@@ -53,7 +53,9 @@ table, basis names) in the console with the describe function.
 Complex.describe();
 ```
 To use the inline syntax call the _inline_ function passing in your function
-object, for the AsciiMath syntax, you pass in a string.
+object, for the AsciiMath syntax, you pass in a string. In both cases the
+_inline_ function will return a new function object. (where e-notation and
+operators are resolved) 
 
 ```javascript
 // Inline javascript syntax : 
