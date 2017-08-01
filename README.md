@@ -6,22 +6,24 @@ Ganja.js is a Geometric Algebra code generator for javascript. It supports
 algebra's of any signature and implements advanced operator overloading and
 algebraic constants.
 
+* Supports any metric (p,q,r) (spacelike/timelike/lightlike)
+* Operator overloading
+* Algebraic constants
+* super small (130 lines)
+* inverses up to 5 dimensions
+* geometric, inner, outer product
+* conjugate, reverse, involute, dual, negative
+* 4 API's (inline, asciimath, object oriented, functional)
+
 To use it, first include the ganja.js script.
 ```html
 <SCRIPT SRC="https://raw.githubusercontent.com/enkimute/ganja.js/master/ganja.js"></SCRIPT>
 ```
-#### Creating algebra classes.
-
-```javascript
-function Algebra(p,q,r)
-  // p = dimensions that square to +1
-  // q = dimensions that square to -1
-  // r = dimensions that square to  0
-```
+#### Create your algebra class.
 
 To create an Algebra, all you need to know is its metric. The Algebra
 function will generate an ES6 class that implements the algebra with the
-specified metric.
+specified metric (p,q,r). 
 
 ```javascript
 var Complex = Algebra(0,1);     // Complex numbers.
@@ -37,10 +39,26 @@ full operator overloading and literal algebraic objects - targetting the more
 mathematically inclined. The Object Oriented and functional syntax on the
 other hand will probably feel more familiar to engineers and programmers.  
 
-#### Introducing the javascript inline syntax.
+#### Javascript inline syntax.
 
-To use the javascript inline syntax, simply wrap any function with direct
-mathematical statemens inside the 'inline' function call:
+Ganja.js' inline syntax allows you to write GA statements seamlessly inside your
+javascript functions. Simply wrap your functions to get full operator
+overloading and algebraic constants.
+
+To enable you to directly write algebraic constants, we overload the
+scientific notation. Allowing you to write : 
+
+```javascript
+// Direct algebraic objects specifying basisblades with e notation.
+  var xy_bivector = 1e12;    // 1e12 = 1 time the basis xy-bivector
+  var z_vector = 1e3;        // 1e3 = the basis z-vector
+
+// Algebraic objects and operator overloading (^ = wedge) 
+  var xy_bivector = 1e1^1e2; // wedge x-vector and y-vector to get the xy-bivector
+```
+
+Here are some more examples showing you the power and readability of this
+API in C and R3. 
 
 ```javascript
 Complex.inline(function(){
