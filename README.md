@@ -52,7 +52,21 @@ table, basis names) in the console with the describe function.
 ```javascript
 Complex.describe();
 ```
+To use the inline syntax call the _inline_ function passing in your function
+object, for the AsciiMath syntax, you pass in a string.
+
+```javascript
+// Inline javascript syntax : 
+Complex.inline(function(){
+  return 2 + 3e1; // 2+3i
+});
+
+// Inline AsciiMath syntax : 
+Complex.inline("2+3e_1")
+```
 ### ganja.js Syntax Overview.
+
+Here's a list of the supported operators in all syntax flavors : 
 
 |Inline JS | AsciiMath | Object Oriented | Functional
 |----------|-----------|-----------------|------------
