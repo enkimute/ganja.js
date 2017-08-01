@@ -1,6 +1,6 @@
 # ganja.js - Geometric Algebra for javascript.
 
-<CENTER><IMG SRC="ganja_thumb.jpg"></CENTER>
+<IMG SRC="ganja_thumb.jpg">
 
 Ganja.js is a Geometric Algebra code generator for javascript. It supports
 algebra's of any signature and implements advanced operator overloading and
@@ -8,8 +8,10 @@ algebraic constants.
 
 To use it, first include the ganja.js script.
 ```html
-<SCRIPT SRC="https://raw.githubusercontent.com/enkimute/ganja.js/master/ganja.js"></SCRIPT>
+<SCRIPT SRC="../res/ganja.js"></SCRIPT>
 ```
+<SCRIPT SRC="../res/ganja.js"></SCRIPT>
+
 #### Creating algebra classes.
 
 ```javascript
@@ -31,6 +33,15 @@ var timeSpace = Algebra(3,1);   // timespace
 var P3 = Algebra(2,0,1);        // Projective 2D space
 var C3 = Algebra(4,1);          // Conformal 3D space
 ```
+<SCRIPT>
+var Complex = Algebra(0,1);     // Complex numbers.
+var E2 = Algebra(2);            // Euclidean 2D space.
+var E3 = Algebra(3);            // Euclidean 3D space.
+var timeSpace = Algebra(3,1);   // timespace
+var P3 = Algebra(2,0,1);        // Projective 2D space
+var C3 = Algebra(4,1);          // Conformal 3D space
+</SCRIPT>
+
 These classes provide four seperate syntax flavors. (Inline, AsciiMath,
 Object-Oriented and Functional). The Inline and AsciiMath syntaxes provide in
 full operator overloading and literal algebraic objects - targetting the more
@@ -82,7 +93,14 @@ Complex.graph(function(x,y){
   return (n/100);
 });
 ```
-<CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
+<DIV ID="mandlebrot" STYLE="text-align:center"></DiV>
+<SCRIPT>
+  document.getElementById('mandlebrot').appendChild(Algebra(0,1).graph(function(x,y){
+    var n=110, z=0e1, c=x*1.75-1+y*1e1;
+    while (z < 2 && n--) z=z**2+c;
+    return (n/100);
+  }));
+</SCRIPT>
 
 #### Example Hue Rotor
 
@@ -92,4 +110,10 @@ E3.graph(function(x,y){
   return (rot*c*rot**-1).slice(1,4);
 });
 ```
-<CENTER><IMG SRC="ganja_hue.png"></CENTER>
+<DIV ID="hue"></DiV>
+<SCRIPT>
+  document.getElementById('hue').appendChild(Algebra(3,0).graph(function(x,y){
+    var c=1e1, rot=Math.cos(x*2) + Math.sin(x*2)*(1e12+1e23-1e13);
+    return (rot*c*rot**-1).slice(1,4);
+  },undefined,820,20));
+</SCRIPT>
