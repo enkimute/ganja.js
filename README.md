@@ -126,21 +126,47 @@ E3.inline(function(){
 ```
 ### Example : Mandlebrot
 
+In this example we use the smallest Geometric Algebra that cannonicaly
+embeds the Complex numbers. We graph a two dimensional function where
+we evaluate the number of iterations the complex expression (z*z+c) needs to
+converge to infinity (well .. to more than two ;) ).
+
+This famous equation is known as the Mandelbrot set. In the following piece
+of javascript, z and c are complex numbers. The imaginary unit _i_ is
+written _e1_ as the first basis vector of R(0,1) squares to -1.  
+
 ```javascript
-Complex.graph(function(x,y){
+var Complex = Algebra(0,1);
+
+var canvas = Complex.graph(function(x,y){
   var n=110, z=0e1, c=x*1.75-1+y*1e1;
   while (z < 2 && n--) z=z**2+c;
   return (n/100);
 });
+
+document.body.appendChild(canvas);
 ```
 <CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
 
 ### Example Hue Rotor
 
+This example uses three dimensional euclidean space which is the smallest GA
+that cannonicaly embeds the quaternions. Because of our order choice of
+basis blades (i.e. e13 instead of e31), the e<sub>13</sub> basis bivector is negated
+compared to the default quaternion implementations.
+
+In the code below, *c* is a vector and *rot* is a quaternion (scalar +
+bivector). We graph the color vector obtained by rotating red (1e1) in the
+(1,1,1) bivector plane. (this is changing the hue).
+
 ```javascript
-E3.graph(function(x,y){
+var E3 = Algebra(3);
+
+var canvas = E3.graph(function(x,y){
   var c=1e1, rot=Math.cos(x*2) + Math.sin(x*2)*(1e12+1e23-1e13);
   return (rot*c*rot**-1).Vector;
 });
+
+document.body.appendChild(canvas);
 ```
 <CENTER><IMG SRC="ganja_hue.png"></CENTER>
