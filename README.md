@@ -173,6 +173,8 @@ var canvas = E3.graph(function(x,y){
 
 document.body.appendChild(canvas);
 ```
+<CENTER><IMG SRC="ganja_hue.png"></CENTER>
+
 
 ### Example intersecting lines in 2D
 
@@ -207,4 +209,3 @@ This example outputs :
 ```
 intersection of xy and ab =  Element(3) [0, 1, 1]
 ```
-<CENTER><IMG SRC="ganja_hue.png"></CENTER>
