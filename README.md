@@ -31,12 +31,12 @@ var Complex = Algebra(0,1);     // Complex numbers.
 var E2 = Algebra(2);            // Euclidean 2D space.
 var E3 = Algebra(3);            // Euclidean 3D space.
 var timeSpace = Algebra(3,1);   // timespace
-var P3 = Algebra(2,0,1);        // Projective 2D space
+var P3 = Algebra(3,0,1);        // Projective 3D space
 var C3 = Algebra(4,1);          // Conformal 3D space
 ```
 
 The result of this call will be an ES6 class object (deriving from
-typedarray). These classes can be used to generate algebra elements with
+Float64Array). These classes can be used to generate algebra elements with
 all expected operators available. Apart from the (default) OO syntax, they
 also provide a functional syntax (through static member functions), and two
 inline syntaxes (javascript and AsciiMath).
@@ -95,7 +95,9 @@ javascript functions. Simply wrap your functions to get full operator
 overloading and algebraic constants.
 
 To enable you to directly write algebraic constants, we overload the
-scientific notation. Allowing you to write : 
+scientific notation. Allowing you to write basis blade names (e.g.
+**e<sub>1</sub>**, **e<sub>2</sub>**, **e<sub>12</sub>**,
+**e<sub>235</sub>**, etc as : 
 
 ```javascript
 // Direct algebraic objects specifying basisblades with e notation.
@@ -133,7 +135,7 @@ converge to infinity (well .. to more than two ;) ).
 
 This famous equation is known as the Mandelbrot set. In the following piece
 of javascript, z and c are complex numbers. The imaginary unit _i_ is
-written _e1_ as the first basis vector of R(0,1) squares to -1.  
+written **_e<sub>1</sub>_** as the first basis vector of R(0,1) squares to -1.  
 
 ```javascript
 var Complex = Algebra(0,1);
@@ -152,10 +154,11 @@ document.body.appendChild(canvas);
 
 This example uses three dimensional euclidean space which is the smallest GA
 that cannonicaly embeds the quaternions. Because of our order choice of
-basis blades (i.e. e13 instead of e31), the e<sub>13</sub> basis bivector is negated
+basis blades (i.e. **e<sub>13</sub>** instead of **e<sub>31</sub>**), the
+**e<sub>13</sub>** basis bivector is negated
 compared to the default quaternion implementations.
 
-In the code below, *c* is a vector and *rot* is a quaternion (scalar +
+In the code below, **c** is a vector and **rot** is a quaternion (scalar +
 bivector). We graph the color vector obtained by rotating red (1e1) in the
 (1,1,1) bivector plane. (this is changing the hue).
 
