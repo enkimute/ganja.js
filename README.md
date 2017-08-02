@@ -9,8 +9,8 @@ algebraic constants.
 * Supports any metric (p,q,r) (spacelike/timelike/lightlike)
 * Operator overloading
 * Algebraic constants
-* super small (130 lines)
-* inverses up to 5 dimensions
+* smallish (138 lines)
+* inverses up to 5D.
 * geometric, inner, outer product
 * conjugate, reverse, involute, dual, negative
 * 4 API's (inline, asciimath, object oriented, functional)
@@ -95,7 +95,7 @@ javascript functions. Simply wrap your functions to get full operator
 overloading and algebraic constants.
 
 To enable you to directly write algebraic constants, we overload the
-scientific notation. Allowing you to write basis blade names (e.g.
+scientific notation. Allowing you to write basis blade names 
 **e<sub>1</sub>**, **e<sub>2</sub>**, **e<sub>12</sub>**,
 **e<sub>235</sub>**, etc as : 
 
@@ -111,7 +111,6 @@ scientific notation. Allowing you to write basis blade names (e.g.
 Here are some more examples showing you the power and readability of this
 API in C and R3. 
 
-
 ```javascript
 Complex.inline(function(){
   console.log( (3+2e1)*(1+4e1) );      // complex multiplication. (outputs -5+14i)
@@ -126,6 +125,7 @@ E3.inline(function(){
   console.log( 1e1.Dual );             // x.Dual (outputs [0, 0, 0, 0, 0, 0, -1, 0])
 })();
 ```
+
 ### Example : Mandlebrot
 
 In this example we use the smallest Geometric Algebra that cannonicaly
@@ -148,6 +148,7 @@ var canvas = Complex.graph(function(x,y){
 
 document.body.appendChild(canvas);
 ```
+
 <CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
 
 ### Example Hue Rotor
@@ -171,5 +172,39 @@ var canvas = E3.graph(function(x,y){
 });
 
 document.body.appendChild(canvas);
+```
+
+### Example intersecting lines in 2D
+
+This example uses 'classic' homogenous coordinates in eucledian 3D space.
+Points are represented by adding in the third basis vector
+**e<sub>3</sub>**. Lines are constructed using the wedge product and the
+intersection is the dual of the product of the duals.
+
+```javascript
+// Intersecting two lines in homogenous 2D.
+Algebra(3).inline(function(){
+  var point = (x,y) => x*1e1 + y*1e2 + 1e3;
+  var meet  = (x,y) => (x.Dual*y.Dual).Dual;
+
+ // 4 points      
+  var x = point(1,1),
+      y = point(2,1),
+      a = point(0,3),
+      b = point(0,2);
+
+ // 2 lines
+   var xy = x^y,
+       ab = a^b;
+
+ // Intersection.
+   var intersect = meet(xy,ab);
+    
+   console.log('intersection of xy and ab = ', (intersect*intersect.e3).Vector)
+})();
+```
+This example outputs :
+```
+intersection of xy and ab =  Element(3) [0, 1, 1]
 ```
 <CENTER><IMG SRC="ganja_hue.png"></CENTER>
