@@ -190,14 +190,11 @@ Algebra(3).inline(function(){
   var meet  = (x,y) => (x.Dual*y.Dual).Dual;
 
  // 4 points      
-  var x = point(1,1),
-      y = point(2,1),
-      a = point(0,3),
-      b = point(0,2);
+  var x = point(1,1), y = point(2,1),
+      a = point(0,3), b = point(0,2);
 
  // 2 lines
-   var xy = x^y,
-       ab = a^b;
+   var xy = x^y, ab = a^b;
 
  // Intersection.
    var intersect = meet(xy,ab);
