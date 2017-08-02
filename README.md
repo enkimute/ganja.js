@@ -80,7 +80,7 @@ Here's a list of the supported operators in all syntax flavors :
 | x**y     |  x^y      | x.Pow(y)        | A.Pow(x,y)
 | x*y      |  x**y     | x.Mul(y)        | A.Mul(x,y)
 | x/y      |  x/y      | x.Div(y)        | A.Div(x,y)
-| x^y      |  x^^y     | x.Wedge(y)      | A.Wedge(x)
+| x^y      |  x^^y     | x.Wedge(y)      | A.Wedge(x,y)
 | x<<y     |  x*y      | x.Dot(y)        | A.Dot(x,y)
 | x-y      |  x-y      | x.Sub(y)        | A.Sub(x,y)
 | x+y      |  x+y      | x.Add(y)        | A.Add(x,y)
@@ -140,7 +140,7 @@ Complex.graph(function(x,y){
 ```javascript
 E3.graph(function(x,y){
   var c=1e1, rot=Math.cos(x*2) + Math.sin(x*2)*(1e12+1e23-1e13);
-  return (rot*c*rot**-1).slice(1,4);
+  return (rot*c*rot**-1).Vector;
 });
 ```
 <CENTER><IMG SRC="ganja_hue.png"></CENTER>

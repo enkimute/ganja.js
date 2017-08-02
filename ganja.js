@@ -43,6 +43,7 @@
       Div  (b,res) { return this.Mul(b.Inverse,res); }                                                                                                        // right inverse assumed here.
       LDiv (b,res) { return b.Inverse.Mul(this,res); }                                                                                                        // left inverse assumed here.
       Map  (a,b  ) { var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*(((a===grades[i])||(b===grades[i]))?-1:1); return res; } // for inverse calculations.
+      get Vector ()    { return this.slice(grade_start[1],grade_start[2]); };
     // Factories - Make it easy to generate blades.
       static Element()   { var res = new Element(); for (var i=0; i<res.length; i++) res[i]=arguments[i]||0; return res; }                                    // Create a fully specified element.
       static Coeff(x,y)  { var res = new Element(); res[x]=y; return res; }
