@@ -202,7 +202,7 @@ Algebra(3).inline(function(){
  // Intersection.
    var intersect = meet(xy,ab);
     
-   console.log('intersection of xy and ab = ', (intersect*intersect.e3).Vector)
+   console.log('intersection of xy and ab = ', (intersect/intersect.e3).Vector)
 })();
 ```
 This example outputs :
