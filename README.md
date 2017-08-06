@@ -176,33 +176,46 @@ document.body.appendChild(canvas);
 <CENTER><IMG SRC="ganja_hue.png"></CENTER>
 
 
-### Example intersecting lines in 2D
+### Example intersecting lines in Projective 2D
 
-This example uses 'classic' homogenous coordinates in eucledian 3D space.
-Points are represented by adding in the third basis vector
-**e<sub>3</sub>**. Lines are constructed using the wedge product and the
-intersection is the dual of the product of the duals.
+This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
+i.e. points are higher grade than lines). Dual is implemented without
+multiplication with the inverse of the pseudo (since it has no inverse).
+Points are constructed by adding in E0, and the join is the dual of the
+wedge of the duals. (meet is just wedge). We construct two lines from points
+and find their intersection point. (answers always since in projective space
+even parallel lines have an intersection point.) 
 
 ```javascript
-// Intersecting two lines in homogenous 2D.
-Algebra(3).inline(function(){
-  var point = (x,y) => x*1e1 + y*1e2 + 1e3;
-  var meet  = (x,y) => (x.Dual*y.Dual).Dual;
+Algebra(2,0,1).inline(function(){
+  // basis lines
+  var e0 = 1e3,  e1 = 1e1,  e2 = 1e2;
+  // basis points
+  var E0 = 1e12, E1 = 1e13, E2 = 1e23;
+  // pseudo scalar.
+  var I = 1e123;
 
- // 4 points      
-  var x = point(1,1), y = point(2,1),
-      a = point(0,3), b = point(0,2);
+  // fast dual, point constructor, join
+  var dual  = (x)=>x.s*I + x.e123*1 + x.e1*E1 + x.e2*E2 - x.e3*E0 - x.e12*e0 + x.e13*e1 + x.e23*e2;
+  var point = (x,y)=>E0+x*E1+y*E2;
+  var join  = (x,y)=>dual(dual(x)^dual(y));
 
- // 2 lines
-   var xy = x^y, ab = a^b;
+  // define 4 points
+  var a = point(4,1);
+  var b = point(4,2);
+  var c = point(2,5);
+  var d = point(1,5);
 
- // Intersection.
-   var intersect = meet(xy,ab);
-    
-   console.log('intersection of xy and ab = ', (intersect/intersect.e3).Vector)
+  // join them into two lines.
+  var ab = join(a,b);
+  var cd = join(c,d);
+  
+  // Find their intersection point.
+  var abcd = ab^cd;
+  console.log(abcd.toString());
 })();
 ```
 This example outputs :
 ```
-intersection of xy and ab =  Element(3) [0, 1, 1]
+e_12-4e_13-5e_23
 ```
