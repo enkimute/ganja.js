@@ -60,7 +60,7 @@
       static Pow(a,b,res)   { if (!(a instanceof Element || b instanceof Element)) return a**b; a=(a instanceof Element)?a:Element.Scalar(a); if (b==-1) return a.Inverse; if (b==2) return a.Mul(a); throw 'not yet'; }  
       static Dot(a,b,res)   { if (!(a instanceof Element || b instanceof Element)) return a*b; a=(a instanceof Element)?a:Element.Scalar(a); b=(b instanceof Element)?b:Element.Scalar(b); return a.Dot(b,res); }  
       static Wedge(a,b,res) { if (!(a instanceof Element || b instanceof Element)) return a*b; a=(a instanceof Element)?a:Element.Scalar(a); b=(b instanceof Element)?b:Element.Scalar(b); return a.Wedge(b,res); }  
-      static Dual(a)        { return (a instanceof Element)?a.Dual:Element.nVector(tot-1,a); }; static Involute(a) { return a.Involute; }; static Reverse(a) { return a.Reverse; }; static Conjugate(a) { return a.Conjugate; }
+      static Dual(a)        { if (r) return a.reverse(); return (a instanceof Element)?a.Dual:Element.nVector(tot-1,a); }; static Involute(a) { return a.Involute; }; static Reverse(a) { return a.Reverse; }; static Conjugate(a) { return a.Conjugate; }
       static lt(a,b)        { if (!(a instanceof Element || b instanceof Element)) return a<b; a=(a instanceof Element)?a.Length.s:a; b=(b instanceof Element)?b.Length.s:b; return a<b; }
       static gt(a,b)        { if (!(a instanceof Element || b instanceof Element)) return a>b; a=(a instanceof Element)?a.Length.s:a; b=(b instanceof Element)?b.Length.s:b; return a>b; }
       static lte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a<=b; a=(a instanceof Element)?a.Length.s:a; b=(b instanceof Element)?b.Length.s:b; return a<=b; }
@@ -123,7 +123,7 @@
     res.prototype.__defineGetter__('Reverse',  function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,1,-1,-1][grades[i]%4]; return res; });
     res.prototype.__defineGetter__('Involute', function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,1,-1][grades[i]%4]; return res; });
     res.prototype.__defineGetter__('Conjugate',function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; });
-    res.prototype.__defineGetter__('Dual',function(){ var res = new this.constructor(); res[res.length-1]=-1; return res.Mul(this); });
+    res.prototype.__defineGetter__('Dual',function(){ if (r) return this.reverse(); var res = new this.constructor(); res[res.length-1]=-1; return res.Mul(this); });
     res.prototype.__defineGetter__('Length',  function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[0] += this[i]*this[i]; res[0] = Math.sqrt(res[0]); return res; });
     res.prototype.__defineGetter__('Normalized', function(){ var res = new this.constructor(),l=0; for (var i=0; i<this.length; i++) l += this[i]*this[i]; l=1/Math.sqrt(l); for (var i=0; i<this.length; i++)res[i]=this[i]*l; return res; });
     res.prototype.__defineGetter__('Inverse', function(){  // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf

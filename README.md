@@ -179,43 +179,33 @@ document.body.appendChild(canvas);
 ### Example intersecting lines in Projective 2D
 
 This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
-i.e. points are higher grade than lines). Dual is implemented without
-multiplication with the inverse of the pseudo (since it has no inverse).
-Points are constructed by adding in E0, and the join is the dual of the
+i.e. points are higher grade than lines). (Ganja.js can handle degenerate
+metrics). Points are constructed by adding in E0, and the join is the dual of the
 wedge of the duals. (meet is just wedge). We construct two lines from points
-and find their intersection point. (answers always since in projective space
+and find their intersection point. (always exists, since in projective space
 even parallel lines have an intersection point.) 
 
 ```javascript
-Algebra(2,0,1).inline(function(){
-  // basis lines
-  var e0 = 1e3,  e1 = 1e1,  e2 = 1e2;
-  // basis points
+Algebra(2,0,1).inline(function(){ 
+  // basis points in Dual Projective 2D. (e3*e3=0)
   var E0 = 1e12, E1 = 1e13, E2 = 1e23;
-  // pseudo scalar.
-  var I = 1e123;
 
-  // fast dual, point constructor, join
-  var dual  = (x)=>x.s*I + x.e123*1 + x.e1*E1 + x.e2*E2 - x.e3*E0 - x.e12*e0 + x.e13*e1 + x.e23*e2;
+  // point constructor, join as dual of wedge of duals.
   var point = (x,y)=>E0+x*E1+y*E2;
-  var join  = (x,y)=>dual(dual(x)^dual(y));
+  var join  = (x,y)=>(x.Dual^y.Dual).Dual;
 
   // define 4 points
-  var a = point(4,1);
-  var b = point(4,2);
-  var c = point(2,5);
-  var d = point(1,5);
+  var a = point(4,1), b = point(4,2), 
+      c = point(2,5), d = point(1,5);
 
   // join them into two lines.
-  var ab = join(a,b);
-  var cd = join(c,d);
+  var ab = join(a,b), cd = join(c,d);
   
   // Find their intersection point.
   var abcd = ab^cd;
   console.log(abcd.toString());
-})();
-```
+})();```
 This example outputs :
 ```
-e_12-4e_13-5e_23
+e_12+4e_13+5e_23
 ```
