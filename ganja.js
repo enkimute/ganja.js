@@ -85,7 +85,7 @@
           /^[A-Za-z0-9_.]*/g]                                                                                                           // 5: identifier
         while (txt.length) for(t in tokens) if(res=txt.match(tokens[t])){ tok.push([t|0,res[0]]); txt=txt.slice(res[0].length); break;} // tokenise
         tok=tok.map(t=>(t[0]==2)?[2,'this.Coeff('+basis.indexOf('e'+(t[1].split(/e_|e|i/)[1]||1))+','+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);   // translate scientific notation into algebra elements.
-        var syntax = (intxt instanceof Function)?[['~','Conjugate',1],['!','Involute',1],['**','Pow',0,1],['*','Mul'],['/','Div'],['^','Wedge'],['<<','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]
+        var syntax = (intxt instanceof Function)?[['~','Conjugate',1],['!','Dual',1],['**','Pow',0,1],['*','Mul'],['/','Div'],['^','Wedge'],['<<','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]
                                                 :[['pi','Math.PI'],['sin','Math.sin'],['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual'],['hat',''],['~','Conjugate',1],['!','Involute',1],['^','Pow',0,1],['**','Mul'],['/','Div'],['^^','Wedge'],['*','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']];
         tok=tok.map(t=>(t[0]!=5)?t:syntax.filter(x=>x[0]==t[1]).length?[5,syntax.filter(x=>x[0]==t[1])[0][1]]:t); // static function translations (mostly for asciimath)                                       
         function translate(tokens) { 

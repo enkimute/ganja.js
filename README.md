@@ -73,9 +73,9 @@ Here's a list of the supported operators in all syntax flavors :
 |Inline JS | AsciiMath | Object Oriented | Functional
 |----------|-----------|-----------------|------------
 | ~x       |  hat(x)   | x.Conjugate     | A.Conjugate(x)
-| !x       |  tilde(x) | x.Involute      | A.Involute(x)
+| x.Involute|  tilde(x) | x.Involute      | A.Involute(x)
 | x.Reverse|  ddot(x)  | x.Reverse       | A.Reverse(x)
-| x.Dual   |  hat(x)   | x.Dual          | A.Dual(x)
+| !x       |  hat(x)   | x.Dual          | A.Dual(x)
 | x**-1    |  x^-1     | x.Inverse       | A.Inverse(x)
 | x**y     |  x^y      | x.Pow(y)        | A.Pow(x,y)
 | x*y      |  x**y     | x.Mul(y)        | A.Mul(x,y)
@@ -192,7 +192,7 @@ Algebra(2,0,1).inline(function(){
 
   // point constructor, join as dual of wedge of duals.
   var point = (x,y)=>E0+x*E1+y*E2;
-  var join  = (x,y)=>(x.Dual^y.Dual).Dual;
+  var join  = (x,y)=>!(!x^!y);
 
   // define 4 points
   var a = point(4,1), b = point(4,2), 
