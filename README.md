@@ -204,8 +204,11 @@ Algebra(2,0,1).inline(function(){
   // Find their intersection point.
   var abcd = ab^cd;
   console.log(abcd.toString());
-})();```
+})();
+```
+
 This example outputs :
+
 ```
 e_12+4e_13+5e_23
 ```
