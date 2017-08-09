@@ -176,14 +176,19 @@ document.body.appendChild(canvas);
 <CENTER><IMG SRC="ganja_hue.png"></CENTER>
 
 
-### Example intersecting lines in Projective 2D
+### Example Projective 2D
 
 This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
 i.e. points are higher grade than lines). (Ganja.js can handle degenerate
 metrics). Points are constructed by adding in E0, and the join is the dual of the
 wedge of the duals. (meet is just wedge). We construct two lines from points
-and find their intersection point. (always exists, since in projective space
-even parallel lines have an intersection point.) 
+and find their intersection point, angles and distances.
+
+We've also used a custom ordering of the basis blades, and used
+**e<sub>20</sub>** instead of the default **e<sub>e02</sub>**. This matches
+the convention of Charles Gunn (refer to his thesis for more information
+on projective geometric algebra). 
+
 
 ```javascript
 Algebra({metric:[1,1,0],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).inline(function(){ 
@@ -223,7 +228,6 @@ Algebra({metric:[1,1,0],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).in
   console.log('angle ab ad',angle_lines(ab,ad));
   console.log('angle ab cd',angle_lines(ab,cd));
   console.log('angle ad bc',angle_lines(ad,bc));
-
 })();
 ```
 
@@ -233,19 +237,15 @@ This example outputs :
 points :  0,0 and 1,0 and 0,1 and 1,1
 
 a to d 1.4142135623730951
-
 ad to c -0.7071067811865475
-
 ab to c -1
-
 ad meet bc to c 0.7071067811865476
 
 ad intersect bc (2) [0.5, 0.5]
 ab intersect cd (2) [Infinity, 0]
-
 ac intersect bd (2) [0, -Infinity]
+
 angle ab ad 0.7071067811865475
 angle ab cd 1
-
 angle ad bc 0
 ```
