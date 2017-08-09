@@ -202,8 +202,12 @@ Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).in
       meet            = (x,y)=>x^y,                                    // intersect 
       dist_points     = (p1,p2)=>join(p1/p1.e12,p2/p2.e12).Length,     // distance between points
       dist_point_line = (p,l)=>((p.Normalized)^(l.Normalized)).e012,   // oriented distance point to line.
-      angle_lines     = (l1,l2)=>(l1.Normalized)<<(l2.Normalized).s;   // angle between lines
-
+      angle_lines     = (l1,l2)=>(l1.Normalized)<<(l2.Normalized).s,   // angle between lines
+      project         = (p,l)=>(p<<l)*l,                               // project p onto l
+      parallel        = (p,l)=>(p<<l)*p,                               // line parallel to l and through p.
+      ortho           = (p,l)=>p<<l,                                   // line ortho to l and through p.
+      rotor           = (a)=>Math.cos(a/2)+Math.sin(a/2)*E0;           // rotor a.
+      
   // define 4 points
   var a=point(0,0), b=point(0,1), c=point(1,0), d=point(1,1);
 
@@ -228,6 +232,15 @@ Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).in
   console.log('angle ab ad',angle_lines(ab,ad));
   console.log('angle ab cd',angle_lines(ab,cd));
   console.log('angle ad bc',angle_lines(ad,bc));
+
+  // project, ortho, parallel 
+  console.log('project a onto bc', to_point(project(a,bc)));
+  console.log('line through a, parallel to bc', parallel(a,bc));
+  console.log('line through a, orthogonal to bc',ortho(a,bc));
+
+  // rotate
+  var rot = rotor(Math.PI/4,a);
+  console.log('b rotated pi/4',to_point(rot*b*rot**-1));
 })();
 ```
 
@@ -248,4 +261,8 @@ ac intersect bd (2) [0, -Infinity]
 angle ab ad 0.7071067811865475
 angle ab cd 1
 angle ad bc 0
+
+line through a, parallel to bc [0, 0, 1, 1, 0, 0, 0, 0]
+line through a, orthogonal to bc [0, 0, 1, -1, 0, 0, 0, 0]
+b rotated pi/4 [0.7071067811865475, 0.7071067811865476]
 ```

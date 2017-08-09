@@ -45,7 +45,6 @@
           gp[i][xi] = (mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';           // Fill in the geometric table
           cp[i][xi] = ( grades[i] == grades[xi]-grades[yi] ) ? gp[i][xi]:'0';                                                                 // strict diff of grades in inner
         }  
-//        if (true || mulTable[xi][yi]!='0' || grades[xi]==1 || grades[yi]==1) { cp[i][xi] = ( grades[i] == grades[xi]-grades[yi] ) ? gp[i][xi]:'0'; } // suggested by Gunn
     }})));
   // Generate a new class for our algebra.
     var res = class Element extends Float64Array {                                                                                                            // Our elements will be Float64Arrays.
