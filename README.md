@@ -185,7 +185,7 @@ wedge of the duals. (meet is just wedge). We construct two lines from points
 and find their intersection point, angles and distances.
 
 We've also used a custom ordering of the basis blades, and used
-**e<sub>20</sub>** instead of the default **e<sub>e02</sub>**. This matches
+**e<sub>20</sub>** instead of the default **e<sub>02</sub>**. This matches
 the convention of Charles Gunn (refer to his thesis for more information
 on projective geometric algebra). 
 
