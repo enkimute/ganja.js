@@ -202,7 +202,7 @@ Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).in
       meet            = (x,y)=>x^y,                                    // intersect 
       dist_points     = (p1,p2)=>join(p1/p1.e12,p2/p2.e12).Length,     // distance between points
       dist_point_line = (p,l)=>((p.Normalized)^(l.Normalized)).e012,   // oriented distance point to line.
-      angle_lines     = (l1,l2)=>(l1.Normalized)<<(l2.Normalized).s,   // angle between lines
+      angle_lines     = (l1,l2)=>(l1.Normalized<<l2.Normalized).s,     // angle between lines
       project         = (p,l)=>(p<<l)*l,                               // project p onto l
       parallel        = (p,l)=>(p<<l)*p,                               // line parallel to l and through p.
       ortho           = (p,l)=>p<<l,                                   // line ortho to l and through p.
