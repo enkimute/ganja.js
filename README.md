@@ -192,7 +192,7 @@ on projective geometric algebra).
 
 ```javascript
 Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).inline(function(){ 
-  // basis points in Dual Projective 2D. (e0*e0=0)
+  // basis points in Dual Projective 2D. (e3*e3=0)
   var E0 = 1e12, E1 = 1e20, E2 = 1e01;
 
   // some projective elements/operations (p,p1,p2=point;l,l1,l2=line;X,Y=eucledian coordinates;x,y=multivectors)
@@ -206,8 +206,9 @@ Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).in
       project         = (p,l)=>(p<<l)*l,                               // project p onto l
       parallel        = (p,l)=>(p<<l)*p,                               // line parallel to l and through p.
       ortho           = (p,l)=>p<<l,                                   // line ortho to l and through p.
-      rotor           = (a)=>Math.cos(a/2)+Math.sin(a/2)*E0;           // rotor a.
-      
+      rotor           = (a)=>Math.cos(a/2)+Math.sin(a/2)*E0,           // rotor a.
+      translator      = (x,y)=>1+0.5*(x*E1-y*E2);                      // translator x,y
+  
   // define 4 points
   var a=point(0,0), b=point(0,1), c=point(1,0), d=point(1,1);
 
@@ -238,9 +239,13 @@ Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).in
   console.log('line through a, parallel to bc', parallel(a,bc));
   console.log('line through a, orthogonal to bc',ortho(a,bc));
 
-  // rotate
+  // rotate, translate 
   var rot = rotor(Math.PI/4,a);
-  console.log('b rotated pi/4',to_point(rot*b*rot**-1));
+  console.log('b rotated pi/4',to_point(rot*b*~rot));
+  var tran = translator(1,2);
+  console.log('b translated 1,2',to_point(b),'->',to_point(tran*b*~tran));
+  var combined = tran*rot;
+  console.log('b rotated and translated',to_point(combined*b*~combined));
 })();
 ```
 
@@ -265,4 +270,13 @@ angle ad bc 0
 line through a, parallel to bc [0, 0, 1, 1, 0, 0, 0, 0]
 line through a, orthogonal to bc [0, 0, 1, -1, 0, 0, 0, 0]
 b rotated pi/4 [0.7071067811865475, 0.7071067811865476]
+b translated 1,2 [1, 0] -> [2, 2]
+b rotated and translated [1.7071067811865472, 2.7071067811865475]
 ```
+
+### Example Projective 3D
+
+This example implements the table from
+[http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf](Gunn's
+Geometric Algebra for Computer Graphics).
+

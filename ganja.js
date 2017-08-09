@@ -41,8 +41,8 @@
     basis.forEach((output,i)=>basis.forEach((x,xi)=>basis.forEach((y,yi)=>{ if (mulTable2[xi][yi].replace('-','') == output) {              // For each output component scan Cayley table.
         gp[i][xi] = (mulTable2[xi][yi]=='0')?'0':((mulTable2[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                             // Fill in the geometric table         
         op[i][xi] = ( grades[i] == grades[xi]+grades[yi] ) ? gp[i][xi]:'0';                                                                 // strict sum of grades in outer
-        if (mulTable[xi][yi].replace('-','') == output) {
-          gp[i][xi] = (mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';           // Fill in the geometric table
+        if ((mulTable[xi][yi].replace('-','') == output)||(mulTable[xi][yi]=='0')) {
+          gp[i][xi] = (mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                             // Fill in the geometric table
           cp[i][xi] = ( grades[i] == grades[xi]-grades[yi] ) ? gp[i][xi]:'0';                                                                 // strict diff of grades in inner
         }  
     }})));
@@ -79,7 +79,7 @@
       static lte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a<=b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<=b; }
       static gte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a>=b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>=b; }
     // Debug  
-      static describe() { console.log(`Basis\n${basis}\nRemap${JSON.stringify(brm)}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
+      static describe() { console.log(`Basis\n${basis}\nRemap${JSON.stringify(brm)}\nDual\n${drm}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
       toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
     // Parse expressions, translate functions and render graphs.
       static graph(f,cvs,ww,hh) {
