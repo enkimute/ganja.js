@@ -192,7 +192,7 @@ on projective geometric algebra).
 
 ```javascript
 Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).inline(function(){ 
-  // basis points in Dual Projective 2D. (e3*e3=0)
+  // basis points in Dual Projective 2D. (e0*e0=0)
   var E0 = 1e12, E1 = 1e20, E2 = 1e01;
 
   // some projective elements/operations (p,p1,p2=point;l,l1,l2=line;X,Y=eucledian coordinates;x,y=multivectors)
