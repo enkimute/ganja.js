@@ -8,30 +8,44 @@
   else context[name] = definition();
 }('Algebra', this, function () {
   return function Algebra(p,q,r) {
+  // p can be options object.
+    var options=p; if (options instanceof Object) {
+      q = p.q || (p.metric && p.metric.filter(x=>x==-1).length) || q;
+      r = p.r || (p.metric && p.metric.filter(x=>x==0).length) || r;
+      p = p.p || (p.metric && p.metric.filter(x=>x==1).length) || p;
+    } else options={};
   // Initialise basis names and multiplication table.
     var tot = (p||0)+(q||0)+(r||0),                                                                                                         // p = #dimensions that square to 1, q to -1, r to 0.
-        basis=Array.apply([],{length:2**tot})                                                                                               // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
+        basis=options.basis||Array.apply([],{length:2**tot})                                                                                // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
               .map((x,xi)=>(((1<<20)+xi).toString(2)).slice(-tot||-1)                                                                       // => ["000", "001", "010", "011", "100", "101", "110", "111"]  (index of array in base 2)
-              .replace(/./g,(a,ai)=>a=='0'?'':ai+1))                                                                                        // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
-              .sort((a,b)=>(a|0)-(b|0))                                                                                                     // => ["", "1", "2", "3", "12", "13", "23", "123"] (sorted numerically)
+              .replace(/./g,(a,ai)=>a=='0'?'':ai+1-(r||0)))                                                                                 // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
+              .sort((a,b)=>(a.toString().length==b.toString().length)?(a|0)-(b|0):a.toString().length-b.toString().length)                  // => ["", "1", "2", "3", "12", "13", "23", "123"] (sorted numerically)
               .map(x=>x&&'e'+x||'1'),                                                                                                       // => ["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"] (converted to commonly used basis names)
         grades=basis.map(x=>x.length-1),                                                                                                    // => [0, 1, 1, 1, 2, 2, 2, 3] (grade per basis blade)
         grade_start=grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]),                                              // =>  [0, 1, 4, 7, 8] (first blade of given grade, with extra stop element)
-        simplify = (s)=>{                                                                                                                   // implement ex*ey=-ey*ex (for x!=y) and ex*ex=metric[x] 
-          var sign=1,c,l=s.length,t=''; s=[].slice.call(s.replace(/e/g,''));                                                                // e123e12 => 12312, sign = 1;
-          for (var i=0; i<l-1; i++) for (var j=i+1; j<l; j++) if (s[i]>s[j]) { c=s[i];s[i]=s[j];s[j]=c; sign*=-1; }                         // 12312 => 11223, sign = -1;
-          for (var i=0; i<l;) if (s[i] === s[i+1]) { if ((s[i]|0)>p+q) sign*=0; else if ((s[i]|0)>p) sign*=-1;  i+=2 } else t+=s[i++];      // 11223 => 3, sign = -1;
-          if (sign==0) return '0';                                                                                                          // for dimensions that square to 0.
-          return ((sign==1)?'':'-') + ((t=='')?'1':'e'+t);                                                                                  // "-e3"
+        simplify = (s,p,q,r)=>{                                                                                                             // implement ex*ey=-ey*ex (for x!=y) and ex*ex=metric[x] 
+          var sign=1,c,l,t=[],f=true;s=[].slice.call(s.replace(/e/g,''));l=s.length;
+          while (f) { f=false;
+            for (var i=0; i<l;) if (s[i]===s[i+1]) { if ((s[i]|0)>p) sign*=-1; else if ((s[i]|0)<r) sign*=0; i+=2; f=true; } else t.push(s[i++]);
+            for (var i=0; i<t.length-1; i++) if (t[i]>t[i+1]) { c=t[i];t[i]=t[i+1];t[i+1]=c;sign*=-1;f=true; break;} if (f) { s=t;t=[];l=s.length; }
+          }
+          var ret=(sign==0)?'0':((sign==1)?'':'-')+(t.length?'e'+t.join(''):'1'); return (brm&&brm[ret])||(brm&&brm['-'+ret]&&'-'+brm['-'+ret])||ret;
         },
-        mulTable = basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y))),                                                             // Generate Cayley multiplication table.
+        brm=(x=>{ var ret={}; for (var i in basis) ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i]; return ret; })(basis),      
+        drm=basis.map((a,i)=>{ return {a:a,i:i} }).sort((a,b)=>a.a.length>b.a.length?1:a.a.length<b.a.length?-1:(+a.a.slice(1).split('').sort().join(''))-(+b.a.slice(1).split('').sort().join('')) ).map(x=>x.i).reverse(),
+        mulTable = basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),                                                       // Generate Cayley multiplication table.
+        mulTable2 = basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0))),                                                  // Generate Cayley multiplication table.
         metric = basis.map((x,xi)=>mulTable[xi][xi]|0),                                                                                     // extended metric .. per basis blade (not just for the 1D subspaces) .. diagonal of cayley table.
         gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0'));                                     // Storage for our product tables.
   // Convert Caeyley table to product matrices.           
-    basis.forEach((output,i)=>basis.forEach((x,xi)=>basis.forEach((y,yi)=>{ if (mulTable[xi][yi].replace('-','') == output) {               // For each output component scan Cayley table.
-        gp[i][xi] = ((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                                                           // Fill in the geometric table         
+    basis.forEach((output,i)=>basis.forEach((x,xi)=>basis.forEach((y,yi)=>{ if (mulTable2[xi][yi].replace('-','') == output) {              // For each output component scan Cayley table.
+        gp[i][xi] = (mulTable2[xi][yi]=='0')?'0':((mulTable2[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                             // Fill in the geometric table         
         op[i][xi] = ( grades[i] == grades[xi]+grades[yi] ) ? gp[i][xi]:'0';                                                                 // strict sum of grades in outer
-        cp[i][xi] = ( grades[i] == grades[xi]-grades[yi] ) ? gp[i][xi]:'0';                                                                 // strict diff of grades in inner
+        if (mulTable[xi][yi].replace('-','') == output) {
+          gp[i][xi] = (mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';           // Fill in the geometric table
+          cp[i][xi] = ( grades[i] == grades[xi]-grades[yi] ) ? gp[i][xi]:'0';                                                                 // strict diff of grades in inner
+        }  
+//        if (true || mulTable[xi][yi]!='0' || grades[xi]==1 || grades[yi]==1) { cp[i][xi] = ( grades[i] == grades[xi]-grades[yi] ) ? gp[i][xi]:'0'; } // suggested by Gunn
     }})));
   // Generate a new class for our algebra.
     var res = class Element extends Float64Array {                                                                                                            // Our elements will be Float64Arrays.
@@ -60,13 +74,13 @@
       static Pow(a,b,res)   { if (!(a instanceof Element || b instanceof Element)) return a**b; a=(a instanceof Element)?a:Element.Scalar(a); if (b==-1) return a.Inverse; if (b==2) return a.Mul(a); throw 'not yet'; }  
       static Dot(a,b,res)   { if (!(a instanceof Element || b instanceof Element)) return a*b; a=(a instanceof Element)?a:Element.Scalar(a); b=(b instanceof Element)?b:Element.Scalar(b); return a.Dot(b,res); }  
       static Wedge(a,b,res) { if (!(a instanceof Element || b instanceof Element)) return a*b; a=(a instanceof Element)?a:Element.Scalar(a); b=(b instanceof Element)?b:Element.Scalar(b); return a.Wedge(b,res); }  
-      static Dual(a)        { if (r) return a.reverse(); return (a instanceof Element)?a.Dual:Element.nVector(tot-1,a); }; static Involute(a) { return a.Involute; }; static Reverse(a) { return a.Reverse; }; static Conjugate(a) { return a.Conjugate; }
-      static lt(a,b)        { if (!(a instanceof Element || b instanceof Element)) return a<b; a=(a instanceof Element)?a.Length.s:a; b=(b instanceof Element)?b.Length.s:b; return a<b; }
-      static gt(a,b)        { if (!(a instanceof Element || b instanceof Element)) return a>b; a=(a instanceof Element)?a.Length.s:a; b=(b instanceof Element)?b.Length.s:b; return a>b; }
-      static lte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a<=b; a=(a instanceof Element)?a.Length.s:a; b=(b instanceof Element)?b.Length.s:b; return a<=b; }
-      static gte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a>=b; a=(a instanceof Element)?a.Length.s:a; b=(b instanceof Element)?b.Length.s:b; return a>=b; }
+      static Dual(a)        { if (r) return a.map((x,i,a)=>a[drm[i]]); return (a instanceof Element)?a.Dual:Element.nVector(tot-1,a); }; static Involute(a) { return a.Involute; }; static Reverse(a) { return a.Reverse; }; static Conjugate(a) { return a.Conjugate; }
+      static lt(a,b)        { if (!(a instanceof Element || b instanceof Element)) return a<b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<b; }
+      static gt(a,b)        { if (!(a instanceof Element || b instanceof Element)) return a>b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>b; }
+      static lte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a<=b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<=b; }
+      static gte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a>=b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>=b; }
     // Debug  
-      static describe() { console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
+      static describe() { console.log(`Basis\n${basis}\nRemap${JSON.stringify(brm)}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
       toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
     // Parse expressions, translate functions and render graphs.
       static graph(f,cvs,ww,hh) {
@@ -123,9 +137,9 @@
     res.prototype.__defineGetter__('Reverse',  function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,1,-1,-1][grades[i]%4]; return res; });
     res.prototype.__defineGetter__('Involute', function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,1,-1][grades[i]%4]; return res; });
     res.prototype.__defineGetter__('Conjugate',function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; });
-    res.prototype.__defineGetter__('Dual',function(){ if (r) return this.reverse(); var res = new this.constructor(); res[res.length-1]=-1; return res.Mul(this); });
-    res.prototype.__defineGetter__('Length',  function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[0] += this[i]*this[i]; res[0] = Math.sqrt(res[0]); return res; });
-    res.prototype.__defineGetter__('Normalized', function(){ var res = new this.constructor(),l=0; for (var i=0; i<this.length; i++) l += this[i]*this[i]; l=1/Math.sqrt(l); for (var i=0; i<this.length; i++)res[i]=this[i]*l; return res; });
+    res.prototype.__defineGetter__('Dual',function(){ return this.map((x,i,a)=>a[drm[i]]); var res = new this.constructor(); res[res.length-1]=-1; return res.Mul(this); });
+    res.prototype.__defineGetter__('Length',  function(){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]*Math.abs(metric[i]); return Math.sqrt(res); });
+    res.prototype.__defineGetter__('Normalized', function(){ var res = new this.constructor(),l=0; for (var i=0; i<this.length; i++) l += this[i]*this[i]*metric[i]; if (!l) return this; l=1/Math.sqrt(Math.abs(l)); for (var i=0; i<this.length; i++)res[i]=this[i]*l; return res; });
     res.prototype.__defineGetter__('Inverse', function(){  // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf
       return (tot==0)?new this.constructor([1/this[0]]):(tot==1)?this.Involute.Mul(this.constructor.Scalar(1/this.Mul(this.Involute)[0])):(tot==2)?this.Conjugate.Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate)[0])):
              (tot==3)?this.Reverse.Mul(this.Involute).Mul(this.Conjugate).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse)[0])):

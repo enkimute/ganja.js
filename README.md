@@ -186,29 +186,66 @@ and find their intersection point. (always exists, since in projective space
 even parallel lines have an intersection point.) 
 
 ```javascript
-Algebra(2,0,1).inline(function(){ 
+Algebra({metric:[1,1,0],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).inline(function(){ 
   // basis points in Dual Projective 2D. (e3*e3=0)
-  var E0 = 1e12, E1 = 1e13, E2 = 1e23;
+  var E0 = 1e12, E1 = 1e20, E2 = 1e01;
 
-  // point constructor, join as dual of wedge of duals.
-  var point = (x,y)=>E0+x*E1+y*E2;
-  var join  = (x,y)=>!(!x^!y);
+  // some projective elements/operations (p,p1,p2=point;l,l1,l2=line;X,Y=eucledian coordinates;x,y=multivectors)
+  var point           = (X,Y)=>E0+X*E1+Y*E2,
+      to_point        = (p)=>p.e12?[p.e01/p.e12,p.e20/p.e12]:[p.e01*Infinity||0,p.e20*Infinity||0],
+      join            = (x,y)=>!(!x^!y),                               // union
+      meet            = (x,y)=>x^y,                                    // intersect 
+      dist_points     = (p1,p2)=>join(p1/p1.e12,p2/p2.e12).Length,     // distance between points
+      dist_point_line = (p,l)=>((p.Normalized)^(l.Normalized)).e012,   // oriented distance point to line.
+      angle_lines     = (l1,l2)=>(l1.Normalized)<<(l2.Normalized).s;   // angle between lines
 
   // define 4 points
-  var a = point(4,1), b = point(4,2), 
-      c = point(2,5), d = point(1,5);
+  var a=point(0,0), b=point(0,1), c=point(1,0), d=point(1,1);
 
-  // join them into two lines.
-  var ab = join(a,b), cd = join(c,d);
-  
-  // Find their intersection point.
-  var abcd = ab^cd;
-  console.log(abcd.toString());
+  // join them in 6 lines.
+  var ab=join(a,b), ac=join(a,c), ad=join(a,d), bc=join(b,c), bd=join(b,d), cd=join(c,d);
+
+  // output points
+  console.log('points : ',[a,b,c,d].map(x=>to_point(x)).join(' and '));   
+
+  // output distances.
+  console.log('a to d',dist_points(a,d));
+  console.log('ad to c',dist_point_line(ad,c));
+  console.log('ab to c',dist_point_line(ab,c));
+  console.log('ad meet bc to c',dist_points(meet(ad,bc),c));
+
+  // output intersections
+  console.log('ad intersect bc', to_point(meet(ad,bc)));
+  console.log('ab intersect cd', to_point(meet(ab,cd)));
+  console.log('ac intersect bd', to_point(meet(ac,bd)));
+
+  // output angles.
+  console.log('angle ab ad',angle_lines(ab,ad));
+  console.log('angle ab cd',angle_lines(ab,cd));
+  console.log('angle ad bc',angle_lines(ad,bc));
+
 })();
 ```
 
 This example outputs :
 
 ```
-e_12+4e_13+5e_23
+points :  0,0 and 1,0 and 0,1 and 1,1
+
+a to d 1.4142135623730951
+
+ad to c -0.7071067811865475
+
+ab to c -1
+
+ad meet bc to c 0.7071067811865476
+
+ad intersect bc (2) [0.5, 0.5]
+ab intersect cd (2) [Infinity, 0]
+
+ac intersect bd (2) [0, -Infinity]
+angle ab ad 0.7071067811865475
+angle ab cd 1
+
+angle ad bc 0
 ```
