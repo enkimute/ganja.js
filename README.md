@@ -55,11 +55,11 @@ square to -1, r = # that square to 0).
 
 ```javascript
 var Complex = Algebra(0,1);     // Complex numbers.
-var E2 = Algebra(2);            // Euclidean 2D space.
-var E3 = Algebra(3);            // Euclidean 3D space.
+var R2 = Algebra(2);            // 2D vector space.
+var R3 = Algebra(3);            // 3D vector space.
 var timeSpace = Algebra(3,1);   // timespace
-var P3 = Algebra(3,0,1);        // Projective 3D space
-var C3 = Algebra(4,1);          // Conformal 3D space
+var P3 = Algebra(3,0,1);        // Projective Euclidean 3D space
+var C3 = Algebra(4,1);          // Conformal Euclidean 3D space
 ```
 
 The result of this call will be an ES6 class object (deriving from
@@ -146,7 +146,7 @@ Complex.inline(function(){
   console.log( (1+4e1)**-1*(1+4e1) );  // complex inverse (outputs 1)
 })();
 
-E3.inline(function(){
+R3.inline(function(){
   console.log( 1e1 );                  // x-vector (outputs [0, 1, 0, 0, 0, 0, 0, 0])
   console.log( 1e1^1e2 );              // x wedge y (outputs [0, 0, 0, 0, 1, 0, 0, 0])
   console.log( 1e12<<1e2 );            // xy dot y (outputs [0, 1, 0, 0, 0, 0, 0, 0])
@@ -180,10 +180,10 @@ document.body.appendChild(canvas);
 
 <CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
 
-<A NAME="E3"></A>
+<A NAME="R3"></A>
 ### Example Hue Rotor
 
-This example uses three dimensional euclidean space which is the smallest GA
+This example uses three dimensional vector space R<sub>3</sub> which is the smallest GA
 that cannonicaly embeds the quaternions. Because of our order choice of
 basis blades (i.e. **e<sub>13</sub>** instead of **e<sub>31</sub>**), the
 **e<sub>13</sub>** basis bivector is negated
@@ -194,9 +194,9 @@ bivector). We graph the color vector obtained by rotating red (1e1) in the
 (1,1,1) bivector plane. (this is changing the hue).
 
 ```javascript
-var E3 = Algebra(3);
+var R3 = Algebra(3);
 
-var canvas = E3.graph(function(x,y){
+var canvas = R3.graph(function(x,y){
   var c=1e1, rot=Math.cos(x*2) + Math.sin(x*2)*(1e12+1e23-1e13);
   return (rot*c*rot**-1).Vector;
 });
