@@ -13,12 +13,19 @@ algebraic constants. It's real math, in your browser.
 ### Contents
 
 [1. Features](#Features)
+
 [2. Getting Started]{#Started)
+
 [3. Syntax Overview](#syntax)
+
 [4. Inline operators and Algebraic Literals](#inline)
+
 [5. Example : Complex Numbers](#C)
+
 [6. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)
+
 [7. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)
+
 [8. Example : P(R*<sub>2,0,1</sub>) Projective 3D](#P3)
 
 
