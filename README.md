@@ -189,63 +189,72 @@ We've also used a custom ordering of the basis blades, and used
 the convention of Charles Gunn (refer to his thesis for more information
 on projective geometric algebra). 
 
+We start by creating an R<sub>2,0,1</sub> Clifford Algebra with given basis
+names.
 
 ```javascript
-Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).inline(function(){ 
-  // basis points in Dual Projective 2D. (e3*e3=0)
-  var E0 = 1e12, E1 = 1e20, E2 = 1e01;
+var P2 = Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']});
+```
+Next, we upgrade it to a geometric algebra by extending it with geometric
+operators. (this is where we decide our bivectors will be points,
+effectively making this P(R*<sub>2,0,1</SUB>). 
 
-  // some projective elements/operations (p,p1,p2=point;l,l1,l2=line;X,Y=eucledian coordinates;x,y=multivectors)
-  var point           = (X,Y)=>E0+X*E1+Y*E2,
-      to_point        = (p)=>p.e12?[p.e01/p.e12,p.e20/p.e12]:[p.e01*Infinity||0,p.e20*Infinity||0],
-      join            = (x,y)=>!(!x^!y),                               // union
-      meet            = (x,y)=>x^y,                                    // intersect 
-      dist_points     = (p1,p2)=>join(p1/p1.e12,p2/p2.e12).Length,     // distance between points
-      dist_point_line = (p,l)=>((p.Normalized)^(l.Normalized)).e012,   // oriented distance point to line.
-      angle_lines     = (l1,l2)=>(l1.Normalized<<l2.Normalized).s,     // angle between lines
-      project         = (p,l)=>(p<<l)*l,                               // project p onto l
-      parallel        = (p,l)=>(p<<l)*p,                               // line parallel to l and through p.
-      ortho           = (p,l)=>p<<l,                                   // line ortho to l and through p.
-      rotor           = (a)=>Math.cos(a/2)+Math.sin(a/2)*E0,           // rotor a.
-      translator      = (x,y)=>1+0.5*(x*E1-y*E2);                      // translator x,y
-  
-  // define 4 points
-  var a=point(0,0), b=point(0,1), c=point(1,0), d=point(1,1);
+```javascript
+P2.inline(function(){ 
+  this.point           = (X,Y)=>1e12+X*1e20+Y*1e01;
+  this.to_point        = (p)=>`[${p.e12?[p.e01/p.e12,p.e20/p.e12]:[p.e01*Infinity||0,p.e20*Infinity||0]}]`;
+  this.to_line         = (p)=>`${p.e1}x + ${p.e2}y + ${p.e0}`;
+  this.join            = (x,y)=>!(!x^!y);                               // union
+  this.meet            = (x,y)=>x^y;                                    // intersect 
+  this.dist_points     = (p1,p2)=>this.join(p1/p1.e12,p2/p2.e12).Length;// distance between points
+  this.dist_point_line = (p,l)=>((p.Normalized)^(l.Normalized)).e012;   // oriented distance point to line.
+  this.angle_lines     = (l1,l2)=>(l1.Normalized<<l2.Normalized).s;     // angle between lines
+  this.project         = (p,l)=>(p<<l)*l;                               // project p onto l
+  this.parallel        = (p,l)=>(p<<l)*p;                               // line parallel to l and through p.
+  this.ortho           = (p,l)=>p<<l;                                   // line ortho to l and through p.
+  this.rotor           = (a)=>Math.cos(a*0.5)+Math.sin(a*0.5)*1e12;     // rotor a.
+  this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);                  // translator x,y
+})();
+```
+We can now use our 2D Projective Algebra.
 
-  // join them in 6 lines.
-  var ab=join(a,b), ac=join(a,c), ad=join(a,d), bc=join(b,c), bd=join(b,d), cd=join(c,d);
+```javascript
+P2.inline(x=>{
+  // define 4 points, and their 6 connecting lines.
+  var a=P2.point(0,0), b=P2.point(0,1), c=P2.point(1,0), d=P2.point(1,1);
+  var ab=P2.join(a,b), ac=P2.join(a,c), ad=P2.join(a,d), bc=P2.join(b,c), bd=P2.join(b,d), cd=P2.join(c,d);
 
   // output points
-  console.log('points : ',[a,b,c,d].map(x=>to_point(x)).join(' and '));   
+  console.log('points : ',[a,b,c,d].map(x=>P2.to_point(x)).join(' and '));   
 
   // output distances.
-  console.log('a to d',dist_points(a,d));
-  console.log('ad to c',dist_point_line(ad,c));
-  console.log('ab to c',dist_point_line(ab,c));
-  console.log('ad meet bc to c',dist_points(meet(ad,bc),c));
+  console.log('a to d :',P2.dist_points(a,d));
+  console.log('ad to c :',P2.dist_point_line(ad,c));
+  console.log('ab to c :',P2.dist_point_line(ab,c));
+  console.log('ad meet bc to c :',P2.dist_points(P2.meet(ad,bc),c));
 
   // output intersections
-  console.log('ad intersect bc', to_point(meet(ad,bc)));
-  console.log('ab intersect cd', to_point(meet(ab,cd)));
-  console.log('ac intersect bd', to_point(meet(ac,bd)));
+  console.log('ad intersect bc :', P2.to_point(P2.meet(ad,bc)));
+  console.log('ab intersect cd :', P2.to_point(P2.meet(ab,cd)));
+  console.log('ac intersect bd :', P2.to_point(P2.meet(ac,bd)));
 
   // output angles.
-  console.log('angle ab ad',angle_lines(ab,ad));
-  console.log('angle ab cd',angle_lines(ab,cd));
-  console.log('angle ad bc',angle_lines(ad,bc));
+  console.log('angle ab ad :',P2.angle_lines(ab,ad));
+  console.log('angle ab cd :',P2.angle_lines(ab,cd));
+  console.log('angle ad bc :',P2.angle_lines(ad,bc));
 
   // project, ortho, parallel 
-  console.log('project a onto bc', to_point(project(a,bc)));
-  console.log('line through a, parallel to bc', parallel(a,bc));
-  console.log('line through a, orthogonal to bc',ortho(a,bc));
+  console.log('project a onto bc :', P2.to_point(P2.project(a,bc)));
+  console.log('line through d, parallel to bc :', P2.to_line(P2.parallel(d,bc)));
+  console.log('line through d, orthogonal to bc :',P2.to_line(P2.ortho(d,bc)));
 
   // rotate, translate 
-  var rot = rotor(Math.PI/4,a);
-  console.log('b rotated pi/4',to_point(rot*b*~rot));
-  var tran = translator(1,2);
-  console.log('b translated 1,2',to_point(b),'->',to_point(tran*b*~tran));
+  var rot = P2.rotor(Math.PI/4,a);
+  console.log('b rotated pi/4 :',P2.to_point(rot*b*~rot));
+  var tran = P2.translator(1,2);
+  console.log('b translated 1,2 :',P2.to_point(b),'->',P2.to_point(tran*b*~tran));
   var combined = tran*rot;
-  console.log('b rotated and translated',to_point(combined*b*~combined));
+  console.log('b rotated and translated :',P2.to_point(combined*b*~combined));
 })();
 ```
 
@@ -254,29 +263,28 @@ This example outputs :
 ```
 points :  0,0 and 1,0 and 0,1 and 1,1
 
-a to d 1.4142135623730951
-ad to c -0.7071067811865475
-ab to c -1
-ad meet bc to c 0.7071067811865476
+a to d : 1.4142135623730951
+ad to c : -0.7071067811865475
+ab to c : -1
+ad meet bc to c : 0.7071067811865476
 
-ad intersect bc (2) [0.5, 0.5]
-ab intersect cd (2) [Infinity, 0]
-ac intersect bd (2) [0, -Infinity]
+ad intersect bc : [0.5, 0.5]
+ab intersect cd : [Infinity, 0]
+ac intersect bd : [0, -Infinity]
 
-angle ab ad 0.7071067811865475
-angle ab cd 1
-angle ad bc 0
+angle ab ad : 0.7071067811865475
+angle ab cd : 1
+angle ad bc : 0
 
-line through a, parallel to bc [0, 0, 1, 1, 0, 0, 0, 0]
-line through a, orthogonal to bc [0, 0, 1, -1, 0, 0, 0, 0]
-b rotated pi/4 [0.7071067811865475, 0.7071067811865476]
-b translated 1,2 [1, 0] -> [2, 2]
-b rotated and translated [1.7071067811865472, 2.7071067811865475]
+line through a, parallel to bc : 1x + 1y + -2
+line through a, orthogonal to bc : 1x + -1y + 0
+b rotated pi/4 : [0.7071067811865475, 0.7071067811865476]
+b translated 1,2 : [1, 0] -> [2, 2]
+b rotated and translated : [1.7071067811865472, 2.7071067811865475]
 ```
 
 ### Example Projective 3D
 
 This example implements the table from
-[http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf](Gunn's
-Geometric Algebra for Computer Graphics).
+[http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf](Gunn's Geometric Algebra for Computer Graphics).
 
