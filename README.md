@@ -290,7 +290,10 @@ This example implements the table on page 15 of [Gunn's Geometric Algebra for Co
 We apply the same strategy from above and start from a Clifford Algebra in R<sub>3,0,1</sub>. 
 
 ```javascript
-var P3 = Algebra({metric:[0,1,1,1],basis:['1','e0','e1','e2','e3','e01','e02','e03','e12','e31','e23','e123','e012','e023','e031','e0123']})
+var P3 = Algebra({
+           metric:[0,1,1,1],
+           basis:['1','e0','e1','e2','e3','e01','e02','e03','e12','e31','e23','e123','e012','e023','e031','e0123']
+         });
 ```
 Extending it with geometric operators to form P(R*<sub>3,0,1</sub>). 
 

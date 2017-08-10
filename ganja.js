@@ -43,7 +43,7 @@
         op[i][xi] = ( grades[i] == grades[xi]+grades[yi] ) ? gp[i][xi]:'0';                                                                 // strict sum of grades in outer
         if ((mulTable[xi][yi].replace('-','') == output)||(mulTable[xi][yi]=='0')) {
           gp[i][xi] = (mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                             // Fill in the geometric table
-          cp[i][xi] = ( grades[i] == grades[xi]-grades[yi] ) ? gp[i][xi]:'0';                                                                 // strict diff of grades in inner
+          cp[i][xi] = ( grades[i] == grades[xi]-grades[yi] ) ? gp[i][xi]:'0';                                                               // strict diff of grades in inner
         }  
     }})));
   // Generate a new class for our algebra.
