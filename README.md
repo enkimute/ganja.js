@@ -1,6 +1,6 @@
 # ganja.js - Geometric Algebra for javascript.
 
-<DIV STYLE="width:100%"><CENTER><IMG SRC="ganja_thumb.jpg"></CENTER></DIV>
+<DIV STYLE="width:100%"><CENTER><IMG SRC="ganja_thumb.jpg" WiDTH=100%></CENTER></DIV>
 
 Ganja.js is a Geometric Algebra code generator for javascript. It supports
 algebra's of any signature and implements advanced operator overloading and
