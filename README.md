@@ -286,5 +286,5 @@ b rotated and translated : [1.7071067811865472, 2.7071067811865475]
 
 ### Example Projective 3D
 
-This example implements the table from (http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf)[Gunn's Geometric Algebra for Computer Graphics].
+This example implements the table from [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf).
 
