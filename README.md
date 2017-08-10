@@ -323,27 +323,31 @@ We apply the same strategy from above and start from a Clifford Algebra in R<sub
 ```javascript
 var P3 = Algebra({
            metric:[0,1,1,1],
-           basis:['1','e0','e1','e2','e3','e01','e02','e03','e12','e31','e23','e123','e012','e023','e031','e0123']
+           basis:['1','e0','e1','e2','e3','e01','e02','e03','e12','e31','e23','e123','e012','e031','e023','e0123']
          });
 ```
 Extending it with geometric operators to form P(R*<sub>3,0,1</sub>). 
 
 ```javascript
 P3.inline(function(){ 
-    var E0=1e123, E1=1e012, E2=1e023, E3=1e031;
+  // We extend the basic (clifford) algebra with PGA specific items.
+  // Easier names for triVectors.  
+    var E0=1e123, E1=1e012, E2=1e031, E3=1e023;
+  // Homogenous points.
     this.point    = (X,Y,Z)=>E0+X*E1+Y*E2+(Z||0)*E3,
     this.to_point = (p)=>p.e123?[p.e012/p.e123,p.e023/p.e123,p.e031/p.e123]
-                               :[p.e012*Infinity||0,p.e023*Infinity||0,p.e031*Infinity||0],
-    this.join     = (x,y)=>!(!x^!y);
-    this.meet     = (x,y)=>x^y;
+                        :[p.e012*Infinity||0,p.e023*Infinity||0,p.e031*Infinity||0],
+  // Join and Meet
+    this.join = (x,y)=>!(!x^!y);
+    this.meet = (x,y)=>x^y;
   // Table from "Geometric Algebra for Copmuter Graphics"
-    this.LineFromPoints            = (P,Q)=>join(P,Q);
+    this.LineFromPoints            = (P,Q)=>P3.join(P,Q);
     this.LineFromPlanes            = (a,b)=>a^b;
     this.PointFromPlanes           = (a,b,c)=>a^b^c;
-    this.PlaneFromPoints           = (P,Q,R)=>join(join(P,Q),R);
-    this.DistPointToPlane          = (a,P)=>join(a,P).Length;
-    this.DistPoints                = (P,Q)=>join(P,Q).Length;
-    this.AnglePlanes               = (a,b)=>Math.acos(a<<b);
+    this.PlaneFromPoints           = (P,Q,R)=>P3.join(P3.join(P,Q),R);
+    this.DistPointToPlane          = (a,P)=>P3.join(a,P);
+    this.DistPoints                = (P,Q)=>P3.join(P,Q).Length;
+    this.AnglePlanes               = (a,b)=>Math.acos((a<<b).Length);
     this.LineThroughPointPerpPlane = (P,a)=>P<<a;
     this.OrthProjPointToPlane      = (P,a)=>(P<<a)*a;
     this.PlaneThroughPointParPlane = (P,a)=>(P<<a)*P;
@@ -351,12 +355,29 @@ P3.inline(function(){
     this.PlaneThroughPointPerpLine = (PI,P)=>P<<PI;
     this.OrthProjPointToLine       = (PI,P)=>(P<<PI)*PI;
     this.LineThroughPointParLine   = (PI,P)=>(P<<PI)*P;
-    this.LineThroughPointPerpLine  = (PI,P)=>join((P<<PI)*P,P);
-    this.DistLines                 = (PI,EP)=>join(PI,EP);
-    this.AngleLines                = (PI,EP)=>PI<<EP;
+    this.LineThroughPointPerpLine  = (PI,P)=>P3.join((P<<PI)*P,P);
+    this.DistLines                 = (PI,EP)=>P3.join(PI,EP);
+    this.AngleLines                = (PI,EP)=>Math.acos((PI<<EP).Length);
     this.ReflectionInPlane         = (a,X)=>a*X*a;
     this.Rotor                     = (PI,alpha)=>Math.cos(alpha/2) + Math.sin(alpha/2)*PI;
     this.RotationAroundLine        = (X,PI,alpha)=>this.rotor(PI,alpha)*X*~this.rotor(PI,alpha);
     this.Translator                = (x,y,z)=>1+0.5*(x*1e03+y*1e01+z*1e02);
+})();
+
+```
+Resulting in P3, the geometric algebra for projective eucledian space.
+
+```javascript
+P3.inline(function(){ 
+  var o=P3.point(0,0,0), x=P3.point(1,0,0), y=P3.point(0,1,0), z=P3.point(0,0,1);
+  var ox=P3.LineFromPoints(o,x), oy=P3.LineFromPoints(o,y), oz=P3.LineFromPoints(o,z);
+  var oxy=P3.PlaneFromPoints(o,x,y), oyz=P3.PlaneFromPoints(o,y,z), ozx=P3.PlaneFromPoints(o,z,x), xyz=P3.PlaneFromPoints(x,y,z);
+  console.log('distances |o,x| and |x,y| = ',P3.DistPoints(o,x),',', P3.DistPoints(x,y));
+  console.log('angles lines |ox,oy| and |ox,ox| = ',P3.AngleLines(ox,oy),',',P3.AngleLines(ox,ox));
+  console.log('angles planes |oxy,oyz| and |oxy,oxy| =',P3.AnglePlanes(oxy,oyz),',',P3.AnglePlanes(oxy,oxy));
+  console.log('project o onto xyz = ',P3.to_point(P3.OrthProjPointToPlane(o,xyz)));
+  var tran = P3.Translator(2,3,4), rot = P3.Rotor(x,Math.PI);
+  console.log('x translated 2,3,4 = ',P3.to_point(tran*x*~tran));
+  console.log('o rotated PI around x = ',P3.to_point(rot*o*~rot));
 })();
 ```
