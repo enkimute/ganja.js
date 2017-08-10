@@ -301,7 +301,8 @@ Extending it with geometric operators to form P(R*<sub>3,0,1</sub>).
 P3.inline(function(){ 
     var E0=1e123, E1=1e012, E2=1e023, E3=1e031;
     this.point    = (X,Y,Z)=>E0+X*E1+Y*E2+(Z||0)*E3,
-    this.to_point = (p)=>p.e123?[p.e012/p.e123,p.e023/p.e123,p.e031/p.e123]:[p.e012*Infinity||0,p.e023*Infinity||0,p.e031*Infinity||0],
+    this.to_point = (p)=>p.e123?[p.e012/p.e123,p.e023/p.e123,p.e031/p.e123]
+                               :[p.e012*Infinity||0,p.e023*Infinity||0,p.e031*Infinity||0],
     this.join     = (x,y)=>!(!x^!y);
     this.meet     = (x,y)=>x^y;
   // Table from "Geometric Algebra for Copmuter Graphics"
