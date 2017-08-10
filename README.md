@@ -8,7 +8,22 @@
 
 Ganja.js is a Geometric Algebra code generator for javascript. It supports
 algebra's of any signature and implements advanced operator overloading and
-algebraic constants.
+algebraic constants. It's real math, in your browser.
+
+### Contents
+
+[1. Features](#Features)
+[2. Getting Started]{#Started)
+[3. Syntax Overview](#syntax)
+[4. Inline operators and Algebraic Literals](#inline)
+[5. Example : Complex Numbers](#C)
+[6. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)
+[7. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)
+[8. Example : P(R*<sub>2,0,1</sub>) Projective 3D](#P3)
+
+
+<A NAME="Features"></A>
+### Features
 
 * Supports any metric (p,q,r) (spacelike/timelike/lightlike)
 * Operator overloading
@@ -23,6 +38,7 @@ To use it, first include the ganja.js script.
 ```html
 <SCRIPT SRC="https://raw.githubusercontent.com/enkimute/ganja.js/master/ganja.js"></SCRIPT>
 ```
+<A NAME="Started"></A>
 ### Create your algebra class.
 
 To create an Algebra, all you need to know is its metric. The Algebra
@@ -70,6 +86,7 @@ Complex.inline(function(){
 // Inline AsciiMath syntax : 
 Complex.inline("2+3e_1")
 ```
+<A NAME="syntax"></A>
 ### ganja.js Syntax Overview.
 
 Here's a list of the supported operators in all syntax flavors : 
@@ -92,6 +109,7 @@ Here's a list of the supported operators in all syntax flavors :
 | 2e2      |  2e_2     | new A([0,0,2,0])| A.Vector(0,2)
 | 2e12     |  2e_12    | new A([0,0,0,2])| A.Bivector(2)
 
+<A NAME="inline"></A>
 ### Javascript inline syntax.
 
 Ganja.js' inline syntax allows you to write GA statements seamlessly inside your
@@ -129,7 +147,7 @@ E3.inline(function(){
   console.log( 1e1.Dual );             // x.Dual (outputs [0, 0, 0, 0, 0, 0, -1, 0])
 })();
 ```
-
+<A NAME="C"></A>
 ### Example : Mandlebrot
 
 In this example we use the smallest Geometric Algebra that cannonicaly
@@ -155,6 +173,7 @@ document.body.appendChild(canvas);
 
 <CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
 
+<A NAME="E3"></A>
 ### Example Hue Rotor
 
 This example uses three dimensional euclidean space which is the smallest GA
@@ -179,7 +198,7 @@ document.body.appendChild(canvas);
 ```
 <CENTER><IMG SRC="ganja_hue.png"></CENTER>
 
-
+<A NAME="P2"></A>
 ### Example Projective 2D
 
 This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
@@ -288,6 +307,7 @@ b translated 1,2 : [1, 0] -> [2, 2]
 b rotated and translated : [1.7071067811865472, 2.7071067811865475]
 ```
 
+<A NAME="P3"></A>
 ### Example Projective 3D
 
 This example implements the table on page 15 of [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf). 
