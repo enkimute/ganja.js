@@ -254,7 +254,7 @@ P2.inline(x=>{
   console.log('line through d, orthogonal to bc :',P2.to_line(P2.ortho(d,bc)));
 
   // rotate, translate 
-  var rot = P2.rotor(Math.PI/4,a);
+  var rot = P2.rotor(Math.PI/4);
   console.log('b rotated pi/4 :',P2.to_point(rot*b*~rot));
   var tran = P2.translator(1,2);
   console.log('b translated 1,2 :',P2.to_point(b),'->',P2.to_point(tran*b*~tran));
