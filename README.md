@@ -365,7 +365,7 @@ P3.inline(function(){
 })();
 
 ```
-Resulting in P3, the geometric algebra for projective eucledian space.
+Resulting in P3, the geometric algebra for projective euclidean space.
 
 ```javascript
 P3.inline(function(){ 
