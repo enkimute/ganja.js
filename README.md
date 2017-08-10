@@ -286,5 +286,42 @@ b rotated and translated : [1.7071067811865472, 2.7071067811865475]
 
 ### Example Projective 3D
 
-This example implements the table from [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf).
+This example implements the table on page 15 of [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf). 
+We apply the same strategy from above and start from a Clifford Algebra in R<sub>3,0,1</sub>. 
 
+```javascript
+var P3 = Algebra({metric:[0,1,1,1],basis:['1','e0','e1','e2','e3','e01','e02','e03','e12','e31','e23','e123','e012','e023','e031','e0123']})
+```
+Extending it with geometric operators to form P(R*<sub>3,0,1</sub>). 
+
+```javascript
+P3.inline(function(){ 
+    var E0=1e123, E1=1e012, E2=1e023, E3=1e031;
+    this.point    = (X,Y,Z)=>E0+X*E1+Y*E2+(Z||0)*E3,
+    this.to_point = (p)=>p.e123?[p.e012/p.e123,p.e023/p.e123,p.e031/p.e123]:[p.e012*Infinity||0,p.e023*Infinity||0,p.e031*Infinity||0],
+    this.join     = (x,y)=>!(!x^!y);
+    this.meet     = (x,y)=>x^y;
+  // Table from "Geometric Algebra for Copmuter Graphics"
+    this.LineFromPoints            = (P,Q)=>join(P,Q);
+    this.LineFromPlanes            = (a,b)=>a^b;
+    this.PointFromPlanes           = (a,b,c)=>a^b^c;
+    this.PlaneFromPoints           = (P,Q,R)=>join(join(P,Q),R);
+    this.DistPointToPlane          = (a,P)=>join(a,P).Length;
+    this.DistPoints                = (P,Q)=>join(P,Q).Length;
+    this.AnglePlanes               = (a,b)=>Math.acos(a<<b);
+    this.LineThroughPointPerpPlane = (P,a)=>P<<a;
+    this.OrthProjPointToPlane      = (P,a)=>(P<<a)*a;
+    this.PlaneThroughPointParPlane = (P,a)=>(P<<a)*P;
+    this.IntersectLinePlane        = (PI,a)=>PI^a;
+    this.PlaneThroughPointPerpLine = (PI,P)=>P<<PI;
+    this.OrthProjPointToLine       = (PI,P)=>(P<<PI)*PI;
+    this.LineThroughPointParLine   = (PI,P)=>(P<<PI)*P;
+    this.LineThroughPointPerpLine  = (PI,P)=>join((P<<PI)*P,P);
+    this.DistLines                 = (PI,EP)=>join(PI,EP);
+    this.AngleLines                = (PI,EP)=>PI<<EP;
+    this.ReflectionInPlane         = (a,X)=>a*X*a;
+    this.Rotor                     = (PI,alpha)=>Math.cos(alpha/2) + Math.sin(alpha/2)*PI;
+    this.RotationAroundLine        = (X,PI,alpha)=>this.rotor(PI,alpha)*X*~this.rotor(PI,alpha);
+    this.Translator                = (x,y,z)=>1+0.5*(x*1e03+y*1e01+z*1e02);
+})();
+```
