@@ -307,8 +307,8 @@ angle ab ad : 0.7071067811865475
 angle ab cd : 1
 angle ad bc : 0
 
-line through a, parallel to bc : 1x + 1y + -2
-line through a, orthogonal to bc : 1x + -1y + 0
+line through d, parallel to bc : 1x + 1y + -2
+line through d, orthogonal to bc : 1x + -1y + 0
 b rotated pi/4 : [0.7071067811865475, 0.7071067811865476]
 b translated 1,2 : [1, 0] -> [2, 2]
 b rotated and translated : [1.7071067811865472, 2.7071067811865475]
