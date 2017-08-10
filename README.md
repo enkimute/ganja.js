@@ -181,16 +181,17 @@ document.body.appendChild(canvas);
 This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
 i.e. points are higher grade than lines). (Ganja.js can handle degenerate
 metrics). Points are constructed by adding in E0, and the join is the dual of the
-wedge of the duals. (meet is just wedge). We construct two lines from points
-and find their intersection point, angles and distances.
+wedge of the duals. (meet is just wedge). We construct lines from points
+and find their intersection points, angles, distances and more.
 
 We've also used a custom ordering of the basis blades, and used
 **e<sub>20</sub>** instead of the default **e<sub>02</sub>**. This matches
-the convention of Charles Gunn (refer to his thesis for more information
+the convention of Charles Gunn (refer to his publications for more information
 on projective geometric algebra). 
 
 We start by creating an R<sub>2,0,1</sub> Clifford Algebra with given basis
-names.
+names. (Ganja.js will handle duality and inner product correctly even for degenerate
+metrics.)
 
 ```javascript
 var P2 = Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']});
@@ -216,7 +217,7 @@ P2.inline(function(){
   this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);                  // translator x,y
 })();
 ```
-We can now use our 2D Projective Algebra.
+We can now use our 2D Projective Algebra. 
 
 ```javascript
 P2.inline(x=>{
@@ -285,6 +286,5 @@ b rotated and translated : [1.7071067811865472, 2.7071067811865475]
 
 ### Example Projective 3D
 
-This example implements the table from
-[http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf](Gunn's Geometric Algebra for Computer Graphics).
+This example implements the table from (http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf)[Gunn's Geometric Algebra for Computer Graphics].
 
