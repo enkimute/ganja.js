@@ -117,7 +117,7 @@ the first parameter to the *Algebra* call.
 C = Algebra({p:2,basis:['1','e12']});
 
 // The Quaternions as the even subalgebra of R3
-H = Algebra({p:3,basis:['1','e12','e23','e31']})     
+H = Algebra({p:3,basis:['e23','e31','e12','1']});     
 
 ```
 When not specified, ganja.js will generate basis names that are
