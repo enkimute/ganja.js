@@ -35,7 +35,7 @@ algebraic constants. It's real math, in your browser.
 * Supports any metric (p,q,r) (spacelike/timelike/lightlike)
 * Operator overloading
 * Algebraic constants
-* smallish (138 lines)
+* smallish (150 lines)
 * inverses up to 5D.
 * geometric, inner, outer product
 * conjugate, reverse, involute, dual, negative
