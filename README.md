@@ -369,13 +369,20 @@ Resulting in P3, the geometric algebra for projective euclidean space.
 
 ```javascript
 P3.inline(function(){ 
+// points
   var o=P3.point(0,0,0), x=P3.point(1,0,0), y=P3.point(0,1,0), z=P3.point(0,0,1);
-  var ox=P3.LineFromPoints(o,x), oy=P3.LineFromPoints(o,y), oz=P3.LineFromPoints(o,z);
-  var oxy=P3.PlaneFromPoints(o,x,y), oyz=P3.PlaneFromPoints(o,y,z), ozx=P3.PlaneFromPoints(o,z,x), xyz=P3.PlaneFromPoints(x,y,z);
+// lines
+  var ox=P3.LineFromPoints(o,x), oy=P3.LineFromPoints(o,y);
+// planes
+  var oxy=P3.PlaneFromPoints(o,x,y), oyz=P3.PlaneFromPoints(o,y,z), xyz=P3.PlaneFromPoints(x,y,z);
+// distance
   console.log('distances |o,x| and |x,y| = ',P3.DistPoints(o,x),',', P3.DistPoints(x,y));
+// angles
   console.log('angles lines |ox,oy| and |ox,ox| = ',P3.AngleLines(ox,oy),',',P3.AngleLines(ox,ox));
   console.log('angles planes |oxy,oyz| and |oxy,oxy| =',P3.AnglePlanes(oxy,oyz),',',P3.AnglePlanes(oxy,oxy));
+// projection
   console.log('project o onto xyz = ',P3.to_point(P3.OrthProjPointToPlane(o,xyz)));
+// rotation and translation
   var tran = P3.Translator(2,3,4), rot = P3.Rotor(x,Math.PI);
   console.log('x translated 2,3,4 = ',P3.to_point(tran*x*~tran));
   console.log('o rotated PI around x = ',P3.to_point(rot*o*~rot));
