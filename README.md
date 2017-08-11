@@ -15,32 +15,21 @@ overloading and algebraic constants.
 metric contraction inner product, a Poincare duality operator and the main
 involutions and automorphisms.)
 
-(Technically, ganja.js reificates algebraic literals and expressions by using
-reflection, a built-in tokenizer and a simple AST translator to rewrite functions 
-containing mathematical operators and algebraic constants to a procedural
-weak typed implementation.)
-
+(Technically, ganja.js is a code generator producing class that reificate algebraic literals 
+and expressions by using reflection, a built-in tokenizer and a simple AST translator to 
+rewrite functions containing algebraic expressions and literals.)
 
 ### Contents
 
-[1. Features](#Features)
-
-[2. Getting Started](#Started)
-
-[3. Subalgebra's, custom blade names, ...](#custom)
-
-[4. Syntax Overview](#syntax)
-
-[5. Inline operators and Algebraic Literals](#inline)
-
-[6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)
-
-[7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)
-
-[8. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)
-
-[9. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)
-
+[1. Features](#Features)<BR>
+[2. Getting Started](#Started)<BR>
+[3. Subalgebra's, custom blade names, ...](#custom)<BR>
+[4. Syntax Overview](#syntax)<BR>
+[5. Inline operators and Algebraic Literals](#inline)<BR>
+[6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
+[7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
+[8. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
+[9. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
 
 <A NAME="Features"></A>
 ### Features
@@ -160,7 +149,7 @@ Here's a list of the supported operators in all syntax flavors :
 | 2e12     |  2e_12    | new A([0,0,0,2])| A.Bivector(2)
 
 <A NAME="inline"></A>
-### Javascript inline syntax.
+### Inline operators and Algebraic Literals.
 
 Ganja.js' inline syntax allows you to write GA statements seamlessly inside your
 javascript functions. Simply wrap your functions to get full operator
@@ -219,7 +208,7 @@ R3.inline(function(){
 })();
 ```
 <A NAME="C"></A>
-### Example : Complex number *R<sub>0,1</sub>* Mandlebrot
+### Example : R<sub>0,1</sub> Complex Numbers Mandelbrot
 
 In this example we use the smallest Geometric Algebra that cannonicaly
 embeds the Complex numbers. We graph a two dimensional function where
@@ -245,7 +234,7 @@ document.body.appendChild(canvas);
 <CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
 
 <A NAME="R3"></A>
-### Example 3D Vector Space *R<sub>3</sub>* Hue Rotor
+### Example : R<sub>3</sub> Color Space Hue Rotor
 
 This example uses three dimensional vector space R<sub>3</sub> which is the smallest GA
 that cannonicaly embeds the quaternions. Because of our order choice of
@@ -270,7 +259,7 @@ document.body.appendChild(canvas);
 <CENTER><IMG SRC="ganja_hue.png"></CENTER>
 
 <A NAME="P2"></A>
-### Example Projective 2D P(R*<sub>2,0,1</sub>)
+### Example : P(R*<sub>2,0,1</sub>) Projective 2D
 
 This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
 i.e. points are higher grade than lines). (Ganja.js can handle degenerate
@@ -311,7 +300,7 @@ P2.inline(function(){
   this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);                  // translator x,y
 })();
 ```
-We can now use our 2D Projective Algebra. 
+-We can now use our 2D Projective Algebra. 
 
 ```javascript
 P2.inline(x=>{
@@ -377,9 +366,8 @@ b rotated pi/4 : [0.7071067811865475, 0.7071067811865476]
 b translated 1,2 : [1, 0] -> [2, 2]
 b rotated and translated : [1.7071067811865472, 2.7071067811865475]
 ```
-
 <A NAME="P3"></A>
-### Example Projective 3D P(R*<sub>3,0,1</sub>)
+### Example : P(R*<sub>3,0,1</sub>) Projective 3D
 
 This example implements the table on page 15 of [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf). 
 We apply the same strategy from above and start from a Clifford Algebra in R<sub>3,0,1</sub>. 
@@ -404,7 +392,7 @@ P3.inline(function(){
   // Join and Meet
     this.join = (x,y)=>!(!x^!y);
     this.meet = (x,y)=>x^y;
-  // Table from "Geometric Algebra for Copmuter Graphics"
+  // Table from "Geometric Algebra for Copmuter Graphics" p.15
     this.LineFromPoints            = (P,Q)=>P3.join(P,Q);
     this.LineFromPlanes            = (a,b)=>a^b;
     this.PointFromPlanes           = (a,b,c)=>a^b^c;
