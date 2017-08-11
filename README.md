@@ -103,7 +103,7 @@ Here's a list of the supported operators in all syntax flavors :
 | ~x       |  hat(x)   | x.Conjugate     | A.Conjugate(x)
 | x.Involute|  tilde(x) | x.Involute      | A.Involute(x)
 | x.Reverse|  ddot(x)  | x.Reverse       | A.Reverse(x)
-| !x       |  hat(x)   | x.Dual          | A.Dual(x)
+| !x       |  bar(x)   | x.Dual          | A.Dual(x)
 | x**-1    |  x^-1     | x.Inverse       | A.Inverse(x)
 | x**y     |  x^y      | x.Pow(y)        | A.Pow(x,y)
 | x*y      |  x**y     | x.Mul(y)        | A.Mul(x,y)
