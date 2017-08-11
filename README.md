@@ -109,16 +109,10 @@ the first parameter to the *Algebra* call.
 ```javascript
 
 // The complex numbers as the even subalgebra of R2 
-
 C = Algebra({p:2,basis:['1','e12']});
 
 // The Quaternions as the even subalgebra of R3
-
 H = Algebra({p:3,basis:['1','e12','e23','e31']})     
-
-// The dual quaternions as the even subalgebra of R3,0,1
-
-DH = Algebra({p:3,r:1,basis:['1','e12','e23','e31','e0123','e01','e02','e03']});     
 
 ```
 
