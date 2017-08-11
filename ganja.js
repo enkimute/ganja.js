@@ -15,7 +15,7 @@
       p = p.p || (p.metric && p.metric.filter(x=>x==1).length) || p;
     } else options={};
   // Initialise basis names and multiplication table.
-    var tot = (p||0)+(q||0)+(r||0),                                                                                                         // p = #dimensions that square to 1, q to -1, r to 0.
+    var tot = options.tot||(p||0)+(q||0)+(r||0),                                                                                            // p = #dimensions that square to 1, q to -1, r to 0.
         basis=options.basis||Array.apply([],{length:2**tot})                                                                                // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
               .map((x,xi)=>(((1<<20)+xi).toString(2)).slice(-tot||-1)                                                                       // => ["000", "001", "010", "011", "100", "101", "110", "111"]  (index of array in base 2)
               .replace(/./g,(a,ai)=>a=='0'?'':ai+1-(r||0)))                                                                                 // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)

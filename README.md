@@ -16,17 +16,19 @@ algebraic constants. It's real math, in your browser.
 
 [2. Getting Started](#Started)
 
-[3. Syntax Overview](#syntax)
+[3. Subalgebra's, custom blade names, ...](#custom)
 
-[4. Inline operators and Algebraic Literals](#inline)
+[4. Syntax Overview](#syntax)
 
-[5. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)
+[5. Inline operators and Algebraic Literals](#inline)
 
-[6. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)
+[6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)
 
-[7. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)
+[7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)
 
-[8. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)
+[8. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)
+
+[9. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)
 
 
 <A NAME="Features"></A>
@@ -93,6 +95,33 @@ Complex.inline(function(){
 // Inline AsciiMath syntax : 
 Complex.inline("2+3e_1")
 ```
+<A NAME="custom"></A>
+### Subalgebra's, custom blade names, ..
+
+Ganja.js allows you to further customise the core algebra class it
+generates, allowing you to generate subalgebras (who's elements use
+less storage), or algebra's where you decide on the order and name
+of the basis blades.
+
+The advanced options are available by passing in an options object as
+the first parameter to the *Algebra* call. 
+
+```javascript
+
+// The complex numbers as the even subalgebra of R2 
+
+C = Algebra({p:2,basis:['1','e12']});
+
+// The Quaternions as the even subalgebra of R3
+
+H = Algebra({p:3,basis:['1','e12','e23','e31']})     
+
+// The dual quaternions as the even subalgebra of R3,0,1
+
+DH = Algebra({p:3,r:1,basis:['1','e12','e23','e31','e0123','e01','e02','e03']});     
+
+```
+
 <A NAME="syntax"></A>
 ### ganja.js Syntax Overview.
 
