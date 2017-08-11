@@ -22,9 +22,9 @@ rewrite functions containing algebraic expressions and literals.)
 ### Contents
 
 [1. Features](#Features)<BR>
-[2. Getting Started](#Started)<BR>
+[2. Getting started](#Started)<BR>
 [3. Subalgebra's, custom blade names, ...](#custom)<BR>
-[4. Syntax Overview](#syntax)<BR>
+[4. Syntax overview](#syntax)<BR>
 [5. Inline operators and Algebraic Literals](#inline)<BR>
 [6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
 [7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
@@ -49,7 +49,7 @@ To use it, first include the ganja.js script.
 <SCRIPT SRC="https://raw.githubusercontent.com/enkimute/ganja.js/master/ganja.js"></SCRIPT>
 ```
 <A NAME="Started"></A>
-### Create your algebra class.
+### Getting started
 
 To create an Algebra, call the *_Algebra_* function specifying the metric
 signature (positive,negative,zero). This function will generate an ES6 class 
@@ -126,7 +126,7 @@ dimension will get generator name e<sub>0</sub> and will take
 the first place. 
 
 <A NAME="syntax"></A>
-### ganja.js Syntax Overview.
+### Syntax overview.
 
 Here's a list of the supported operators in all syntax flavors : 
 
