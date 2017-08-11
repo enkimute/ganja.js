@@ -26,10 +26,10 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 [3. Subalgebra's, custom blade names, ...](#custom)<BR>
 [4. Syntax overview](#syntax)<BR>
 [5. Inline operators and Algebraic Literals](#inline)<BR>
-[6. Example : &#x221D;<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
-[7. Example : &#x221D;<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
-[8. Example : P(&#x221D;*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
-[9. Example : P(&#x221D;*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
+[6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
+[7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
+[8. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
+[9. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
 
 <A NAME="Features"></A>
 ### Features
@@ -191,7 +191,7 @@ Algebra(3,0,1).inline(function(){
 })();
 ```
 Here are some more examples showing you the power and readability of this
-API in C and &#x221D;3. 
+API in C and R3. 
 
 ```javascript
 Complex.inline(function(){
@@ -208,7 +208,7 @@ R3.inline(function(){
 })();
 ```
 <A NAME="C"></A>
-### Example : &#x221D;<sub>0,1</sub> Complex Numbers Mandelbrot
+### Example : R<sub>0,1</sub> Complex Numbers Mandelbrot
 
 In this example we use the smallest Geometric Algebra that cannonicaly
 embeds the Complex numbers. We graph a two dimensional function where
@@ -217,7 +217,7 @@ converge to infinity (well .. to more than two ;) ).
 
 This famous equation is known as the Mandelbrot set. In the following piece
 of javascript, z and c are complex numbers. The imaginary unit _i_ is
-written **_e<sub>1</sub>_** as the first basis vector of &#x221D;(0,1) squares to -1.  
+written **_e<sub>1</sub>_** as the first basis vector of R(0,1) squares to -1.  
 
 ```javascript
 var Complex = Algebra(0,1);
@@ -234,9 +234,9 @@ document.body.appendChild(canvas);
 <CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
 
 <A NAME="R3"></A>
-### Example : &#x221D;<sub>3</sub> Color Space Hue Rotor
+### Example : R<sub>3</sub> Color Space Hue Rotor
 
-This example uses three dimensional vector space &#x221D;<sub>3</sub> which is the smallest GA
+This example uses three dimensional vector space R<sub>3</sub> which is the smallest GA
 that cannonicaly embeds the quaternions. Because of our order choice of
 basis blades (i.e. **e<sub>13</sub>** instead of **e<sub>31</sub>**), the
 **e<sub>13</sub>** basis bivector is negated
@@ -261,7 +261,7 @@ document.body.appendChild(canvas);
 <A NAME="P2"></A>
 ### Example : P(R*<sub>2,0,1</sub>) Projective 2D
 
-This example uses projective 2D. (degenerate signature &#x221D;*2,0,1). (Dual ..
+This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
 i.e. points are higher grade than lines). (Ganja.js can handle degenerate
 metrics). Points are constructed by adding in E0, and the join is the dual of the
 wedge of the duals. (meet is just wedge). We construct lines from points
@@ -272,7 +272,7 @@ We've also used a custom ordering of the basis blades, and used
 the convention of Charles Gunn (refer to his publications for more information
 on projective geometric algebra). 
 
-We start by creating an &#x221D;<sub>2,0,1</sub> Clifford Algebra with given basis
+We start by creating an R<sub>2,0,1</sub> Clifford Algebra with given basis
 names. (Ganja.js will handle duality and inner product correctly even for degenerate
 metrics.)
 
@@ -370,7 +370,7 @@ b rotated and translated : [1.7071067811865472, 2.7071067811865475]
 ### Example : P(R*<sub>3,0,1</sub>) Projective 3D
 
 This example implements the table on page 15 of [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf). 
-We apply the same strategy from above and start from a Clifford Algebra in &#x221D;<sub>3,0,1</sub>. 
+We apply the same strategy from above and start from a Clifford Algebra in R<sub>3,0,1</sub>. 
 
 ```javascript
 var P3 = Algebra({
