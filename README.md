@@ -62,7 +62,7 @@ To use it, first include the ganja.js script.
 <A NAME="Started"></A>
 ### Create your algebra class.
 
-To create an Algebra, call the *Algebra* function specifying the metric
+To create an Algebra, call the *_Algebra_* function specifying the metric
 signature (positive,negative,zero). This function will generate an ES6 class 
 implementing the graded clifford algebra with the given signature. 
 
@@ -88,14 +88,14 @@ Object Oriented and functional syntax on the other hand will probably feel
 more familiar to engineers and programmers.  
 
 After creating your algebra you can view its properties (metric, Cayley
-table, basis names, etc) in the console with the describe function. 
+table, basis names, etc) in the console with the *_describe_* function. 
 
 ```javascript
 Complex.describe();
 ```
-To use the inline syntax call the _inline_ function passing in a function
+To use the inline syntax call the *_inline_* function passing in a function
 object, for the AsciiMath syntax, you pass in a string. In both cases the
-_inline_ will return a function object. (where e-notation and operators are resolved) 
+return value will be a function. (where e-notation and operators are resolved) 
 
 ```javascript
 // Inline javascript syntax : 
@@ -184,8 +184,8 @@ The entire example above could be written shorter :
 ```javascript
   Algebra(0,1).inline(function(){ console.log((3+2e1)*(1+4e1)); })();
 ```
-In the example above the imaginary unit i is the first basis vector and
-written in scientific notation as 1e1 (to represent e<sub>1</sub>). Ganja.js
+Here the imaginary unit *_i_* is the first basis vector and
+written in scientific notation as *1e1* (to represent e<sub>1</sub>). Ganja.js
 overloads the scientific notation so you can directly specify basis blades 
 **e<sub>1</sub>**, **e<sub>2</sub>**, **e<sub>12</sub>**, **e<sub>235</sub>**, etc as : 
 
@@ -219,7 +219,7 @@ R3.inline(function(){
 })();
 ```
 <A NAME="C"></A>
-### Example : Mandlebrot
+### Example : Complex number *R<sub>0,1</sub>* Mandlebrot
 
 In this example we use the smallest Geometric Algebra that cannonicaly
 embeds the Complex numbers. We graph a two dimensional function where
@@ -245,7 +245,7 @@ document.body.appendChild(canvas);
 <CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
 
 <A NAME="R3"></A>
-### Example Hue Rotor
+### Example 3D Vector Space *R<sub>3</sub>* Hue Rotor
 
 This example uses three dimensional vector space R<sub>3</sub> which is the smallest GA
 that cannonicaly embeds the quaternions. Because of our order choice of
@@ -270,7 +270,7 @@ document.body.appendChild(canvas);
 <CENTER><IMG SRC="ganja_hue.png"></CENTER>
 
 <A NAME="P2"></A>
-### Example Projective 2D
+### Example Projective 2D P(R*<sub>2,0,1</sub>)
 
 This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
 i.e. points are higher grade than lines). (Ganja.js can handle degenerate
@@ -379,7 +379,7 @@ b rotated and translated : [1.7071067811865472, 2.7071067811865475]
 ```
 
 <A NAME="P3"></A>
-### Example Projective 3D
+### Example Projective 3D P(R*<sub>3,0,1</sub>)
 
 This example implements the table on page 15 of [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf). 
 We apply the same strategy from above and start from a Clifford Algebra in R<sub>3,0,1</sub>. 
