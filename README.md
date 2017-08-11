@@ -15,9 +15,9 @@ overloading and algebraic constants.
 metric contraction inner product, a Poincare duality operator and the main
 involutions and automorphisms.)
 
-(Technically, ganja.js is a code generator producing class that reificate algebraic literals 
+(Technically, ganja.js is a code generator producing classes that reificate algebraic literals 
 and expressions by using reflection, a built-in tokenizer and a simple AST translator to 
-rewrite functions containing algebraic expressions and literals.)
+rewrite functions containing algebraic constructs to their procedural counterparts.)
 
 ### Contents
 
