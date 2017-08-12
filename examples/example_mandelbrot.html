@@ -1,0 +1,18 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY>
+  <SCRIPT>
+
+    var Complex = Algebra(0,1);
+
+    var canvas = Complex.graph(function(x,y){
+      var n=110, z=0e1, c=x*1.75-1+y*1e1;
+      while (z < 2 && n--) z=z**2+c;
+      return (n/100);
+    });
+
+    document.body.appendChild(canvas);
+
+  </SCRIPT>
+</BODY>

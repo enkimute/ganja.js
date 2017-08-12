@@ -1,0 +1,17 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY>
+  <SCRIPT>
+
+    var R3 = Algebra(3);
+
+    var canvas = R3.graph(function(x,y){
+      var c=1e1, rot=Math.cos(x*2) + Math.sin(x*2)*((1e12+1e23-1e13).Normalized);
+      return (rot*c*~rot).Vector;
+    });
+
+    document.body.appendChild(canvas);
+
+  </SCRIPT>
+</BODY>

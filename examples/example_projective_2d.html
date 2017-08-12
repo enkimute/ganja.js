@@ -1,0 +1,35 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY>
+  <SCRIPT>
+
+    var P2 = Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).inline(function(){ 
+      this.point           = (X,Y)=>1e12+X*1e20+Y*1e01;
+      this.join            = (x,y)=>!(!x^!y);                               // union
+      this.project         = (p,l)=>(p<<l)*l;                               // project p onto l
+      this.parallel        = (p,l)=>(p<<l)*p;                               // line parallel to l and through p.
+      this.ortho           = (p,l)=>p<<l;                                   // line ortho to l and through p.
+      this.rotor           = (a,p)=>Math.cos(a*0.5)+Math.sin(a*0.5)*p;      // rotor a.
+      this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);                  // translator x,y
+      return this;
+    })();
+
+
+    document.body.appendChild(P2.graph(P2.inline(function(){ 
+       var O=P2.point(-1,-1), X=P2.point(1,-1), Y=P2.point(-1,1),z=P2.join(Y,X),o=-1*P2.ortho(O,z),rot=this.rotor(0.3,O);
+       return {
+         O,X,Y,
+         "O˅X"           : P2.join(O,X),
+         "O˅Y"           : P2.join(Y,O),
+         "z=X˅Y"         : z,
+         "proj(O,z)"     : P2.project(O,z),
+         "o=ortho(O,z)"  : o,
+         "rot*o*~rot"    : rot*o*~rot,
+         "rot*X*~rot"    : rot*X*~rot,
+         "parallel(O,z)" : P2.parallel(O,z)
+       }
+    })()));
+
+  </SCRIPT>
+</BODY>
