@@ -43,7 +43,7 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 * geometric, inner (contraction), outer product
 * conjugate, reverse, involute, dual (Poincare), negative
 * 4 API's (inline, asciimath, object oriented, functional)
-* Easy graph function for 1D and 2D functions.
+* Easy graph function for 1D and 2D functions and Projective 2D elements.
 
 To use it, first include the ganja.js script.
 ```html
