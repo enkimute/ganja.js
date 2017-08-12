@@ -297,7 +297,7 @@ P2.inline(function(){
   this.project         = (p,l)=>(p<<l)*l;                               // project p onto l
   this.parallel        = (p,l)=>(p<<l)*p;                               // line parallel to l and through p.
   this.ortho           = (p,l)=>p<<l;                                   // line ortho to l and through p.
-  this.rotor           = (a)=>Math.cos(a*0.5)+Math.sin(a*0.5)*1e12;     // rotor a.
+  this.rotor           = (a,p)=>Math.cos(a*0.5)+Math.sin(a*0.5)*p;      // rotor a around p
   this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);                  // translator x,y
 })();
 ```
