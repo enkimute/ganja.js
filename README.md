@@ -309,7 +309,8 @@ P2.inline(function(){
 
 ```javascript
 document.body.appendChild(P2.graph(P2.inline(function(){ 
-   var O=P2.point(-1,-1), X=P2.point(1,-1), Y=P2.point(-1,1),z=P2.join(Y,X),o=-1*P2.ortho(O,z),rot=this.rotor(0.3,O);
+   var O=P2.point(-1,-1), X=P2.point(1,-1), Y=P2.point(-1,1),
+       z=P2.join(Y,X), o=-1*P2.ortho(O,z), rot=this.rotor(0.3,O);
    return {
      O,X,Y,
      "O˅X"           : P2.join(O,X),
