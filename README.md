@@ -301,72 +301,33 @@ P2.inline(function(){
   this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);                  // translator x,y
 })();
 ```
+
+
+
+
 -We can now use our 2D Projective Algebra. 
 
 ```javascript
-P2.inline(x=>{
-  // define 4 points, and their 6 connecting lines.
-  var a=P2.point(0,0), b=P2.point(0,1), c=P2.point(1,0), d=P2.point(1,1);
-  var ab=P2.join(a,b), ac=P2.join(a,c), ad=P2.join(a,d), bc=P2.join(b,c), bd=P2.join(b,d), cd=P2.join(c,d);
-
-  // output points
-  console.log('points : ',[a,b,c,d].map(x=>P2.to_point(x)).join(' and '));   
-
-  // output distances.
-  console.log('a to d :',P2.dist_points(a,d));
-  console.log('ad to c :',P2.dist_point_line(ad,c));
-  console.log('ab to c :',P2.dist_point_line(ab,c));
-  console.log('ad meet bc to c :',P2.dist_points(P2.meet(ad,bc),c));
-
-  // output intersections
-  console.log('ad intersect bc :', P2.to_point(P2.meet(ad,bc)));
-  console.log('ab intersect cd :', P2.to_point(P2.meet(ab,cd)));
-  console.log('ac intersect bd :', P2.to_point(P2.meet(ac,bd)));
-
-  // output angles.
-  console.log('angle ab ad :',P2.angle_lines(ab,ad));
-  console.log('angle ab cd :',P2.angle_lines(ab,cd));
-  console.log('angle ad bc :',P2.angle_lines(ad,bc));
-
-  // project, ortho, parallel 
-  console.log('project a onto bc :', P2.to_point(P2.project(a,bc)));
-  console.log('line through d, parallel to bc :', P2.to_line(P2.parallel(d,bc)));
-  console.log('line through d, orthogonal to bc :',P2.to_line(P2.ortho(d,bc)));
-
-  // rotate, translate 
-  var rot = P2.rotor(Math.PI/4);
-  console.log('b rotated pi/4 :',P2.to_point(rot*b*~rot));
-  var tran = P2.translator(1,2);
-  console.log('b translated 1,2 :',P2.to_point(b),'->',P2.to_point(tran*b*~tran));
-  var combined = tran*rot;
-  console.log('b rotated and translated :',P2.to_point(combined*b*~combined));
-})();
+document.body.appendChild(P2.graph(P2.inline(function(){ 
+   var O=P2.point(-1,-1), X=P2.point(1,-1), Y=P2.point(-1,1),z=P2.join(Y,X),o=-1*P2.ortho(O,z),rot=this.rotor(0.3,O);
+   return {
+     O,X,Y,
+     "O˅X"           : P2.join(O,X),
+     "O˅Y"           : P2.join(Y,O),
+     "z=X˅Y"         : z,
+     "proj(O,z)"     : P2.project(O,z),
+     "o=ortho(O,z)"  : o,
+     "rot*o*~rot"    : rot*o*~rot,
+     "rot*X*~rot"    : rot*X*~rot,
+     "parallel(O,z)" : P2.parallel(O,z)
+   }
+})()));
 ```
 
 This example outputs :
 
-```
-points :  0,0 and 1,0 and 0,1 and 1,1
+<svg viewBox="-2 -2 4 4" style="width:512px; height:512px; background-color:#eee"><circle cx="-1" cy="-1" r="0.02" fill="green"></circle><text x="-1.1" y="-1.05" font-family="Verdana" font-size="0.1">O</text>,<circle cx="1" cy="-1" r="0.02" fill="green"></circle><text x="0.9" y="-1.05" font-family="Verdana" font-size="0.1">X</text>,<circle cx="-1" cy="1" r="0.02" fill="green"></circle><text x="-1.1" y="0.95" font-family="Verdana" font-size="0.1">Y</text>,<line x1="-10" y1="-1" x2="10" y2="-1" stroke-width="0.005" stroke="#888" transform="rotate(0,0,0)"></line><text x="0.5" y="-1.05" font-family="Verdana" font-size="0.1" transform="rotate(0,0,0)">O˅X</text>,<line x1="-10" y1="-1" x2="10" y2="-1" stroke-width="0.005" stroke="#888" transform="rotate(-90,0,0)"></line><text x="0.5" y="-1.05" font-family="Verdana" font-size="0.1" transform="rotate(-90,0,0)">O˅Y</text>,<line x1="-10" y1="0" x2="10" y2="0" stroke-width="0.005" stroke="#888" transform="rotate(-45,0,0)"></line><text x="0.5" y="-0.05" font-family="Verdana" font-size="0.1" transform="rotate(-45,0,0)">z=X˅Y</text>,<circle cx="0" cy="0" r="0.02" fill="green"></circle><text x="-0.1" y="-0.05" font-family="Verdana" font-size="0.1">proj(O,z)</text>,<line x1="-10" y1="0" x2="10" y2="0" stroke-width="0.005" stroke="#888" transform="rotate(45,0,0)"></line><text x="0.5" y="-0.05" font-family="Verdana" font-size="0.1" transform="rotate(45,0,0)">o=ortho(O,z)</text>,<line x1="-10" y1="-0.4179286842157663" x2="10" y2="-0.4179286842157663" stroke-width="0.005" stroke="#888" transform="rotate(27.8112661460753,0,0)"></line><text x="0.5" y="-0.4679286842157663" font-family="Verdana" font-size="0.1" transform="rotate(27.8112661460753,0,0)">rot*o*~rot</text>,<circle cx="0.910672978251212" cy="-1.5910404133226794" r="0.02" fill="green"></circle><text x="0.810672978251212" y="-1.6410404133226795" font-family="Verdana" font-size="0.1">rot*X*~rot</text>,<line x1="-10" y1="-1.414213562373095" x2="10" y2="-1.414213562373095" stroke-width="0.005" stroke="#888" transform="rotate(-45,0,0)"></line><text x="0.5" y="-1.464213562373095" font-family="Verdana" font-size="0.1" transform="rotate(-45,0,0)">parallel(O,z)</text></svg>
 
-a to d : 1.4142135623730951
-ad to c : -0.7071067811865475
-ab to c : -1
-ad meet bc to c : 0.7071067811865476
-
-ad intersect bc : [0.5, 0.5]
-ab intersect cd : [Infinity, 0]
-ac intersect bd : [0, -Infinity]
-
-angle ab ad : 0.7071067811865475
-angle ab cd : 1
-angle ad bc : 0
-
-line through d, parallel to bc : 1x + 1y + -2
-line through d, orthogonal to bc : 1x + -1y + 0
-b rotated pi/4 : [0.7071067811865475, 0.7071067811865476]
-b translated 1,2 : [1, 0] -> [2, 2]
-b rotated and translated : [1.7071067811865472, 2.7071067811865475]
-```
 <A NAME="P3"></A>
 ### Example : P(R*<sub>3,0,1</sub>) Projective 3D
 
