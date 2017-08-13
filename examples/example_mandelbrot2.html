@@ -1,0 +1,21 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY>
+  <SCRIPT>
+  /** In quaternion space H, we calculate the mandelbrot set and use the
+    * iteration count for colorisation.
+    */
+
+    document.body.appendChild(Algebra({p:3,basis:['1','e12','e13','e23']}).graph(function(x,y){
+    // Calculate iteration count for mandelbrot.
+      var n=40, z=0e12, c=x*1.75-1+y*1e12;
+      while (z < 2 && n--) z=z**2+c;
+    // Use the iteration count to rotate the color red in the hue plane  
+      var red=1e12, rot=Math.cos(n/20) + Math.sin(n/20)*(0.578e12+0.578e13+0.578e23);
+      return (rot*red*~rot).slice(1);
+    }));
+
+
+  </SCRIPT>
+</BODY>
