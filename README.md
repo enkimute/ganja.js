@@ -29,8 +29,9 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 [5. Inline operators and Algebraic Literals](#inline)<BR>
 [6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
 [7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
-[8. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
-[9. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
+[8. Example : R+<sub>3</sub> Quaternions](#H)<BR>
+[9. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
+[10. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
 
 <A NAME="Features"></A>
 ### Features
@@ -281,7 +282,7 @@ document.body.appendChild(Algebra({p:3,basis:['1','e12','e13','e23']}).graph(fun
 ```
 This example outputs : 
 
-<CENTER><IMG SRC="images/ganja_mandlebrot2.png"></CENTER>
+<CENTER><IMG SRC="images/ganja_mandelbrot2.png"></CENTER>
 
 <A NAME="P2"></A>
 ### Example : P(R*<sub>2,0,1</sub>) Projective 2D
