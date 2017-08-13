@@ -330,24 +330,24 @@ We can now use our 2D Projective Algebra. We'll use the graph function to
 visualize some algebraic objects (i.e. lines and points).
 
 ```javascript
-    P2.inline(function(){ 
-       var O=P2.point(-1,-1), X=P2.point(1,-1), Y=P2.point(-1,1),
-           z=P2.join(Y,X),o=-1*P2.ortho(O,z),rot=this.rotor(0.3,O);
-       document.body.appendChild(this.graph({
-         O,X,Y,
-         "color1"        : 0xff0000,
-         "O˅X"           : P2.join(O,X),
-         "O˅Y"           : P2.join(Y,O),
-         "z=X˅Y"         : z,
-         "color2"        : 0x008800,
-         "o=ortho(O,z)"  : o,
-         "parallel(O,z)" : P2.parallel(O,z),
-         "rot*o*~rot"    : rot*o*~rot,
-         "color3"        : 0x8888ff,
-         "proj(O,z)"     : P2.project(O,z),
-         "rot*X*~rot"    : rot*X*~rot,
-       }))
-    })();
+P2.inline(function(){ 
+   var O=P2.point(-1,-1), X=P2.point(1,-1), Y=P2.point(-1,1),
+       z=P2.join(Y,X),o=-1*P2.ortho(O,z),rot=this.rotor(0.3,O);
+   document.body.appendChild(this.graph({
+     O,X,Y,
+     "color1"        : 0xff0000,
+     "O˅X"           : P2.join(O,X),
+     "O˅Y"           : P2.join(Y,O),
+     "z=X˅Y"         : z,
+     "color2"        : 0x008800,
+     "o=ortho(O,z)"  : o,
+     "parallel(O,z)" : P2.parallel(O,z),
+     "rot*o*~rot"    : rot*o*~rot,
+     "color3"        : 0x8888ff,
+     "proj(O,z)"     : P2.project(O,z),
+     "rot*X*~rot"    : rot*X*~rot,
+   }))
+})();
 ```
 
 This example outputs :
