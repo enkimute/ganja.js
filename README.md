@@ -267,7 +267,7 @@ We'll combine the two examples above and graph a colorised Mandelbrot
 fractal. We'll use the minimal required algebra for this which is the
 even subalgebra of R<SUB>3</SUB> known as H - the Quaternions.
 
-The elements in this example will have 4 coefficients (scalare,
+The elements in this example will have 4 coefficients (scalar,
 e<Sub>12</sub>, e<sub>13</sub>, e<sub>23</sub>)
 
 ```javascript
