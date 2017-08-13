@@ -349,7 +349,7 @@ document.body.appendChild(P2.graph(P2.inline(function(){
 
 This example outputs :
 
-<CENTER><IMG SRC="images/ganja_p2.jpg"></CENTER>
+<CENTER><IMG WIDTH=512 HEIGHT=512 SRC="images/ganja_p2.jpg"></CENTER>
 
 <A NAME="P3"></A>
 ### Example : P(R*<sub>3,0,1</sub>) Projective 3D
