@@ -259,6 +259,30 @@ document.body.appendChild(canvas);
 ```
 <CENTER><IMG SRC="images/ganja_hue.png"></CENTER>
 
+<A NAME="H"></A>
+### Example : R+<sub>3</sub> Quaternions
+
+We'll combine the two examples above and graph a colorised mandlebrot
+fractal. We'll use the minimal required algebra for this which is the
+even subalgebra of R<SUB>3</SUB> known as H - the Quaternions.
+
+The elements in this example will have 4 coefficients (scalare,
+e<Sub>12</sub>, e<sub>13</sub>, e<sub>23</sub>)
+
+```javascript
+document.body.appendChild(Algebra({p:3,basis:['1','e12','e13','e23']}).graph(function(x,y){
+// Calculate iteration count for mandelbrot.
+  var n=40, z=0e12, c=x*1.75-1+y*1e12;
+  while (z < 2 && n--) z=z**2+c;
+// Use the iteration count to rotate the color red in the hue plane  
+  var red=1e12, rot=Math.cos(n/20) + Math.sin(n/20)*(0.578e12+0.578e13+0.578e23);
+  return (rot*red*~rot).slice(1);
+}));
+```
+This example outputs : 
+
+<CENTER><IMG SRC="images/ganja_mandlebrot2.png"></CENTER>
+
 <A NAME="P2"></A>
 ### Example : P(R*<sub>2,0,1</sub>) Projective 2D
 
@@ -301,11 +325,8 @@ P2.inline(function(){
   this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);                  // translator x,y
 })();
 ```
-
-
-
-
--We can now use our 2D Projective Algebra. 
+We can now use our 2D Projective Algebra. We'll use the graph function to
+visualize some algebraic objects (i.e. lines and points).
 
 ```javascript
 document.body.appendChild(P2.graph(P2.inline(function(){ 
