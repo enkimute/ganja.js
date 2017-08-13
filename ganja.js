@@ -91,7 +91,7 @@
       static inline(intxt) {
         var txt = (intxt instanceof Function)?intxt.toString():`function(){return (${intxt})}`;
         var tok = [], res, t, tokens = [/^[\s\uFFFF]|^[\u000A\u000D\u2028\u2029]|^\/\/[^\n]*\n|^\/\*[\s\S]*?\*\//g,                     // 0: whitespace/comments
-          /^\".*?[^\\]\"|^\'.*?[^\\]\'|^\`[\s\S]*?[^\\]\`/g,                                                                            // 1: literal strings 
+          /^\"\"|^\'\'|^\".*?[^\\]\"|^\'.*?[^\\]\'|^\`[\s\S]*?[^\\]\`/g,                                                                // 1: literal strings 
           /^\d+[.]{0,1}\d*[eEi][\+\-_]{0,1}\d*|^\.\d+[eEi][\+\-_]{0,1}\d*|^e_\d*/g,                                                     // 2: literal numbers in scientific notation (with small hack for i and e_ asciimath)
           /^0x\d+|^\d+[.]{0,1}\d*|^\.\d+|^\(\/.*[^\\]\/\)/g,                                                                            // 3: literal hex, nonsci numbers and regex (surround regex with extra brackets!)
           /^(>>>=|===|!==|>>>|<<=|>>=|=>|[<>\+\-\*%&|^\/!\=]=|\*\*|\+\+|\-\-|<<|>>|\&\&|\^\^|^[{}()\[\];.,<>\+\-\*%|&^!~?:=\/]{1})/g,   // 4: punctuator
