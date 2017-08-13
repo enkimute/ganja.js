@@ -263,7 +263,7 @@ document.body.appendChild(canvas);
 <A NAME="H"></A>
 ### Example : R+<sub>3</sub> Quaternions
 
-We'll combine the two examples above and graph a colorised mandlebrot
+We'll combine the two examples above and graph a colorised Mandelbrot
 fractal. We'll use the minimal required algebra for this which is the
 even subalgebra of R<SUB>3</SUB> known as H - the Quaternions.
 
