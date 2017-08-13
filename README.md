@@ -29,7 +29,7 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 [5. Inline operators and Algebraic Literals](#inline)<BR>
 [6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
 [7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
-[8. Example : R+<sub>3</sub> Quaternions](#H)<BR>
+[8. Example : R<SUP>+</SUP><sub>3</sub> Quaternions](#H)<BR>
 [9. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
 [10. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
 
@@ -261,7 +261,7 @@ document.body.appendChild(canvas);
 <CENTER><IMG SRC="images/ganja_hue.png"></CENTER>
 
 <A NAME="H"></A>
-### Example : R+<sub>3</sub> Quaternions
+### Example : R<SUP>+</SUP><sub>3</sub> Quaternions
 
 We'll combine the two examples above and graph a colorised Mandelbrot
 fractal. We'll use the minimal required algebra for this which is the
