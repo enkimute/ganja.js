@@ -3,7 +3,7 @@
 **G**eometric **A**lgebra - **N**ot **J**ust **A**lgebra
 
 <DIV STYLE="width:100%">
-<CENTER><IMG SRC="ganja_thumb.jpg" WiDTH=100%></CENTER>
+<CENTER><IMG SRC="images/ganja_thumb.jpg" WiDTH=100%></CENTER>
 </DIV>
 
 Ganja.js is a Geometric Algebra code generator for javascript. It generates
@@ -232,7 +232,7 @@ var canvas = Complex.graph(function(x,y){
 document.body.appendChild(canvas);
 ```
 
-<CENTER><IMG SRC="ganja_mandelbrot.png"></CENTER>
+<CENTER><IMG SRC="images/ganja_mandelbrot.png"></CENTER>
 
 <A NAME="R3"></A>
 ### Example : R<sub>3</sub> Color Space Hue Rotor
@@ -257,7 +257,7 @@ var canvas = R3.graph(function(x,y){
 
 document.body.appendChild(canvas);
 ```
-<CENTER><IMG SRC="ganja_hue.png"></CENTER>
+<CENTER><IMG SRC="images/ganja_hue.png"></CENTER>
 
 <A NAME="P2"></A>
 ### Example : P(R*<sub>2,0,1</sub>) Projective 2D
@@ -327,7 +327,7 @@ document.body.appendChild(P2.graph(P2.inline(function(){
 
 This example outputs :
 
-<CENTER><IMG SRC="ganja_p2.jpg"></CENTER>
+<CENTER><IMG SRC="images/ganja_p2.jpg"></CENTER>
 
 <A NAME="P3"></A>
 ### Example : P(R*<sub>3,0,1</sub>) Projective 3D
