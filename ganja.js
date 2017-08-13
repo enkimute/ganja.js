@@ -82,7 +82,19 @@
       static describe() { console.log(`Basis\n${basis}\nRemap${JSON.stringify(brm)}\nDual\n${drm}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
       toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
     // Parse expressions, translate functions and render graphs.
-      static graph(f,cvs,ww,hh) { if (!(f instanceof Function)) return new DOMParser().parseFromString(`<SVG viewBox="-2 -2 4 4" style="width:512px; height:512px; background-color:#eee">${Object.keys(f).map(oi=>{ var o=f[oi].Normalized; return (o.Blade(1).Length>0.001?`<LINE x1=-10 y1=${-o[1]} x2=10 y2=${-o[1]} stroke-width="0.005" stroke="#888" transform="rotate(${-Math.atan2(o[2],o[3])/Math.PI*180},0,0)"/><text x="0.5" y="${-o[1]-0.05}" font-family="Verdana" font-size="0.1" transform="rotate(${(-Math.atan2(o[2],o[3])/Math.PI*180)},0,0)">${oi}</text>`:`<CIRCLE cx="${o.e20/o.e12}" cy="${o.e01/o.e12}" r="0.02" fill="green"/><text x="${o.e20/o.e12-0.1}" y="${o.e01/o.e12-0.05}" font-family="Verdana" font-size="0.1">${oi}</text>`)}).join()}`,'text/html').body.firstChild;
+      static graph(f,cvs,ww,hh) {  
+      // p2d SVG points/lines/rotations/translations/labels .. 
+        if (!(f instanceof Function)) { var lx=0,ly=0,lr=0,color='';
+          if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k]));
+          return new DOMParser().parseFromString(`<SVG viewBox="-2 -2 4 4" style="width:512px; height:512px; background-color:#eee">
+           ${f.map(o=>{ 
+             if (typeof o =='string') { return `<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" fill="${color||'#333'}" transform="rotate(${lr},0,0)">${o}</text>`; }
+             if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; }o=o.Normalized; var oi='test';
+             if (o.Blade(2).Length>0.001) { lx=o.e20/o.e12; ly=o.e01/o.e12; lr=0;  var res=`<CIRCLE cx="${lx}" cy="${ly}" r="0.02" fill="${color||'green'}"/>`; ly-=0.05; lx-=0.1; return res; }
+             if (o.Blade(1).Length>0.001) { lx=0.5; ly=-o[1]; lr=-Math.atan2(o[2],o[3])/Math.PI*180; var res=`<LINE x1=-10 y1=${ly} x2=10 y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},0,0)"/>`; ly-=0.05; return res; }
+            }).join()}`,'text/html').body.firstChild;
+        }  
+      // 1d and 2d functions  
         if (cvs!==false) f=this.inline(f); cvs=cvs||document.createElement('canvas'); if(ww)cvs.width=ww; if(hh)cvs.height=hh; var w=cvs.width,h=cvs.height,context=cvs.getContext('2d'), data=context.getImageData(0,0,w,h);
         if (f.length==2) for (var px=0; px<w; px++) for (var py=0; py<h; py++) { var res=f(px/w*2-1, py/h*2-1); res=res.buffer?[].slice.call(res):res.slice?res:[res,res,res]; data.data.set(res.map(x=>x*255).concat([255]),py*w*4+px*4); }
         else if (f.length==1) for (var px=0; px<w; px++) { var res=f(px/w*2-1); res=Math.round(Math.min(h-1,Math.max(0,(res/2+0.5)*h))); data.data.set([0,0,0,255],res*w*4+px*4); }
