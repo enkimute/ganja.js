@@ -78,6 +78,7 @@
       static gt(a,b)        { if (!(a instanceof Element || b instanceof Element)) return a>b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>b; }
       static lte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a<=b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<=b; }
       static gte(a,b)       { if (!(a instanceof Element || b instanceof Element)) return a>=b; a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>=b; }
+      static sw(a,b)        { return a.Mul(b).Mul(a.Conjugate); }
     // Debug  
       static describe() { console.log(`Basis\n${basis}\nRemap${JSON.stringify(brm)}\nDual\n${drm}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
       toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
@@ -88,7 +89,7 @@
           if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k]));
           function build(f) { color='#444'; return new DOMParser().parseFromString(`<SVG viewBox="-2 -2 4 4" style="width:512px; height:512px; background-color:#eee; user-select:none">
            ${f.map((o,oidx)=>{  if (o instanceof Function) o=o(); if (o===undefined) return;
-             if (o instanceof Array)  { return `<POLYGON STYLE="fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`; }
+             if (o instanceof Array)  { return o.length>2?`<POLYGON STYLE="fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${((drm[1]==6)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${o[0][drm[3]]/o[0][drm[1]]} x2=${((drm[1]==6)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${o[1][drm[3]]/o[1][drm[1]]} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
              if (typeof o =='string') { return (o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},0,0)">${o}</text>`; }
              if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; }o=o.Normalized; var oi='test';
              if (o.Blade(2).Length>0.001) { lx=o[drm[2]]/o[drm[1]]; if (drm[1]==6) lx*=-1; ly=o[drm[3]]/o[drm[1]]; lr=0;  var res=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; ly-=0.05; lx-=0.1; return res; }
@@ -112,7 +113,7 @@
           /^[A-Za-z0-9_.]*/g]                                                                                                           // 5: identifier
         while (txt.length) for(t in tokens) if(res=txt.match(tokens[t])){ tok.push([t|0,res[0]]); txt=txt.slice(res[0].length); break;} // tokenise
         tok=tok.map(t=>(t[0]==2)?[2,'this.Coeff('+basis.indexOf('e'+(t[1].split(/e_|e|i/)[1]||1))+','+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);   // translate scientific notation into algebra elements.
-        var syntax = (intxt instanceof Function)?[['~','Conjugate',1],['!','Dual',1],['**','Pow',0,1],['*','Mul'],['/','Div'],['^','Wedge'],['<<','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]
+        var syntax = (intxt instanceof Function)?[['~','Conjugate',1],['!','Dual',1],['**','Pow',0,1],['>>>','sw',0,1],['*','Mul'],['/','Div'],['^','Wedge'],['<<','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]
                                                 :[['pi','Math.PI'],['sin','Math.sin'],['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual'],['hat',''],['~','Conjugate',1],['!','Involute',1],['^','Pow',0,1],['**','Mul'],['/','Div'],['^^','Wedge'],['*','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']];
         tok=tok.map(t=>(t[0]!=5)?t:syntax.filter(x=>x[0]==t[1]).length?[5,syntax.filter(x=>x[0]==t[1])[0][1]]:t); // static function translations (mostly for asciimath)                                       
         function translate(tokens) { 
