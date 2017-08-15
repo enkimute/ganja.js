@@ -31,6 +31,7 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 [7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
 [8. Example : R<SUP>+</SUP><sub>3</sub> Quaternions](#H)<BR>
 [9. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
+[9. Example : P(R*<sub>2,0,1</sub>) Desargues's Theorem](#P2B)<BR>
 [10. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
 
 <A NAME="Features"></A>
@@ -353,6 +354,44 @@ P2.inline(function(){
 This example outputs :
 
 <CENTER><IMG WIDTH=512 HEIGHT=512 SRC="images/ganja_p2.jpg"></CENTER>
+
+<A NAME="P2B"></A>
+### Example : P(R*<sub>2,0,1</sub>) Desargues's Theorem
+
+A classic example in projective geometry : [Desargues's Theorem on Wikipedia](https://en.wikipedia.org/wiki/Desargues%27s_theorem).
+
+This example passes an array of render commands to the graph function. The type of the elements in that array determines what graph
+will do (numbers will set the color, algebraic objects are rendered as expected, strings are labels and arrays of points are rendered
+as polygons). Arrow functions will be evaluated every time the user interacts with the graph. 
+
+```javascript
+Algebra(2,0,1).inline(()=>{ 
+  var O=1e12+1.4e02+0.5e01, X=1e12-1e02-1e01, Y=1e12-0.2e02-1.2e01, Z=1e12-0.75e02-0.5e01, x,y,z, YX,yx,YZ,yz,XZ,xz;
+  document.body.appendChild(this.graph([
+  // calculate derived points.
+    ()=>{x=(0.55*O+0.45*X);y=(0.4*O+0.6*Y);z=(0.7*O+0.3*Z)},
+  // Blue lines through triangle vertices  
+    0x4444ff, ()=>!(!O^!X), ()=>!(!O^!Y), ()=>!(!O^!Z),
+  // Grey lines extending triangle edges  
+    0xcccccc, ()=>YZ=!(!Y^!Z), ()=>yz=!(!y^!z), ()=>YZ^yz,
+              ()=>XZ=!(!X^!Z), ()=>xz=!(!x^!z), ()=>XZ^xz,
+              ()=>YX=!(!Y^!X), ()=>yx=!(!y^!x), ()=>YX^yx,
+  // Render the two triangles.            
+    0x76cc82, [X,Y,Z],
+    0xffeb57, ()=>[x,y,z],
+  // Render and label derived points (x,y,z)  
+    0xaaaaaa, ()=>x, "x", ()=>y, "y", ()=>z, "z", 
+  // Render axis of perspectivity  
+    0xff0000, ()=>!(!(XZ^xz)^!(YX^yx)), "Axis of perspectivity",
+  // All the way on top, render the original input points X, Y, Z and O  
+    0x444444, X, "X", Y, "Y", Z, "Z", O, "Center of perspectivity", 
+  ]));
+})();
+```
+
+Please note that these examples are interactive. (not on github)
+
+<IMG WIDTH=512 HEIGHT=512 SRC="images/ganja_p2_desargues.jpg">
 
 <A NAME="P3"></A>
 ### Example : P(R*<sub>3,0,1</sub>) Projective 3D

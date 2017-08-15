@@ -1,0 +1,46 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY STYLE="margin:auto; max-width:1600px">
+  <H1>Projective Euclidean Plane Geometry : Desargues Theorem</H1>
+  <p>
+    From wikipedia : For Perspective triangles, corresponding sides of the triangles, when extended, 
+    meet at points on a line called the axis of perspectivity. The lines which run through corresponding 
+    vertices on the triangles meet at a point called the center of perspectivity. Desargues's theorem 
+    states that the truth of the first condition is necessary and sufficient for the truth of the second.
+  </p>
+  <p>
+    This theorem is 'naturally' dual. The meet of the join of corresponding points is 1 point. The join of the meet of corresponding lines is 1 line. 
+  </P>
+  <BR>
+  Drag the black points (O,X,Y,Z).<BR>
+  <SCRIPT>
+  function sample() {
+    Algebra(2,0,1).inline(()=>{ 
+      var O=1e12+1.4e02+0.5e01, X=1e12-1e02-1e01, Y=1e12-0.2e02-1.2e01, Z=1e12-0.75e02-0.5e01, x,y,z, YX,yx,YZ,yz,XZ,xz;
+      document.body.appendChild(this.graph([
+      // calculate derived points.
+        ()=>{x=(0.55*O+0.45*X);y=(0.4*O+0.6*Y);z=(0.7*O+0.3*Z)},
+      // Blue lines through triangle vertices  
+        0x4444ff, ()=>!(!O^!X), ()=>!(!O^!Y), ()=>!(!O^!Z),
+      // Grey lines extending triangle edges  
+        0xcccccc, ()=>YZ=!(!Y^!Z), ()=>yz=!(!y^!z), ()=>YZ^yz,
+                  ()=>XZ=!(!X^!Z), ()=>xz=!(!x^!z), ()=>XZ^xz,
+                  ()=>YX=!(!Y^!X), ()=>yx=!(!y^!x), ()=>YX^yx,
+      // Render the two triangles.            
+        0x76cc82, [X,Y,Z],
+        0xffeb57, ()=>[x,y,z],
+      // Render and label derived points (x,y,z)  
+        0xaaaaaa, ()=>x, "x", ()=>y, "y", ()=>z, "z", 
+      // Render axis of perspectivity  
+        0xff0000, ()=>!(!(XZ^xz)^!(YX^yx)), "Axis of perspectivity",
+      // All the way on top, render the original input points X, Y, Z and O  
+        0x444444, X, "X", Y, "Y", Z, "Z", O, "Center of perspectivity", 
+      ]));
+    })();
+  }; sample();
+  document.write('<PRE STYLE="display:inline-block; vertical-align:top">',sample.toString().replace(/\</g,'&lt;').replace(/(\b(0x)*[0-9abcdef]+\b)/g,"<FONT COLOR='#44f'>$1</FONT>").replace(/(\/\/.*?\n)/g,"<FONT COLOR='#484'>$1</FONT>").replace(/(\(\)=>|=>|\!|\^|\*|\+|\-)/g,"<FONT COLOR='#A44'>$1</FONT>").replace(/(this|while|for|var|function|const|do\b|repeat|until)/g,"<FONT COLOR='#96F'>$1</FONT>").replace(/(".*?")/g,"<FONT COLOR='red'>$1</FONT>").split('\n').slice(1).reverse().slice(1).reverse().join('\n'));
+  </SCRIPT>
+</PRE>
+  
+</BODY>

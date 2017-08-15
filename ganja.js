@@ -84,15 +84,17 @@
     // Parse expressions, translate functions and render graphs.
       static graph(f,cvs,ww,hh) {  
       // p2d SVG points/lines/rotations/translations/labels .. 
-        if (!(f instanceof Function)) { var lx=0,ly=0,lr=0,color='';
+        if (!(f instanceof Function)) { var lx=0,ly=0,lr=0,color='#444';
           if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k]));
-          return new DOMParser().parseFromString(`<SVG viewBox="-2 -2 4 4" style="width:512px; height:512px; background-color:#eee">
-           ${f.map(o=>{ 
-             if (typeof o =='string') { return `<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" fill="${color||'#333'}" transform="rotate(${lr},0,0)">${o}</text>`; }
+          function build(f) { color='#444'; return new DOMParser().parseFromString(`<SVG viewBox="-2 -2 4 4" style="width:512px; height:512px; background-color:#eee; user-select:none">
+           ${f.map((o,oidx)=>{  if (o instanceof Function) o=o(); if (o===undefined) return;
+             if (o instanceof Array)  { return `<POLYGON STYLE="fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`; }
+             if (typeof o =='string') { return (o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},0,0)">${o}</text>`; }
              if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; }o=o.Normalized; var oi='test';
-             if (o.Blade(2).Length>0.001) { lx=o.e20/o.e12; ly=o.e01/o.e12; lr=0;  var res=`<CIRCLE cx="${lx}" cy="${ly}" r="0.02" fill="${color||'green'}"/>`; ly-=0.05; lx-=0.1; return res; }
-             if (o.Blade(1).Length>0.001) { lx=0.5; ly=-o[1]; lr=-Math.atan2(o[2],o[3])/Math.PI*180; var res=`<LINE x1=-10 y1=${ly} x2=10 y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},0,0)"/>`; ly-=0.05; return res; }
-            }).join()}`,'text/html').body.firstChild;
+             if (o.Blade(2).Length>0.001) { lx=o[drm[2]]/o[drm[1]]; if (drm[1]==6) lx*=-1; ly=o[drm[3]]/o[drm[1]]; lr=0;  var res=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; ly-=0.05; lx-=0.1; return res; }
+             if (o.Blade(1).Length>0.001) { lx=0.5; ly=-o[1]; lr=-Math.atan2(o[2],o[3])/Math.PI*180; var res=`<LINE style="pointer-events:none" x1=-10 y1=${ly} x2=10 y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},0,0)"/>`; ly-=0.05; return res; }
+            }).join()}`,'text/html').body.firstChild; };
+          var res=build(f); res.onmousemove=(e)=>{ if (!res.sel || !e.buttons) return; var x=e.offsetX/128-2,y=e.offsetY/128-2; f[res.sel][drm[2]]=(drm[1]==6)?-x:x; f[res.sel][drm[3]]=y; f[res.sel][drm[1]]=1; res.innerHTML=build(f).innerHTML; }; return res;
         }  
       // 1d and 2d functions  
         if (cvs!==false) f=this.inline(f); cvs=cvs||document.createElement('canvas'); if(ww)cvs.width=ww; if(hh)cvs.height=hh; var w=cvs.width,h=cvs.height,context=cvs.getContext('2d'), data=context.getImageData(0,0,w,h);
