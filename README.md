@@ -174,7 +174,7 @@ overloading and algebraic constants.
 The entire example above could be written shorter :
 
 ```javascript
-  Algebra(0,1).inline(function(){ console.log((3+2e1)*(1+4e1)); })();
+  Algebra(0,1).inline(()=>console.log((3+2e1)*(1+4e1)))();
 ```
 Here the imaginary unit *_i_* is the first basis vector and
 written in scientific notation as *1e1* (to represent e<sub>1</sub>). Ganja.js
