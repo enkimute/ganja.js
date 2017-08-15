@@ -366,7 +366,8 @@ as polygons). Arrow functions will be evaluated every time the user interacts wi
 
 ```javascript
 Algebra(2,0,1).inline(()=>{ 
-  var O=1e12+1.4e02+0.5e01, X=1e12-1e02-1e01, Y=1e12-0.2e02-1.2e01, Z=1e12-0.75e02-0.5e01, x,y,z, YX,yx,YZ,yz,XZ,xz;
+  var O=1e12+1.4e02+0.5e01, X=1e12-1e02-1e01, Y=1e12-0.2e02-1.2e01, Z=1e12-0.75e02-0.5e01, 
+      x,y,z, yx,yz,xz, YX,YZ,XZ;
   document.body.appendChild(this.graph([
   // calculate derived points.
     ()=>{x=(0.55*O+0.45*X);y=(0.4*O+0.6*Y);z=(0.7*O+0.3*Z)},
