@@ -145,6 +145,7 @@ Here's a list of the supported operators in all syntax flavors :
 | x/y      |  x/y      | x.Div(y)        | A.Div(x,y)
 | x^y      |  x^^y     | x.Wedge(y)      | A.Wedge(x,y)
 | x<<y     |  x*y      | x.Dot(y)        | A.Dot(x,y)
+| x>>>y    |  x*y*hat(x) | x.Mul(y).Mul(x.Conjugate) | A.sw(x,y)
 | x-y      |  x-y      | x.Sub(y)        | A.Sub(x,y)
 | x+y      |  x+y      | x.Add(y)        | A.Add(x,y)
 | 1e1      |  1e_1     | new A([0,1])    | A.Vector(1)
