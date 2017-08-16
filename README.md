@@ -234,6 +234,8 @@ var canvas = Complex.graph(function(x,y){
 document.body.appendChild(canvas);
 ```
 
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_mandelbrot.html)
+
 <CENTER><IMG SRC="images/ganja_mandelbrot.png"></CENTER>
 
 <A NAME="R3"></A>
@@ -259,6 +261,9 @@ var canvas = R3.graph(function(x,y){
 
 document.body.appendChild(canvas);
 ```
+
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_hue.html)
+
 <CENTER><IMG SRC="images/ganja_hue.png"></CENTER>
 
 <A NAME="H"></A>
@@ -281,7 +286,7 @@ document.body.appendChild(Algebra({p:3,basis:['1','e12','e13','e23']}).graph(fun
   return (rot*red*~rot).slice(1);
 }));
 ```
-This example outputs : 
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_mandelbrot2.html)
 
 <CENTER><IMG SRC="images/ganja_mandelbrot2.png"></CENTER>
 
@@ -351,12 +356,12 @@ P2.inline(function(){
 })();
 ```
 
-This example outputs :
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_projective_2d.html)
 
 ![ganja p2 example](images/ganja_p2.jpg)
 
 <A NAME="P2B"></A>
-### Example : P(R*<sub>2,0,1</sub>) Desargues's Theorem
+### Example : P(R*<sub>2,0,1</sub>) P2 Desargues's Theorem
 
 A classic example in projective geometry : [Desargues's Theorem on Wikipedia](https://en.wikipedia.org/wiki/Desargues%27s_theorem).
 
@@ -390,9 +395,40 @@ Algebra(2,0,1).inline(()=>{
 })();
 ```
 
-Please note that these examples are interactive. (not on github)
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_desargues.html)
 
 ![desargues image](images/ganja_p2_desargues.jpg)
+
+<A NAME="P2C"></A>
+### Example : P(R*<sub>2,0,1</sub>) P2 Inverse Kinematics
+
+A simple IK chain is solved analytically and expressed elegantly with GA : 
+
+```javascript
+Algebra(2,0,1).inline(()=>{  
+// Define 4 points : T is our target the others form the chain X-Y-Z
+  var X=1e12+1e02, Y=1e12, Z=1e12-1e02, T=1e12-0.5e02;
+// A motor that moves distance d along line l  
+  var M=(l,d)=>1-0.5*d*(1e0^(l.Normalized*1e12));
+// Graph ..  
+  document.body.appendChild(this.graph([
+    ()=>{ 
+    // xt = line from x to t, xtl = half of distance x to t
+      var xt=!(!X^!T), xtl=0.5*Math.min(2,xt.Length);
+    // the new z is x moved along xt  
+      Z.set(M(xt,2*xtl)>>>X); 
+    // the new y is x moved halfway along xt and pythagoras on the ortho axis.  
+      Y.set(M(Y<<xt,(1-xtl**2)**0.5)>>>M(xt,xtl)>>>X);
+    },
+  // Render all points and line segments.  
+    X, "Base", Z, T, "Target", 0x0000FF, Y, [X,Y], [Y,Z]
+  ]));
+})();
+```
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_ik.html)
+
+![Ganja P2 IK](images/ganja_p2_ik.jpg)
+
 
 <A NAME="P3"></A>
 ### Example : P(R*<sub>3,0,1</sub>) Projective 3D
@@ -468,9 +504,4 @@ P3.inline(function(){
   console.log('o rotated PI around x = ',P3.to_point(rot*o*~rot));
 })();
 ```
-
-<DIV>
-  <SCRIPT SRC="ganja.js"></SCRIPT>
-</DIV>
-
 
