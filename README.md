@@ -471,7 +471,7 @@ P3.inline(function(){
 
 <FONT COLOR="white">
 
-<SCRIPT SRC="../ganja.js"></SCRIPT>
+<SCRIPT SRC="ganja.js"></SCRIPT>
 
 </FONT>
 
