@@ -355,7 +355,7 @@ P2.inline(function(){
 
 This example outputs :
 
-<CENTER><IMG WIDTH=512 HEIGHT=512 SRC="images/ganja_p2.jpg"></CENTER>
+![ganja p2 example](images/ganja_p2.jpg)
 
 <A NAME="P2B"></A>
 ### Example : P(R*<sub>2,0,1</sub>) Desargues's Theorem
