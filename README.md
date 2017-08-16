@@ -468,3 +468,11 @@ P3.inline(function(){
   console.log('o rotated PI around x = ',P3.to_point(rot*o*~rot));
 })();
 ```
+
+<FONT COLOR="white">
+
+<SCRIPT SRC="../ganja.js"></SCRIPT>
+
+</FONT>
+
+
