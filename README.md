@@ -3,7 +3,7 @@
 **G**eometric **A**lgebra - **N**ot **J**ust **A**lgebra
 
 <DIV STYLE="width:100%">
-<CENTER><IMG SRC="images/ganja_thumb.jpg" WiDTH=100%></CENTER>
+![title image](images/ganja_thumb.jpg)
 </DIV>
 
 Ganja.js is a Geometric Algebra code generator for javascript. It generates
