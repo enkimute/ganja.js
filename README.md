@@ -2,9 +2,7 @@
 
 **G**eometric **A**lgebra - **N**ot **J**ust **A**lgebra
 
-<DIV STYLE="width:100%">
 ![title image](images/ganja_thumb.jpg)
-</DIV>
 
 Ganja.js is a Geometric Algebra code generator for javascript. It generates
 Clifford algebras and sub-algebras of any signature and implements operator 
