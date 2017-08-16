@@ -29,8 +29,8 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 [7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
 [8. Example : R<SUP>+</SUP><sub>3</sub> Quaternions](#H)<BR>
 [9. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
-[10. Example : P(R*<sub>2,0,1</sub>) Desargues's Theorem](#P2B)<BR>
-[11. Example : P(R*<SUB>2,0,1</sub>) Inverse Kinematics](#P2C)<BR>
+[10. Example : P(R*<sub>2,0,1</sub>) P2 Desargues Theorem](#P2B)<BR>
+[11. Example : P(R*<sub>2,0,1</sub>) P2 Inverse Kinematics](#P2C)<BR>
 [12. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
 
 <A NAME="Features"></A>
