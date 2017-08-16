@@ -392,7 +392,7 @@ Algebra(2,0,1).inline(()=>{
 
 Please note that these examples are interactive. (not on github)
 
-<IMG WIDTH=512 HEIGHT=512 SRC="images/ganja_p2_desargues.jpg">
+![desargues image](images/ganja_p2_desargues.jpg)
 
 <A NAME="P3"></A>
 ### Example : P(R*<sub>3,0,1</sub>) Projective 3D
