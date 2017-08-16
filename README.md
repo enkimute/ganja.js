@@ -469,10 +469,8 @@ P3.inline(function(){
 })();
 ```
 
-<FONT COLOR="white">
-
-<SCRIPT SRC="ganja.js"></SCRIPT>
-
-</FONT>
+<DIV>
+  <SCRIPT SRC="ganja.js"></SCRIPT>
+</DIV>
 
 
