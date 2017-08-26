@@ -35,10 +35,14 @@
         }};
       
       // Evaluate IK, render points and lines, target last (so its on top)
-        document.getElementById('demo3').appendChild(this.graph(
-          [()=>IK(points), points[0], "Base", ()=>(J(points[l-1],points[l]).Length)<0.01?0x0000ff:0xff0000]
-          .concat(points.slice(1,l)).concat(points.map((x,i,a)=>[a[i-1],x]).slice(1,l)).concat([0,points[l],"Target"])
-        ));
+        document.getElementById('demo3').appendChild(this.graph([].concat(
+          ()=>IK(points),                                                 // run solver.
+          points[0], "Base",                                              // render base
+          ()=>(J(points[l-1],points[l]).Length)<0.01?0x0000ff:0xff0000,   // check reached target, set color
+          points.slice(1,l),                                              // render joint points
+          points.map((x,i,a)=>[a[i-1],x]).slice(1,l),                     // render line segments
+          0x000000,points[l],"Target"                                     // render target.
+        )));
         
       })();
     }; sample();
