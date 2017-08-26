@@ -67,37 +67,37 @@
       static nVector(n)  { var res = new Element(); res.set([].slice.call(arguments,1),grade_start[n]); return res; }                                         // Create an nVector of desired grade.
     // Static operators (easier integration with scalars when using inline operator overloading)
       static toEl(x)        { if (x instanceof Function) x=x(); if (x instanceof Array) return new Element(x); if (!(x instanceof Element)) x=Element.Scalar(x); return x; }
-      static Add(a,b,res)   { a=a.call?a():a; b=b.call?b():b; if ((typeof a=='string')||(typeof b=='string')) return a.toString()+b.toString(); if (!(a instanceof Element || b instanceof Element)) return a+b; res=res||new Element(); a=Element.toEl(a); b=Element.toEl(b); for(var i=0;i<res.length;i++)res[i]=a[i]+b[i]; return res; }  
-      static Sub(a,b,res)   { a=a.call?a():a; b=(b&&b.call)?b():b; if (arguments.length==1) return Element.Mul(a,-1); if (!(a instanceof Element || b instanceof Element)) return a-b; res=res||new Element(); a=Element.toEl(a); b=Element.toEl(b); for(var i=0;i<res.length;i++)res[i]=a[i]-b[i]; return res; }
-      static Mul(a,b,res)   { a=a.call?a():a; b=b.call?b():b; var r=a*b; if (!isNaN(r)) return r; a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b,res); }  
-      static Div(a,b,res)   { a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a/b; a=Element.toEl(a);b=Element.toEl(b); return a.Div(b,res); }  
-      static Pow(a,b,res)   { a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a**b; a=Element.toEl(a); if (b==-1) return a.Inverse; if (b==2) return a.Mul(a); throw 'not yet'; }  
-      static Dot(a,b,res)   { a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a*b; a=Element.toEl(a);b=Element.toEl(b); return a.Dot(b,res); }  
-      static Wedge(a,b,res) { a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a*b; a=Element.toEl(a);b=Element.toEl(b); return a.Wedge(b,res); }  
-      static Dual(a)        { if (r) return Element.toEl(a).map((x,i,a)=>a[drm[i]]); return Element.toEl(a).Dual; }; static Involute(a) { return Element.toEl(a).Involute; }; static Reverse(a) { return Element.toEl(a).Reverse; }; static Conjugate(a) { return Element.toEl(a).Conjugate; }
-      static Normalize(a)   { a=a.call?a():a; return a.Normalized; }
-      static lt(a,b)        { a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a<b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<b; }
-      static gt(a,b)        { a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>b; }
-      static lte(a,b)       { a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a<=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<=b; }
-      static gte(a,b)       { a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>=b; }
-      static sw(a,b)        { a=a.call?a():a; b=b.call?b():b; return a.Mul(b).Mul(a.Conjugate); }
+      static Add(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if ((typeof a=='string')||(typeof b=='string')) return a.toString()+b.toString(); if (!(a instanceof Element || b instanceof Element)) return a+b; res=res||new Element(); a=Element.toEl(a); b=Element.toEl(b); for(var i=0;i<res.length;i++)res[i]=a[i]+b[i]; return res; }  
+      static Sub(a,b,res)   {  a=a.call?a():a; b=(b&&b.call)?b():b; if (arguments.length==1) return Element.Mul(a,-1); if (!(a instanceof Element || b instanceof Element)) return a-b; res=res||new Element(); a=Element.toEl(a); b=Element.toEl(b); for(var i=0;i<res.length;i++)res[i]=a[i]-b[i]; return res; }
+      static Mul(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; var r=a*b; if (!isNaN(r)) return r; a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b,res); }  
+      static Div(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a/b; a=Element.toEl(a);b=Element.toEl(b); return a.Div(b,res); }  
+      static Pow(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a**b; a=Element.toEl(a); if (b==-1) return a.Inverse; if (b==2) return a.Mul(a); throw 'not yet'; }  
+      static Dot(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a*b; a=Element.toEl(a);b=Element.toEl(b); return a.Dot(b,res); }  
+      static Wedge(a,b,res) {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a*b; a=Element.toEl(a);b=Element.toEl(b); return a.Wedge(b,res); }  
+      static Dual(a)        {  if (r) return Element.toEl(a).map((x,i,a)=>a[drm[i]]); return Element.toEl(a).Dual; }; static Involute(a) { return Element.toEl(a).Involute; }; static Reverse(a) { return Element.toEl(a).Reverse; }; static Conjugate(a) { return Element.toEl(a).Conjugate; }
+      static Normalize(a)   {  return Element.toEl(a).Normalized; }; static Length(a) {  return Element.toEl(a).Length };
+      static lt(a,b)        {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a<b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<b; }
+      static gt(a,b)        {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>b; }
+      static lte(a,b)       {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a<=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<=b; }
+      static gte(a,b)       {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>=b; }
+      static sw(a,b)        {  a=a.call?a():a; b=b.call?b():b; return a.Mul(b).Mul(a.Conjugate); }
     // Debug  
       static describe() { console.log(`Basis\n${basis}\nRemap${JSON.stringify(brm)}\nDual\n${drm}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
       toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
     // Parse expressions, translate functions and render graphs.
-      static graph(f,cvs,ww,hh) {  
-      // p2d SVG points/lines/rotations/translations/labels .. 
-        if (!(f instanceof Function)) { var lx,ly,lr,color;
+      static graph(f,cvs,ww,hh) { 
+      // p2d SVG points/lines/rotations/translations/labels . 
+        if (!(f instanceof Function)) { var lx,ly,lr,color,res,anim=false;
           if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k]));
           function build(f) { lx=-2;ly=-1.85;lr=0;color='#444'; return new DOMParser().parseFromString(`<SVG viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; user-select:none">
-           ${f.map((o,oidx)=>{  if (o instanceof Function) o=o(); if (o===undefined) return;
-             if (o instanceof Array)  { return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${((drm[1]==6)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${o[0][drm[3]]/o[0][drm[1]]} x2=${((drm[1]==6)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${o[1][drm[3]]/o[1][drm[1]]} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
-             if (typeof o =='string') { var res=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},0,0)">&nbsp;${o}&nbsp;</text>`; ly+=0.1; return res; }
+           ${f.map((o,oidx)=>{  if(o==Element.graph) { anim=true; return requestAnimationFrame(()=>{var r=build(f).innerHTML; if (res) res.innerHTML=r; });} while (o instanceof Function) o=o(); if (o===undefined) return;
+             if (o instanceof Array)  { lx=ly=lr=0; o=o.map((x)=>x.call?x():x); o.forEach((o)=>{lx+=((drm[1]==6)?-1:1)*o[drm[2]]/o[drm[1]];ly+=o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${((drm[1]==6)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${o[0][drm[3]]/o[0][drm[1]]} x2=${((drm[1]==6)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${o[1][drm[3]]/o[1][drm[1]]} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
+             if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},0,0)">&nbsp;${o}&nbsp;</text>`; ly+=0.1; return res2; }
              if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; }o=o.Normalized; var oi='test';
-             if (o.Blade(2).Length>0.001) { lx=o[drm[2]]/o[drm[1]]; if (drm[1]==6) lx*=-1; ly=o[drm[3]]/o[drm[1]]; lr=0;  var res=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; ly-=0.05; lx-=0.1; return res; }
-             if (o.Blade(1).Length>0.001) { lx=0.5; ly=-o[1]; lr=-Math.atan2(o[2],o[3])/Math.PI*180; var res=`<LINE style="pointer-events:none" x1=-10 y1=${ly} x2=10 y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},0,0)"/>`; ly-=0.05; return res; }
+             if (o.Blade(2).Length>0.001) { lx=o[drm[2]]/o[drm[1]]; if (drm[1]==6) lx*=-1; ly=o[drm[3]]/o[drm[1]]; lr=0;  var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; ly-=0.05; lx-=0.1; return res2; }
+             if (o.Blade(1).Length>0.001) { lx=0.5; ly=-o[1]; lr=-Math.atan2(o[2],o[3])/Math.PI*180; var res2=`<LINE style="pointer-events:none" x1=-10 y1=${ly} x2=10 y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},0,0)"/>`; ly-=0.05; return res2; }
             }).join()}`,'text/html').body.firstChild; };
-          var res=build(f); res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return; var x=(e.clientX-res.getBoundingClientRect().left)/(ww/4||128)-2,y=((e.clientY-res.getBoundingClientRect().top)/(hh/4||128)-2)*(hh/ww||1); f[res.sel][drm[2]]=(drm[1]==6)?-x:x; f[res.sel][drm[3]]=y; f[res.sel][drm[1]]=1; res.innerHTML=build(f).innerHTML; }; return res;
+          res=build(f); res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return; var x=(e.clientX-res.getBoundingClientRect().left)/(ww/4||128)-2,y=((e.clientY-res.getBoundingClientRect().top)/(hh/4||128)-2)*(hh/ww||1); f[res.sel][drm[2]]=(drm[1]==6)?-x:x; f[res.sel][drm[3]]=y; f[res.sel][drm[1]]=1; if (!anim) res.innerHTML=build(f).innerHTML; }; return res;
         }  
       // 1d and 2d functions  
         if (cvs!==false) f=this.inline(f); cvs=cvs||document.createElement('canvas'); if(ww)cvs.width=ww; if(hh)cvs.height=hh; var w=cvs.width,h=cvs.height,context=cvs.getContext('2d'), data=context.getImageData(0,0,w,h);
@@ -111,11 +111,11 @@
           /^\"\"|^\'\'|^\".*?[^\\]\"|^\'.*?[^\\]\'|^\`[\s\S]*?[^\\]\`/g,                                                                // 1: literal strings 
           /^\d+[.]{0,1}\d*[eEi][\+\-_]{0,1}\d*|^\.\d+[eEi][\+\-_]{0,1}\d*|^e_\d*/g,                                                     // 2: literal numbers in scientific notation (with small hack for i and e_ asciimath)
           /^0x\d+|^\d+[.]{0,1}\d*|^\.\d+|^\(\/.*[^\\]\/\)/g,                                                                            // 3: literal hex, nonsci numbers and regex (surround regex with extra brackets!)
-          /^(\.Normalized|>>>=|===|!==|>>>|<<=|>>=|=>|[<>\+\-\*%&|^\/!\=]=|\*\*|\+\+|\-\-|<<|>>|\&\&|\^\^|^[{}()\[\];.,<>\+\-\*%|&^!~?:=\/]{1})/g,   // 4: punctuator
+          /^(\.Normalized|\.Length|>>>=|===|!==|>>>|<<=|>>=|=>|[<>\+\-\*%&|^\/!\=]=|\*\*|\+\+|\-\-|<<|>>|\&\&|\^\^|^[{}()\[\];.,<>\+\-\*%|&^!~?:=\/]{1})/g,   // 4: punctuator
           /^[A-Za-z0-9_]*/g]                                                                                                            // 5: identifier
         while (txt.length) for(t in tokens) if(res=txt.match(tokens[t])){ tok.push([t|0,res[0]]); txt=txt.slice(res[0].length); break;} // tokenise
         tok=tok.map(t=>(t[0]==2)?[2,'this.Coeff('+basis.indexOf('e'+(t[1].split(/e_|e|i/)[1]||1))+','+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);   // translate scientific notation into algebra elements.
-        var syntax = (intxt instanceof Function)?[['.Normalized','Normalize',2],['.','.',3],['~','Conjugate',1],['!','Dual',1],['**','Pow',0,1],['>>>','sw',0,1],['*','Mul'],['/','Div'],['^','Wedge'],['<<','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]
+        var syntax = (intxt instanceof Function)?[['.Normalized','Normalize',2],['.Length','Length',2],['.','.',3],['~','Conjugate',1],['!','Dual',1],['**','Pow',0,1],['>>>','sw',0,1],['*','Mul'],['/','Div'],['^','Wedge'],['<<','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]
                                                 :[['pi','Math.PI'],['sin','Math.sin'],['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual'],['hat',''],['~','Conjugate',1],['!','Involute',1],['^','Pow',0,1],['**','Mul'],['/','Div'],['^^','Wedge'],['*','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']];
         tok=tok.map(t=>(t[0]!=5)?t:syntax.filter(x=>x[0]==t[1]).length?[5,syntax.filter(x=>x[0]==t[1])[0][1]]:t); // static function translations (mostly for asciimath)                                       
         function translate(tokens) { 
