@@ -1,0 +1,50 @@
+<HEAD>
+  <SCRIPT SRC="../ace/src/ace.js"></SCRIPT>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY STYLE="margin:auto; max-width:1600px">
+  <H1>2D PGA : 2D Projective Geometric Algebra</H1>
+  <HR>
+
+  Elegant and stable solver for the full IK problem. The exact same method can be used in 3D.<BR><BR>
+  Move the black base and target points to run the solver. Move the blue points to set the remaining degrees of freedom. (default behavior for those is 'minimal change') <BR><BR>
+  <div style="display:flex">
+    <div id="demo3" style="width:512px; height:512px; overflow:hidden; display:inline-block"></div>
+    <pre id="editor3" style="height:512px;min-width:512px;margin:0;flex-grow:1"></pre>
+  </div>
+  <SCRIPT>
+    var editor3 = ace.edit("editor3");
+    editor3.setTheme("ace/theme/chrome");
+    editor3.session.setMode("ace/mode/javascript");
+    editor3.session.setUseWorker(false);
+    function sample() {
+      Algebra(2,0,1).inline(()=>{  
+      // Translator, Join
+        var TR=(l,d)=>1-0.5*d*(1e0^(l.Normalized*1e12)),
+            J=(x,y)=>!(!x^!y);
+
+      // points
+        var l=6, d=0.5, points=Array.apply([],{length:l+1}).map( (x,i)=>1e12+(1.5-i*d)*1e02 );
+      
+      // solver
+        var IK=(chain)=>{
+          var iter=5, base=chain[0].slice(); while (iter--) {
+            chain[l-1].set(chain[l]); for (var i=l-2; i>=0; i--) chain[i].set(TR(J(chain[i],chain[i+1]),-d)>>>(chain[i+1])); 
+            chain[0].set(base);       for (var i=1; i<l;  i++)   chain[i].set(TR(J(chain[i-1],chain[i]),d)>>>(chain[i-1])); 
+            if ((J(chain[l-1],chain[l]).Length)<0.001) iter=0; 
+        }};
+      
+      // Evaluate IK, render points and lines, target last (so its on top)
+        document.getElementById('demo3').appendChild(this.graph(
+          [()=>IK(points), points[0], "Base", ()=>(J(points[l-1],points[l]).Length)<0.01?0x0000ff:0xff0000]
+          .concat(points.slice(1,l)).concat(points.map((x,i,a)=>[a[i-1],x]).slice(1,l)).concat([0,points[l],"Target"])
+        ));
+        
+      })();
+    }; sample();
+    editor3.setValue(sample.toString().split('\n').slice(1).reverse().slice(1).reverse().join('\n')); editor3.clearSelection(); editor3.setHighlightActiveLine(false);
+    editor3.getSession().on('change', function(e) { document.getElementById('demo3').innerHTML=''; try { eval(editor3.getValue()); } catch (e) { document.getElementById('demo3').innerHTML='<PRE>'+e.message+'</PRE>'}; });
+  </SCRIPT>
+</PRE>
+  
+</BODY>
