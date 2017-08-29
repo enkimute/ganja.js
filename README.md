@@ -16,7 +16,7 @@ involutions and automorphisms.)
 and expressions by using reflection, a built-in tokenizer and a simple AST translator to 
 rewrite functions containing algebraic constructs to their procedural counterparts.)
 
-(**Seriously**, look at the examples first.)
+(**Seriously**, look at the [examples](https://enkimute.github.io/ganja.js/examples/coffeeshop.html) first.)
 
 ### Contents
 
@@ -234,7 +234,7 @@ var canvas = Complex.graph(function(x,y){
 document.body.appendChild(canvas);
 ```
 
-[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_mandelbrot.html)
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_complex_mandelbrot.html)
 
 <CENTER><IMG SRC="images/ganja_mandelbrot.png"></CENTER>
 
@@ -262,7 +262,7 @@ var canvas = R3.graph(function(x,y){
 document.body.appendChild(canvas);
 ```
 
-[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_hue.html)
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_quaternion_hue.html)
 
 <CENTER><IMG SRC="images/ganja_hue.png"></CENTER>
 
@@ -286,7 +286,7 @@ document.body.appendChild(Algebra({p:3,basis:['1','e12','e13','e23']}).graph(fun
   return (rot*red*~rot).slice(1);
 }));
 ```
-[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_mandelbrot2.html)
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_quaternion_mandelbrot.html)
 
 <CENTER><IMG SRC="images/ganja_mandelbrot2.png"></CENTER>
 
@@ -395,7 +395,7 @@ Algebra(2,0,1).inline(()=>{
 })();
 ```
 
-[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_desargues.html)
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_pga2d_desargues.html)
 
 ![desargues image](images/ganja_p2_desargues.jpg)
 
@@ -425,7 +425,7 @@ Algebra(2,0,1).inline(()=>{
   ]));
 })();
 ```
-[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_ik.html)
+[A live version is available here.](https://enkimute.github.io/ganja.js/examples/example_pga2d_inverse_kinematics.html)
 
 ![Ganja P2 IK](images/ganja_p2_ik.jpg)
 
