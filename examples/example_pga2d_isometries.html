@@ -35,7 +35,7 @@ Algebra(2,0,1).inline(()=>{
   // Interpolate the isometrie to illustrate the solution. 
       lines = Array.apply([],{length:100}).map((x,xi)=>()=>lerp(1,g,xi*0.01)>>>m);
 
-  // Graph it
+  // Reproduce the graph from the paper
   document.body.appendChild(this.graph([0xCCCCCC].concat(lines).concat([
     0xAAAA44,m,"m &rarr;",m2,"m' &larr;", 
     0x0000ff,[A,A2],
