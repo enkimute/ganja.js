@@ -1,0 +1,71 @@
+<HEAD>
+  <STYLE>
+    body    { margin: 0; background-color:#EEE; position:relative; display:flex; flex-direction:column; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
+    #SAMPLE { width: 512px; height: 100%; position: absolute; top: 0px; left: 0px; border: 0; }
+    #SOURCE { position:absolute; bottom:0px; top:0px; left:512px; right:0px; margin:0 }
+    #HEADER { position:relative; display:flex; flex-flow:wrap; z-index:10 }
+    #MAIN   { border-top:1px solid black; position : relative; flex-grow:1 } 
+    .TAB    { cursor:pointer; background-color:#ccc; color:#666; margin-bottom:-1px;  border:1px solid black; border-bottom:1px solid black; border-top-left-radius:10px; border-top-right-radius:10px; text-decoration:none; padding:5px; padding-left:15px; padding-right:15px; margin-right:-1px; }
+    .SELECTED { background-color:#eee; color:#606060; border-bottom:1px solid #eee;}
+    H3      { padding-left : 25px }
+    .pga2d          { background-color:#ccf; color:#668; }
+    .pga2d.SELECTED { background-color:#eef; color:#606080; }
+    .quaternion          { background-color:#cfc; color:#686; }
+    .quaternion.SELECTED { background-color:#efe; color:#608060; }
+  </STYLE>
+  <SCRIPT SRC="../ace/src/ace.js"></SCRIPT>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY>
+  <H3>The Coffeeshop - get your free <A HREF="https://github.com/enkimute/ganja.js" TARGET="_blank">ganja.js</A> samples!</H3>
+  <DIV ID="HEADER">
+  </DIV>
+  <DIV ID="MAIN">
+    <IFRAME ID="SAMPLE" BORDER=0 SRC=""></IFRAME>
+    <PRE ID="SOURCE"></PRE>
+  </DIV>
+  <SCRIPT>
+    var examples_pga = ["complex_mandelbrot","quaternion_hue","quaternion_mandelbrot","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_inverse_kinematics","pga2d_desargues_theorem"]
+    
+    var $ = document.getElementById.bind(document);
+    
+    if (document.location.hash=='') document.location.hash = 'pga2d_points_and_lines';
+    
+    examples_pga.forEach((e,i)=>$('HEADER').innerHTML+=
+      `<A CLASS="TAB ${e.split('_')[0]} ${document.location.hash.slice(1)==examples_pga[i]?' SELECTED':''}" 
+          ONCLICK="[].map.call(document.querySelectorAll('.SELECTED'),a=>a.classList.remove('SELECTED')); 
+                   this.classList.add('SELECTED'); document.location.hash='${e}';
+                   loaded=false; $('SAMPLE').src='${'example_'+e+'.html'}';"
+          >${e.split('_').slice(1).join(' ')}</A>`);
+    
+    var editor = ace.edit('SOURCE');
+    editor.setTheme("ace/theme/chrome");
+    editor.session.setMode("ace/mode/javascript");
+    editor.session.setUseWorker(false);
+    editor.setHighlightActiveLine(false);
+    editor.$blockScrolling = Infinity;
+    
+    var loaded=false;
+    $('SAMPLE').src = 'example_'+(document.location.hash.slice(1).replace(/ /g,'_')||examples_pga[0])+'.html';    
+    $('SAMPLE').onload = function(){ 
+      var $$ = $('SAMPLE').contentDocument.querySelectorAll.bind($('SAMPLE').contentDocument);
+      
+      $('SAMPLE').contentDocument.body.style.margin=0;
+      $('SAMPLE').contentDocument.body.style.overflow='hidden';
+      
+      editor.setValue($('SAMPLE').contentDocument.querySelectorAll('script')[1].innerText.split('\n').slice(1).reverse().slice(1).reverse().join('\n'));
+      editor.clearSelection();
+      loaded=true;
+
+      var changed=false;
+      editor.session.on('change',e=>changed=loaded&&true);
+      editor.on('blur', function(e) { if (!changed || !loaded) return; changed=false;
+        $('SAMPLE').contentDocument.body.innerHTML='';
+        try { $('SAMPLE').contentWindow.eval( editor.getValue() ); }
+        catch (e) { $('SAMPLE').contentDocument.body.innerHTML='<PRE>'+e.message+'</PRE>';}
+      });
+
+      
+    };
+  </SCRIPT>
+</BODY>

@@ -1,0 +1,33 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 2,0,1 metric.
+Algebra(2,0,1).inline(()=>{  
+
+  // Identities we need are the join and the translator.
+  var translator = (line,dist)=>1+0.5*dist*(line.Normalized*1e012),
+      join       = (x,y)=>!(!x^!y);
+
+  // Create chain of points. (l = number of segments in chain)
+  var l=6, d=3/l, points=Array.apply([],{length:l+1}).map((x,i)=>1e12+(1.5-i*d)*1e02);
+
+  // solver. Last point in chain is the target. Set tip to target, then cycle to base and back
+  // restoring original lengths.
+  var IK=(c)=>{
+    for (var i,j=0;j<4; j++) { 
+      c[l-1].set(c[l]); 
+      for (i=l-2; i>0; i--) c[i].set(translator(join(c[i],c[i+1]),-d)>>>(c[i+1])); 
+      for (i=1; i<l; i++) c[i].set(translator(join(c[i-1],c[i]),d)>>>(c[i-1])); 
+  }};
+
+  // Evaluate IK, render points and lines, target last (so its on top)
+  document.body.appendChild(this.graph([].concat(
+    "Inverse Kinematics",()=>IK(points), points[0], "Base",   // render title, run IK and render base
+    0x0000ff,points.slice(1,l),                               // render joint points. [A,B,C,..]
+    points.map((x,i,a)=>[a[i-1],x]).slice(1,l),               // render line segments. [[A,B],[B,C],..]
+    0x000000,points[l],"Target"                               // render target in black
+  )));
+  
+})();
+</SCRIPT></BODY>

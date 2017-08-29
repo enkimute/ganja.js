@@ -1,0 +1,38 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 2,0,1 metric. 
+Algebra(2,0,1).inline(()=>{
+  
+  // The identities we already established.
+  var point   = (x,y)=>1e12-x*1e02+y*1e01,    
+      line    = (a,b,c)=>a*1e1+b*1e2+c*1e0,
+      join    = (X,Y)=>!(!X^!Y),
+      dist_pp = (X,Y)=>join(X,Y).Length,
+      dist_pl = (P,l)=>(P.Normalized^l.Normalized).e012,
+      angle   = (x,y)=>Math.acos(x.Normalized<<y.Normalized);
+      
+  // Projecting a point onto a line.
+  var project_pl = (P,l)=>(P<<l)*l,
+  
+  // Or we can project a line on a point.
+      project_lp = (P,l)=>(P<<l)*-P,
+      
+  // We can also reject a line from a point.
+      reject_lp = (P,l)=>(P<<l);    
+    
+  // Define some points and lines.
+  var A=point(-1,1), B=point(-1,-1), C=point(1,-1), AC=()=>join(A,C);
+  
+  // Graph the triangle, its angles and side lengths.
+  document.body.appendChild(this.graph([
+    0xffcccc, [A,B,C],                              // render the triangle
+    0x444444, A, "A", B, "B", C, "C",
+    ()=>project_pl(B,AC), "project B onto AC",
+    ()=>project_lp(B,AC), "project AC onto B",
+    0xff8888,
+    ()=>reject_lp(B,AC), "reject AC from B"
+  ]));
+})();
+</SCRIPT></BODY>

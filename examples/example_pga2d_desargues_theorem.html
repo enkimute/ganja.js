@@ -1,0 +1,32 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 2,0,1 metric.
+Algebra(2,0,1).inline(()=>{
+
+  // Just the join and point identities of PGA2D.
+  var point      = (x,y)=>1e12-x*1e02+y*1e01,
+      join       = (X,Y)=>!(!X^!Y);
+
+  // The origin and points of big triangle.
+  var O=point(-1.4,0.5), X=point(1,-1), Y=point(0.2,-1.2), Z=point(0.75,-0.5);
+  
+  // Derived points of small triangle
+  var x=()=>0.55*O+0.45*X, y=()=>0.4*O+0.6*Y, z=()=>0.7*O+0.3*Z;
+
+  // All Edges.
+  var YX=()=>join(Y,X), YZ=()=>join(Y,Z), XZ=()=>join(X,Z),
+      OX=()=>join(O,X), OY=()=>join(O,Y), OZ=()=>join(O,Z),
+      yx=()=>join(y,x), yz=()=>join(y,z), xz=()=>join(x,z);
+
+  document.body.appendChild(this.graph([
+    0x4444ff, OX, OY, OZ,                                           // Blue lines through triangle vertices.
+    0xcccccc, YX, YZ, XZ, yx, yz, xz, YX^yx, YZ^yz, xz^XZ,          // Grey lines through edges
+    0x76cc82, [X,Y,Z], 0xffeb57, ()=>[x,y,z],                       // Render both triangles.
+    0xaaaaaa, x, "x", y, "y", z, "z",                               // Light Grey Derived points small triangle.
+    0xff0000, ()=>join(YX^yx,xz^XZ), "Axis of perspectivity",       // Red axis of perspectivity
+    0x444444, X, "X", Y, "Y", Z, "Z", O, "Center of perspectivity", // Points and center of perspectivity
+  ]));
+})();
+</SCRIPT></BODY>

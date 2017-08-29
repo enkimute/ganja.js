@@ -1,0 +1,18 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// In Vector space R3, rotate a color around the hue axis and output 
+// the result using the graph function.
+var R3 = Algebra(3);
+
+var cache={};
+
+var canvas = R3.graph(function(x,y){
+  if (cache[x]) return cache[x];
+  var c=1e1, rot=Math.cos(x*2) + Math.sin(x*2)*(1e12+1e23-1e13).Normalized;
+  return cache[x]=(rot>>>c).Vector;
+});
+
+document.body.appendChild(canvas);
+</SCRIPT></BODY>
