@@ -1,0 +1,38 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 2,0,1 metric.
+Algebra(2,0,1).inline(()=>{
+
+  // Upgrade to 2D PGA.
+  var point      = (x,y)=>1e12-x*1e02+y*1e01,
+      line       = (a,b,c)=>a*1e1+b*1e2+c*1e0,
+      join       = (X,Y)=>!(!X^!Y);
+  
+  // Define some points and lines.
+  var A=point(0,-0.5), B=point(-0.5,-1), C=point(0.5,-1);
+  
+  // Two cameras and camera line.
+  var CA=point(-0.5,1.5), CB=point(0.5,1.5), cl=line(0,1,-1);
+  
+  // Images of A,B,C on camera line. 
+  var iaA = cl^join(CA,A), iaB = cl^join(CA,B), iaC = cl^join(CA, C);
+  var ibA = cl^join(CB,A), ibB = cl^join(CB,B), ibC = cl^join(CB, C);
+  
+  // Lines from camera through pojections.
+  var CAA = join(CA,iaA), CAB = join(CA,iaB), CAC = join(CA,iaC);
+  var CBA = join(CB,ibA), CBB = join(CB,ibB), CBC = join(CB,ibC);
+  
+  // Graph it
+  document.body.appendChild(this.graph([()=>{
+      var s = performance.now()*0.001%5|0, res=[['Start from projected points','Construct rays camera A','Construct rays camera B','Intersect corresponding rays','Find object'][s]];
+      if (s>=0) res = res.concat([cl,CA,"Cam A",CB,"Cam B",iaA, iaB, iaC, ibA, ibB, ibC]); 
+      if (s>=1) res = res.concat([0x8888ff,CAA,CAB,CAC]); 
+      if (s>=2) res = res.concat([0x8888ff,CBA,CBB,CBC]); 
+      if (s>=3) res = res.concat([0x0000ff,CBA^CAA,CBB^CAB,CBC^CAC]); 
+      if (s>=4) res = res.concat([[CBA^CAA,CBB^CAB],[CBA^CAA,CBC^CAC]])
+      return res.concat(this.graph);
+  }]));
+})();
+</SCRIPT></BODY>
