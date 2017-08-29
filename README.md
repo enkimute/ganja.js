@@ -29,10 +29,10 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 [6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
 [7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
 [8. Example : R<SUP>+</SUP><sub>3</sub> Quaternions](#H)<BR>
-[9. Example : P(R*<sub>2,0,1</sub>) Projective 2D](#P2)<BR>
-[10. Example : P(R*<sub>2,0,1</sub>) P2 Desargues Theorem](#P2B)<BR>
-[11. Example : P(R*<sub>2,0,1</sub>) P2 Inverse Kinematics](#P2C)<BR>
-[12. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
+[9. Example : P(R*<sub>2,0,1</sub>) 2D PGA - Projective Geometric Algebra](#P2)<BR>
+[10. Example : P(R*<sub>2,0,1</sub>) 2D PGA Desargues Theorem](#P2B)<BR>
+[11. Example : P(R*<sub>2,0,1</sub>) 2D PGA Inverse Kinematics](#P2C)<BR>
+[12. Example : P(R*<sub>3,0,1</sub>) 3D PGA - Projective Geometric Algebra](#P3)<BR>
 
 <A NAME="Features"></A>
 ### Reasons to use ganja
@@ -299,7 +299,7 @@ document.body.appendChild(Algebra({p:3,basis:['1','e12','e13','e23']}).graph(fun
 <CENTER><IMG SRC="images/ganja_mandelbrot2.png"></CENTER>
 
 <A NAME="P2"></A>
-### Example : P(R*<sub>2,0,1</sub>) Projective 2D
+### Example : P(R*<sub>2,0,1</sub>) 2D PGA - Projective Geometric Algebra
 
 This example uses projective 2D. (degenerate signature R*2,0,1). (Dual ..
 i.e. points are higher grade than lines). (Ganja.js can handle degenerate
@@ -369,7 +369,7 @@ P2.inline(function(){
 ![ganja p2 example](images/ganja_p2.jpg)
 
 <A NAME="P2B"></A>
-### Example : P(R*<sub>2,0,1</sub>) P2 Desargues's Theorem
+### Example : P(R*<sub>2,0,1</sub>) 2D PGA Desargues's Theorem
 
 A classic example in projective geometry : [Desargues's Theorem on Wikipedia](https://en.wikipedia.org/wiki/Desargues%27s_theorem).
 
@@ -408,7 +408,7 @@ Algebra(2,0,1).inline(()=>{
 ![desargues image](images/ganja_p2_desargues.jpg)
 
 <A NAME="P2C"></A>
-### Example : P(R*<sub>2,0,1</sub>) P2 Inverse Kinematics
+### Example : P(R*<sub>2,0,1</sub>) 2D PGA Inverse Kinematics
 
 A simple IK chain is solved analytically and expressed elegantly with GA : 
 
@@ -439,7 +439,7 @@ Algebra(2,0,1).inline(()=>{
 
 
 <A NAME="P3"></A>
-### Example : P(R*<sub>3,0,1</sub>) Projective 3D
+### Example : P(R*<sub>3,0,1</sub>) 3D PGA - Projective Geometric Algebra
 
 This example implements the table on page 15 of [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf). 
 We apply the same strategy from above and start from a Clifford Algebra in R<sub>3,0,1</sub>. 
