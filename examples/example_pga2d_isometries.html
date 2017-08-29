@@ -33,10 +33,10 @@ Algebra(2,0,1).inline(()=>{
       s=()=>join(A,C), g=()=>r*s,
   
   // Interpolate the isometrie to illustrate the solution. 
-      lines = Array.apply([],{length:10}).map((x,xi)=>()=>lerp(1,g,xi*0.1)>>>m);
+      lines = Array.apply([],{length:100}).map((x,xi)=>()=>lerp(1,g,xi*0.01)>>>m);
 
   // Graph it
-  document.body.appendChild(this.graph([
+  document.body.appendChild(this.graph([0xCCCCCC].concat(lines).concat([
     0xAAAA44,m,"m",m2,"m'", 
     0x0000ff,[A,A2],
     0x008800,c,"c",
@@ -44,7 +44,6 @@ Algebra(2,0,1).inline(()=>{
     0xff0000,s,"s", 
     0x444444,A,"A",A2,"A'",
     0x999999,M,"M",C,"C",
-    0xCCCCCC
-  ].concat(lines)));
+  ])));
 })();
 </SCRIPT></BODY>
