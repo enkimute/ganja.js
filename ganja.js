@@ -85,12 +85,12 @@
       static describe() { console.log(`Basis\n${basis}\nRemap${JSON.stringify(brm)}\nDual\n${drm}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
       toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
     // Parse expressions, translate functions and render graphs.
-      static graph(f,cvs,ww,hh) { 
+      static graph(f,cvs,ww,hh) { if (!f) return; var origf=f;
       // p2d SVG points/lines/rotations/translations/labels . 
         if (!(f instanceof Function)) { var lx,ly,lr,color,res,anim=false;
-          if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k]));
-          function build(f,or) { lx=-2;ly=-1.85;lr=0;color='#444'; return new DOMParser().parseFromString(`<SVG viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; user-select:none">
-           ${f.map((o,oidx)=>{  if(o==Element.graph && or !==false) { anim=true; return requestAnimationFrame(()=>{var r=build(f,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; });} while (o instanceof Function) o=o(); if (o===undefined) return;
+          if (f && f.length==1 && f[0] instanceof Function) f=f[0]();if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k])); 
+          function build(f,or) { if (or && f && f.length==1 && f[0] instanceof Function) f=f[0](); lx=-2;ly=-1.85;lr=0;color='#444'; return new DOMParser().parseFromString(`<SVG viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; user-select:none">
+           ${f.map((o,oidx)=>{  if(o==Element.graph && or !==false) { anim=true; return requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; });} while (o instanceof Function) o=o(); if (o===undefined) return;
              if (o instanceof Array)  { lx=ly=lr=0; o=o.map((x)=>x.call?x():x); o.forEach((o)=>{lx+=((drm[1]==6)?-1:1)*o[drm[2]]/o[drm[1]];ly+=o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${((drm[1]==6)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${o[0][drm[3]]/o[0][drm[1]]} x2=${((drm[1]==6)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${o[1][drm[3]]/o[1][drm[1]]} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
              if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},0,0)">&nbsp;${o}&nbsp;</text>`; ly+=0.1; return res2; }
              if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; }o=o.Normalized; var oi='test';
