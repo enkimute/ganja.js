@@ -20,9 +20,10 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 
 ### Contents
 
-[1. Features](#Features)<BR>
-[2. Getting started](#Started)<BR>
-[3. Subalgebra's, custom blade names, ...](#custom)<BR>
+[1. Reasons to use ganja](#Features)<BR>
+[2. Using ganja the first time](#Started)<BR>
+[3. Ganja for experts](#custom)<BR>
+[4. Getting free ganja samples](#samples)<BR>
 [4. Syntax overview](#syntax)<BR>
 [5. Inline operators and Algebraic Literals](#inline)<BR>
 [6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
@@ -34,12 +35,12 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 [12. Example : P(R*<sub>3,0,1</sub>) Projective 3D](#P3)<BR>
 
 <A NAME="Features"></A>
-### Features
+### Reasons to use ganja
 
-* Supports any metric (positive,negative,zero)
 * Operator overloading
 * Algebraic constants
-* smallish (162 lines)
+* Supports any metric (positive,negative,zero)
+* smallish (170 lines)
 * matrix-free inverses up to 5D.
 * geometric, inner (contraction), outer product
 * conjugate, reverse, involute, dual (Poincare), negative
@@ -51,7 +52,7 @@ To use it, first include the ganja.js script.
 <SCRIPT SRC="https://raw.githubusercontent.com/enkimute/ganja.js/master/ganja.js"></SCRIPT>
 ```
 <A NAME="Started"></A>
-### Getting started
+### Using ganja the first time
 
 To create an Algebra, call the *_Algebra_* function specifying the metric
 signature (positive,negative,zero). This function will generate an ES6 class 
@@ -101,7 +102,7 @@ See the examples below for more examples of how to use the inline syntax.
 (the inline syntax is the preferred syntax). 
 
 <A NAME="custom"></A>
-### Subalgebra's, custom blade names, ..
+### Ganja for experts.
 
 Ganja.js allows you to further customise the algebra class it
 generates, allowing you to generate subalgebras (who's elements use
@@ -126,6 +127,13 @@ When not specified, ganja.js will generate basis names that are
 grouped by rank and numerically sorted. By default, a single zero
 dimension will get generator name e<sub>0</sub> and will take
 the first place. 
+
+<A NAME="samples"></A>
+### Getting free ganja samples.
+
+Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html)
+and play around with the examples. They are interactive and you can easily
+change the code online. No need to download or install anything !
 
 <A NAME="syntax"></A>
 ### Syntax overview.
