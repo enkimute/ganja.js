@@ -1,0 +1,50 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 2,0,1 metric.
+Algebra(2,0,1).inline(()=>{
+
+  // From https://arxiv.org/pdf/1501.06511.pdf, p21.
+  //   Find and illustrate the unique direct isometry that takes (A,m) to (A2,m2)
+  //   Note that ganja.js allows implementing this letter for letter like in
+  //   the paper .. 
+
+  var point      = (x,y)=>1e12-x*1e02+y*1e01,
+      join       = (X,Y)=>!(!X^!Y),
+      lerp       = (x,y,a)=>(1-a)*x+a*y;
+      
+  // Start with two points A and A2 (and a helper)      
+  var A=point(-0.5,0.5), A2=point(0.5,0.2), B=point(0,-1), 
+  
+  // Form the lines m and m2 using these points.
+      m=()=>join(B,A).Normalized, m2=()=>join(A2,B).Normalized,
+  
+  // Find intersection of m and m2 and line through a and a2    
+      M=()=>m^m2, a=()=>join(A,A2),
+      
+  // Find the midpoint between A and A2 and the orthogonal line through it.      
+      Am=()=>A+A2, r=()=>Am<<a,
+      
+  // Find the line between m and m2 and cut that with r to find the center of our isometry      
+      c=()=>m-m2, C=()=>r^c,
+      
+  // Construct the transformation as a rotation around C. (or translation if C is infinity)       
+      s=()=>join(A,C), g=()=>r*s,
+  
+  // Interpolate the isometrie to illustrate the solution. 
+      lines = Array.apply([],{length:10}).map((x,xi)=>()=>lerp(1,g,xi*0.1)>>>m);
+
+  // Graph it
+  document.body.appendChild(this.graph([
+    0xAAAA44,m,"m",m2,"m'", 
+    0x0000ff,[A,A2],
+    0x008800,c,"c",
+    0x008888,r,"r",
+    0xff0000,s,"s", 
+    0x444444,A,"A",A2,"A'",
+    0x999999,M,"M",C,"C",
+    0xCCCCCC
+  ].concat(lines)));
+})();
+</SCRIPT></BODY>
