@@ -9,11 +9,18 @@
     .SELECTED { background-color:#eee; color:#606060; border-bottom:1px solid #eee;}
     H3      { padding-left : 25px }
     .legend { position:fixed; top:12px; right:5px;  }
-    .legend > span { padding:4px; border:1px solid #AAA; margin:4px; border-radius:5px; }
+    .legend > span { padding:4px; border:1px solid #AAA; margin:4px; border-radius:5px; cursor:pointer; }
+    .complex          { background-color:#ccc; color:#666; }
+    .complex.SELECTED { background-color:#eee; color:#606060; }
     .pga2d          { background-color:#ccf; color:#668; }
     .pga2d.SELECTED { background-color:#eef; color:#606080; }
     .quaternion          { background-color:#cfc; color:#686; }
     .quaternion.SELECTED { background-color:#efe; color:#608060; }
+    #HEADER { background-color:#eee; }
+    .TAB { display:none; }
+    #HEADER.complex > .TAB.complex { display:block; }
+    #HEADER.quaternion > .TAB.quaternion { display:block; }
+    #HEADER.pga2d > .TAB.pga2d { display:block; }
     #RUN { box-sizing:border-box; position:absolute; top:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
     #RUN:hover { border : 2px solid #886; top:9px; left:9px}
   </STYLE>
@@ -25,11 +32,11 @@
   <SMALL>free <A HREF="https://github.com/enkimute/ganja.js" TARGET="_blank">ganja</A> samples!</SMALL>
   </H3>
   <DIV CLASS="legend">
-    <SPAN CLASS="">Complex</SPAN>
-    <SPAN CLASS="quaternion">Quaternion</SPAN>
-    <SPAN CLASS="pga2d">PGA 2D</SPAN>
+    <SPAN CLASS="complex" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('complex'); ">Complex</SPAN>
+    <SPAN CLASS="quaternion" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('quaternion'); ">Quaternion</SPAN>
+    <SPAN CLASS="pga2d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga2d'); ">PGA 2D</SPAN>
   </DIV>
-  <DIV ID="HEADER">
+  <DIV ID="HEADER" CLASS="complex quaternion pga2d">
   </DIV>
   <DIV ID="MAIN">
     <DIV ID="RUN">&#x25B6; Run Changes <SPAN STYLE="opacity:0.5; float:right; margin-left:30px">Ctrl+Enter</SPAN></DIV>
