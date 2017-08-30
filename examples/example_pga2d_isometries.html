@@ -17,10 +17,10 @@ Algebra(2,0,1).inline(()=>{
       lerp       = (x,y,a)=>(1-a)*x+a*y;
       
   // Start with two points A and A2 (and a helper)      
-  var A=point(-0.5,0.5), A2=point(0.5,0.2), B=point(0,-1), 
+  var A=point(-0.5,0.5), A2=point(0.5,0.2), B=point(0,-1), B2=point(0,-1),
   
   // Form the lines m and m2 using these points.
-      m=()=>join(B,A), m2=()=>join(A2,B),
+      m=()=>join(B,A), m2=()=>join(A2,B2),
   
   // Find intersection of m and m2 and line through a and a2    
       M=()=>m^m2, a=()=>join(A,A2),
@@ -45,7 +45,7 @@ Algebra(2,0,1).inline(()=>{
     0x008888,r,"r",
     0xff0000,s,"s", 
     0x444444,A,"A",A2,"A'",
-    0x999999,M,"M",C,"C",
+    0x999999,M,"M",C,"C",B,B2,
   ])));
 })();
 </SCRIPT></BODY>

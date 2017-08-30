@@ -8,19 +8,31 @@
     .TAB    { cursor:pointer; background-color:#ccc; color:#666; margin-bottom:-1px;  border:1px solid black; border-bottom:1px solid black; border-top-left-radius:10px; border-top-right-radius:10px; text-decoration:none; padding:5px; padding-left:15px; padding-right:15px; margin-right:-1px; }
     .SELECTED { background-color:#eee; color:#606060; border-bottom:1px solid #eee;}
     H3      { padding-left : 25px }
+    .legend { position:fixed; top:12px; right:5px;  }
+    .legend > span { padding:4px; border:1px solid #AAA; margin:4px; border-radius:5px; }
     .pga2d          { background-color:#ccf; color:#668; }
     .pga2d.SELECTED { background-color:#eef; color:#606080; }
     .quaternion          { background-color:#cfc; color:#686; }
     .quaternion.SELECTED { background-color:#efe; color:#608060; }
+    #RUN { box-sizing:border-box; position:absolute; top:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
+    #RUN:hover { border : 2px solid #886; top:9px; left:9px}
   </STYLE>
   <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></SCRIPT>
   <SCRIPT SRC="../ganja.js"></SCRIPT>
 </HEAD>
 <BODY>
-  <H3>The Coffeeshop - get your free <A HREF="https://github.com/enkimute/ganja.js" TARGET="_blank">ganja.js</A> samples!</H3>
+  <H3>The Coffeeshop<BR>
+  <SMALL>free <A HREF="https://github.com/enkimute/ganja.js" TARGET="_blank">ganja</A> samples!</SMALL>
+  </H3>
+  <DIV CLASS="legend">
+    <SPAN CLASS="">Complex</SPAN>
+    <SPAN CLASS="quaternion">Quaternion</SPAN>
+    <SPAN CLASS="pga2d">PGA 2D</SPAN>
+  </DIV>
   <DIV ID="HEADER">
   </DIV>
   <DIV ID="MAIN">
+    <DIV ID="RUN">&#x25B6; Run Changes <SPAN STYLE="opacity:0.5; float:right; margin-left:30px">Ctrl+Enter</SPAN></DIV>
     <IFRAME ID="SAMPLE" BORDER=0 SRC=""></IFRAME>
     <PRE ID="SOURCE"></PRE>
   </DIV>
@@ -58,12 +70,23 @@
       loaded=true;
 
       var changed=false;
-      editor.session.on('change',e=>changed=loaded&&true);
-      editor.on('blur', function(e) { if (!changed || !loaded) return; changed=false;
+      editor.session.on('change',e=>{ changed=loaded&&true;  if (changed) $('RUN').style.opacity=1; });
+
+
+editor.commands.addCommand({
+    name: "run changes",
+    bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
+    exec: function(editor) { $('RUN').click(); }
+});
+
+
+
+      $('RUN').onclick = function(e) { e.preventDefault(); e.stopPropagation(); if (!changed || !loaded) return; changed=false; $('RUN').style.opacity=0;
         $('SAMPLE').contentDocument.body.innerHTML='';
         try { $('SAMPLE').contentWindow.eval( editor.getValue() ); }
         catch (e) { $('SAMPLE').contentDocument.body.innerHTML='<PRE>'+e.message+'</PRE>';}
-      });
+        editor.focus();
+      };
 
       
     };
