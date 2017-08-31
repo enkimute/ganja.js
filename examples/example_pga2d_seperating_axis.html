@@ -24,7 +24,7 @@ Algebra(2,0,1).inline(()=>{
     var check=(box,axis,ref)=>{
         var refd=dist_pl(ref,axis), dists=box.map(x=>dist_pl(x,axis));
         var min=Math.min.apply(Math,dists), max=Math.max.apply(Math,dists);
-        return ((refd<min)||(refd>max))&&((0<min)||(0>max));
+        return ((refd<min)||(refd>max))&&((0<min)||(0>max))&&(0<max||refd>min);
     }
     return check(b,A2,a[0])||check(b,A1,a[2])||check(a,B2,b[0])||check(a,B1,b[2]);
   }
