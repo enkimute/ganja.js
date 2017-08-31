@@ -53,58 +53,67 @@ advanced syntax and graphing makes math in the browser feel like .. math.
 <A NAME="Started"></A>
 ### Using ganja the first time
 
-First, include the ganja.js script.
+Start off by including the ganja.js script. (ganja.js has no dependencies - just 7.9kb on the wire)
 
 ```html
 <SCRIPT SRC="https://raw.githubusercontent.com/enkimute/ganja.js/master/ganja.js"></SCRIPT>
 ```
-
 To create an Algebra, call the **_Algebra_** function specifying the metric
-signature (positive,negative,zero). The result is an ES6 class 
-implementing the graded clifford algebra with the given signature. 
+signature (number of positive,negative and zero dimensions). The result is 
+an ES6 class implementing the requested clifford algebra.
 
 ```javascript
 var Complex = Algebra(0,1);     // Complex numbers.
-var R2 = Algebra(2);            // 2D vector space.
-var R3 = Algebra(3);            // 3D vector space.
+var Cl2 = Algebra(2);           // Clifford algebra for 2D vectors.
+var Cl3 = Algebra(3);           // Clifford algebra for 3D vectors.
 var timeSpace = Algebra(3,1);   // timespace
-var P3 = Algebra(3,0,1);        // Projective Euclidean 3D space
-var C3 = Algebra(4,1);          // Conformal Euclidean 3D space
+var PGA3D = Algebra(3,0,1);     // Projective Euclidean 3D space
+var CGA3D = Algebra(4,1);       // Conformal Euclidean 3D space
 ```
 
 You can now use this class to generate elements of your algebra. Those elements will have all of the
-expected properties. (Length, blade access, Dot, Wedge, Mul, Dual, Inverse, ...)
+expected properties. (Length, blade access, Dot, Wedge, Mul, Dual, Inverse, etc ...)
 
-And while not advised you could use them in a 'classic' programming style math syntax like the example below.
+And while not advised you could use them in a 'classic' programming style syntax like the example below.
 
 ```javascript
 var Complex = Algebra(0,1);     // Complex numbers.
 var a = new Complex([3,2]);     // 3+2i
 var b = new Complex([1,4]);     // 1+4i
-console.log(a.Mul(b));          // logs [-5, 14]
+return a.Mul(b);                // returns [-5, 14]
 ```
 This however, is not very pretty. It's not that much fun either. Luckily,
 ganja.js provides an alternate way to write algebraic functions, literals
 and expressions. You Algebra class exposes this interface through the
-**inline** function. Using the **inline** function, the above example is
+**_inline_** function. Using the **_inline_** function, the above example is
 written :
 
 ```javascript
-Algebra(0,1).inline(function(){   // Complex numbers with inline math. 
-  var a = 3+2e1;                  // 3+2i (in signature 0,1 the e1 basis blade squares to -1 
-  var b = 1+4e1;                  // 1+4i
-  console.log(a*b);               // logs [-5, 14]
-})();
+Algebra(0,1).inline(()=>(3+2e1)*(1+4e1))();  // return [-5,14]
 ```
 The inline syntax is powerful and flexible. It offers full operator
 overloading, overloads scientific e-notation to allow you to directly
 specify basis blades and allows using lambda expressions without the need
 for calling brackets in algebraic expressions.
 
-See the [coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html) for more
-on how to use the inline syntax.
+Under the hood, ganja.js will translate these functions. 
 
-Your Algebra also exposes a static **graph** function that allows you to
+```javascript
+// the pretty mathematical expression (!=dual, ^=wedge)
+
+a = ()=>!(!a^!b)*(c*1e123)
+
+// gets translated to .. 
+
+b = ()=>this.Mul(this.Dual((this.Wedge(this.Dual(a),this.Dual(b)))),(this.Mul(c,this.Coeff(7,1))))
+```
+In the example above, functions **a** and **b** do the same thing, but it should be clear that **_a-b=headeache_**. 
+Because I'm out of aspirine, I'll leave the proof of that to the reader. 
+
+See the [coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html) for more
+examples of how to use the inline syntax.
+
+Your Algebra also exposes a static **_graph_** function that allows you to
 easily graph 1D or 2D functions as well as 2D PGA elements.
 
 ```javascript
@@ -113,7 +122,7 @@ document.body.appendChild(Algebra(0).graph(x=>Math.sin(x*5)));    // Graph a 1D 
 Again, many more examples can be found at [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html).
 
 To display the basis blade names, metric, Cayley table and more, use the
-static **describe** function.
+static **_describe_** function.
 
 ```javascript
 Algebra(0,1).describe();
@@ -203,7 +212,7 @@ The entire example above could be written shorter :
   Algebra(0,1).inline(()=>console.log((3+2e1)*(1+4e1)))();
 ```
 Here the imaginary unit *_i_* is the first basis vector and
-written in scientific notation as *1e1* (to represent e<sub>1</sub>). Ganja.js
+written in scientific notation as *1e1* (to represent **e<sub>1</sub>**). Ganja.js
 overloads the scientific notation so you can directly specify basis blades 
 **e<sub>1</sub>**, **e<sub>2</sub>**, **e<sub>12</sub>**, **e<sub>235</sub>**, etc as : 
 
@@ -245,7 +254,7 @@ we evaluate the number of iterations the complex expression (z*z+c) needs to
 converge to infinity (well .. to more than two ;) ).
 
 This famous equation is known as the Mandelbrot set. In the following piece
-of javascript, z and c are complex numbers. The imaginary unit _i_ is
+of javascript, z and c are complex numbers. The imaginary unit **_i_** is
 written **_e<sub>1</sub>_** as the first basis vector of R(0,1) squares to -1.  
 
 ```javascript
