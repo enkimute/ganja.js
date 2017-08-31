@@ -1,7 +1,7 @@
 <HEAD>
   <STYLE>
     body    { margin: 0; background-color:#EEE; position:relative; display:flex; flex-direction:column; font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
-    #SAMPLE { width:33%; min-width: 512px; height: 100%; border: 0; }
+    #SAMPLE { width:33%; min-width: 512px; border: 0; }
     #SOURCE { margin:0; flex-grow:1; }
     #HEADER { position:relative; display:flex; flex-flow:wrap; z-index:10 }
     #MAIN   { border-top:1px solid black; position : relative; flex-grow:1; display:flex; } 
@@ -63,6 +63,8 @@
     editor.session.setUseWorker(false);
     editor.setHighlightActiveLine(false);
     editor.$blockScrolling = Infinity;
+    editor.commands.addCommand({name: "run changes",bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},exec: function(editor) { $('RUN').click(); }});
+    editor.session.on('change',e=>{ changed=loaded&&true;  if (changed) $('RUN').style.opacity=1; });
     
     var loaded=false;
     $('SAMPLE').src = 'example_'+(document.location.hash.slice(1).replace(/ /g,'_')||examples[0])+'.html';    
@@ -76,20 +78,7 @@
       editor.clearSelection();
       loaded=true;
       
-      a=$$('svg');
-      if (a[0]) a[0].style.height='100%';
-      if (a[0]) a[0].style.width='100%';
-      var changed=false;
-      editor.session.on('change',e=>{ changed=loaded&&true;  if (changed) $('RUN').style.opacity=1; });
-
-
-editor.commands.addCommand({
-    name: "run changes",
-    bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
-    exec: function(editor) { $('RUN').click(); }
-});
-
-
+      a=$$('svg'); if (a[0]) { a[0].style.height=a[0].style.width='100%'; var changed=false; }
 
       $('RUN').onclick = function(e) { e.preventDefault(); e.stopPropagation(); if (!changed || !loaded) return; changed=false; $('RUN').style.opacity=0;
         $('SAMPLE').contentDocument.body.innerHTML='';
