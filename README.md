@@ -84,7 +84,7 @@ return a.Mul(b);                // returns [-5, 14]
 ```
 This however, is not very pretty. It's not that much fun either. Luckily,
 ganja.js provides an alternate way to write algebraic functions, literals
-and expressions. You Algebra class exposes this interface through the
+and expressions. Your Algebra class exposes this interface through the
 **_inline_** function. Using the **_inline_** function, the above example is
 written :
 
