@@ -5,6 +5,15 @@
 // Create a Clifford Algebra with 2,0,1 metric.
 Algebra(2,0,1).inline(()=>{  
 
+  // In the inverse kinematics problem we need to calculate joint angles of
+  // a kinematic chain so its base remains fixed and its tip reaches a given 
+  // target. This is a highly non-linear problem with many solutions. We 
+  // implement a solver that tries to minimize the differences on all 
+  // remaining degrees of freedom.
+  
+  // This algorithm readily translates to 3D, is efficient and very well
+  // received by artists in a cg animation context.
+  
   // Identities we need are the join and the translator.
   var translator = (line,dist)=>1+0.5*dist*(line.Normalized*1e012),
       join       = (x,y)=>!(!x^!y);
@@ -15,18 +24,22 @@ Algebra(2,0,1).inline(()=>{
   // solver. Last point in chain is the target. Set tip to target, then cycle to base and back
   // restoring original lengths.
   var IK=(c)=>{
+  // Run four relaxation steps
     for (var i,j=0;j<4; j++) { 
+    // Set the tip to the target. (this will change the length of the last segment.)
       c[l-1].set(c[l]); 
+    // Run backwards to the base and restore the lengths along the chain.  
       for (i=l-2; i>0; i--) c[i].set(translator(join(c[i],c[i+1]),-d)>>>(c[i+1])); 
+    // Loop the other way from base to tip again restoring all lengths.  
       for (i=1; i<l; i++) c[i].set(translator(join(c[i-1],c[i]),d)>>>(c[i-1])); 
   }};
 
   // Evaluate IK, render points and lines, target last (so its on top)
   document.body.appendChild(this.graph([].concat(
-    "Inverse Kinematics",()=>IK(points), points[0], "Base",   // render title, run IK and render base
-    0x0000ff,points.slice(1,l),                               // render joint points. [A,B,C,..]
-    points.map((x,i,a)=>[a[i-1],x]).slice(1,l),               // render line segments. [[A,B],[B,C],..]
-    0x000000,points[l],"Target"                               // render target in black
+    ()=>IK(points), points[0], "Base",                  // run IK and render base
+    0x0000ff,points.slice(1,l),                         // render joint points. [A,B,C,..]
+    points.map((x,i,a)=>[a[i-1],x]).slice(1,l),         // render line segments. [[A,B],[B,C],..]
+    0x000000,points[l],"Target"                         // render target in black
   )));
   
 })();

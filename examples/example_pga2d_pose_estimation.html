@@ -5,7 +5,10 @@
 // Create a Clifford Algebra with 2,0,1 metric.
 Algebra(2,0,1).inline(()=>{
 
-  // Upgrade to 2D PGA.
+  // A simple illustrative example that calculates the position of a 2D
+  // object from its given projection on two known 1D cameras.
+
+  // the PGA identities we need.
   var point      = (x,y)=>1e12-x*1e02+y*1e01,
       line       = (a,b,c)=>a*1e1+b*1e2+c*1e0,
       join       = (X,Y)=>!(!X^!Y);
@@ -19,6 +22,9 @@ Algebra(2,0,1).inline(()=>{
   // Images of A,B,C on camera line. 
   var iaA = cl^join(CA,A), iaB = cl^join(CA,B), iaC = cl^join(CA, C);
   var ibA = cl^join(CB,A), ibB = cl^join(CB,B), ibC = cl^join(CB, C);
+  
+  // At this point the problem is constructed. We now do the inverse
+  // and reconstruct the 3D positions of the points from their projections.
   
   // Lines from camera through pojections.
   var CAA = join(CA,iaA), CAB = join(CA,iaB), CAC = join(CA,iaC);
