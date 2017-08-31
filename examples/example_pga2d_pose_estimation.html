@@ -31,7 +31,7 @@ Algebra(2,0,1).inline(()=>{
   var CBA = join(CB,ibA), CBB = join(CB,ibB), CBC = join(CB,ibC);
   
   // Graph it
-  document.body.appendChild(this.graph([()=>{
+  document.body.appendChild(this.graph(()=>{
       var s = performance.now()*0.001%5|0, res=[['Start from projected points','Construct rays camera A','Construct rays camera B','Intersect corresponding rays','Find object'][s]];
       if (s>=0) res = res.concat([cl,CA,"Cam A",CB,"Cam B",iaA, iaB, iaC, ibA, ibB, ibC]); 
       if (s>=1) res = res.concat([0x8888ff,CAA,CAB,CAC]); 
@@ -39,6 +39,6 @@ Algebra(2,0,1).inline(()=>{
       if (s>=3) res = res.concat([0x0000ff,CBA^CAA,CBB^CAB,CBC^CAC]); 
       if (s>=4) res = res.concat([[CBA^CAA,CBB^CAB],[CBA^CAA,CBC^CAC]])
       return res.concat(this.graph);
-  }]));
+  }));
 })();
 </SCRIPT></BODY>

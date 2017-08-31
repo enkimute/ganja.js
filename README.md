@@ -101,14 +101,14 @@ Under the hood, ganja.js will translate these functions.
 ```javascript
 // the pretty mathematical expression (!=dual, ^=wedge)
 
-a = ()=>!(!a^!b)*(c*1e123)
+a = ()=>!(!a^!b)*(c*1e23)
 
 // gets translated to .. 
 
-b = ()=>this.Mul(this.Dual((this.Wedge(this.Dual(a),this.Dual(b)))),(this.Mul(c,this.Coeff(7,1))))
+b = ()=>this.Mul(this.Dual((this.Wedge(this.Dual(a),this.Dual(b)))),(this.Mul(c,this.Coeff(6,1))))
 ```
 In the example above, functions **a** and **b** do the same thing, but it should be clear that **_a-b=headeache_**. 
-Because I'm out of aspirine, I'll leave the proof of that to the reader. 
+Because I'm out of aspirin, I'll leave the proof of that to the reader. 
 
 See the [coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html) for more
 examples of how to use the inline syntax.
