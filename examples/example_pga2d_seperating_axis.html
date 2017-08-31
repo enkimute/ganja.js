@@ -33,7 +33,7 @@ Algebra(2,0,1).inline(()=>{
   document.body.appendChild(this.graph([()=>{
     // Define two boxes.
     var pa = point(0,0.3-(performance.now()*0.0001%2));
-    var a = box(pa,0.45).map(x=>rotor(pa,performance.now()*0.001)>>>x), b = box(pb,0.4);
+    var a = box(pa,0.45).map(x=>rotor(pa,performance.now()*0.001)>>>x), b=box(pb,0.4);
     return [a,sat(a,b)?0xccffcc:0xffaaaa,b,0x444444,pb,"move",this.graph]}]));
 })();
 </SCRIPT></BODY>
