@@ -44,14 +44,14 @@
     <PRE ID="SOURCE"></PRE>
   </DIV>
   <SCRIPT>
-    var examples_pga = ["complex_mandelbrot","quaternion_hue","quaternion_mandelbrot","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_pose_estimation","pga2d_desargues_theorem"]
+    var examples = ["complex_mandelbrot","quaternion_hue","quaternion_mandelbrot","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_seperating_axis","pga2d_pose_estimation","pga2d_desargues_theorem"]
     
     var $ = document.getElementById.bind(document);
     
     if (document.location.hash=='') document.location.hash = 'pga2d_points_and_lines';
     
-    examples_pga.forEach((e,i)=>$('HEADER').innerHTML+=
-      `<A CLASS="TAB ${e.split('_')[0]} ${document.location.hash.slice(1)==examples_pga[i]?' SELECTED':''}" 
+    examples.forEach((e,i)=>$('HEADER').innerHTML+=
+      `<A CLASS="TAB ${e.split('_')[0]} ${document.location.hash.slice(1)==examples[i]?' SELECTED':''}" 
           ONCLICK="[].map.call(document.querySelectorAll('.SELECTED'),a=>a.classList.remove('SELECTED')); 
                    this.classList.add('SELECTED'); document.location.hash='${e}';
                    loaded=false; $('SAMPLE').src='${'example_'+e+'.html'}';"
@@ -65,7 +65,7 @@
     editor.$blockScrolling = Infinity;
     
     var loaded=false;
-    $('SAMPLE').src = 'example_'+(document.location.hash.slice(1).replace(/ /g,'_')||examples_pga[0])+'.html';    
+    $('SAMPLE').src = 'example_'+(document.location.hash.slice(1).replace(/ /g,'_')||examples[0])+'.html';    
     $('SAMPLE').onload = function(){ 
       var $$ = $('SAMPLE').contentDocument.querySelectorAll.bind($('SAMPLE').contentDocument);
       
