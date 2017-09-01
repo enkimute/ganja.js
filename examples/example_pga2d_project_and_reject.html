@@ -8,8 +8,7 @@ Algebra(2,0,1).inline(()=>{
   // The identities we already established.
   var point   = (x,y)=>1e12-x*1e02+y*1e01,    
       line    = (a,b,c)=>a*1e1+b*1e2+c*1e0,
-      join    = (X,Y)=>X&Y, // = !(!X^!Y),
-      dist_pp = (X,Y)=>join(X,Y).Length,
+      dist_pp = (X,Y)=>(X&Y).Length,
       dist_pl = (P,l)=>(P.Normalized^l.Normalized).e012,
       angle   = (x,y)=>Math.acos(x.Normalized<<y.Normalized);
       
@@ -23,7 +22,7 @@ Algebra(2,0,1).inline(()=>{
       reject_lp = (P,l)=>(P<<l);    
     
   // Define some points and lines.
-  var A=point(-1,1), B=point(-1,-1), C=point(1,-1), AC=()=>join(A,C);
+  var A=point(-1,1), B=point(-1,-1), C=point(1,-1), AC=()=>A&C;
   
   // Graph the triangle, its angles and side lengths.
   document.body.appendChild(this.graph([

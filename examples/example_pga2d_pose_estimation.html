@@ -10,8 +10,7 @@ Algebra(2,0,1).inline(()=>{
 
   // the PGA identities we need.
   var point      = (x,y)=>1e12-x*1e02+y*1e01,
-      line       = (a,b,c)=>a*1e1+b*1e2+c*1e0,
-      join       = (X,Y)=>X&Y; // = !(!X^!Y);
+      line       = (a,b,c)=>a*1e1+b*1e2+c*1e0;
   
   // Define some points and lines.
   var A=point(0,-0.5), B=point(-0.5,-1), C=point(0.5,-1);
@@ -20,15 +19,15 @@ Algebra(2,0,1).inline(()=>{
   var CA=point(-0.5,1.5), CB=point(0.5,1.5), cl=line(0,1,-1);
   
   // Images of A,B,C on camera line. 
-  var iaA = cl^join(CA,A), iaB = cl^join(CA,B), iaC = cl^join(CA, C);
-  var ibA = cl^join(CB,A), ibB = cl^join(CB,B), ibC = cl^join(CB, C);
+  var iaA = cl^(CA&A), iaB = cl^(CA&B), iaC = cl^(CA&C);
+  var ibA = cl^(CB&A), ibB = cl^(CB&B), ibC = cl^(CB&C);
   
   // At this point the problem is constructed. We now do the inverse
   // and reconstruct the 3D positions of the points from their projections.
   
   // Lines from camera through pojections.
-  var CAA = join(CA,iaA), CAB = join(CA,iaB), CAC = join(CA,iaC);
-  var CBA = join(CB,ibA), CBB = join(CB,ibB), CBC = join(CB,ibC);
+  var CAA = CA&iaA, CAB = CA&iaB, CAC = CA&iaC;
+  var CBA = CB&ibA, CBB = CB&ibB, CBC = CB&ibC;
   
   // Graph it
   document.body.appendChild(this.graph(()=>{

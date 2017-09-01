@@ -7,11 +7,10 @@ Algebra(2,0,1).inline(()=>{
   
   // The identities we already established.
   var point = (x,y)=>1e12-x*1e02+y*1e01,    
-      line  = (a,b,c)=>a*1e1+b*1e2+c*1e0,
-      join  = (X,Y)=>X&Y; // = !(!X^!Y);
+      line  = (a,b,c)=>a*1e1+b*1e2+c*1e0;
       
   // Distances and angles
-  var dist_pp = (X,Y)=>join(X,Y).Length,
+  var dist_pp = (X,Y)=>(X&Y).Length,
       dist_pl = (P,l)=>(P.Normalized^l.Normalized).e012,
       angle   = (x,y)=>Math.acos(x.Normalized<<y.Normalized);
 
@@ -19,7 +18,7 @@ Algebra(2,0,1).inline(()=>{
       B=point(-1,-1), C=point(1,-1); 
   
   // Define some algebraic expressions as functions of these points.
-  var AB=()=>join(B,A), BC =()=>join(C,B), CA=()=>join(C,A);
+  var AB=()=>B&A, BC =()=>C&B, CA=()=>C&A;
 
   // Distances between points as functions that return labels (strings);
   var AtoB   =()=>dist_pp(A,B).toFixed(3),  

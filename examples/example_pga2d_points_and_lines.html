@@ -12,9 +12,6 @@ Algebra(2,0,1).inline(()=>{
     // Similarly, we can define lines directly. The euclidean line ax + by + c can be specified so :
     var line = (a,b,c)=>a*1e1+b*1e2+c*1e0;
     
-    // Lines can also be defined by joining two points.
-    var join = (x,y)=>x&y; // = !(!x^!y);
-    
     // Define 3 points.
     var A=point(-1,1), B=point(-1,-1), C=point(1,-1); 
     
@@ -22,7 +19,7 @@ Algebra(2,0,1).inline(()=>{
     var L=line(-1,1,0.5)
     
     // Or by joining two points. We define M as a function so it will update when C or A are dragged.
-    var M=()=>join(C,A);
+    var M=()=>C&A;
     
     // Points can also be found by intersecting two lines. We similarly define D as a function for interactive updates. 
     var D=()=>L^M;
