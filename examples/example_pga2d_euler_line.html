@@ -1,0 +1,41 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 2,0,1 metric.
+Algebra(2,0,1).inline(()=>{
+
+  // in 2D, the seperating axis test involves testing overlap of the projection
+  // onto one of the possible seperating axi. we support all regular ngons and
+  // demonstrate intersection testing.
+
+  // Some identities we'll use.
+  var point      = (x,y)=>1e12-x*1e02+y*1e01;
+  
+  // Three points.
+  var A=point(-1.5,0.5), B=point(0.5,-1.5), C=point(1,0.5),
+  
+  // The edges
+      a=()=>B&C,b=()=>C&A,c=()=>A&B,
+
+  // The orthocenter
+     oa=()=>A<<a, ob=()=>B<<b, oc=()=>C<<c, ortho=()=>oa^ob,
+  
+  // The circumcenter
+      ca=()=>(A+B)<<c, cb=()=>(B+C)<<a, cc=()=>(C+A)<<b, circum=()=>ca^cb,
+      
+  // The centroid      
+      centroid = ()=>A+B+C,
+  
+  // The Euler line      
+      line = ()=>ortho&circum;
+   
+  document.body.appendChild(this.graph([
+      0xFFFFEE,[A,B,C],                        // triangle
+      0xFFAAAA,oa,ob,oc,ortho,                 // orthocenter
+      0x88AA88,ca,cb,cc,circum,                // circumcenter
+      0x8888FF,centroid,line,"Euler Line",     // centroid and euler line
+      0x444444,A,B,C                           // triangle vertices
+      ]));
+})();
+</SCRIPT></BODY>

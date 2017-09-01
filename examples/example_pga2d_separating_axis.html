@@ -29,7 +29,7 @@ Algebra(2,0,1).inline(()=>{
       for (var i=0; i<bl; i++) db[i]=dist_pl(b[i],axis);
       return (Math.min.apply(Math,da)>Math.max.apply(Math,db))||(Math.min.apply(Math,db)>Math.max.apply(Math,da));
     }
-  // Test all edges. Return the seperating axis if found.
+  // Test all edges. Return the separating axis if found.
     for (i=0; i<e.length; i++) if (check(e[i])) return e[i];
   }
   
