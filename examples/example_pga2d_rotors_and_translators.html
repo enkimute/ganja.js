@@ -8,7 +8,7 @@ Algebra(2,0,1).inline(()=>{
   // Upgrade to 2D PGA.
   var point      = (x,y)=>1e12-x*1e02+y*1e01,
       line       = (a,b,c)=>a*1e1+b*1e2+c*1e0,
-      join       = (X,Y)=>X&Y; // = !(!X^!Y),
+      join       = (X,Y)=>X&Y, // = !(!X^!Y),
       dist_pp    = (X,Y)=>join(X,Y).Length,
       dist_pl    = (P,l)=>(P.Normalized^l.Normalized).e012,
       angle      = (x,y)=>Math.acos(x.Normalized<<y.Normalized),
