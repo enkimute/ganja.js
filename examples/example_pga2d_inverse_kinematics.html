@@ -16,7 +16,7 @@ Algebra(2,0,1).inline(()=>{
   
   // Identities we need are the join and the translator.
   var translator = (line,dist)=>1+0.5*dist*(line.Normalized*1e012),
-      join       = (x,y)=>!(!x^!y);
+      join       = (x,y)=>x&y; // = !(!x^!y);
 
   // Create chain of points. (l = number of segments in chain)
   var l=6, d=3/l, points=Array.apply([],{length:l+1}).map((x,i)=>1e12+(1.5-i*d)*1e02);

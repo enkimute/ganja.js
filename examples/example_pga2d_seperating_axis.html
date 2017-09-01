@@ -10,7 +10,7 @@ Algebra(2,0,1).inline(()=>{
 
   // Some identities we'll use.
   var point      = (x,y)=>1e12-x*1e02+y*1e01,
-      join       = (X,Y)=>!(!X^!Y),
+      join       = (X,Y)=>X&Y,
       dist_pl    = (P,l)=>(P.Normalized^l.Normalized).e012,
       rotor      = (point,angle)=>Math.cos(angle/2) + Math.sin(angle/2)*point.Normalized,
       box        = (p,d)=>[point(-p.e02-d,p.e01-d),point(-p.e02+d,p.e01-d),point(-p.e02+d,p.e01+d),point(-p.e02-d,p.e01+d)];

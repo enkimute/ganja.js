@@ -13,7 +13,7 @@ Algebra(2,0,1).inline(()=>{
     var line = (a,b,c)=>a*1e1+b*1e2+c*1e0;
     
     // Lines can also be defined by joining two points.
-    var join = (x,y)=>!(!x^!y);
+    var join = (x,y)=>x&y; // = !(!x^!y);
     
     // Define 3 points.
     var A=point(-1,1), B=point(-1,-1), C=point(1,-1); 

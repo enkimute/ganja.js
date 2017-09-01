@@ -11,7 +11,7 @@ Algebra(2,0,1).inline(()=>{
   // the PGA identities we need.
   var point      = (x,y)=>1e12-x*1e02+y*1e01,
       line       = (a,b,c)=>a*1e1+b*1e2+c*1e0,
-      join       = (X,Y)=>!(!X^!Y);
+      join       = (X,Y)=>X&Y; // = !(!X^!Y);
   
   // Define some points and lines.
   var A=point(0,-0.5), B=point(-0.5,-1), C=point(0.5,-1);
