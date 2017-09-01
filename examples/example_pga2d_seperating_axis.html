@@ -6,34 +6,39 @@
 Algebra(2,0,1).inline(()=>{
 
   // in 2D the seperating axis test involves testing the extent of the projection
-  // onto one of four possible seperating axi. 
+  // onto one of the possible seperating axi. we support all regular ngons and
+  // demonstrate intersection testing.
 
   // Some identities we'll use.
   var point      = (x,y)=>1e12-x*1e02+y*1e01,
       join       = (X,Y)=>X&Y,
       dist_pl    = (P,l)=>(P.Normalized^l.Normalized).e012,
       rotor      = (point,angle)=>Math.cos(angle/2) + Math.sin(angle/2)*point.Normalized,
-      box        = (p,d)=>[point(-p.e02-d,p.e01-d),point(-p.e02+d,p.e01-d),point(-p.e02+d,p.e01+d),point(-p.e02-d,p.e01+d)];
+      ngon       = (p,n,d,a)=>Array.apply([],{length:n}).map((x,i)=>rotor(p,(a||0)+2*Math.PI*i/n)>>>(p+d*1e01));
+
+  // the shapes can be movved around.
+  var pa = point(0,-0.2), pb = point(-0.8,-1);
   
-  // One box can be moved .. its around this point.
-  var pb = point(-0.8,-1);
-  
-  // Seperating axis test.
-  var sat=(a,b)=>{ 
-    var A1=join(a[0],a[1]), A2=join(a[1],a[2]), B1=join(b[0],b[1]), B2=join(b[1],b[2]);
-    var check=(box,axis,ref)=>{
-        var refd=dist_pl(ref,axis), dists=box.map(x=>dist_pl(x,axis));
-        var min=Math.min.apply(Math,dists), max=Math.max.apply(Math,dists);
-        return ((refd<min)||(refd>max))&&((0<min)||(0>max));
+  var sat=(a,b)=>{
+  // Collect potential axis candidates (all poly edges)
+    var e=[], da=[],db=[],i,al=a.length,bl=b.length;
+    for (i=0; i<(al%2?al:al/2); i++) e[i]=((a[i]&a[(i+1)%al]));
+    for (i=0; i<(bl%2?bl:bl/2); i++) e[i+al]=((b[i]&b[(i+1)%bl]));
+  // Testing a single edge
+    var check=(axis)=>{debugger;
+      for (var i=0; i<al; i++) da[i]=dist_pl(a[i],axis);
+      for (var i=0; i<bl; i++) db[i]=dist_pl(b[i],axis);
+      var mina=Math.min.apply(Math,da), maxa=Math.max.apply(Math,da);
+      var minb=Math.min.apply(Math,db), maxb=Math.max.apply(Math,db);
+      return (minb>maxa) || (mina>maxb) 
     }
-    return check(b,A2,a[0])||check(b,A1,a[2])||check(a,B2,b[0])||check(a,B1,b[2]);
+  // Test all edges. Return the seperating axis if found.
+    for (i=0; i<e.length; i++) if (check(e[i])) return e[i];
   }
   
-  // Graph it
   document.body.appendChild(this.graph(()=>{
-    // Define two boxes.
-    var pa = point(0,0.3-(performance.now()*0.0001%2));
-    var a = box(pa,0.45).map(x=>rotor(pa,performance.now()*0.001)>>>x), b = box(pb,0.4);
-    return [a,sat(a,b)?0xccffcc:0xffaaaa,b,0x444444,pb,"move",this.graph]}));
+    pa[4] = -0.2+(0.3-(performance.now()*0.0001%2));
+    var a = ngon(pa,3,0.65).map(x=>rotor(pa,pa.e01*10)>>>x), b = ngon(pb,6,0.5);
+    return [sat(a,b)?0x88ff88:0xffaaaa,a,b,0x444444,pa,pb,this.graph]}));
 })();
 </SCRIPT></BODY>
