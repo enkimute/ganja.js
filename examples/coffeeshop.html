@@ -63,12 +63,6 @@
     editor.session.setUseWorker(false);
     editor.setHighlightActiveLine(false);
     editor.$blockScrolling = Infinity;
-    editor.session.on('change',e=>{ changed=loaded&&true;  if (changed) $('RUN').style.opacity=1; });
-    editor.commands.addCommand({
-        name: "run changes",
-        bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
-        exec: function(editor) { $('RUN').click(); }
-    });
     
     var loaded=false;
     $('SAMPLE').src = 'example_'+(document.location.hash.slice(1).replace(/ /g,'_')||examples[0])+'.html';    
@@ -87,6 +81,13 @@
       if (a[0]) a[0].style.width='100%';
       $('RUN').style.opacity=0;
       var changed=false;
+
+      editor.session.on('change',e=>{ changed=loaded&&true;  if (changed) $('RUN').style.opacity=1; });
+      editor.commands.addCommand({
+          name: "run changes",
+          bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
+          exec: function(editor) { $('RUN').click(); }
+      });
 
       $('RUN').onclick = function(e) { 
         e.preventDefault(); e.stopPropagation(); 
