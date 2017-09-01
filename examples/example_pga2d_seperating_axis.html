@@ -25,7 +25,7 @@ Algebra(2,0,1).inline(()=>{
     for (i=0; i<(al%2?al:al/2); i++) e[i]=((a[i]&a[(i+1)%al]));
     for (i=0; i<(bl%2?bl:bl/2); i++) e[i+al]=((b[i]&b[(i+1)%bl]));
   // Testing a single edge
-    var check=(axis)=>{debugger;
+    var check=(axis)=>{
       for (var i=0; i<al; i++) da[i]=dist_pl(a[i],axis);
       for (var i=0; i<bl; i++) db[i]=dist_pl(b[i],axis);
       var mina=Math.min.apply(Math,da), maxa=Math.max.apply(Math,da);
