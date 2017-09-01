@@ -21,8 +21,8 @@ Algebra(2,0,1).inline(()=>{
   var sat=(a,b)=>{
   // Collect potential axis candidates (all poly edges or half of them for symmetric polys)
     var e=[], da=[], db=[], i, al=a.length, bl=b.length;
-    for (i=0; i<(al%2?al:al/2); i++) e[i]=a[i]&a[i+1%al];
-    for (i=0; i<(bl%2?bl:bl/2); i++) e[i+al]=b[i]&b[i+1%bl];
+    for (i=0; i<(al%2?al:al/2); i++) e[i]=a[i]&a[(i+1)%al];
+    for (i=0; i<(bl%2?bl:bl/2); i++) e[i+al]=b[i]&b[(i+1)%bl];
   // Testing a single axis
     var check=(axis)=>{
       for (var i=0; i<al; i++) da[i]=dist_pl(a[i],axis);
