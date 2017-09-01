@@ -5,11 +5,9 @@
 // Create a Clifford Algebra with 2,0,1 metric.
 Algebra(2,0,1).inline(()=>{
 
-  // in 2D, the seperating axis test involves testing overlap of the projection
-  // onto one of the possible seperating axi. we support all regular ngons and
-  // demonstrate intersection testing.
+  // The Euler line connects several important points in any non equilateral triangle.
 
-  // Some identities we'll use.
+  // Not many identities needed..
   var point      = (x,y)=>1e12-x*1e02+y*1e01;
   
   // Three points.
