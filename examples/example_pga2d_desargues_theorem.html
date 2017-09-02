@@ -20,12 +20,12 @@ Algebra(2,0,1).inline(()=>{
       yx=()=>y&x, yz=()=>y&z, xz=()=>x&z;
 
   document.body.appendChild(this.graph([
-    0x4444ff, OX, OY, OZ,                                           // Blue lines through triangle vertices.
-    0xcccccc, YX, YZ, XZ, yx, yz, xz, YX^yx, YZ^yz, xz^XZ,          // Grey lines through edges
-    0x76cc82, [X,Y,Z], 0xffeb57, ()=>[x,y,z],                       // Render both triangles.
-    0xaaaaaa, x, "x", y, "y", z, "z",                               // Light Grey Derived points small triangle.
-    0xff0000, ()=>(YX^yx)&(xz^XZ), "Axis of perspectivity",         // Red axis of perspectivity
-    0x444444, X, "X", Y, "Y", Z, "Z", O, "Center of perspectivity", // Points and center of perspectivity
+    0x4444ff, OX, OY, OZ,                                               // Blue lines through triangle vertices.
+    0xcccccc, YX, YZ, XZ, yx, yz, xz, ()=>YX^yx, ()=>YZ^yz, ()=>xz^XZ,  // Grey lines through edges
+    0x76cc82, [X,Y,Z], 0xffeb57, ()=>[x,y,z],                           // Render both triangles.
+    0xaaaaaa, x, "x", y, "y", z, "z",                                   // Light Grey Derived points small triangle.
+    0xff0000, ()=>(YX^yx)&(xz^XZ), "Axis of perspectivity",             // Red axis of perspectivity
+    0x444444, X, "X", Y, "Y", Z, "Z", O, "Center of perspectivity",     // Points and center of perspectivity
   ]));
 })();
 </SCRIPT></BODY>
