@@ -212,32 +212,6 @@ and play around with the examples. They are interactive and you can easily
 change the code online. No need to download or install anything !
 
 <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
-
-<TR><TD ALIGN=CENTER>
-Complex Mandelbrot<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#complex_mandelbrot"           TARGET="_blank" TITLE="Complex Mandelbrot"><IMG SRC="images/complex_mandelbrot.jpg"/></A>
-<TD>
-<PRE>document.body.appendChild(Algebra(0,1).graph((x,y)=>{
-  var n=35, z=0e1, c=x*1.75-1+y*1e1;
-  while (z < 2 && n--) z=z**2+c;
-  return (n/30);
-});
-</PRE>
-
-
-<TR><TD ALIGN=CENTER>
-Mandelbrot with Quaternion Hue colorisation<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_mandelbrot"        TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/quaternion_mandelbrot.jpg"/></A>
-<TD>
-<PRE>document.body.appendChild(Algebra(3).graph((x,y)=>{
-  var n=40, z=0e12, c=x*1.75-1+y*1e12;
-  while (z < 2 && n--) z=z**2+c;
-  var red=1e12, rot=Math.cos(n/20) + Math.sin(n/20)*(0.578e12+0.578e13+0.578e23);
-  return (rot>>>red).Vector;
-}));
-</PRE>
-
-
 <TR><TD ALIGN=CENTER>
 Complex Mandelbrot<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#complex_mandelbrot"           TARGET="_blank" TITLE="Complex Mandelbrot"><IMG SRC="images/complex_mandelbrot.jpg"/></A>
