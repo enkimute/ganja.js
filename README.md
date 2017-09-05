@@ -162,18 +162,27 @@ Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffe
 and play around with the examples. They are interactive and you can easily
 change the code online. No need to download or install anything !
 
-<DiV STYLE="display:inline-block">PGA2D Points and Lines<BR>
+<TABLE><TR><TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
-</DIV>
+<TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_distances_and_angles"   TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/pga2d_distances_and_angles.jpg"/></A>
+<TR><TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_project_and_reject"     TARGET="_blank" TITLE="PGA2D Project and Reject"><IMG SRC="images/pga2d_project_and_reject.jpg"/></A>
+<TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_rotors_and_translators" TARGET="_blank" TITLE="PGA2D Rotors and Translators"><IMG SRC="images/pga2d_rotors_and_translators.jpg"/></A>
+<TR><TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_isometries"             TARGET="_blank" TITLE="PGA2D Isometries"><IMG SRC="images/pga2d_isometries.jpg"/></A>
+<TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_inverse_kinematics"     TARGET="_blank" TITLE="PGA2D Inverse Kinematics"><IMG SRC="images/pga2d_inverse_kinematics.jpg"/></A>
+<TR><TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_separating_axis"        TARGET="_blank" TITLE="PGA2D Separating Axis"><IMG SRC="images/pga2d_separating_axis.jpg"/></A>
+<TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_pose_estimation"        TARGET="_blank" TITLE="PGA2D Pose Estimation"><IMG SRC="images/pga2d_pose_estimation.jpg"/></A>
+<TR><TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_euler_line"             TARGET="_blank" TITLE="PGA2D Euler Line"><IMG SRC="images/pga2d_euler_line.jpg"/></A>
+<TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_desargues_theorem"      TARGET="_blank" TITLE="PGA2D Desargues Theorem"><IMG SRC="images/pga2d_desargues_theorem.jpg"/></A>
+</TABLE>
 
 <A NAME="syntax"></A>
 ### Syntax overview.
