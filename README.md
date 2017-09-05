@@ -2,7 +2,7 @@
 
 **G**eometric **A**lgebra - **N**ot **J**ust **A**lgebra
 
-![title image](images/ganja_thumb.jpg)
+<IMG TITLE="Geometric Algebra - Not Just Algebra" SRC="images/ganja_thumb.jpg" WIDTH=100%>
 
 Ganja.js is a Geometric Algebra code generator for javascript. It generates
 Clifford algebras and sub-algebras of any signature and implements operator 
@@ -21,8 +21,8 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 ### Contents
 
 [1. Reasons to use ganja](#Features)<BR>
-[2. Using ganja the first time](#Started)<BR>
-[3. Ganja for experts](#custom)<BR>
+[2. Using ganja for the first time](#Started)<BR>
+[3. Ganja for experienced users](#custom)<BR>
 [4. Getting free ganja samples](#samples)<BR>
 [4. Syntax overview](#syntax)<BR>
 [5. Inline operators and Algebraic Literals](#inline)<BR>
@@ -51,7 +51,7 @@ advanced syntax and graphing makes math in the browser feel like .. math.
 * Easy graph function for 1D and 2D functions and Projective 2D elements.
 
 <A NAME="Started"></A>
-### Using ganja the first time
+### Using ganja for the first time
 
 Start off by including the ganja.js script. (ganja.js has no dependencies - just 7.9kb on the wire)
 
@@ -129,7 +129,7 @@ Algebra(0,1).describe();
 ```
 
 <A NAME="custom"></A>
-### Ganja for experts.
+### Ganja for experienced users.
 
 Ganja.js allows you to further customise the algebra class it
 generates, allowing you to generate subalgebras (who's elements use
