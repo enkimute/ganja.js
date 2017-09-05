@@ -162,7 +162,9 @@ Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffe
 and play around with the examples. They are interactive and you can easily
 change the code online. No need to download or install anything !
 
+<DiV STYLE="display:inline-block">PGA2D Points and Lines<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
+</DIV>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_distances_and_angles"   TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/pga2d_distances_and_angles.jpg"/></A>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_project_and_reject"     TARGET="_blank" TITLE="PGA2D Project and Reject"><IMG SRC="images/pga2d_project_and_reject.jpg"/></A>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_rotors_and_translators" TARGET="_blank" TITLE="PGA2D Rotors and Translators"><IMG SRC="images/pga2d_rotors_and_translators.jpg"/></A>
