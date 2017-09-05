@@ -215,6 +215,17 @@ change the code online. No need to download or install anything !
 <TR><TD ALIGN=CENTER>
 Complex Mandelbrot<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#complex_mandelbrot"           TARGET="_blank" TITLE="Complex Mandelbrot"><IMG SRC="images/complex_mandelbrot.jpg"/></A>
+<TD>
+```javascript
+document.body.appendChild(Algebra(0,1).graph((x,y)=>{
+  var n=35, z=0e1, c=x*1.75-1+y*1e1;
+  while (z < 2 && n--) z=z**2+c;
+  return (n/30);
+});
+```
+<TR><TD ALIGN=CENTER>
+Complex Mandelbrot<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#complex_mandelbrot"           TARGET="_blank" TITLE="Complex Mandelbrot"><IMG SRC="images/complex_mandelbrot.jpg"/></A>
 <TD ALIGN=CENTER>
 Mandelbrot with Quaternion Hue colorisation<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_mandelbrot"        TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/quaternion_mandelbrot.jpg"/></A>
