@@ -162,6 +162,11 @@ Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffe
 and play around with the examples. They are interactive and you can easily
 change the code online. No need to download or install anything !
 
+![PGA2D points and lines](images/pga2d_points_and_lines.jpg) ![PGA2D distances and angles](images/pga2d_distances_and_angles.jpg) ![PGA2D project and reject](images/pga2d_project_and_reject.jpg)
+![PGA2D rotors and translators](images/pga2d_rotors_and_translators.jpg) ![PGA2D isometries](images/pga2d_isometries.jpg) ![PGA2D inverse kinematics](images/pga2d_inverse_kinematics.jpg)
+![PGA2D separating axis](images/pga2d_separating_axis.jpg) ![PGA2D pose estimation](images/pga2d_pose_estimation.jpg) ![PGA2D euler line](images/pga2d_euler_line.jpg)
+![PGA2D desargues theorem](images/pga2d_desargues_theorem.jpg)
+
 <A NAME="syntax"></A>
 ### Syntax overview.
 
