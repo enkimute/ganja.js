@@ -24,7 +24,7 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 [2. Using ganja for the first time](#Started)<BR>
 [3. Ganja for experienced users](#custom)<BR>
 [4. Getting free ganja samples](#samples)<BR>
-[4. Syntax overview](#syntax)<BR>
+[4. Ganja ingredients and syntax](#syntax)<BR>
 [5. Inline operators and Algebraic Literals](#inline)<BR>
 [6. Example : R<sub>0,1</sub> Complex Numbers Mandelbrot](#C)<BR>
 [7. Example : R<sub>3</sub> Color Space Hue Rotor](#R3)<BR>
@@ -96,6 +96,33 @@ overloading, overloads scientific e-notation to allow you to directly
 specify basis blades and allows using lambda expressions without the need
 for calling brackets in algebraic expressions.
 
+```javascript
+Algebra(2,0,1).inline(()={
+
+  // Direct specification of basis blades using e-notation.
+  var xy_bivector = 1e12,
+      pseudoscalar = 1e012;
+
+  // Operator overloading .. * = geometric product, ^ = wedge, & = vee, << = dot, >>> = sandwich ... 
+  var xy_bivector_from_product = 1e1 * 1e2;
+
+  // Directly specified point.
+  var some_point = 1e12 + 0.4e01 + 0.5e02;  
+
+  // Function that returns point.
+  var function_that_returns_point = ()=>some_point + 0.5e01;
+
+  // Join of point and function .. notice no calling brackets .. 
+  var join_between_point_and_function = some_point & function_that_returns_point;
+
+  // Same line as above.. but as function.. (so will update if the point changes)
+  var function_that_returns_join = ()=>join_between_point_and_function;
+
+  // All elements and functions can be rendered directly. (again, no calling brackets). 
+  var canvas = this.graph([ some_point, function_that_returns_point, function_that_returns_join ]);
+
+})();
+```
 Under the hood, ganja.js will translate these functions. 
 
 ```javascript
@@ -117,7 +144,11 @@ Your Algebra also exposes a static **_graph_** function that allows you to
 easily graph 1D or 2D functions as well as 2D PGA elements.
 
 ```javascript
-document.body.appendChild(Algebra(0).graph(x=>Math.sin(x*5)));    // Graph a 1D function in R
+canvas = Algebra(0).graph(x=>Math.sin(x*5));            // Graph a 1D function in R
+
+canvas = Algebra(0).graph((x,y)=>x+y);                  // Graph a 2D function in R
+
+svg = Algebra(2,0,1).graph(()=>[1e12,1e1,1e2]);         // Graph the origin and x and y-axis
 ```
 Again, many more examples can be found at [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html).
 
@@ -154,6 +185,18 @@ When not specified, ganja.js will generate basis names that are
 grouped by rank and numerically sorted. By default, a single zero
 dimension will get generator name e<sub>0</sub> and will take
 the first place. 
+
+By default, your algebra elements will inherit from Float32Array.
+You can change the underlying datatype used by ganja.js to any of the
+typed array basis types :
+
+```javascript
+
+var R3_32 = Algebra(3);
+
+var R3_64 = Algebra({p:3,baseType:Float64Array});
+
+```
 
 <A NAME="samples"></A>
 ### Getting free ganja samples.
@@ -202,7 +245,7 @@ PGA2D Desargues Theorem<BR>
 </TABLE>
 
 <A NAME="syntax"></A>
-### Syntax overview.
+### Ganja ingredients and syntax.
 
 Here's a list of the supported operators in all syntax flavors : 
 
