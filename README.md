@@ -162,12 +162,16 @@ Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffe
 and play around with the examples. They are interactive and you can easily
 change the code online. No need to download or install anything !
 
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines" TARGET="_BLANK"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
-![PGA2D points and lines](images/pga2d_points_and_lines.jpg) ![PGA2D distances and angles](images/pga2d_distances_and_angles.jpg)
-![PGA2D project and reject](images/pga2d_project_and_reject.jpg) ![PGA2D rotors and translators](images/pga2d_rotors_and_translators.jpg)
-![PGA2D isometries](images/pga2d_isometries.jpg) ![PGA2D inverse kinematics](images/pga2d_inverse_kinematics.jpg)
-![PGA2D separating axis](images/pga2d_separating_axis.jpg) ![PGA2D pose estimation](images/pga2d_pose_estimation.jpg)
-![PGA2D euler line](images/pga2d_euler_line.jpg) ![PGA2D desargues theorem](images/pga2d_desargues_theorem.jpg)
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_distances_and_angles"   TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/pga2d_distances_and_angles.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_project_and_reject"     TARGET="_blank" TITLE="PGA2D Project and Reject"><IMG SRC="images/pga2d_project_and_reject.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_rotors_and_translators" TARGET="_blank" TITLE="PGA2D Rotors and Translators"><IMG SRC="images/pga2d_rotors_and_translators.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_isometries"             TARGET="_blank" TITLE="PGA2D Isometries"><IMG SRC="images/pga2d_isometries.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_inverse_kinematics"     TARGET="_blank" TITLE="PGA2D Inverse Kinematics"><IMG SRC="images/pga2d_inverse_kinematics.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_separating_axis"        TARGET="_blank" TITLE="PGA2D Separating Axis"><IMG SRC="images/pga2d_separating_axis.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_pose_estimation"        TARGET="_blank" TITLE="PGA2D Pose Estimation"><IMG SRC="images/pga2d_pose_estimation.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_euler_line"             TARGET="_blank" TITLE="PGA2D Euler Line"><IMG SRC="images/pga2d_euler_line.jpg"/></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_desargues_theorem"      TARGET="_blank" TITLE="PGA2D Desargues Theorem"><IMG SRC="images/pga2d_desargues_theorem.jpg"/></A>
 
 <A NAME="syntax"></A>
 ### Syntax overview.
