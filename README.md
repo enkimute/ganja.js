@@ -32,15 +32,15 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 ### Reasons to use ganja
 
 Ganja.js makes doing Geometric Algebra in your browser easy and fun. It's
-advanced syntax and graphing makes math in the browser feel like .. math.
+inline syntax and graphing makes math in the browser feel like .. math.
 
 * Operator overloading
 * Algebraic constants
 * Supports any metric (positive,negative,zero)
-* smallish (170 lines)
+* smallish (173 lines)
 * matrix-free inverses up to 5D.
-* geometric, inner (contraction), outer product
-* conjugate, reverse, involute, dual (Poincare), negative
+* geometric, inner (contraction), outer (wedge) and vee product
+* conjugate, Reverse, Involute, Dual (Poincare), Negative
 * 4 API's (inline, asciimath, object oriented, functional)
 * Easy graph function for 1D and 2D functions and Projective 2D elements.
 
@@ -52,6 +52,8 @@ Start off by including the ganja.js script. (ganja.js has no dependencies - just
 ```html
 <SCRIPT SRC="https://raw.githubusercontent.com/enkimute/ganja.js/master/ganja.js"></SCRIPT>
 ```
+#### The Algebra Function
+
 To create an Algebra, call the **_Algebra_** function specifying the metric
 signature (number of positive,negative and zero dimensions). The result is 
 an ES6 class implementing the requested clifford algebra.
@@ -78,7 +80,11 @@ return a.Mul(b);                // returns [-5, 14]
 ```
 This however, is not very pretty. It's not that much fun either. Luckily,
 ganja.js provides an alternate way to write algebraic functions, literals
-and expressions. Your Algebra class exposes this interface through the
+and expressions. 
+
+#### The inline function
+
+Your Algebra class exposes this interface through the
 **_inline_** function. Using the **_inline_** function, the above example is
 written :
 
@@ -134,6 +140,8 @@ Because I'm out of aspirin, I'll leave the proof of that to the reader.
 See the [coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html) for more
 examples of how to use the inline syntax.
 
+#### The graph function.
+
 Your Algebra also exposes a static **_graph_** function that allows you to
 easily graph 1D or 2D functions as well as 2D PGA elements.
 
@@ -145,6 +153,8 @@ canvas = Algebra(0).graph((x,y)=>x+y);                  // Graph a 2D function i
 svg = Algebra(2,0,1).graph(()=>[1e12,1e1,1e2]);         // Graph the origin and x and y-axis
 ```
 Again, many more examples can be found at [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html).
+
+#### The describe function.
 
 To display the basis blade names, metric, Cayley table and more, use the
 static **_describe_** function.
