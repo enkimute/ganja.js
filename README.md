@@ -162,9 +162,11 @@ Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffe
 and play around with the examples. They are interactive and you can easily
 change the code online. No need to download or install anything !
 
-<TABLE><TR><TD>
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0><TR><TD>
+PGA2D Points and Lines<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
 <TD>
+PGA2D Distances and Angles<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_distances_and_angles"   TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/pga2d_distances_and_angles.jpg"/></A>
 <TR><TD>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_project_and_reject"     TARGET="_blank" TITLE="PGA2D Project and Reject"><IMG SRC="images/pga2d_project_and_reject.jpg"/></A>
