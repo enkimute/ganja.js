@@ -162,7 +162,14 @@ Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffe
 and play around with the examples. They are interactive and you can easily
 change the code online. No need to download or install anything !
 
-<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0><TR><TD>
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR><TD>
+Complex Mandelbrot<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#complex_mandelbrot"           TARGET="_blank" TITLE="Complex Mandelbrot"><IMG SRC="images/complex_mandelbrot.jpg"/></A>
+<TD>
+Mandelbrot with Quaternion Hue colorisation<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_mandelbrot"        TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/quaternion_mandelbrot.jpg"/></A>
+<TR><TD>
 PGA2D Points and Lines<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
 <TD>
