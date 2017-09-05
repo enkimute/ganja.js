@@ -212,7 +212,7 @@ and play around with the examples. They are interactive and you can easily
 change the code online. No need to download or install anything !
 
 <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
-<TR><TD>
+<TR><TD ALIGN=CENTER>
 Complex Mandelbrot<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#complex_mandelbrot"           TARGET="_blank" TITLE="Complex Mandelbrot"><IMG SRC="images/complex_mandelbrot.jpg"/></A>
 <TD>
