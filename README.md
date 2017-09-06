@@ -199,8 +199,8 @@ the first place.
 |4,0,0 and 3,1,0|1,e<sub>1</sub>,e<sub>2</sub>,e<sub>3</sub>,e<sub>4</sub>,e<sub>12</sub>,e<sub>13</sub>,e<sub>14</sub>,e<sub>23</sub>,e<sub>24</sub>,e<sub>34</sub>,e<sub>123</sub>,e<sub>124</sub>,e<sub>134</sub>,e<sub>234</sub>,e<sub>1234</sub>
 |3,0,1|1,e<sub>0</sub>,e<sub>1</sub>,e<sub>2</sub>,e<sub>3</sub>,e<sub>01</sub>,e<sub>02</sub>,e<sub>03</sub>,e<sub>12</sub>,e<sub>13</sub>,e<sub>23</sub>,e<sub>012</sub>,e<sub>013</sub>,e<sub>023</sub>,e<sub>123</sub>,e<sub>0123</sub>
 
-*note* the scalar part of a multivector can be addressed with "mv.s", other basis
-blades follow the expected pattern. e.g. "mv.e12" or "mv.e012". 
+*note* the scalar part of a multivector **"mv"** can be addressed with **"mv.s"**, other basis
+blades follow the expected pattern. e.g. **"mv.e12"** or **"mv.e012"**. 
 
 By default, your algebra elements will inherit from Float32Array.
 You can change the underlying datatype used by ganja.js to any of the
