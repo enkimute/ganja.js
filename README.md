@@ -116,7 +116,7 @@ Algebra(2,0,1).inline(()={
   var join_between_point_and_function = some_point & function_that_returns_point;
 
   // Same line as above.. but as function.. (so will update if the point changes)
-  var function_that_returns_join = ()=>join_between_point_and_function;
+  var function_that_returns_join = ()=>some_point & function_that_returns_point;
 
   // All elements and functions can be rendered directly. (again, no calling brackets). 
   var canvas = this.graph([ some_point, function_that_returns_point, function_that_returns_join ]);
