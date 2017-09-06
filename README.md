@@ -376,7 +376,7 @@ P3.inline(function(){
   // Join and Meet
     this.join = (x,y)=>x&y;
     this.meet = (x,y)=>x^y;
-  // Table from "Geometric Algebra for Copmuter Graphics" p.15
+  // Table from "Geometric Algebra for Computer Graphics" p.15
     this.LineFromPoints            = (P,Q)=>P3.join(P,Q);
     this.LineFromPlanes            = (a,b)=>a^b;
     this.PointFromPlanes           = (a,b,c)=>a^b^c;
