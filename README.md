@@ -192,12 +192,12 @@ the first place.
 
 |signature|default basis names
 |---|---
-|2,0,0 and 1,1,0|1,e1,e2,e12
-|1,0,1|1,e0,e1,e01
-|3,0,0 and 2,1,0|1,e1,e2,e3,e12,e13,e23,e123
-|2,0,1|1,e0,e1,e2,e01,e02,e12,e012
-|4,0,0 and 3,1,0|1,e1,e2,e3,e4,e12,e13,e14,e23,e24,e34,e123,e124,e134,e234,e1234
-|3,0,1|1,e0,e1,e2,e3,e01,e02,e03,e12,e13,e23,e012,e013,e023,e123,e0123
+|2,0,0 and 1,1,0|1,e<sub>1</sub>,e<sub>2</sub>,e<sub>12</sub>
+|1,0,1|1,e<sub>0</sub>,e<sub>1</sub>,e<sub>01</sub>
+|3,0,0 and 2,1,0|1,e<sub>1</sub>,e<sub>2</sub>,e<sub>3</sub>,e<sub>12</sub>,e<sub>13</sub>,e<sub>23</sub>,e<sub>123</sub>
+|2,0,1|1,e<sub>0</sub>,e<sub>1</sub>,e<sub>2</sub>,e<sub>01</sub>,e<sub>02</sub>,e<sub>12</sub>,e<sub>012</sub>
+|4,0,0 and 3,1,0|1,e<sub>1</sub>,e<sub>2</sub>,e<sub>3</sub>,e<sub>4</sub>,e<sub>12</sub>,e<sub>13</sub>,e<sub>14</sub>,e<sub>23</sub>,e<sub>24</sub>,e<sub>34</sub>,e<sub>123</sub>,e<sub>124</sub>,e<sub>134</sub>,e<sub>234</sub>,e<sub>1234</sub>
+|3,0,1|1,e<sub>0</sub>,e<sub>1</sub>,e<sub>2</sub>,e<sub>3</sub>,e<sub>01</sub>,e<sub>02</sub>,e<sub>03</sub>,e<sub>12</sub>,e<sub>13</sub>,e<sub>23</sub>,e<sub>012</sub>,e<sub>013</sub>,e<sub>023</sub>,e<sub>123</sub>,e<sub>0123</sub>
 
 *note* the scalar part of a multivector can be addressed with "mv.s", other basis
 blades follow the expected pattern. e.g. "mv.e12" or "mv.e012". 
