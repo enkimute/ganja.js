@@ -14,11 +14,14 @@
     .complex.SELECTED { background-color:#eee; color:#606060; }
     .pga2d          { background-color:#ccf; color:#668; }
     .pga2d.SELECTED { background-color:#eef; color:#606080; }
+    .game          { background-color:#fcf; color:#868; }
+    .game.SELECTED { background-color:#fef; color:#806080; }
     .quaternion          { background-color:#cfc; color:#686; }
     .quaternion.SELECTED { background-color:#efe; color:#608060; }
     #HEADER { background-color:#eee; }
     .TAB { display:none; }
     #HEADER.complex > .TAB.complex { display:block; }
+    #HEADER.game > .TAB.game { display:block; }
     #HEADER.quaternion > .TAB.quaternion { display:block; }
     #HEADER.pga2d > .TAB.pga2d { display:block; }
     #RUN { box-sizing:border-box; position:absolute; top:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
@@ -41,8 +44,9 @@
     <SPAN CLASS="complex" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('complex'); ">Complex</SPAN>
     <SPAN CLASS="quaternion" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('quaternion'); ">Quaternion</SPAN>
     <SPAN CLASS="pga2d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga2d'); ">PGA 2D</SPAN>
+    <SPAN CLASS="game" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('game'); ">Games</SPAN>
   </DIV>
-  <DIV ID="HEADER" CLASS="complex quaternion pga2d">
+  <DIV ID="HEADER" CLASS="complex quaternion pga2d game">
   </DIV>
   <DIV ID="MAIN">
     <DIV ID="RUN">&#x25B6; Run Changes <SPAN STYLE="opacity:0.5; float:right; margin-left:30px">Ctrl+Enter</SPAN></DIV>
@@ -50,7 +54,7 @@
     <PRE ID="SOURCE"></PRE>
   </DIV>
   <SCRIPT>
-    var examples = ["complex_mandelbrot","quaternion_hue","quaternion_mandelbrot","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_separating_axis","pga2d_pose_estimation","pga2d_euler_line","pga2d_desargues_theorem"]
+    var examples = ["complex_mandelbrot","quaternion_hue","quaternion_mandelbrot","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_separating_axis","pga2d_pose_estimation","pga2d_euler_line","pga2d_desargues_theorem","game_wedge"]
     
     var $ = document.getElementById.bind(document);
     
