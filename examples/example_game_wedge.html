@@ -125,7 +125,7 @@
       ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Orthocenter",find,((C<<(A&B))^(A<<(B&C))),given,A,B,C];},
       ()=>{
         var A=point(1.2,0.8), B=point(0.4,-1), C=point(-1,-0.9);
-        return ["Eulers line",find,((C<<(A&B))^(A<<(B&C))).Normalized&(((A&B).Normalized+(C&B).Normalized)^((B&C).Normalized+(A&C).Normalized)).Normalized,given,A,B,C];
+        return ["Eulers line",find,((C<<(A&B))^(A<<(B&C)))&(((A+B)<<(A&B))^((B+C)<<(B&C))),given,A,B,C];
       },
       ()=>["End of game",find,1e12]
     ];
@@ -150,5 +150,6 @@
   // and.... go!    
   nextLevel();
   
+
 </SCRIPT>
 </BODY>
