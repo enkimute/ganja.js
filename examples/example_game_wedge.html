@@ -28,128 +28,154 @@
   </STYLE>
 </HEAD>
 <BODY><SCRIPT>
-  /*******************************************************************************************/
-  /*                Wedge - The math game free of charge and coordinates.                    */
-  /*******************************************************************************************/
+/*******************************************************************************************/
+/*                Wedge - The math game free of charge and coordinates.                    */
+/*******************************************************************************************/
 
-  // $elect, Merge, Create (svg), Append, Group (svg)
-  var $ = document.querySelector.bind(document),
-      m = (a,b,c,d)=>{ for (var i in b) a[i]=b[i]; for (i in c) a.style[i]=c[i]; for (i in d) a.setAttribute(i,d[i]); return a},
-      c = (a,b,c,d)=>m(document.createElementNS('http://www.w3.org/2000/svg',a),c,d,b),
-      a = (x,p)=>(p||$('#main')).appendChild(x),
-      g = function(){ var i,g=c('g'); for (i in arguments) a(arguments[i],g); return g};
-  
-  // Main setup .. SVG renderer.
-  a(c('svg',{viewBox:"-2 -2 4 4"},{id:"main"}),document.body);
-  a(m(document.createElement('div'),{id:"title"}),document.body);
-  
-  // Global selection.
-  var selection=[],
-      selectionAdd   = (s,dx,dy)=>{ selectionDel(s); selection.push([s,dx,dy]); handle_operation(); },
-      selectionDel   =       (s)=>{ var i=selection.findIndex(x=>x[0]==s); if (~i) selection.splice(i,1); },
-      selectionClear =        ()=>{ selection.forEach(x=>x[0].clear()); selection=[] };
-      
-  // Process selection - see if we have an operator.
-  function handle_operation() {
-    if (selection.length!=2) return;
-    var adx = selection[0][1], ady=selection[0][2], bdx=selection[1][1], bdy=selection[1][2],
-        al = Math.sqrt(adx**2+ady**2), bl = Math.sqrt(bdx**2+bdy**2),
-        abx = (selection[0][0].g._x||selection[0][0].l.x1.baseVal.value) - (selection[1][0].g._x||selection[1][0].l.x1.baseVal.value), 
-        aby = (selection[0][0].g._y||selection[0][0].l.y1.baseVal.value) - (selection[1][0].g._y||selection[1][0].l.y1.baseVal.value), abl=Math.sqrt(abx**2+aby**2),
-        cb = (abx/abl)*(bdx/bl)+(aby/abl)*(bdy/bl), ca = (-abx/abl)*(adx/al)+(-aby/abl)*(ady/al),
-        holda=al<0.1,holdb=bl<0.1,aout=al>0.1&&ca<0,bout=bl>0.1&&cb<0,ain=al>0.1&&ca>0,bin=bl>0.1&&cb>0; 
-         if (aout && bout) var n=selection[0][0].P.Vee(selection[1][0].P).Normalized; 
-    else if (ain  && bin)  var n=selection[0][0].P.Wedge(selection[1][0].P).Normalized; 
-    else if (holda && bin) var n=selection[0][0].P.Dot(selection[1][0].P).Normalized; 
-    else if (holdb && ain) var n=selection[1][0].P.Dot(selection[0][0].P).Normalized; 
-    else return setTimeout(selectionClear,600);
-    // upgrade wedge of points or vee of lines to sum.
-    if ((ain&&bin&&n.Length==0)||(aout&&bout&&n.Length==0) )n=selection[0][0].P.Add(selection[1][0].P).Normalized;
-    return setTimeout(()=>{ level.push(n); build(n); selectionClear(); check(); },600); 
-  }    
-  
-  // Check level progress.
-  function check() {
-    if (req.filter(x=>level.slice(origl-1).filter(y=>{ if (!(y instanceof PGA2D)) return false;
-      x=x.Normalized; y=y.Normalized;
-      if (x.Blade(1).Length > 0.01 && y.Blade(1).Length > 0.01 && (x.Sub(y).Length<0.01 || x.Add(y).Length<0.01) && Math.abs(Math.abs(x.e0)-Math.abs(y.e0))<0.01) return true;
-      else if (x.e12 > 0.01 && y.e12 > 0.01 && x.Vee(y).Length < 0.01) return true;
-      return false;
-    }).length).length == req.length) setTimeout(nextLevel,2000);
-  }
-  
-  // Fancy dragable Points
-  function point(P,color) {
-    var x=P.e01/P.e12, y=P.e02/P.e12,
-        stop=(e)=>{ this.gp.removeEventListener('mousemove',move,false); this.gp.removeEventListener('mouseup',stop,false); selectionAdd(this,this.c.cx.baseVal.value,this.c.cy.baseVal.value); },
-        move=(e)=>{ var ww=window.innerWidth,wh=window.innerHeight,d=(wh>ww)?wh/ww:1,d2=(ww>wh)?ww/wh:1,cx=(e.x/ww*4-2)*d2-this.g._x,cy=(e.y/wh*4-2)*d-this.g._y;m(this.c,{},{},{cx,cy}); m(this.l,{},{},{x2:cx,y2:cy});};
-    m(this,{ active:color!=0xff8888,P,c:c('circle',{cx:0,cy:0,r:0.2,class:'pointBase'},{},{stroke:(color==0xffffff)?'':('#'+color.toString(16)),fill:'#'+(color.toString(16)||'F00')}),
-             l:c('line',{x1:0,y1:0,x2:0,y2:0,class:'pointLine'}),clear:function(){ this.g.classList.remove('selected'); m(this.c,{},{},{cx:0,cy:0}); m(this.l,{},{},{x2:0,y2:0}); }, });
-    this.g = m(a(g(this.c,this.l,c('circle',{cx:0,cy:0,r:0.2,class:'pointSel'}))),{_x:x||0,_y:y||0},{},{transform:`translate(${x||0} ${y||0})`});
-    this.gp = this.g.parentElement;
-    if (this.active) this.c.addEventListener('mousedown',(e)=>{ if (this.g.classList.toggle('selected')){ this.gp.addEventListener('mousemove',move,false); this.gp.addEventListener('mouseup',stop,false); } else this.clear(); },false);         
-  }
-  
-  // Fancy dragable Lines
-  function line(P,color) {
-    P = P.Normalized; var ly=P.e0, lr=Math.atan2(P.e2,P.e1)/Math.PI*180;
-    var stop=(e)=>{this.gp.removeEventListener('mousemove',move,false);this.gp.removeEventListener('mouseup',stop,false);selectionAdd(this,this.l.x2.baseVal.value-this.l.x1.baseVal.value,this.l.y2.baseVal.value-this.l.y1.baseVal.value);},
-        move=(e)=>{var ww=window.innerWidth,wh=window.innerHeight,d=(wh>ww)?wh/ww:1,d2=(ww>wh)?ww/wh:1,cx=(e.x/ww*4-2)*d2,cy=(e.y/wh*4-2)*d;m(this.l,{},{},{x2:cx,y2:cy});m(this.c2,{},{},{cx,cy});};
-    m(this,{P,active:color!=0xff8888,l:c('line',{x1:0,y1:ly,x2:0,y2:ly,class:'pointLine'}),c:c('line',{x1:-10,y1:ly,x2:10,y2:ly,transform:`rotate(${lr})`,class:'lineSel'}),c2:c('circle',{cx:0,cy:ly,class:'lineSelPoint'})});
-    this.g = a(g(c('line',{x1:-10,y1:ly,x2:10,y2:ly,class:'lineBase',transform:`rotate(${lr})`},{},{stroke:(color==0xffffff)?'':('#'+color.toString(16))}),this.l,this.c,this.c2));
-    this.gp = this.g.parentElement; this.clear = function(){ this.g.classList.remove('selected'); m(this.l,{},{},{x1:0,y1:0,x2:0,y2:0}); m(this.c2,{},{},{cx:0,cy:0}); };
-    if (this.active) this.c.addEventListener('mousedown',(e)=>{
-      if (this.g.classList.toggle('selected')) {
-        var ww=window.innerWidth,wh=window.innerHeight,d=(wh>ww)?wh/ww:1,d2=(ww>wh)?ww/wh:1,cx=(e.x/ww*4-2)*d2,cy=(e.y/wh*4-2)*d; 
-        m(this.l,{},{},{x1:cx,y1:cy,x2:cx,y2:cy}); m(this.c2,{},{},{cx,cy}); this.gp.addEventListener('mousemove',move,false); this.gp.addEventListener('mouseup',stop,false);
-      } else { this.clear(); selectionDel(this); }
-    },false);         
-    return this;
-  }
-  
-  // Define our levels.. 
-  var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x666666, levels = PGA2D.inline(()=>{
-    // Some helpers.
-    var point = (x,y)=>1e12-x*1e01+y*1e02,
-        line  = (a,b,c)=>c*1e0+a*1e1+b*1e2,
-        A=point(-1,0),B=point(1,0.5),a=line(0,1,0),b=line(1,-0.5,0),c=line(1,0.5,0);
+// Level Definition
+var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x666666, levels = PGA2D.inline(()=>{
+  // Some helpers.
+  var point = (x,y)=>1e12-x*1e01+y*1e02,
+      line  = (a,b,c)=>c*1e0+a*1e1+b*1e2,
+      A=point(-1,0),B=point(1,0.5),a=line(0,1,0),b=line(1,-0.5,0),c=line(1,0.5,0);
 
-    // Each function returns a level
-    return [
-      ()=>["Drag points apart to <B>Join</B> them in a line",find,A&B,given,A,B],
-      ()=>["Drag lines together to <B>Meet</B> them in a point.",find,a^(A&B),hint,A,B,given,a,A&B],
-      ()=>["Drag points together to <B>Add</B> them.",find,A+B,given,A,B],
-      ()=>["Drag lines apart to <B>Add</B> them.",find,c+b,given,c,b],
-      ()=>{ var a=line(1,0,0),B=point(0,1); return ["Select a point, drag the line to it.",find,B<<a,given,a,B]; },
-      ()=>{ var a=line(1,0,0),B=point(0,1),C=point(1,1); return [".. find the red elements ..",find,B<<a,a+B<<a,given,a,B]; },
-      ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Orthocenter",find,((C<<(A&B))^(A<<(B&C))),given,A,B,C];},
-      ()=>{
-        var A=point(1.2,0.8), B=point(0.4,-1), C=point(-1,-0.9);
-        return ["Eulers line",find,((C<<(A&B))^(A<<(B&C)))&(((A+B)<<(A&B))^((B+C)<<(B&C))),given,A,B,C];
-      },
-      ()=>["End of game",find,1e12]
-    ];
-  })();
+  // Each function returns a level
+  return [
+    ()=>["Drag points apart to <B>Join</B> them in a line",find,A&B,given,A,B],
+    ()=>["Drag lines together to <B>Meet</B> them in a point.",find,a^(A&B),hint,A,B,given,a,A&B],
+    ()=>["Drag points together to <B>Add</B> them.",find,A+B,given,A,B],
+    ()=>["Drag lines apart to <B>Add</B> them.",find,c+b,given,c,b],
+    ()=>{ var a=line(1,0,0),B=point(0,1); return ["Select a point, drag the line to it.",find,B<<a,given,a,B]; },
+    ()=>{ var a=line(1,0,0),B=point(0,1),C=point(1,1); return [".. find the red elements ..",find,B<<a,a+B<<a,given,a,B]; },
+    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Orthocenter",find,((C<<(A&B))^(A<<(B&C))),given,A,B,C];},
+    ()=>{
+      var A=point(1.2,0.8), B=point(0.4,-1), C=point(-1,-0.9);
+      return ["Eulers line",find,((C<<(A&B))^(A<<(B&C)))&(((A+B)<<(A&B))^((B+C)<<(B&C))),given,A,B,C];
+    },
+    ()=>["End of game",find,1e12]
+  ];
+})();
 
-  // Our current color, requirements, etc .. 
-  var color, req=[], curlevel = 0, level, origl, 
-      build = x=>{ 
-        if (color==0xff8888&&x instanceof PGA2D) req.push(x);
-        if (typeof x == 'string') return $('#title').innerHTML=x;
-        if (!(x instanceof PGA2D)) return color=x,undefined;
-        if (x.Blade(2).Length > 0.01) return new point(x,color); 
-        else if (x.Blade(1).Length > 0.01) return new line(x,color); 
-      },
-      nextLevel = function() {
-        var m = $('#main'); while (m.firstChild) m.removeChild(m.firstChild);
-        level = levels[curlevel++]();
-        origl = level.length;
-        req   = []; level.forEach(build);
-      };
-  
-  // and.... go!    
-  nextLevel();
-  
+/*******************************************************************************************/
+/* Mechanics, rendering, user input, ...                                                   */
+/*******************************************************************************************/
 
+// $elect, Merge, Create (svg), Append, Group (svg)
+var $ = document.querySelector.bind(document),
+    m = (a,b,c,d)=>{ for (var i in b) a[i]=b[i]; for (i in c) a.style[i]=c[i]; for (i in d) a.setAttribute(i,d[i]); return a},
+    c = (a,b,c,d)=>m(document.createElementNS('http://www.w3.org/2000/svg',a),c,d,b),
+    a = (x,p)=>(p||$('#main')).appendChild(x),
+    g = function(){ var i,g=c('g'); for (i in arguments) a(arguments[i],g); return g};
+
+// Main setup .. SVG renderer.
+a(c('svg',{viewBox:"-2 -2 4 4"},{id:"main"}),document.body);
+a(m(document.createElement('div'),{id:"title"}),document.body);
+
+// Global selection.
+var selection=[],
+    selectionAdd   = (s,dx,dy)=>{ selectionDel(s); selection.push([s,dx,dy]); handle_operation(); },
+    selectionDel   =       (s)=>{ var i=selection.findIndex(x=>x[0]==s); if (~i) selection.splice(i,1); },
+    selectionClear =        ()=>{ selection.forEach(x=>x[0].clear()); selection=[] };
+    
+// Process selection - see if we have an operator.
+function handle_operation() {
+  if (selection.length!=2) return;
+  var adx = selection[0][1], ady=selection[0][2], bdx=selection[1][1], bdy=selection[1][2],
+      al = Math.sqrt(adx**2+ady**2), bl = Math.sqrt(bdx**2+bdy**2),
+      abx = (selection[0][0].g._x||selection[0][0].l.x1.baseVal.value) - (selection[1][0].g._x||selection[1][0].l.x1.baseVal.value), 
+      aby = (selection[0][0].g._y||selection[0][0].l.y1.baseVal.value) - (selection[1][0].g._y||selection[1][0].l.y1.baseVal.value), abl=Math.sqrt(abx**2+aby**2),
+      cb = (abx/abl)*(bdx/bl)+(aby/abl)*(bdy/bl), ca = (-abx/abl)*(adx/al)+(-aby/abl)*(ady/al),
+      holda=al<0.1,holdb=bl<0.1,aout=al>0.1&&ca<0,bout=bl>0.1&&cb<0,ain=al>0.1&&ca>0,bin=bl>0.1&&cb>0; 
+       if (aout && bout) var n=selection[0][0].P.Vee(selection[1][0].P).Normalized; 
+  else if (ain  && bin)  var n=selection[0][0].P.Wedge(selection[1][0].P).Normalized; 
+  else if (holda && bin) var n=selection[0][0].P.Dot(selection[1][0].P).Normalized; 
+  else if (holdb && ain) var n=selection[1][0].P.Dot(selection[0][0].P).Normalized; 
+  else return setTimeout(selectionClear,600);
+  // upgrade wedge of points or vee of lines to sum.
+  if ((ain&&bin&&n.Length==0)||(aout&&bout&&n.Length==0) )n=selection[0][0].P.Add(selection[1][0].P).Normalized;
+  return setTimeout(()=>{ level.push(n); build(n); selectionClear(); check(); },600); 
+}    
+
+// Check level progress.
+function check() {
+  if (req.filter(x=>level.slice(origl-1).filter(y=>{ if (!(y instanceof PGA2D)) return false;
+    x=x.Normalized; y=y.Normalized;
+    if (x.Blade(1).Length > 0.01 && y.Blade(1).Length > 0.01 && (x.Sub(y).Length<0.01 || x.Add(y).Length<0.01) && Math.abs(Math.abs(x.e0)-Math.abs(y.e0))<0.01) return true;
+    else if (x.e12 > 0.01 && y.e12 > 0.01 && x.Vee(y).Length < 0.01) return true;
+    return false;
+  }).length).length == req.length) setTimeout(nextLevel,2000);
+}
+
+// Fancy dragable Points
+function point(P,color) {
+  var x=P.e01/P.e12, y=P.e02/P.e12,
+      stop=(e)=>{ this.gp.removeEventListener('mousemove',move,false); this.gp.removeEventListener('mouseup',stop,false); selectionAdd(this,this.c.cx.baseVal.value,this.c.cy.baseVal.value); },
+      move=(e)=>{ var ww=window.innerWidth,wh=window.innerHeight,d=(wh>ww)?wh/ww:1,d2=(ww>wh)?ww/wh:1,cx=(e.x/ww*4-2)*d2-this.g._x,cy=(e.y/wh*4-2)*d-this.g._y;m(this.c,{},{},{cx,cy}); m(this.l,{},{},{x2:cx,y2:cy});};
+  m(this,{ active:color!=0xff8888,P,c:c('circle',{cx:0,cy:0,r:0.2,class:'pointBase'},{},{stroke:(color==0xffffff)?'':('#'+color.toString(16)),fill:'#'+(color.toString(16)||'F00')}),
+           l:c('line',{x1:0,y1:0,x2:0,y2:0,class:'pointLine'}),clear:function(){ this.g.classList.remove('selected'); m(this.c,{},{},{cx:0,cy:0}); m(this.l,{},{},{x2:0,y2:0}); }, });
+  this.g = m(a(g(this.c,this.l,c('circle',{cx:0,cy:0,r:0.2,class:'pointSel'}))),{_x:x||0,_y:y||0},{},{transform:`translate(${x||0} ${y||0})`});
+  this.gp = this.g.parentElement;
+  if (this.active) this.c.addEventListener('mousedown',(e)=>{ if (this.g.classList.toggle('selected')){ this.gp.addEventListener('mousemove',move,false); this.gp.addEventListener('mouseup',stop,false); } else this.clear(); },false);         
+}
+
+// Fancy dragable Lines
+function line(P,color) {
+  P = P.Normalized; var ly=P.e0, lr=Math.atan2(P.e2,P.e1)/Math.PI*180;
+  var stop=(e)=>{this.gp.removeEventListener('mousemove',move,false);this.gp.removeEventListener('mouseup',stop,false);selectionAdd(this,this.l.x2.baseVal.value-this.l.x1.baseVal.value,this.l.y2.baseVal.value-this.l.y1.baseVal.value);},
+      move=(e)=>{var ww=window.innerWidth,wh=window.innerHeight,d=(wh>ww)?wh/ww:1,d2=(ww>wh)?ww/wh:1,cx=(e.x/ww*4-2)*d2,cy=(e.y/wh*4-2)*d;m(this.l,{},{},{x2:cx,y2:cy});m(this.c2,{},{},{cx,cy});};
+  m(this,{P,active:color!=0xff8888,l:c('line',{x1:0,y1:ly,x2:0,y2:ly,class:'pointLine'}),c:c('line',{x1:-10,y1:ly,x2:10,y2:ly,transform:`rotate(${lr})`,class:'lineSel'}),c2:c('circle',{cx:0,cy:ly,class:'lineSelPoint'})});
+  this.g = a(g(c('line',{x1:-10,y1:ly,x2:10,y2:ly,class:'lineBase',transform:`rotate(${lr})`},{},{stroke:(color==0xffffff)?'':('#'+color.toString(16))}),this.l,this.c,this.c2));
+  this.gp = this.g.parentElement; this.clear = function(){ this.g.classList.remove('selected'); m(this.l,{},{},{x1:0,y1:0,x2:0,y2:0}); m(this.c2,{},{},{cx:0,cy:0}); };
+  if (this.active) this.c.addEventListener('mousedown',(e)=>{
+    if (this.g.classList.toggle('selected')) {
+      var ww=window.innerWidth,wh=window.innerHeight,d=(wh>ww)?wh/ww:1,d2=(ww>wh)?ww/wh:1,cx=(e.x/ww*4-2)*d2,cy=(e.y/wh*4-2)*d; 
+      m(this.l,{},{},{x1:cx,y1:cy,x2:cx,y2:cy}); m(this.c2,{},{},{cx,cy}); this.gp.addEventListener('mousemove',move,false); this.gp.addEventListener('mouseup',stop,false);
+    } else { this.clear(); selectionDel(this); }
+  },false);         
+  return this;
+}
+
+// Define our levels.. 
+var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x666666, levels = PGA2D.inline(()=>{
+  // Some helpers.
+  var point = (x,y)=>1e12-x*1e01+y*1e02,
+      line  = (a,b,c)=>c*1e0+a*1e1+b*1e2,
+      A=point(-1,0),B=point(1,0.5),a=line(0,1,0),b=line(1,-0.5,0),c=line(1,0.5,0);
+
+  // Each function returns a level
+  return [
+    ()=>["Drag points apart to <B>Join</B> them in a line",find,A&B,given,A,B],
+    ()=>["Drag lines together to <B>Meet</B> them in a point.",find,a^(A&B),hint,A,B,given,a,A&B],
+    ()=>["Drag points together to <B>Add</B> them.",find,A+B,given,A,B],
+    ()=>["Drag lines apart to <B>Add</B> them.",find,c+b,given,c,b],
+    ()=>{ var a=line(1,0,0),B=point(0,1); return ["Select a point, drag the line to it.",find,B<<a,given,a,B]; },
+    ()=>{ var a=line(1,0,0),B=point(0,1),C=point(1,1); return [".. find the red elements ..",find,B<<a,a+B<<a,given,a,B]; },
+    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Orthocenter",find,((C<<(A&B))^(A<<(B&C))),given,A,B,C];},
+    ()=>{
+      var A=point(1.2,0.8), B=point(0.4,-1), C=point(-1,-0.9);
+      return ["Eulers line",find,((C<<(A&B))^(A<<(B&C)))&(((A+B)<<(A&B))^((B+C)<<(B&C))),given,A,B,C];
+    },
+    ()=>["End of game",find,1e12]
+  ];
+})();
+
+// Our current color, requirements, level builder and driver .. 
+var color, req=[], curlevel = 0, level, origl, 
+    build = x=>{ 
+      if (color==0xff8888&&x instanceof PGA2D) req.push(x);
+      if (typeof x == 'string') return $('#title').innerHTML=x;
+      if (!(x instanceof PGA2D)) return color=x,undefined;
+      if (x.Blade(2).Length > 0.01) return new point(x,color); 
+      else if (x.Blade(1).Length > 0.01) return new line(x,color); 
+    },
+    nextLevel = function() {
+      var m = $('#main'); while (m.firstChild) m.removeChild(m.firstChild);
+      level = levels[curlevel++]();
+      origl = level.length;
+      req   = []; level.forEach(build);
+    };
+
+// and.... go!    
+nextLevel();
 </SCRIPT>
 </BODY>
