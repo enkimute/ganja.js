@@ -31,7 +31,7 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 <A NAME="Features"></A>
 ### Reasons to use ganja
 
-Ganja.js makes doing Geometric Algebra in your browser easy and fun. It's
+Ganja.js makes doing Geometric Algebra in your browser easy and fun. Its
 inline syntax and graphing makes math in the browser feel like .. math.
 
 * Operator overloading
