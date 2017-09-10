@@ -102,7 +102,7 @@ function check() {
   if (req.filter(x=>level.slice(origl-1).filter(y=>{ if (!(y instanceof PGA2D)) return false;
     x=x.Normalized; y=y.Normalized;
     if (x.Blade(1).Length > 0.01 && y.Blade(1).Length > 0.01 && (x.Sub(y).Length<0.01 || x.Add(y).Length<0.01) && Math.abs(Math.abs(x.e0)-Math.abs(y.e0))<0.01) return true;
-    else if (x.e12 > 0.01 && y.e12 > 0.01 && x.Vee(y).Length < 0.01) return true;
+    else if (Math.abs(x.e12) > 0.01 && Math.abs(y.e12) > 0.01 && x.Vee(y).Length < 0.01) return true;
     return false;
   }).length).length == req.length) setTimeout(nextLevel,2000);
 }
