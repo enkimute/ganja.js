@@ -33,7 +33,7 @@
 /*******************************************************************************************/
 
 // Level Definition
-var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x666666, levels = PGA2D.inline(()=>{
+var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x535364, levels = PGA2D.inline(()=>{
   // Some helpers.
   var point = (x,y)=>1e12-x*1e01+y*1e02,
       line  = (a,b,c)=>c*1e0+a*1e1+b*1e2,
@@ -47,10 +47,11 @@ var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x666666, levels
     ()=>["Drag lines apart to <B>Add</B> them.",find,c+b,given,c,b],
     ()=>{ var a=line(1,0,0),B=point(0,1); return ["Select a point, drag the line to it.",find,B<<a,given,a,B]; },
     ()=>{ var a=line(1,0,0),B=point(0,1),C=point(1,1); return [".. find the red elements ..",find,B<<a,a+B<<a,given,a,B]; },
-    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Orthocenter",find,((C<<(A&B))^(A<<(B&C))),given,A,B,C];},
+    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Orthocenter",hint,A&B,(C<<(A&B)),find,((C<<(A&B))^(A<<(B&C))), given,A,B,C];},
+    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Circumcenter",hint,A+B,(A+B)<<(A&B),find,(((A+B)<<(A&B))^((B+C)<<(B&C))),given,A,B,C];},
     ()=>{
-      var A=point(1.2,0.8), B=point(0.4,-1), C=point(-1,-0.9);
-      return ["Eulers line",find,((C<<(A&B))^(A<<(B&C)))&(((A+B)<<(A&B))^((B+C)<<(B&C))),given,A,B,C];
+      var A=point(1.2,0.8), B=point(0.4,-1), C=point(-1,-0.9), ortho=((C<<(A&B))^(A<<(B&C))), circum=(((A+B)<<(A&B))^((B+C)<<(B&C)));
+      return ["Eulers line",hint,ortho,circum,find,ortho&circum,given,A,B,C];
     },
     ()=>["End of game",find,1e12]
   ];
@@ -115,7 +116,7 @@ function point(P,color) {
            l:c('line',{x1:0,y1:0,x2:0,y2:0,class:'pointLine'}),clear:function(){ this.g.classList.remove('selected'); m(this.c,{},{},{cx:0,cy:0}); m(this.l,{},{},{x2:0,y2:0}); }, });
   this.g = m(a(g(this.c,this.l,c('circle',{cx:0,cy:0,r:0.2,class:'pointSel'}))),{_x:x||0,_y:y||0},{},{transform:`translate(${x||0} ${y||0})`});
   this.gp = this.g.parentElement;
-  if (this.active) this.c.addEventListener('mousedown',(e)=>{ if (this.g.classList.toggle('selected')){ this.gp.addEventListener('mousemove',move,false); this.gp.addEventListener('mouseup',stop,false); } else this.clear(); },false);         
+  if (this.active) this.c.addEventListener('mousedown',(e)=>{ if (this.g.classList.toggle('selected')){ this.gp.addEventListener('mousemove',move,false); this.gp.addEventListener('mouseup',stop,false); } else {this.clear(); selectionDel(this);}},false);         
 }
 
 // Fancy dragable Lines
@@ -134,30 +135,6 @@ function line(P,color) {
   },false);         
   return this;
 }
-
-// Define our levels.. 
-var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x666666, levels = PGA2D.inline(()=>{
-  // Some helpers.
-  var point = (x,y)=>1e12-x*1e01+y*1e02,
-      line  = (a,b,c)=>c*1e0+a*1e1+b*1e2,
-      A=point(-1,0),B=point(1,0.5),a=line(0,1,0),b=line(1,-0.5,0),c=line(1,0.5,0);
-
-  // Each function returns a level
-  return [
-    ()=>["Drag points apart to <B>Join</B> them in a line",find,A&B,given,A,B],
-    ()=>["Drag lines together to <B>Meet</B> them in a point.",find,a^(A&B),hint,A,B,given,a,A&B],
-    ()=>["Drag points together to <B>Add</B> them.",find,A+B,given,A,B],
-    ()=>["Drag lines apart to <B>Add</B> them.",find,c+b,given,c,b],
-    ()=>{ var a=line(1,0,0),B=point(0,1); return ["Select a point, drag the line to it.",find,B<<a,given,a,B]; },
-    ()=>{ var a=line(1,0,0),B=point(0,1),C=point(1,1); return [".. find the red elements ..",find,B<<a,a+B<<a,given,a,B]; },
-    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Orthocenter",find,((C<<(A&B))^(A<<(B&C))),given,A,B,C];},
-    ()=>{
-      var A=point(1.2,0.8), B=point(0.4,-1), C=point(-1,-0.9);
-      return ["Eulers line",find,((C<<(A&B))^(A<<(B&C)))&(((A+B)<<(A&B))^((B+C)<<(B&C))),given,A,B,C];
-    },
-    ()=>["End of game",find,1e12]
-  ];
-})();
 
 // Our current color, requirements, level builder and driver .. 
 var color, req=[], curlevel = 0, level, origl, 
