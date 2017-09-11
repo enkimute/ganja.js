@@ -44,6 +44,7 @@ inline syntax and graphing makes math in the browser feel like .. math.
 * conjugate, Reverse, Involute, Dual (Poincare), Negative
 * 4 API's (inline, asciimath, object oriented, functional)
 * Easy graph function for 1D and 2D functions and Projective 2D elements.
+* There's a [game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) that teaches you how to use ganja.js !
 
 <A NAME="Started"></A>
 ### Using ganja for the first time
