@@ -8,7 +8,7 @@ var d3 = Algebra(3,0,1);
 // Ganja.js only supoprts native 2D graphing. So we use a projective 2D algebra and implement a camera projection that rotates around the y axis :
 var d2      = Algebra(2,0,1), 
     project = d2.inline(P=>(P instanceof Array)?P.map(project):(P instanceof d3)?P.e01*-1e0+(P.e13)*1e1+(P.e12)*1e2+P.e012*1e02+P.e013*1e01+P.e123*1e12:P),
-    view    = d3.inline(P=>(P instanceof Array)?P.map(view):(P instanceof d3)?((1e123-15e023)&P)^(1e1-2e0):P),
+    view    = d3.inline(P=>(P instanceof Array)?P.map(view):(P instanceof d3)?((1e123+15e023)&P)^(1e1-2e0):P),
     model   = d3.inline(P=>(P instanceof Array)?P.map(model):(P instanceof d3)?((Math.cos(performance.now()/2000)+Math.sin(performance.now()/2000)*(1e13))>>>P):P),
     graph   = (x)=>d2.graph(()=>[d2.graph].concat(x.map(model).map(view).map(project)));
     
