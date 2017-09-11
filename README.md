@@ -262,6 +262,10 @@ PGA2D Desargues Theorem<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_desargues_theorem"      TARGET="_blank" TITLE="PGA2D Desargues Theorem"><IMG SRC="images/pga2d_desargues_theorem.jpg"/></A>
 </TABLE>
 
+Or - get some hands on experience with eucledian plane PGA by playing the [wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html).
+
+![Wedge screenshot](images/wedge.png)
+
 <A NAME="syntax"></A>
 ### Ganja ingredients and syntax.
 
