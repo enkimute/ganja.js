@@ -24,7 +24,7 @@
     .selected > .pointLine { opacity:1; }
     
     .lineBase { point-events:none; }
-    .lineSel { stroke-width:0.1; stroke:transparent; transition: stroke 0.6s ease-in-out; }
+    .lineSel { stroke-width: 0.3; stroke:transparent; transition: stroke 0.6s ease-in-out; }
     .lineSelPoint { stroke:#8F8; pointer-events:none; r:1; opacity:0; stroke-width:0.2; transition:opacity 0.6s ease-in-out, r 0.6s ease-in-out, stroke-width 0.6s ease-in-out; }
     .selected > .lineBase { stroke:#8F8; }
     .selected > .lineSel  { stroke:#AFA; stroke-opacity:0.5; }
@@ -130,7 +130,7 @@ function point(P,color) {
       move=(e)=>{ if (e.targetTouches) e=[].filter.call(e.targetTouches,x=>x.identifier==this.tid)[0]; var ww=window.innerWidth,wh=window.innerHeight,d=(wh>ww)?wh/ww:1,d2=(ww>wh)?ww/wh:1,cx=(e.clientX/ww*4-2)*d2-this.g._x,cy=(e.clientY/wh*4-2)*d-this.g._y;m(this.c,{},{},{cx,cy}); m(this.l,{},{},{x2:cx,y2:cy});};
   m(this,{ active:color!=0xff8888,P,c:c('circle',{cx:0,cy:0,r:0.2,class:'pointBase'},{},{stroke:(color==0xffffff)?'':('#'+color.toString(16)),fill:'#'+(color.toString(16)||'F00')}),
            l:c('line',{x1:0,y1:0,x2:0,y2:0,class:'pointLine'}),clear:function(){ this.g.classList.remove('selected'); m(this.c,{},{},{cx:0,cy:0}); m(this.l,{},{},{x2:0,y2:0}); }, });
-  this.g = m(a(g(this.c,this.l,c('circle',{cx:0,cy:0,r:0.2,class:'pointSel'}))),{_x:x||0,_y:y||0},{},{transform:`translate(${x||0} ${y||0})`});
+  this.g = m(a(g(this.c,this.l,c('circle',{cx:0,cy:0,r:0.2,class:'pointSel'}))),{_x:x||0,_y:y||0},{},{transform:`translate(${x||0} ${y||0})`}); this.g.classList.add('point');
   this.gp = this.g.parentElement;
   if (this.active) {
     this.c.addEventListener('mousedown',(e)=>{  if(this.touch) return; if (this.g.classList.toggle('selected')){ this.gp.addEventListener('mousemove',move,false); this.gp.addEventListener('mouseup',stop,false); } else {this.clear(); selectionDel(this);}},false);         
@@ -145,7 +145,8 @@ function line(P,color) {
       tstop=(e)=>{this.gp.removeEventListener('touchmove',move,false);this.gp.removeEventListener('touchend',tstop,false); selectionAdd(this,this.l.x2.baseVal.value-this.l.x1.baseVal.value,this.l.y2.baseVal.value-this.l.y1.baseVal.value);},
       move=(e)=>{ if (e.targetTouches) e=[].filter.call(e.targetTouches,x=>x.identifier==this.tid)[0]; var ww=window.innerWidth,wh=window.innerHeight,d=(wh>ww)?wh/ww:1,d2=(ww>wh)?ww/wh:1,cx=(e.clientX/ww*4-2)*d2,cy=(e.clientY/wh*4-2)*d;m(this.l,{},{},{x2:cx,y2:cy});m(this.c2,{},{},{cx,cy});};
   m(this,{P,active:color!=0xff8888,l:c('line',{x1:0,y1:ly,x2:0,y2:ly,class:'pointLine'}),c:c('line',{x1:-10,y1:ly,x2:10,y2:ly,transform:`rotate(${lr})`,class:'lineSel'}),c2:c('circle',{cx:0,cy:ly,class:'lineSelPoint'})});
-  this.g = a(g(c('line',{x1:-10,y1:ly,x2:10,y2:ly,class:'lineBase',transform:`rotate(${lr})`},{},{stroke:(color==0xffffff)?'':('#'+color.toString(16))}),this.l,this.c,this.c2));
+  this.g = a(g(c('line',{x1:-10,y1:ly,x2:10,y2:ly,class:'lineBase',transform:`rotate(${lr})`},{},{stroke:(color==0xffffff)?'':('#'+color.toString(16))}),this.l,this.c,this.c2)); this.g.classList.add('line');
+  if (color==0xffffff) while (this.g.previousSibling && this.g.previousSibling.classList.contains('point')) this.g.parentElement.insertBefore(this.g,this.g.previousSibling);
   this.gp = this.g.parentElement; this.clear = function(){ this.g.classList.remove('selected'); m(this.l,{},{},{x1:0,y1:0,x2:0,y2:0}); m(this.c2,{},{},{cx:0,cy:0}); };
   if (this.active) {
     this.c.addEventListener('mousedown',(e)=>{if(this.touch)return;
