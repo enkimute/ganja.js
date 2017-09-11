@@ -58,7 +58,7 @@ var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x535364, levels
       var A=point(1.2,1.3), B=point(0.4,-0.5), C=point(-1,-0.4), ortho=((C<<(A&B))^(A<<(B&C))), circum=(((A+B)<<(A&B))^((B+C)<<(B&C)));
       return ["Find Eulers line",hint,ortho,circum,find,ortho&circum,given,A,B,C];
     },
-    ()=>[`Well done.<BR><BR><BR>Moves : ${moves}<BR>Time : ${(dt/1000/60)|0}:${(dt/1000)|0%60}<BR>Score : ${score|0}`,find,1e12]
+    ()=>[`Well done.<BR><BR><BR>Moves : ${moves}<BR>Time : ${(dt/1000/60)|0}:${((dt/1000)|0)%60}<BR>Score : ${score|0}`,find,1e12]
   ];
 })();
 
@@ -72,7 +72,7 @@ var $ = document.querySelector.bind(document),
     c = (a,b,c,d)=>m(document.createElementNS('http://www.w3.org/2000/svg',a),c,d,b),
     a = (x,p)=>(p||$('#main')).appendChild(x),
     g = function(){ var i,g=c('g'); for (i in arguments) a(arguments[i],g); return g},
-    say = (x)=>{if (window.speechSynthesis) window.speechSynthesis.speak(m(new SpeechSynthesisUtterance(x.replace(/\<.*?\>/g,'')),{lang:'en-US'}))};
+    say = (x)=>{if (window.speechSynthesis) window.speechSynthesis.speak(m(new SpeechSynthesisUtterance(x.replace(/\<BR\>/g,'\n').replace(/\<.*?\>/g,'')),{lang:'en-US'}))};
 
 // Main setup .. SVG renderer.
 a(c('svg',{viewBox:"-2 -2 4 4"},{id:"main"}),document.body);
