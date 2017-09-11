@@ -18,7 +18,7 @@ d3.inline(()=>{
     var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;     
     
     // Create 5 points and some joining lines.
-    var A = point(0,0,0), B = point(1,1,-1), C = point(-1,1,-1), D = point(1,1,1), E=point(-1,1,1),
+    var A = point(0,-1,0), B = point(1,1,-1), C = point(-1,1,-1), D = point(1,1,1), E=point(-1,1,1),
         ab = A&B, bc=B&C, ca=C&A, ad=A&D, bd=B&D,cd =C&D;
     
     // Graph the 3D items
