@@ -9,6 +9,7 @@
     #title { position:fixed; top:10px; width:100%; text-align:center; font-size:40px; color:#444; user-select:none; pointer-events:none}
     #footer { position:fixed; bottom:10px; right:10px; font-size:16px; color:white; }
     #score  { position:fixed; bottom:10px; left:10px; font-size:30px; color:white; }
+    #intro  { position:absolute; width:90%; left:5%; text-align:center; font-size:20px; top:50%; transform:translateY(-50%); color:#ccc }
     
   /* SVG CSS **************************************************************************************/
     circle  { transition: stroke 0.2s linear; stroke-width:0.01; stroke:white; fill:transparent; }
@@ -78,6 +79,7 @@ var $ = document.querySelector.bind(document),
 a(c('svg',{viewBox:"-2 -2 4 4"},{id:"main"}),document.body);
 a(m(document.createElement('div'),{id:"title"}),document.body);
 a(m(document.createElement('a'),{id:"footer",href:"https://github.com/enkimute/ganja.js",target:"blank",innerText:"Fork me on github"}),document.body);
+a(m(document.createElement('div'),{id:"intro",innerHTML:`Wedge - The Geometric Algebra game.<BR><BR>Play Wedge by dragging points and lines to try and reconstruct the <FONT COLOR=#F88>red</FONT> items.<BR><BR><FONT COLOR=#FFF>White</FONT> elements can be dragged<BR><FONT COLOR=#888>Ghosted</FONT> elements are hints<BR><BR><SMALL>Try to use as few moves and time as possible..</SMALL><BR><BR>Click to start.`,onclick:function(){this.style.display='none';nextLevel();}}),document.body);
 
 // Scoring
 var score=1000, moves=0, startTime=0, dt, scoreDiv = a(m(document.createElement('div'),{id:"score",innerHTML:"1000"}),document.body);
@@ -181,7 +183,5 @@ var color, req=[], curlevel = 0, level, origl,
       req   = []; level.forEach(build);
     };
 
-// and.... go!    
-nextLevel();
 </SCRIPT>
 </BODY>
