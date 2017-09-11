@@ -164,7 +164,7 @@ function line(P,color) {
 }
 
 // Our current color, requirements, level builder and driver .. 
-var color, req=[], curlevel = 3, level, origl, 
+var color, req=[], curlevel = 0, level, origl, 
     build = x=>{ 
       if (color==0xff8888&&x instanceof PGA2D) req.push(x);
       if (typeof x == 'string') { say(x);  return $('#title').innerHTML=x;}
