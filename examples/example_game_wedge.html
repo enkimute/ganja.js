@@ -52,7 +52,7 @@ var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x535364, levels
     "Stage 1 : PGA2D<BR><BR>Eucledian Projective Geometric Algebra.<BR><BR>Click here to start.",
     "In 2D PGA, points and lines are the elements of your algebra.<BR><BR>You can <b>join</b> points into lines, or <b>meet</b> lines into points.<BR><BR>Click here to continue",
     ()=>["Drag points apart to <B>Join</B> them in a line",find,A&B,given,A,B],
-    ()=>["Drag lines together to <B>Meet</B> them in a point.",find,a^(A&B),hint,A,B,given,a,A&B],
+    ()=>["Drag lines together to <B>Meet</B> them in a point.",find,a^(A&B),given,a,A&B],
     "If you try to join lines or meet points, wedge will instead add your elements together.<BR><BR>Click here to continue",
     ()=>["Drag points together to <B>Add</B> them.",find,A+B,given,A,B],
     ()=>["Drag lines apart to <B>Add</B> them.",find,c+b,given,c,b],
