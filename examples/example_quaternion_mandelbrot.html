@@ -11,7 +11,7 @@ document.body.appendChild(Algebra({p:3,basis:['1','e12','e13','e23']}).graph(fun
 // Calculate iteration count for mandelbrot.
   var n=40, z=0e12, c=x*1.75-1+y*1e12;
   while (z < 4 && n--) z=z**2+c;
-  n += Math.log2(Math.log2(Math.max(4,z.Length)))-4;
+  n += Math.log2(Math.log2(Math.max(4,z.Length)))-Math.atan2(y,x)*10;
 // Use the iteration count to rotate the color red in the hue plane  
   if (cache[n]) return cache[n];
   var red=1e12, rot=Math.cos(n/20) + Math.sin(n/20)*(0.578e12+0.578e13+0.578e23);
