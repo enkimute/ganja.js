@@ -8,7 +8,7 @@ var d3 = Algebra(3,0,1);
 // Ganja.js only supoprts native 2D graphing. So we use a projective 2D algebra and implement a camera projection that rotates around the y axis :
 var d2      = Algebra(2,0,1), 
     project = d2.inline(P=>(P instanceof Array)?P.map(project):(P instanceof d3)?P.e01*-1e0+(P.e13)*1e1+(P.e12)*1e2+P.e012*1e02+P.e013*1e01+P.e123*1e12:P),
-    view    = d3.inline(P=>(P instanceof Array)?P.map(view):(P instanceof d3)?((1e123+15e023)&P)^(1e1-2e0):P),
+    view    = d3.inline(P=>(P instanceof Array)?P.map(view):(P instanceof d3)?((1e123+5e023)&P)^(1e1-2e0):P),
     model   = d3.inline(P=>(P instanceof Array)?P.map(model):(P instanceof d3)?((Math.cos(performance.now()/2000)+Math.sin(performance.now()/2000)*(1e13))>>>P):P),
     graph   = (x)=>d2.graph(()=>[d2.graph].concat(x.map(model).map(view).map(project)));
     
@@ -23,9 +23,13 @@ d3.inline(()=>{
     
     // Graph the 3D items
     document.body.appendChild(graph(["3D PGA",
-      0xddaaff,ab,bc,ca,ad,bd,cd,[A,B,C],
-      0xAA88FF,[A,B],[A,C],[A,D],[B,C],[B,D],[C,E],[A,E],[E,D],
-      0x444444,A,"A",B,"B",C,"C",D,"D",E,"E"
+      0xddaaff,ab,bc,ca,ad,bd,cd,[A,B,C],                          // graph some lines and one face of the pyramid
+      0xAA88FF,[A,B],[A,C],[A,D],[B,C],[B,D],[C,E],[A,E],[E,D],    // graph all edges
+      0x444444,A,"A",B,"B",C,"C",D,"D",E,"E",                      // graph all vertices
+      0x884444,A<<(B&C&E),"A.(B&C&E)",                             // line throu a and the floor plane of the pyramid
+      0x448844,A+B+C+D+E,"G=A+B+C+D+E",                            // G = center of gravity  
+      0x444488,(A+B+C+D+E)<<(A&B&C),"h=G.(A&B&C)",                 // line between CoG and ABC plane
+      0x4444ff,((A+B+C+D+E)<<(A&B&C))^(A&B&C),"I=h^(A&B&C)"        // projection CoG  onto ABC plane
     ])); 
 })();
 </SCRIPT></BODY>
