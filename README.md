@@ -231,6 +231,12 @@ Complex Mandelbrot<BR>
 Mandelbrot with Quaternion Hue colorisation<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_mandelbrot"        TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/quaternion_mandelbrot.jpg"/></A>
 <TR><TD ALIGN=CENTER>
+Quaternion color rotations<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternione_hue"              TARGET="_blank" TITLE="Quaternion Hue Rotations"><IMG SRC="images/quaternion_hue.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA3D Distances and Angles<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_distances_and_angles"   TARGET="_blank" TITLE="PGA3D Distances and Angles"><IMG SRC="images/pga3d_distances_and_angles.jpg"/></A>
+<TR><TD ALIGN=CENTER>
 PGA2D Points and Lines<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
 <TD ALIGN=CENTER>
