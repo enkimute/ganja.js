@@ -33,7 +33,7 @@ d3.inline(()=>{
       0x448844,A+B+C+D+E,"G=A+B+C+D+E",                            // G = center of gravity  
       0x444488,(A+B+C+D+E)<<(A&B&C),"h=G.(A&B&C)",                 // line between CoG and ABC plane
       0x4444ff,((A+B+C+D+E)<<(A&B&C))^(A&B&C),"I=h^(A&B&C)",       // projection CoG  onto ABC plane
-      0xaaaaff,[A&B,A&C,A&D,A&E].map(x=>x^plane)                   // wedge with the plane
+      0xaaaaff,()=>[A&B,A&C,A&E,A&D].map(x=>x^plane)               // wedge with the plane
     ])); 
 })();
 </SCRIPT></BODY>
