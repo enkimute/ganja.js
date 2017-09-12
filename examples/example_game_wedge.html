@@ -78,7 +78,7 @@ var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x535364, levels
 var $ = document.getElementById.bind(document), // was queryselector, didn't work in edge at some point.
     m = (a,b,c,d)=>{ for (var i in b) a[i]=b[i]; for (i in c) a.style[i]=c[i]; for (i in d) a.setAttribute(i,d[i]); return a},
     c = (a,b,c,d)=>m(document.createElementNS('http://www.w3.org/2000/svg',a),c,d,b),
-    a = (x,p)=>(p||$('#main')).appendChild(x),
+    a = (x,p)=>(p||$('main')).appendChild(x),
     g = function(){ var i,g=c('g'); for (i in arguments) a(arguments[i],g); return g},
     say = (x)=>{if (window.speechSynthesis) window.speechSynthesis.speak(m(new SpeechSynthesisUtterance(x.replace(/\<BR\>/g,'\n').replace(/\<.*?\>/g,'')),{lang:'en-US'}))};
 
@@ -178,21 +178,21 @@ function line(P,color) {
 var color, req=[], curlevel = 0, level, origl, 
     build = x=>{ 
       if (color==0xff8888&&x instanceof PGA2D) req.push(x);
-      if (typeof x == 'string') { say(x);  return $('#title').innerHTML=x;}
+      if (typeof x == 'string') { say(x);  return $('title').innerHTML=x;}
       if (!(x instanceof PGA2D)) return color=x,undefined;
       if (x.Blade(2).Length > 0.01) return new point(x,color); 
       else if (x.Blade(1).Length > 0.01) return new line(x,color); 
     },
     nextLevel = function() {
-      var m = $('#main'); while (m && m.firstChild) m.removeChild(m.firstChild);
+      var m = $('main'); while (m && m.firstChild) m.removeChild(m.firstChild);
       if (levels[curlevel] instanceof Function) {
        level = levels[curlevel]();
        origl = level.length;
        req   = []; level.forEach(build);
       } else {
-        $("#title").innerHTML = '';
-        $("#intro").innerHTML = levels[curlevel];
-        $("#intro").style.display="block";
+        $("title").innerHTML = '';
+        $("intro").innerHTML = levels[curlevel];
+        $("intro").style.display="block";
       } 
       curlevel++;
     };
