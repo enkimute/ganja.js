@@ -1,0 +1,34 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 3,0,1 metric. 
+var d3 = Algebra(3,0,1);
+
+// Ganja.js only supoprts native 2D graphing. So we use a projective 2D algebra and implement a camera projection that rotates around the y axis :
+var d2      = Algebra(2,0,1), 
+    project = d2.inline(P=>(P instanceof Array)?P.map(project):(P instanceof d3)?P.e01*-1e0+(P.e13)*1e1+(P.e12)*1e2+P.e012*1e02+P.e013*1e01+P.e123*1e12:P),
+    view    = d3.inline(P=>(P instanceof Array)?P.map(view):(P instanceof d3)?((1e123+5e023)&P)^(1e1-2e0):P),
+    model   = d3.inline(P=>(P instanceof Function)?model(P()):(P instanceof Array)?P.map(model):(P instanceof d3)?((Math.cos(performance.now()/2000)+Math.sin(performance.now()/2000)*(1e13))>>>P):P),
+    graph   = (x)=>d2.graph(()=>[d2.graph].concat(x.map(x=>(x instanceof Function)?y=>project(view(model(x()))):project(view(model(x))))));
+    
+// Now we display some 3D points, lines and polygons.
+d3.inline(()=>{ 
+    
+    // Helper to create points.
+    var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
+    var AngleLines = (PI,EP)=>Math.acos((PI.Normalized<<EP.Normalized).Length)*180/Math.PI;
+    
+    // Create 5 points and some joining lines.
+    var A=()=>point(0,Math.sin(performance.now()/1000),0), B=point(1,1,-1), C=point(-1,1,-1), D=point(1,1,1), E=point(-1,1,1);
+    
+    // Graph the 3D items
+    document.body.appendChild(graph(["3D PGA",
+      0xddaaff,()=>[A,B,C],
+      0xAA88FF,()=>[A,B],()=>[A,C],()=>[A,D],()=>[A,E],[B,C],[B,D],[C,E],[E,D],
+      0x444444,A,"A",B,"B",C,"C",D,"D",E,"E",
+      0x888888,B+E,[A,B+E],()=>(A&(B+E).Normalized).Length.toFixed(2),
+      0xFF6666,[A,B],[B,B+E],()=>[A+2*B,E+5*B],()=>(AngleLines((A&B),(B&(B+E))).toFixed(2))+"&deg;"
+    ])); 
+})();
+</SCRIPT></BODY>
