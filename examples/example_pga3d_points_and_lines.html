@@ -10,7 +10,7 @@ var d2      = Algebra(2,0,1),
     project = d2.inline(P=>(P instanceof Array)?P.map(project):(P instanceof d3)?P.e01*-1e0+(P.e13)*1e1+(P.e12)*1e2+P.e012*1e02+P.e013*1e01+P.e123*1e12:P),
     view    = d3.inline(P=>(P instanceof Array)?P.map(view):(P instanceof d3)?((1e123+5e023)&P)^(1e1-2e0):P),
     model   = d3.inline(P=>(P instanceof Array)?P.map(model):(P instanceof d3)?((Math.cos(performance.now()/2000)+Math.sin(performance.now()/2000)*(1e13))>>>P):P),
-    graph   = (x)=>d2.graph(()=>[d2.graph].concat(x.map(model).map(view).map(project)));
+    graph   = (x)=>d2.graph(()=>[d2.graph].concat(x.map(x=>(x instanceof Function)?y=>project(view(model(x()))):project(view(model(x))))));
     
 // Now we display some 3D points, lines and polygons.
 d3.inline(()=>{ 
@@ -18,8 +18,11 @@ d3.inline(()=>{
     var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;     
     
     // Create 5 points and some joining lines.
-    var A = point(0,-1,0), B = point(1,1,-1), C = point(-1,1,-1), D = point(1,1,1), E=point(-1,1,1),
-        ab = A&B, bc=B&C, ca=C&A, ad=A&D, bd=B&D,cd =C&D;
+    var A=point(0,-1,0), B=point(1,1,-1), C=point(-1,1,-1), D=point(1,1,1), E=point(-1,1,1),
+        ab=A&B, bc=B&C, ca=C&A, ad=A&D, bd=B&D, cd=C&D;
+        
+    // An animated plane.    
+    var plane = ()=>Math.sin(performance.now()/1000)*1e0 + 1e2;
     
     // Graph the 3D items
     document.body.appendChild(graph(["3D PGA",
@@ -29,7 +32,8 @@ d3.inline(()=>{
       0x884444,A<<(B&C&E),"A.(B&C&E)",                             // line throu a and the floor plane of the pyramid
       0x448844,A+B+C+D+E,"G=A+B+C+D+E",                            // G = center of gravity  
       0x444488,(A+B+C+D+E)<<(A&B&C),"h=G.(A&B&C)",                 // line between CoG and ABC plane
-      0x4444ff,((A+B+C+D+E)<<(A&B&C))^(A&B&C),"I=h^(A&B&C)"        // projection CoG  onto ABC plane
+      0x4444ff,((A+B+C+D+E)<<(A&B&C))^(A&B&C),"I=h^(A&B&C)",       // projection CoG  onto ABC plane
+      0xaaaaff,[A&B,A&C,A&D,A&E].map(x=>x^plane)                   // wedge with the plane
     ])); 
 })();
 </SCRIPT></BODY>
