@@ -240,7 +240,7 @@ PGA3D Points and Lines<BR>
 PGA3D Distances and Angles<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_distances_and_angles"   TARGET="_blank" TITLE="PGA3D Distances and Angles"><IMG SRC="images/pga3d_distances_and_angles.jpg"/></A>
 <TD ALIGN=CENTER>
-PGA2D Distances and Angles<BR>
+PGA#D Rotors and Translators<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_rotors_and_translators" TARGET="_blank" TITLE="PGA3D Rotors and Translators"><IMG SRC="images/pga3d_rotors_and_translators.jpg"/></A>
 <TR><TD ALIGN=CENTER>
 PGA2D Points and Lines<BR>
