@@ -37,7 +37,7 @@ Algebra(2,0,1).inline(()=>{
       if (s>=2) res = res.concat([0x8888ff,CBA,CBB,CBC]); 
       if (s>=3) res = res.concat([0x0000ff,CBA^CAA,CBB^CAB,CBC^CAC]); 
       if (s>=4) res = res.concat([[CBA^CAA,CBB^CAB],[CBA^CAA,CBC^CAC]])
-      return res.concat(this.graph);
-  }));
+      return res;
+  },{animate:true}));
 })();
 </SCRIPT></BODY>

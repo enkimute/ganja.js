@@ -3,37 +3,49 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 3,0,1 metric. 
-var d3 = Algebra(3,0,1);
-
-// Ganja.js only supoprts native 2D graphing. So we use a projective 2D algebra and implement a camera projection that rotates around the y axis :
-var d2      = Algebra(2,0,1), 
-    project = d2.inline(P=>(P instanceof Array)?P.map(project):(P instanceof d3)?P.e01*-1e0+(P.e13)*1e1+(P.e12)*1e2+P.e012*1e02+P.e013*1e01+P.e123*1e12:P),
-    view    = d3.inline(P=>(P instanceof Array)?P.map(view):(P instanceof d3)?((1e123+5e023)&P)^(1e1-2e0):P),
-    model   = d3.inline(P=>(P instanceof Array)?P.map(model):(P instanceof d3)?((Math.cos(performance.now()/2000)+Math.sin(performance.now()/2000)*(1e13))>>>P):P),
-    graph   = (x)=>d2.graph(()=>[d2.graph].concat(x.map(x=>(x instanceof Function)?y=>project(view(model(x()))):project(view(model(x))))));
+Algebra(3,0,1).inline(()=>{ 
     
-// Now we display some 3D points, lines and polygons.
-d3.inline(()=>{ 
-    // Helper to create points.
-    var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;     
+    // We work in dual space. Our 1-blade's are dual-vectors (aka functionals of the form ax + by + cz + dw = 0).
+    // The four basis functionals are thus (x=0, y=0, z=0, w=0). In three dimensions these represent the yz, xz, xy and
+    // ideal plane. 
+    
+    // Specify a point directly (trivectors specified with overloaded e-notation.)
+    var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
+    
+    // Lines can be defined using plucker coordinates
+    var line = (px,py,pz,dx,dy,dz)=>px*1e01+py&1e02+pz*1e03+dx*1e12+dy*1e13+dz*1e23;
+
+    // Planes can be defined directly using e0,e1,e2,e3
+    var plane = (a,b,c,d)=>d*1e0+a*1e1+b*1e2+c*1e3;
+    
+    // Useful joins
+    var line_from_points  = (P1,P2)=>P1.Normalized&P2.Normalized,
+        plane_from_points = (P1,P2,P3)=>P1&P2&P3,
+        plane_from_point_and_line = (P,L)=>P&L;
+        
+    // Usefull meets
+    var line_from_planes  = (p1,p2)=>p1^p2,
+        point_from_planes = (p1,p2,p3)=>p1^p2^p3,
+        point_from_line_and_plane = (L,P)=>L^P;
     
     // Create 5 points and some joining lines.
-    var A=point(0,-1,0), B=point(1,1,-1), C=point(-1,1,-1), D=point(1,1,1), E=point(-1,1,1),
-        ab=A&B, bc=B&C, ca=C&A, ad=A&D, bd=B&D, cd=C&D;
-        
-    // An animated plane.    
-    var plane = ()=>Math.sin(performance.now()/1000)*1e0 + 1e2;
+    var A=point(0,-1,0), B=point(1,1,-1), C=point(-1,1,-1), D=point(1,1,1), E=point(-1,1,1), 
+        centroid=A+B+C+D+E,
+        camera=0e0;
     
     // Graph the 3D items
-    document.body.appendChild(graph(["3D PGA",
-      0xddaaff,ab,bc,ca,ad,bd,cd,[A,B,C],                          // graph some lines and one face of the pyramid
-      0xAA88FF,[A,B],[A,C],[A,D],[B,C],[B,D],[C,E],[A,E],[E,D],    // graph all edges
-      0x444444,A,"A",B,"B",C,"C",D,"D",E,"E",                      // graph all vertices
-      0x884444,A<<(B&C&E),"A.(B&C&E)",                             // line throu a and the floor plane of the pyramid
-      0x448844,A+B+C+D+E,"G=A+B+C+D+E",                            // G = center of gravity  
-      0x444488,(A+B+C+D+E)<<(A&B&C),"h=G.(A&B&C)",                 // line between CoG and ABC plane
-      0x4444ff,((A+B+C+D+E)<<(A&B&C))^(A&B&C),"I=h^(A&B&C)",       // projection CoG  onto ABC plane
-      0xaaaaff,()=>[A&B,A&C,A&E,A&D].map(x=>x^plane)               // wedge with the plane
-    ])); 
+    document.body.appendChild(this.graph(()=>{
+      var time=performance.now()/4000;    
+      camera.set(Math.cos(time)+Math.sin(time)*1e13);                      // rotate around Y 
+      return [0xddaaff,[A,B,C],                                            // graph on face
+              0xAA88FF,[A,B],[A,C],[A,D],[B,C],[B,D],[C,E],[A,E],[E,D],    // graph all edges
+              0x444444,A,"A",B,"B",C,"C",D,"D",E,"E",                      // graph all vertices
+              0xFF8888,C+E,centroid,"sum of points",
+              0x8888FF,line_from_points(centroid,C+E),"line from points ..",
+              0x44AA44,line_from_planes(A&B&C,B&C&D),"line from planes ..",
+              0x4488FF,point_from_line_and_plane(line_from_points(centroid,C+E),A&D&B),"point from line and plane ..",
+              0xFFAA66,(B&D)+(C&E),"sum of lines"
+             ];
+    },{animate:true,camera})); 
 })();
 </SCRIPT></BODY>

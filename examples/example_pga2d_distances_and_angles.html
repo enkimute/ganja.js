@@ -39,7 +39,6 @@ Algebra(2,0,1).inline(()=>{
     0xff4444, AB, AtoB, BC, BtoC, CA, CtoA,         // render edges and lengths.
     0x444444, A, CAtoAB, B, ABtoBC, C, CAtoBC,      // render verts and angles
     0x8888ff, [B,()=>(B<<CA)*CA], BtoCA, 
-    this.graph // tell it to animate .. 
-  ]));
+  ],{animate:true}));
 })();
 </SCRIPT></BODY>

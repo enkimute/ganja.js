@@ -3,32 +3,50 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 3,0,1 metric. 
-var d3 = Algebra(3,0,1);
+Algebra(3,0,1).inline(()=>{ 
+    
+  // Specify a point directly (trivectors specified with overloaded e-notation.)
+  var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
+  
+  // Lines can be defined using plucker coordinates
+  var line = (px,py,pz,dx,dy,dz)=>px*1e01+py&1e02+pz*1e03+dx*1e12+dy*1e13+dz*1e23;
 
-// Ganja.js only supoprts native 2D graphing. So we use a projective 2D algebra and implement a camera projection that rotates around the y axis :
-var d2      = Algebra(2,0,1), 
-    project = d2.inline(P=>(P instanceof Array)?P.map(project):(P instanceof d3)?P.e01*-1e0+(P.e13)*1e1+(P.e12)*1e2+P.e012*1e02+P.e013*1e01+P.e123*1e12:P),
-    view    = d3.inline(P=>(P instanceof Array)?P.map(view):(P instanceof d3)?((1e123+5e023)&P)^(1e1-2e0):P),
-    model   = d3.inline(P=>(P instanceof Function)?model(P()):(P instanceof Array)?P.map(model):(P instanceof d3)?((Math.cos(performance.now()/2000)+Math.sin(performance.now()/2000)*(1e13))>>>P):P),
-    graph   = (x)=>d2.graph(()=>[d2.graph].concat(x.map(x=>(x instanceof Function)?y=>project(view(model(x()))):project(view(model(x))))));
-    
-// Now we display some 3D points, lines and polygons.
-d3.inline(()=>{ 
-    
-    // Helper to create points.
-    var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
-    var AngleLines = (PI,EP)=>Math.acos((PI.Normalized<<EP.Normalized).Length)*180/Math.PI;
-    
-    // Create 5 points and some joining lines.
-    var A=()=>point(0,Math.sin(performance.now()/1000),0), B=point(1,1,-1), C=point(-1,1,-1), D=point(1,1,1), E=point(-1,1,1);
-    
-    // Graph the 3D items
-    document.body.appendChild(graph(["3D PGA",
-      0xddaaff,()=>[A,B,C],
-      0xAA88FF,()=>[A,B],()=>[A,C],()=>[A,D],()=>[A,E],[B,C],[B,D],[C,E],[E,D],
-      0x444444,A,"A",B,"B",C,"C",D,"D",E,"E",
-      0x888888,B+E,[A,B+E],()=>(A&(B+E).Normalized).Length.toFixed(2),
-      0xFF6666,[A,B],[B,B+E],()=>[A+2*B,E+5*B],()=>(AngleLines((A&B),(B&(B+E))).toFixed(2))+"&deg;"
-    ])); 
+  // Planes can be defined directly using e0,e1,e2,e3
+  var plane = (a,b,c,d)=>d*1e0+a*1e1+b*1e2+c*1e3;
+  
+  // Useful distances
+  var dist_pp = (P1,P2)=>(P1.Normalized&P2.Normalized).Length,    // point to point
+      dist_pP = (P,p)=>(P.Normalized&p.Normalized).Length,        // point to plane
+      dist_ll = (l1,l2)=>(!(l1.Normalized*l2.Normalized)).Length; // line to line
+  
+  // Useful angles
+  var angle_pp = (p1,p2)=>Math.acos(p1.Normalized<<p2.Normalized)*180/Math.PI, // Angle between planes
+      angle_ll = (l1,l2)=>Math.acos(l1.Normalized<<l2.Normalized)*180/Math.PI; // Angle between lines 
+  
+  // Create 5 points.
+  var A=point(0,-1,0), B=point(1,1,-1), C=point(-1,1,-1), D=point(1,1,1), E=point(-1,1,1), 
+  
+  // Our ground plane
+      a=B&C&D,
+  
+  // Our camera position and orientation
+      camera=0e0;
+  
+  // Graph the 3D items
+  document.body.appendChild(this.graph(()=>{
+    var time=performance.now()/4000;    
+    A=point(0,Math.sin(time*4),0);
+    camera.set(Math.cos(time)+Math.sin(time)*1e13);                      // rotate around Y 
+    return [0xddaaff,[A,B,C],                                            // graph on face
+            0xAA88FF,[A,B],[A,C],[A,D],[B,C],[B,D],[C,E],[A,E],[E,D],    // graph all edges
+            0x444444,A,"A",B,"B",C,"C",D,"D",E,"E",                      // graph all vertices
+            0xFF8888,[A,E],dist_pp(A,E).toFixed(2),                      // distance A to E
+            0x8888FF,[A,B+E],dist_pP(A,a).toFixed(2),                    // distance A to a
+            0x44aa44,C+E,dist_ll(C&E,D&B).toFixed(2),                    // distance CE to DB
+            0x44aaff,[A+D+E,B+C+5*D+5*E,D+E],(angle_pp(A&E&D,a).toFixed(2))+"°",   // angle planes.
+            0xff44ff,[A,2*A+D,2*A+B],(angle_ll(A&D,B&A).toFixed(2))+"°"
+           ];
+  },{animate:true,camera})); 
+  
 })();
 </SCRIPT></BODY>

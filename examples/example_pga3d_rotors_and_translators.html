@@ -1,0 +1,43 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 3,0,1 metric. 
+Algebra(3,0,1).inline(()=>{ 
+
+  // Specify a point directly (trivectors specified with overloaded e-notation.)
+  var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
+  
+  // Lines can be defined using plucker coordinates
+  var line = (px,py,pz,dx,dy,dz)=>px*1e01+py&1e02+pz*1e03+dx*1e12+dy*1e13+dz*1e23;
+
+  // Planes can be defined directly using e0,e1,e2,e3
+  var plane = (a,b,c,d)=>d*1e0+a*1e1+b*1e2+c*1e3;
+  
+  // Rotations can be specified through exponentiation (angle around line).
+  var rotor = (line,angle)=>Math.cos(angle/2) + Math.sin(angle/2)*line.Normalized;
+    
+  // Translations can similarly be expressed through exponentiation.
+  var translator = (line,distance)=>1+0.5*distance*(line.Normalized*1e0123);
+
+  // Create 5 points.
+  var A=point(0,0,0), B=point(0,1,1), C=point(0,1,0), D=point(1,1,1), E=point(-1,1,1), 
+  
+  // Our ground plane
+      a=B&C&D,
+  
+  // Our camera position and orientation
+      camera=0e0;
+  
+  // Graph the 3D items
+  document.body.appendChild(this.graph(()=>{
+    var time=performance.now()/4000;    
+    var D=rotor(A&B,time*10)>>>C;
+    camera.set(rotor(1e13,time));                      // rotate around Y 
+    return [A,"A",B,"B",A&B,E,
+            0xFF8888,[A,B,E],
+            0x444444,[A+0.9*B,(A+0.8*B)+2*D,A+D,D,D+B,2*D+(B+0.8*A),B+0.9*A].map(x=>translator(A&B,Math.sin(time*5))>>>x),
+           ];
+  },{animate:true,camera})); 
+})();
+</SCRIPT></BODY>
