@@ -43,7 +43,7 @@ inline syntax and graphing makes math in the browser feel like .. math.
 * geometric, inner (contraction), outer (wedge) and vee product
 * conjugate, Reverse, Involute, Dual (Poincare), Negative
 * 4 API's (inline, asciimath, object oriented, functional)
-* Easy graph function for 1D and 2D functions and Projective 2D elements.
+* Easy graph function for 1D and 2D functions and Projective 2D and 3D elements.
 * There's a [game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) that teaches you how to use ganja.js !
 
 <A NAME="Started"></A>
@@ -145,14 +145,16 @@ examples of how to use the inline syntax.
 #### The graph function.
 
 Your Algebra also exposes a static **_graph_** function that allows you to
-easily graph 1D or 2D functions as well as 2D PGA elements.
+easily graph 1D or 2D functions as well as 2D and 3D PGA elements.
 
 ```javascript
-canvas = Algebra(0).graph(x=>Math.sin(x*5));            // Graph a 1D function in R
+canvas = Algebra(0).graph(x=>Math.sin(x*5));                   // Graph a 1D function in R
 
-canvas = Algebra(0).graph((x,y)=>x+y);                  // Graph a 2D function in R
+canvas = Algebra(0).graph((x,y)=>x+y);                         // Graph a 2D function in R
 
-svg = Algebra(2,0,1).graph(()=>[1e12,1e1,1e2]);         // Graph the origin and x and y-axis
+svg = Algebra(2,0,1).inline(()=>this.graph([1e12,1e1,1e2]))(); // Graph the origin and x and y-axis in 2D
+
+svg = Algebra(3,0,1).inline(()=>this.graph([1e123,1e23,1e13,1e12],{camera:1+.5e01-.5e02}))(); // and in 3D 
 ```
 Again, many more examples can be found at [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html).
 
