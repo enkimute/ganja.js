@@ -5,16 +5,26 @@
 // In quaternion space H, we calculate the mandelbrot set and use the
 // iteration count for colorisation.
 
-var cache=[];
-
 document.body.appendChild(Algebra({p:3,basis:['1','e12','e13','e23']}).graph(function(x,y){
+
 // Calculate iteration count for mandelbrot.
-  var n=40, z=0e12, c=x*1.75-1+y*1e12;
+  var n=40,                    // Iteration count. 
+      z=0e12,                  // A complex number Z.
+      c=x*1.75-1+y*1e12,       // position in the complex plane.
+      axis=0.578*[0,1,1,1];    // The 1,1,1 axis. (could write 0.578*(1e12+1e13+1e23)
+      
+// See if this c escapes ..      
   while (z < 4 && n--) z=z**2+c;
+  
+// Smooth iteration count and angle added in.
   n += Math.log2(Math.log2(Math.max(4,z.Length)))-Math.atan2(y,x)*10;
+  
 // Use the iteration count to rotate the color red in the hue plane  
-  if (cache[n]) return cache[n];
-  var red=1e12, rot=Math.cos(n/20) + Math.sin(n/20)*(0.578e12+0.578e13+0.578e23);
-  return cache[n]=(rot>>>red).Vector;
+  var red=1e12,                                  
+      rot=Math.cos(n/20) + Math.sin(n/20)*axis;
+      
+// Rotate red around the 1,1,1 axis and return the resulting color      
+  return (rot>>>red).Vector;
+  
 }));
 </SCRIPT></BODY>
