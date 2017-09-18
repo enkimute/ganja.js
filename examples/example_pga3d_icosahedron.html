@@ -34,8 +34,8 @@ Algebra(3,0,1).inline(()=>{
   // Graph the 3D items
   document.body.appendChild(this.graph(()=>{
     var time=performance.now()/4000;    
-    camera.set(rotor(1e13,time)*rotor(1e12,time*1.23131));
-    return items.slice(0,1+((Math.floor(time*50))%(items.length+20)));
+    camera.set(rotor(1e13,time)*rotor(1e12,time*1.23131));                // animate camera
+    return items.slice(0,1+((Math.floor(time*50))%(items.length+20)));    // show more and more elements
   },{animate:true,camera})); 
   
 })();
