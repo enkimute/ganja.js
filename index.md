@@ -1,5 +1,3 @@
-# ganja.js - Geometric Algebra for javascript.
-
 **G**eometric **A**lgebra - **N**ot **J**ust **A**lgebra
 
 ![title image](images/ganja_thumb.jpg)
@@ -19,3 +17,4 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 (**Seriously**, look at the [examples](https://enkimute.github.io/ganja.js/examples/coffeeshop.html)
 or play [the wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) first.)
 
+[Read more on github .. ](https://github.com/enkimute/ganja.js)
