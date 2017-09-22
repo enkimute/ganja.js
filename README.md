@@ -245,6 +245,12 @@ PGA3D Distances and Angles<BR>
 PGA3D Rotors and Translators<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_rotors_and_translators" TARGET="_blank" TITLE="PGA3D Rotors and Translators"><IMG SRC="images/pga3d_rotors_and_translators.jpg"/></A>
 <TR><TD ALIGN=CENTER>
+PGA3D Slicing<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_slicing"                TARGET="_blank" TITLE="PGA3D Slicing"><IMG SRC="images/pga3d_slicing.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA3D Icosahedron<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_icosahedron"            TARGET="_blank" TITLE="PGA3D Icosahedron"><IMG SRC="images/pga3d_icosahedron.jpg"/></A>
+<TR><TD ALIGN=CENTER>
 PGA2D Points and Lines<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
 <TD ALIGN=CENTER>
