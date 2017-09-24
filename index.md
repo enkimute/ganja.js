@@ -1,3 +1,9 @@
+<meta content="ganja.js Geometric Algebra for Javascript" property="og:title">
+<meta content="website" property="og:type">
+<meta content="https://enkimute.github.io/ganja.js/images/ganja_thumb.jpg" property="og:image">
+<meta content="https://enkimute.github.io/ganja.js" property="og:url">
+<meta content="Geometric algebra for javascript with operator overloading and algebraic literals." property="og:description">
+
 **G**eometric **A**lgebra - **N**ot **J**ust **A**lgebra
 
 ![title image](images/ganja_thumb.jpg)
