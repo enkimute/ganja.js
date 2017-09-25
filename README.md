@@ -61,12 +61,25 @@ signature (number of positive,negative and zero dimensions). The result is
 an ES6 class implementing the requested clifford algebra.
 
 ```javascript
+// Basic 
 var Complex = Algebra(0,1);     // Complex numbers.
-var Cl2 = Algebra(2);           // Clifford algebra for 2D vectors.
-var Cl3 = Algebra(3);           // Clifford algebra for 3D vectors.
-var timeSpace = Algebra(3,1);   // timespace
-var PGA3D = Algebra(3,0,1);     // Projective Euclidean 3D space
-var CGA3D = Algebra(4,1);       // Conformal Euclidean 3D space
+var H = Algebra(0,2);           // Quaternions.
+var Dual = Algebra(0,0,1);      // Dual numbers.
+
+// Clifford
+var Cl2 = Algebra(2);           // Clifford algebra for 2D vector space.
+var Cl3 = Algebra(3);           // Clifford algebra for 3D vector space.
+var timeSpace = Algebra(3,1);   // Clifford algebra for timespace vectors.
+
+// SubAlgebras
+var Complex = Algebra({p:3,basis:['1','e123']});        // Complex Numbers as subalgebra of Cl3
+var H = Algebra({p:3,basis:['1','e12','e13','e23']});   // Quaternions as even subalgebra of Cl3
+
+// Geometric
+var PGA2D = Algebra(2,0,1);     // Projective Euclidean 2D plane. (dual)
+var PGA3D = Algebra(3,0,1);     // Projective Euclidean 3D space. (dual)
+var CGA2D = Algebra(3,1);       // conformal 2D space. 
+var CGA3D = Algebra(4,1);       // Conformal 3D space. 
 ```
 
 You can now use this class to generate elements of your algebra. Those elements will have all of the
