@@ -55,6 +55,9 @@
       Sub  (b,res) { if (!(b instanceof Element)) { var c=new Element(b.length&&b); b.length||(c[0]=b); b=c; }; res = res||new Element(); for (var i=0; i<res.length; i++) res[i] = this[i]-b[i]; return res; }  // Component add.
       Div  (b,res) { return this.Mul(b.Inverse,res); }                                                                                                        // right inverse assumed here.
       LDiv (b,res) { return b.Inverse.Mul(this,res); }                                                                                                        // left inverse assumed here.
+      Exp  ()      { var s=this.s; this[0]=0; var l=this.Length; return this.Mul(Element.Scalar(Math.sin(l)/l)).Add(Math.cos(l)).Mul(Element.Scalar(Math.exp(s))); } // Exp
+      Ln   ()      { var ql=this.Length, s=this[0]; this[0]=0; var vl=this.Length; return this.Mul(Element.Scalar(1/vl*Math.acos(s/ql))).Add(Element.Scalar(Math.log(ql))); } // Ln
+      Pow  (a)     { return this.Ln().Mul(Element.Scalar(a)).Exp(); }
       Map  (a,b  ) { var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*(((a===grades[i])||(b===grades[i]))?-1:1); return res; } // for inverse calculations.
       get Vector ()    { return this.slice(grade_start[1],grade_start[2]); };
     // Factories - Make it easy to generate blades.
@@ -71,7 +74,7 @@
       static Sub(a,b,res)   {  a=a.call?a():a; b=(b&&b.call)?b():b; if (arguments.length==1) return Element.Mul(a,-1); if (!(a instanceof Element || b instanceof Element)) return a-b; res=res||new Element(); a=Element.toEl(a); b=Element.toEl(b); for(var i=0;i<res.length;i++)res[i]=a[i]-b[i]; return res; }
       static Mul(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; var r=a*b; if (!isNaN(r)) return r; a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b,res); }  
       static Div(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a/b; a=Element.toEl(a);b=Element.toEl(b); return a.Div(b,res); }  
-      static Pow(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a**b; a=Element.toEl(a); if (b==-1) return a.Inverse; if (b==2) return a.Mul(a); throw 'not yet'; }  
+      static Pow(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a**b; a=Element.toEl(a); if (b==-1) return a.Inverse; if (b==2) return a.Mul(a); return a.Pow(b); }  
       static Dot(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a*b; a=Element.toEl(a);b=Element.toEl(b); return a.Dot(b,res); }  
       static Wedge(a,b,res) {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a*b; a=Element.toEl(a);b=Element.toEl(b); return a.Wedge(b,res); }  
       static Vee(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a*b; a=Element.toEl(a);b=Element.toEl(b); return a.Vee(b,res); }  
@@ -82,6 +85,7 @@
       static lte(a,b)       {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a<=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<=b; }
       static gte(a,b)       {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>=b; }
       static sw(a,b)        {  a=a.call?a():a; b=b.call?b():b; return a.Mul(b).Mul(a.Conjugate); }
+      static exp(a)         {  a=a.call?a():a; return a.Exp(); }
     // Debug  
       static describe() { console.log(`Basis\n${basis}\nRemap${JSON.stringify(brm)}\nDual\n${drm}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}`); }    
       toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
