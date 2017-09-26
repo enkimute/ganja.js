@@ -38,7 +38,7 @@ inline syntax and graphing makes math in the browser feel like .. math.
 * Operator overloading
 * Algebraic constants
 * Supports any metric (positive,negative,zero)
-* smallish (173 lines)
+* smallish (177 lines)
 * matrix-free inverses up to 5D.
 * geometric, inner (contraction), outer (wedge) and vee product
 * conjugate, Reverse, Involute, Dual (Poincare), Negative
