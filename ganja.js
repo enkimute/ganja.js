@@ -55,7 +55,7 @@
       Sub  (b,res) { if (!(b instanceof Element)) { var c=new Element(b.length&&b); b.length||(c[0]=b); b=c; }; res = res||new Element(); for (var i=0; i<res.length; i++) res[i] = this[i]-b[i]; return res; }  // Component add.
       Div  (b,res) { return this.Mul(b.Inverse,res); }                                                                                                        // right inverse assumed here.
       LDiv (b,res) { return b.Inverse.Mul(this,res); }                                                                                                        // left inverse assumed here.
-      Exp  ()      { var s=this.s; this[0]=0; var l=this.Length; return this.Mul(Element.Scalar(Math.sin(l)/l)).Add(Math.cos(l)).Mul(Element.Scalar(Math.exp(s))); } // Exp
+      Exp  ()      { var s=this.s; this[0]=0; var l=this.Length; return this.Mul(Element.Scalar(Math.sin(l)/l)).Add(Math.cos(l)).Mul(Element.Scalar(Math.exp(s))); }          // Exp
       Ln   ()      { var ql=this.Length, s=this[0]; this[0]=0; var vl=this.Length; return this.Mul(Element.Scalar(1/vl*Math.acos(s/ql))).Add(Element.Scalar(Math.log(ql))); } // Ln
       Pow  (a)     { return this.Ln().Mul(Element.Scalar(a)).Exp(); }
       Map  (a,b  ) { var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*(((a===grades[i])||(b===grades[i]))?-1:1); return res; } // for inverse calculations.
