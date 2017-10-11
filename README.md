@@ -207,6 +207,8 @@ and expect ganja.js to make appropriate sign changes)
 The advanced options are available by passing in an options object as
 the first parameter to the *Algebra* call.  
 
+#### Custom subalgebra's
+
 ```javascript
 
 // The complex numbers as the even subalgebra of R2 
@@ -216,6 +218,9 @@ C = Algebra({p:2,basis:['1','e12']});
 var H = Algebra({p:3,basis:['1','e12','e13','e23']});  
 
 ```
+
+#### Custom basis names.
+
 When not specified, ganja.js will generate basis names that are
 grouped by rank and numerically sorted. By default, a single zero
 dimension will get generator name e<sub>0</sub>. Zero dimensions come
@@ -244,6 +249,38 @@ var R3_32 = Algebra(3);
 var R3_64 = Algebra({p:3,baseType:Float64Array});
 
 ```
+
+#### Custom Cayley Table
+
+Or take things a bit further and simply specify a Cayley table to your liking. The example below shows
+automatic numerical differentiation and calculates the value, 1st, 2nd and 3rd derivative of any polynomial.
+
+```javascript
+var basis=['1','e1','e2','e3'];
+var Cayley=[['1', 'e1','e2','e3'],
+            ['e1','e2','e3', '0'],
+            ['e2','e3', '0', '0'],
+            ['e3', '0', '0', '0']];
+
+Algebra({basis,Cayley}).inline(()=>{
+  var f = (x)=>0.25*x*x*x*x-0.5; 
+  for (var i=-5; i<5; i++) console.log( i, f(i+1e1) );
+})();
+```
+outputs : x [f(x),f'(x),f''(x)/2!,f'''(x)/3!]
+```
+-5 [155.75, -125, 37.5, -5]
+-4 [  63.5,  -64,   24, -4]
+-3 [ 19.75,  -27, 13.5, -3]
+-2 [   3.5,   -8,    6, -2]
+-1 [ -0.25,   -1,  1.5, -1]
+0  [  -0.5,    0,    0,  0]
+1  [ -0.25,    1,  1.5,  1]
+2  [   3.5,    8,    6,  2]
+3  [ 19.75,   27, 13.5,  3]
+4  [  63.5,   64,   24,  4]
+```
+
 
 <A NAME="samples"></A>
 ### Getting free ganja samples.
