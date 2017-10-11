@@ -9,7 +9,7 @@ Algebra(0,0,1).inline(()=>{
   // if you pass in a dual number [x,1], it returns [f(x),f'(x)]
   // Feel free to change this function.  
 
-  var f = (x)=>x*x*x*x-0.5;
+  var f = (x)=>0.25*x*x*x*x-0.5;
   
   // On the left the function.
   document.body.appendChild(this.graph((x)=>f([x,1])[0],{nocompile:true}));
@@ -23,5 +23,24 @@ Algebra(0,0,1).inline(()=>{
    innerHTML:`<TR><TH>x<TH>f(x)<TH>f'(x)${[-3,-2,-1,0,1,2,3].map(x=>'<TR><TD>'+x+'<TD>'+f([x,1])[0]+'<TD>'+f([x,1])[1]).join('')}`
   }))
     
+})();
+
+// You can use ganja.js and a custom Cayley table to extend this concept to n-th order derivatives.
+//
+// For that we need an algebra with multiple zero dimensions, that are not 'connected' (produce zero under outer product)
+// This algebra will contain no bivector elements and we have to manually supply a cayley table :
+//
+// We plot f, f', f'2, f'3, f'4 : 
+
+var basis=['1','e1','e2','e3','e4'];
+var Cayley=[['1', 'e1','e2','e3','e4'],
+            ['e1','e2','e3','e4', '0'],
+            ['e2','e3','e4', '0', '0'],
+            ['e3','e4', '0', '0', '0'],
+            ['e4', '0', '0', '0', '0']];
+
+Algebra({basis,Cayley}).inline(()=>{
+  var f = (x)=>0.25*x*x*x*x-0.5;
+  for (var i=0; i<5; i++) document.body.appendChild(this.graph((x)=>f(x+1e1)[i],{nocompile:true}));
 })();
 </SCRIPT></BODY>
