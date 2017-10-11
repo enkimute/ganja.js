@@ -10,23 +10,24 @@
   return function Algebra(p,q,r) {
   // p can be options object.
     var options=p; if (options instanceof Object) {
-      q = p.q || (p.metric && p.metric.filter(x=>x==-1).length) || q;
-      r = p.r || (p.metric && p.metric.filter(x=>x==0).length) || r;
-      p = p.p || (p.metric && p.metric.filter(x=>x==1).length) || p;
+      q = p.q || (p.metric && p.metric.filter(x=>x==-1).length) || 0;
+      r = p.r || (p.metric && p.metric.filter(x=>x==0).length) || 0;
+      p = p.p === undefined ? (p.metric && p.metric.filter(x=>x==1).length) : p.p || 0;
     } else options={};
   // Initialise basis names and multiplication table.
     var tot = options.tot||(p||0)+(q||0)+(r||0),                                                                                            // p = #dimensions that square to 1, q to -1, r to 0.
         basis=options.basis||Array.apply([],{length:2**tot})                                                                                // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
               .map((x,xi)=>(((1<<20)+xi).toString(2)).slice(-tot||-1)                                                                       // => ["000", "001", "010", "011", "100", "101", "110", "111"]  (index of array in base 2)
-              .replace(/./g,(a,ai)=>a=='0'?'':ai+1-(r||0)))                                                                                 // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
+              .replace(/./g,(a,ai)=>a=='0'?'':ai+1-(r==0?0:1)))                                                                             // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
               .sort((a,b)=>(a.toString().length==b.toString().length)?(a|0)-(b|0):a.toString().length-b.toString().length)                  // => ["", "1", "2", "3", "12", "13", "23", "123"] (sorted numerically)
               .map(x=>x&&'e'+x||'1'),                                                                                                       // => ["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"] (converted to commonly used basis names)
+        low=basis.join('').split('').filter(x=>x.match(/\d/)).sort()[0]*1,                                                                  // lowest x in ex basis names.      
         grades=basis.map(x=>x.length-1),                                                                                                    // => [0, 1, 1, 1, 2, 2, 2, 3] (grade per basis blade)
         grade_start=grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]),                                              // =>  [0, 1, 4, 7, 8] (first blade of given grade, with extra stop element)
         simplify = (s,p,q,r)=>{                                                                                                             // implement ex*ey=-ey*ex (for x!=y) and ex*ex=metric[x] 
           var sign=1,c,l,t=[],f=true;s=[].slice.call(s.replace(/e/g,''));l=s.length;
           while (f) { f=false;
-            for (var i=0; i<l;) if (s[i]===s[i+1]) { if ((s[i]|0)>p) sign*=-1; else if ((s[i]|0)<r) sign*=0; i+=2; f=true; } else t.push(s[i++]);
+            for (var i=0; i<l;) if (s[i]===s[i+1]) { if ((s[i]-low)>=(p+r)) sign*=-1; else if ((s[i]-low)<r) sign*=0; i+=2; f=true; } else t.push(s[i++]);
             for (var i=0; i<t.length-1; i++) if (t[i]>t[i+1]) { c=t[i];t[i]=t[i+1];t[i+1]=c;sign*=-1;f=true; break;} if (f) { s=t;t=[];l=s.length; }
           }
           var ret=(sign==0)?'0':((sign==1)?'':'-')+(t.length?'e'+t.join(''):'1'); return (brm&&brm[ret])||(brm&&brm['-'+ret]&&'-'+brm['-'+ret])||ret;
