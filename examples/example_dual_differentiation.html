@@ -9,7 +9,7 @@ Algebra(0,0,1).inline(()=>{
   // if you pass in a dual number [x,1], it returns [f(x),f'(x)]
   // Feel free to change this function.  
 
-  var f = (x)=>x*x-0.5;
+  var f = (x)=>x*x*x*x-0.5;
   
   // On the left the function.
   document.body.appendChild(this.graph((x)=>f([x,1])[0],{nocompile:true}));
