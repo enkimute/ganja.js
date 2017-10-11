@@ -1,0 +1,26 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Dual Numbers Example : Automatic Differentiation.
+Algebra(0,0,1).inline(()=>{
+    
+  // This is our function. If you pass in a scalar x it returns f(x),
+  // if you however pass in a dual number [x,1], it returns [f(x),f'(x)] 
+
+  var f = (x)=>x*x-0.5;
+  
+  // On the left the function.
+  document.body.appendChild(this.graph((x)=>f([x,1])[0],{nocompile:true}));
+  
+  // On the right its derivative.
+  document.body.appendChild(this.graph((x)=>f([x,1])[1],{nocompile:true}));
+
+  // A selection of numerical values of both :
+  document.body.appendChild(Object.assign(document.createElement('table'),{
+   width:200,
+   innerHTML:`<TR><TH>x<TH>f(x)<TH>f'(x)${[-3,-2,-1,0,1,2,3].map(x=>'<TR><TD>'+x+'<TD>'+f([x,1])[0]+'<TD>'+f([x,1])[1]).join('')}`
+  }))
+    
+})();
+</SCRIPT></BODY>
