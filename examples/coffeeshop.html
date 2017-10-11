@@ -14,6 +14,8 @@
     .legend > span { padding:4px; border:1px solid #AAA; margin:4px; border-radius:5px; cursor:pointer; }
     .complex          { background-color:#ccc; color:#666; }
     .complex.SELECTED { background-color:#eee; color:#606060; }
+    .dual             { background-color:#eec; color:#886; }
+    .dual.SELECTED    { background-color:#ffe; color:#808060; }
     .pga2d          { background-color:#ccf; color:#668; }
     .pga2d.SELECTED { background-color:#eef; color:#606080; }
     .pga3d          { background-color:#cff; color:#688; }
@@ -25,6 +27,7 @@
     #HEADER { background-color:#eee; }
     .TAB { display:none; }
     #HEADER.complex > .TAB.complex { display:block; }
+    #HEADER.dual > .TAB.dual { display:block; }
     #HEADER.game > .TAB.game { display:block; }
     #HEADER.quaternion > .TAB.quaternion { display:block; }
     #HEADER.pga2d > .TAB.pga2d { display:block; }
@@ -47,12 +50,13 @@
     <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">&lt;&lt;=Dot</SPAN>
     <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">&gt;&gt;&gt;=Sandwich</SPAN>
     <SPAN CLASS="complex" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('complex'); ">Complex</SPAN>
+    <SPAN CLASS="Dual" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('dual'); ">Dual</SPAN>
     <SPAN CLASS="quaternion" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('quaternion'); ">Quaternion</SPAN>
     <SPAN CLASS="pga2d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga2d'); ">PGA 2D</SPAN>
     <SPAN CLASS="pga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga3d'); ">PGA 3D</SPAN>
     <SPAN CLASS="game" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('game'); ">Games</SPAN>
   </DIV>
-  <DIV ID="HEADER" CLASS="complex quaternion pga2d pga3d game">
+  <DIV ID="HEADER" CLASS="complex dual quaternion pga2d pga3d game">
   </DIV>
   <DIV ID="MAIN">
     <DIV ID="RUN">&#x25B6; Run Changes <SPAN STYLE="opacity:0.5; float:right; margin-left:30px">Ctrl+Enter</SPAN></DIV>
@@ -60,7 +64,7 @@
     <PRE ID="SOURCE"></PRE>
   </DIV>
   <SCRIPT>
-    var examples = ["complex_mandelbrot","quaternion_hue","quaternion_mandelbrot","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_separating_axis","pga2d_pose_estimation","pga2d_euler_line","pga2d_desargues_theorem","pga3d_points_and_lines","pga3d_distances_and_angles","pga3d_rotors_and_translators","pga3d_icosahedron","pga3d_sampling","pga3d_slicing","game_wedge"]
+    var examples = ["complex_mandelbrot","dual_differentiation","quaternion_hue","quaternion_mandelbrot","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_separating_axis","pga2d_pose_estimation","pga2d_euler_line","pga2d_desargues_theorem","pga3d_points_and_lines","pga3d_distances_and_angles","pga3d_rotors_and_translators","pga3d_icosahedron","pga3d_sampling","pga3d_slicing","game_wedge"]
     
     var $ = document.getElementById.bind(document);
     
