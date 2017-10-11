@@ -55,15 +55,8 @@
       Sub  (b,res) { if (!(b instanceof Element)) { var c=new Element(b.length&&b); b.length||(c[0]=b); b=c; }; res = res||new Element(); for (var i=0; i<res.length; i++) res[i] = this[i]-b[i]; return res; }  // Component add.
       Div  (b,res) { return this.Mul(b.Inverse,res); }                                                                                                        // right inverse assumed here.
       LDiv (b,res) { return b.Inverse.Mul(this,res); }                                                                                                        // left inverse assumed here.
-      Exp  ()      { var s=this.s, v=new Element(this);  v[0]=0; var l=v.VLength; if (!l) return Element.Scalar(Math.exp(s)); return v.Mul(Element.Scalar(Math.sin(l)/l)).Add(Math.cos(l)).Mul(Element.Scalar(Math.exp(s))); }          // Exp
-      Ln   ()      { 
-        var v=new Element(this), ql=this.VLength, s=this[0]; 
-        if (!ql) return Element.Scalar(-Infinity); 
-        v[0]=0; var vl=v.VLength; 
-        if (!vl) return Element.Scalar(Math.log(s)); 
-        return v.Mul(Element.Scalar( Math.acos(s/ql)/vl ))
-                   .Add(Element.Scalar( Math.log(ql) )); } // Ln
-      Pow  (a)     { return this.Ln().Mul(Element.Scalar(a)).Exp(); }
+      // Exp via Taylor :( .. do something smarter here.
+      Exp  ()      { var r = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<15; x++) { r=r.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return r; }
       Map  (a,b  ) { var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*(((a===grades[i])||(b===grades[i]))?-1:1); return res; } // for inverse calculations.
       get Vector ()    { return this.slice(grade_start[1],grade_start[2]); };
     // Factories - Make it easy to generate blades.
