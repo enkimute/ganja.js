@@ -213,13 +213,13 @@ the first parameter to the *Algebra* call.
 C = Algebra({p:2,basis:['1','e12']});
 
 // The Quaternions as the even subalgebra of R3
-H = Algebra({p:3,basis:['e23','e31','e12','1']});     
+var H = Algebra({p:3,basis:['1','e12','e13','e23']});  
 
 ```
 When not specified, ganja.js will generate basis names that are
 grouped by rank and numerically sorted. By default, a single zero
-dimension will get generator name e<sub>0</sub> and will take
-the first place. 
+dimension will get generator name e<sub>0</sub>. Zero dimensions come
+first. 
 
 |signature|default basis names
 |---|---
