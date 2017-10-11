@@ -179,6 +179,20 @@ static **_describe_** function.
 ```javascript
 Algebra(0,1).describe();
 ```
+sample output :
+
+```
+Basis
+1,e1
+Metric
+-1
+Cayley
+  1, e1
+ e1, -1
+Matrix Form:
+ A,-B
+ B, A
+```
 
 <A NAME="custom"></A>
 ### Ganja for experienced users.
