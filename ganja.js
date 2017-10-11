@@ -10,10 +10,10 @@
   return function Algebra(p,q,r) {
   // p can be options object.
     var options=p; if (options instanceof Object) {
-      q = p.q || (p.metric && p.metric.filter(x=>x==-1).length) || 0;
-      r = p.r || (p.metric && p.metric.filter(x=>x==0).length) || 0;
+      q = (p.q || (p.metric && p.metric.filter(x=>x==-1).length))| 0;
+      r = (p.r || (p.metric && p.metric.filter(x=>x==0).length)) | 0;
       p = p.p === undefined ? (p.metric && p.metric.filter(x=>x==1).length) : p.p || 0;
-    } else options={};
+    } else { options={}; p=p||0; r=r||0; q=q||0; };
   // Initialise basis names and multiplication table.
     var tot = options.tot||(p||0)+(q||0)+(r||0),                                                                                            // p = #dimensions that square to 1, q to -1, r to 0.
         basis=options.basis||Array.apply([],{length:2**tot})                                                                                // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
