@@ -34,8 +34,8 @@
         },
         brm=(x=>{ var ret={}; for (var i in basis) ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i]; return ret; })(basis),      
         drm=basis.map((a,i)=>{ return {a:a,i:i} }).sort((a,b)=>a.a.length>b.a.length?1:a.a.length<b.a.length?-1:(+a.a.slice(1).split('').sort().join(''))-(+b.a.slice(1).split('').sort().join('')) ).map(x=>x.i).reverse(),
-        mulTable = basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),                                                       // Generate Cayley multiplication table.
-        mulTable2 = basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0))),                                                  // Generate Cayley multiplication table.
+        mulTable  = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),                                      // Generate Cayley multiplication table.
+        mulTable2 = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0))),                                  // Generate Cayley multiplication table.
         metric = basis.map((x,xi)=>mulTable[xi][xi]|0),                                                                                     // extended metric .. per basis blade (not just for the 1D subspaces) .. diagonal of cayley table.
         gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0'));                                     // Storage for our product tables.
   // Convert Caeyley table to product matrices.           
@@ -108,7 +108,7 @@
       // 1d and 2d functions  
         if (cvs!==false&&options.nocompile!==true) f=this.inline(f); cvs=cvs||document.createElement('canvas'); if(ww)cvs.width=ww; if(hh)cvs.height=hh; var w=cvs.width,h=cvs.height,context=cvs.getContext('2d'), data=context.getImageData(0,0,w,h);
         if (f.length==2) for (var px=0; px<w; px++) for (var py=0; py<h; py++) { var res=f(px/w*2-1, py/h*2-1); res=res.buffer?[].slice.call(res):res.slice?res:[res,res,res]; data.data.set(res.map(x=>x*255).concat([255]),py*w*4+px*4); }
-        else if (f.length==1) for (var px=0; px<w; px++) { var res=f(px/w*2-1); res=Math.round(Math.min(h-1,Math.max(0,(res/2+0.5)*h))); data.data.set([0,0,0,255],res*w*4+px*4); }
+        else if (f.length==1) for (var px=0; px<w; px++) { var res=f(px/w*2-1); res=Math.round((res/2+0.5)*h); if (res > 0 && res < h-1) data.data.set([0,0,0,255],res*w*4+px*4); }
         return context.putImageData(data,0,0),cvs;       
       }
       static inline(intxt) {
