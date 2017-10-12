@@ -33,7 +33,7 @@ Algebra(3,0,1).inline(()=>{
     camera.set(Math.cos(time)+Math.sin(time)*1e13);
 
     // Evaluate over the field and update our points.
-    for (var i=0,x=-1; x<1; x+=step) for (var y=-1; y<1; y+=step) {
+    for (var i=0,x=-1; x<1; x+=step) for (var y=-1; y<1; i++,y+=step) {
        var r = f(x + 1e01, y + 1e02, time);
        points_fx[i].e013 = r.s;      // overwrite y coordinate.
        points_dx[i].e013 = r.e01;
