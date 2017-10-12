@@ -20,8 +20,8 @@ Algebra(3,0,1).inline(()=>{
     var time=performance.now()/4000;    
     camera.set(Math.cos(time)+Math.sin(time)*1e13);
 
-    // The function we are graphing.
-    var f = (x,y)=>Math.sin(time)*x*x*x*x-0.4*Math.cos(time)*y*y*y+1;
+    // The function we are graphing. (0.5*x^3 - 0.5*y^2 + 1)
+    var f = (x,y)=>0.5*Math.sin(time)*x*x*x-0.5*Math.cos(time*5)*y*y+1;
       
     // Some points in a plane (f expresses the height). and the partial derivatives for dx and dy
     // as before, we get derivatives 'for free' simply by adding in epsilon's. 
@@ -29,6 +29,7 @@ Algebra(3,0,1).inline(()=>{
     var points_dx=[].concat.apply([], range(-1,1,0.3).map(x=>range(-1,1,0.3).map(y=>point(x,f(x+1e01,y+1e02).e01,y))))
     var points_dy=[].concat.apply([], range(-1,1,0.3).map(x=>range(-1,1,0.3).map(y=>point(x,f(x+1e01,y+1e02).e02,y))))
 
+    // Graph the function (black), and its partial derivatives (red and blue)
     return [].concat(
       0x444444,points,          // in black : f(x) for f = sin(time)*x^4 - 0.4*cos(time)*y^3 + 1;
       0xFFCCCC,points_dx,       // in red   : f(x)/dx
