@@ -7,16 +7,18 @@ Algebra(2,0,1).inline(()=>{
   
   // The PGA2D framework cannonicaly embeds (via e01 and e02) a vector version of dual numbers
   // that can be used for automatic differentiation.
-  
-  // As an example, we calculate partial derivatives for the function 3x^2 - 2x^3
+
+  var dx = 1e01, dy = 1e02;
+    
+  // As an example, we calculate partial derivatives for the function 3x^2 - 2y^3
   // you can change this function to any polynomial in x and y .. the partial derivatives
   // follow automatically (and are numericaly stable up to machine precision.)
   
   var f = (x,y)=>3*x*x - 2*y*y*y;
   
   // Calculate the function value and its partial derivatives at (5,2)
-  
-  var result = f( 5+1e01, 2+1e02 );
+
+  var result = f( 5+dx, 2+dy );
   
   // Output the result
   
