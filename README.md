@@ -119,7 +119,7 @@ specify basis blades and allows using lambda expressions without the need
 for calling brackets in algebraic expressions.
 
 ```javascript
-Algebra(2,0,1).inline(()={
+Algebra(2,0,1,()={
 
   // Direct specification of basis blades using e-notation.
   var xy_bivector = 1e12,
@@ -143,7 +143,7 @@ Algebra(2,0,1).inline(()={
   // All elements and functions can be rendered directly. (again, no calling brackets). 
   var canvas = this.graph([ some_point, function_that_returns_point, function_that_returns_join ]);
 
-})();
+});
 
 
 
@@ -176,9 +176,9 @@ canvas = Algebra(0).graph(x=>Math.sin(x*5));                   // Graph a 1D fun
 
 canvas = Algebra(0).graph((x,y)=>x+y);                         // Graph a 2D function in R
 
-svg = Algebra(2,0,1).inline(()=>this.graph([1e12,1e1,1e2]))(); // Graph the origin and x and y-axis in 2D
+svg = Algebra(2,0,1,()=>this.graph([1e12,1e1,1e2]));           // Graph the origin and x and y-axis in 2D
 
-svg = Algebra(3,0,1).inline(()=>this.graph([1e123,1e23,1e13,1e12],{camera:1+.5e01-.5e02}))(); // and in 3D 
+svg = Algebra(3,0,1,()=>this.graph([1e123,1e23,1e13,1e12],{camera:1+.5e01-.5e02})); // and in 3D 
 ```
 Again, many more examples can be found at [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html).
 
@@ -273,10 +273,10 @@ var Cayley=[['1', 'e1','e2','e3'],
             ['e2','e3', '0', '0'],
             ['e3', '0', '0', '0']];
 
-Algebra({basis,Cayley}).inline(()=>{
+Algebra({basis,Cayley},()=>{
   var f = (x)=>0.25*x*x*x*x-0.5; 
   for (var i=-5; i<5; i++) console.log( i, f(i+1e1) );
-})();
+});
 ```
 outputs : x [f(x),f'(x),f''(x)/2!,f'''(x)/3!]
 ```
