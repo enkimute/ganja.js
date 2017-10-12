@@ -1,0 +1,40 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 3,0,1 metric. 
+Algebra(3,0,1).inline(()=>{ 
+    
+  // Helpers
+  var range=(start,stop,step)=>{ var ret=[]; for (var i=start; i<stop; i+=(step||1)) ret.push(i); return ret; }
+    
+  // Specify a point directly (trivectors specified with overloaded e-notation.)
+  var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
+
+  // Our camera position and orientation
+  var camera=0e0;
+  
+  // Graph the 3D items
+  document.body.appendChild(this.graph(()=>{
+    // An external time parameter, and our camera rotation.
+    var time=performance.now()/4000;    
+    camera.set(Math.cos(time)+Math.sin(time)*1e13);
+
+    // The function we are graphing.
+    var f = (x,y)=>Math.sin(time)*x*x*x*x-0.4*Math.cos(time)*y*y*y+1;
+      
+    // Some points in a plane (f expresses the height). and the partial derivatives for dx and dy
+    // as before, we get derivatives 'for free' simply by adding in epsilon's. 
+    var points=[].concat.apply([], range(-1,1,0.3).map(x=>range(-1,1,0.3).map(y=>point(x,f(x+1e01,y+1e02).s,y))))
+    var points_dx=[].concat.apply([], range(-1,1,0.3).map(x=>range(-1,1,0.3).map(y=>point(x,f(x+1e01,y+1e02).e01,y))))
+    var points_dy=[].concat.apply([], range(-1,1,0.3).map(x=>range(-1,1,0.3).map(y=>point(x,f(x+1e01,y+1e02).e02,y))))
+
+    return [].concat(
+      0x444444,points,          // in black : f(x) for f = sin(time)*x^4 - 0.4*cos(time)*y^3 + 1;
+      0xFFCCCC,points_dx,       // in red   : f(x)/dx
+      0xCCCCFF,points_dy        // in blue  : f(x)/dy
+    );
+  },{animate:true,camera})); 
+  
+})();
+</SCRIPT></BODY>
