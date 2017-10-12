@@ -315,6 +315,12 @@ PGA3D Slicing<BR>
 PGA3D Icosahedron<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_icosahedron"            TARGET="_blank" TITLE="PGA3D Icosahedron"><IMG SRC="images/pga3d_icosahedron.jpg"/></A>
 <TR><TD ALIGN=CENTER>
+PGA3D Sampling<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_sampling"               TARGET="_blank" TITLE="PGA3D Sampling"><IMG SRC="images/pga3d_sampling.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA3D Automatic Differentiation<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_differentiation"        TARGET="_blank" TITLE="PGA3D Automatic Differentiation"><IMG SRC="images/pga3d_differentiation.jpg"/></A>
+<TR><TD ALIGN=CENTER>
 PGA2D Points and Lines<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
 <TD ALIGN=CENTER>
