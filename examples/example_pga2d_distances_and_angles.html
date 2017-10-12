@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric. 
-Algebra(2,0,1).inline(()=>{
+Algebra(2,0,1,()=>{
   
   // The identities we already established.
   var point = (x,y)=>1e12-x*1e02+y*1e01,    
@@ -40,5 +40,5 @@ Algebra(2,0,1).inline(()=>{
     0x444444, A, CAtoAB, B, ABtoBC, C, CAtoBC,      // render verts and angles
     0x8888ff, [B,()=>(B<<CA)*CA], BtoCA, 
   ],{animate:true}));
-})();
+});
 </SCRIPT></BODY>

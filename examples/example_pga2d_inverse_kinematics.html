@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric.
-Algebra(2,0,1).inline(()=>{  
+Algebra(2,0,1,()=>{  
 
   // In the inverse kinematics problem we need to calculate joint angles of
   // a kinematic chain so its base remains fixed and its tip reaches a given 
@@ -41,5 +41,5 @@ Algebra(2,0,1).inline(()=>{
     0x000000,points[l],"Target"                         // render target in black
   )));
   
-})();
+});
 </SCRIPT></BODY>

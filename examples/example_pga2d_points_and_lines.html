@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric. 
-Algebra(2,0,1).inline(()=>{
+Algebra(2,0,1,()=>{
     
     // We work in dual space so we define our points to be bivectors. Ganja.js overloads scientific notation to specify basis blades.
     // For readability we create a function that converts 2D euclidean coordinates to their 3D bivector representation.
@@ -38,5 +38,5 @@ Algebra(2,0,1).inline(()=>{
         [A,B,C]         // render polygon ABC.
     ]));
 
-})();
+});
 </SCRIPT></BODY>

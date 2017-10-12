@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Dual Numbers Example : Automatic Differentiation.
-Algebra(0,0,1).inline(()=>{
+Algebra(0,0,1,()=>{
     
   // This is our function. If you pass in a scalar x it returns f(x),
   // if you pass in a dual number [x,1], it returns [f(x),f'(x)]
@@ -23,7 +23,7 @@ Algebra(0,0,1).inline(()=>{
    innerHTML:`<TR><TH>x<TH>f(x)<TH>f'(x)${[-3,-2,-1,0,1,2,3].map(x=>'<TR><TD>'+x+'<TD>'+f([x,1])[0]+'<TD>'+f([x,1])[1]).join('')}`
   }))
     
-})();
+});
 
 // You can use ganja.js and a custom Cayley table to extend this concept to n-th order derivatives.
 //
@@ -39,8 +39,8 @@ var Cayley=[['1', 'e1','e2','e3','e4'],
             ['e3','e4', '0', '0', '0'],
             ['e4', '0', '0', '0', '0']];
 
-Algebra({basis,Cayley}).inline(()=>{
+Algebra({basis,Cayley},()=>{
   var f = (x)=>0.25*x*x*x*x-0.5;
   for (var i=0; i<5; i++) document.body.appendChild(this.graph((x)=>f(x+1e1)[i],{nocompile:true}));
-})();
+});
 </SCRIPT></BODY>

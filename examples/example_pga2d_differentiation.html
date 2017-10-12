@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric. 
-Algebra(2,0,1).inline(()=>{
+Algebra(2,0,1,()=>{
   
   // The PGA2D framework cannonicaly embeds (via e01 and e02) a vector version of dual numbers
   // that can be used for automatic differentiation.
@@ -45,5 +45,5 @@ Algebra(2,0,1).inline(()=>{
   </PRE>`;
   
 
-})();
+});
 </SCRIPT></BODY>

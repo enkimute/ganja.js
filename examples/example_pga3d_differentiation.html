@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 3,0,1 metric. 
-Algebra(3,0,1).inline(()=>{ 
+Algebra(3,0,1,()=>{ 
     
   // Helpers
   var range=(start,stop,step)=>{ var ret=[]; for (var i=start; i<stop; i+=(step||1)) ret.push(i); return ret; }
@@ -42,5 +42,5 @@ Algebra(3,0,1).inline(()=>{
     return render;
   },{animate:true,camera})); 
   
-})();
+});
 </SCRIPT></BODY>

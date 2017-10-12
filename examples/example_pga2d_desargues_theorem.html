@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric.
-Algebra(2,0,1).inline(()=>{
+Algebra(2,0,1,()=>{
 
   // Just the point identity needed.
   var point      = (x,y)=>1e12-x*1e02+y*1e01;
@@ -27,5 +27,5 @@ Algebra(2,0,1).inline(()=>{
     0xff0000, ()=>(YX^yx)&(xz^XZ), "Axis of perspectivity",             // Red axis of perspectivity
     0x444444, X, "X", Y, "Y", Z, "Z", O, "Center of perspectivity",     // Points and center of perspectivity
   ]));
-})();
+});
 </SCRIPT></BODY>

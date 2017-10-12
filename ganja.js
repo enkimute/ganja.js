@@ -9,7 +9,7 @@
 }('Algebra', this, function () {
   return function Algebra(p,q,r) {
   // p can be options object.
-    var options=p; if (options instanceof Object) {
+    var fu=arguments[arguments.length-1],options=p; if (options instanceof Object) {
       q = (p.q || (p.metric && p.metric.filter(x=>x==-1).length))| 0;
       r = (p.r || (p.metric && p.metric.filter(x=>x==0).length)) | 0;
       p = p.p === undefined ? (p.metric && p.metric.filter(x=>x==1).length) : p.p || 0;
@@ -172,6 +172,6 @@
              (tot==4)?this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0])):
                       this.Conjugate.Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4)).Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4))[0]));
     });
-    return res;  
+    if (fu instanceof Function) return res.inline(fu)(); else return res;  
   }
 }));

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric.
-Algebra(2,0,1).inline(()=>{
+Algebra(2,0,1,()=>{
 
   // in 2D, the seperating axis test involves testing overlap of the projection
   // onto one of the possible seperating axi. we support all regular ngons and
@@ -37,5 +37,5 @@ Algebra(2,0,1).inline(()=>{
     pa[4] = -0.2+(0.3-(performance.now()*0.0001%2));
     var a=ngon(pa,3,0.65,pa.e01*10), b=ngon(pb,6,0.5), h=sat(b,a);
     return [0xcccccc,h,h?0x88ff88:0xffaaaa,a,b,0x444444,pa,pb]},{animate:true}));
-})();
+});
 </SCRIPT></BODY>

@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric.
-Algebra(2,0,1).inline(()=>{
+Algebra(2,0,1,()=>{
 
   // The Euler line connects several important points in any non equilateral triangle.
 
@@ -35,5 +35,5 @@ Algebra(2,0,1).inline(()=>{
       0x8888FF,centroid,line,"Euler Line",     // centroid and euler line
       0x444444,A,B,C                           // triangle vertices
       ]));
-})();
+});
 </SCRIPT></BODY>

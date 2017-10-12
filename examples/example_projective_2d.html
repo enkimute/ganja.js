@@ -6,7 +6,7 @@
 
    // Create a dual projective 2D algebra with some basic operations
    
-    var P2 = Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']}).inline(function(){ 
+    var P2 = Algebra({metric:[0,1,1],basis:['1','e0','e1','e2','e12','e20','e01','e012']},function(){ 
       this.point           = (X,Y)=>1e12+X*1e20+Y*1e01;
       this.join            = (x,y)=>!(!x^!y);                               // union
       this.project         = (p,l)=>(p<<l)*l;                               // project p onto l
@@ -15,7 +15,7 @@
       this.rotor           = (a,p)=>Math.cos(a*0.5)+Math.sin(a*0.5)*p;      // rotor a.
       this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);                  // translator x,y
       return this;
-    })();
+    });
 
 
    // Use the graph function to display a labeled set of elements.

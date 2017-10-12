@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 3,0,1 metric. 
-Algebra(3,0,1).inline(()=>{ 
+Algebra(3,0,1,()=>{ 
     
   // Specify a point directly (trivectors specified with overloaded e-notation.)
   var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
@@ -38,5 +38,5 @@ Algebra(3,0,1).inline(()=>{
     return items.slice(0,1+((Math.floor(time*50))%(items.length+20)));    // show more and more elements
   },{animate:true,camera})); 
   
-})();
+});
 </SCRIPT></BODY>

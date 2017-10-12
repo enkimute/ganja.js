@@ -106,6 +106,13 @@ written :
 ```javascript
 Algebra(0,1).inline(()=>(3+2e1)*(1+4e1))();  // return [-5,14]
 ```
+Note that if you are immediately executing the function, you can add it as a last parameter
+to your Algebra constructor call. 
+
+```javascript
+Algebra(0,1,()=>(3+2e1)*(1+4e1)); // return [-5,14]
+```
+
 The inline syntax is powerful and flexible. It offers full operator
 overloading, overloads scientific e-notation to allow you to directly
 specify basis blades and allows using lambda expressions without the need
@@ -137,6 +144,10 @@ Algebra(2,0,1).inline(()={
   var canvas = this.graph([ some_point, function_that_returns_point, function_that_returns_join ]);
 
 })();
+
+
+
+
 ```
 Under the hood, ganja.js will translate these functions. 
 

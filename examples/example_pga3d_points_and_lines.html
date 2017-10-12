@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 3,0,1 metric. 
-Algebra(3,0,1).inline(()=>{ 
+Algebra(3,0,1,()=>{ 
     
     // We work in dual space. Our 1-blade's are dual-vectors (aka functionals of the form ax + by + cz + dw = 0).
     // The four basis functionals are thus (x=0, y=0, z=0, w=0). In three dimensions these represent the yz, xz, xy and
@@ -47,5 +47,5 @@ Algebra(3,0,1).inline(()=>{
               0xFFAA66,(B&D)+(C&E),"sum of lines"
              ];
     },{animate:true,camera})); 
-})();
+});
 </SCRIPT></BODY>

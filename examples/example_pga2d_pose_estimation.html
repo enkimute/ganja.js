@@ -3,7 +3,7 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric.
-Algebra(2,0,1).inline(()=>{
+Algebra(2,0,1,()=>{
 
   // A simple illustrative example that calculates the position of a 2D
   // object from its given projection on two known 1D cameras.
@@ -39,5 +39,5 @@ Algebra(2,0,1).inline(()=>{
       if (s>=4) res = res.concat([[CBA^CAA,CBB^CAB],[CBA^CAA,CBC^CAC]])
       return res;
   },{animate:true}));
-})();
+});
 </SCRIPT></BODY>
