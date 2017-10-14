@@ -61,6 +61,30 @@ signature (number of positive,negative and zero dimensions). The result is
 an ES6 class implementing the requested clifford algebra.
 
 ```javascript
+function Algebra( p, q, r, func );
+  // p    = number of positive dimensions.
+  // q    = optional number of negative dimensions.
+  // r    = optional number of zero dimensions.
+  // func = optional function. (shorthand .. it is passed to .inline and executed) 
+
+function Algebra( options, func );
+  // options = object containing subset of 
+  //           { 
+  //             p,            integer number of positive dimensions.
+  //             q,            integer number of negative dimensions.
+  //             r,            integer number of zero dimensions.
+  //             metric,       [a,b,..] array with metric per generating dimensions. (e.g. [0,1,1] for PGA2D)
+  //             basis,        ["1","e1","e2"] basis that overrules the standard cannonical basis.
+  //             Cayley,       [["1","e1"],["e1","-1"]] Caeyey table to overrule standard GA tables.
+  //             baseType      float32Array (default), float64Array, .. baseType to be used for the Elements. 
+  //           }
+
+
+  // returns : algebra class if no func supplied, function result if func supplied.
+```
+
+
+```javascript
 // Basic 
 var Complex = Algebra(0,1);     // Complex numbers.
 var H = Algebra(0,2);           // Quaternions.
@@ -100,7 +124,8 @@ and expressions.
 #### The inline function
 
 Your Algebra class exposes this interface through the
-**_inline_** function. Using the **_inline_** function, the above example is
+**_inline_** function. It accepts a javascript function, and translates it to
+use the Algebra of your choice. Using the **_inline_** function, the above example is
 written :
 
 ```javascript
@@ -144,10 +169,6 @@ Algebra(2,0,1,()={
   var canvas = this.graph([ some_point, function_that_returns_point, function_that_returns_join ]);
 
 });
-
-
-
-
 ```
 Under the hood, ganja.js will translate these functions. 
 
