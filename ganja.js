@@ -83,7 +83,7 @@
       static gt(a,b)        {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>b; }
       static lte(a,b)       {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a<=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<=b; }
       static gte(a,b)       {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>=b; }
-      static sw(a,b)        {  a=a.call?a():a; b=b.call?b():b; return a.Mul(b).Mul(a.Conjugate); }
+      static sw(a,b)        {  a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b).Mul(a.Conjugate); }
       static exp(a)         {  a=a.call?a():a; return a.Exp(); }
     // Debug  
       static describe() { console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); }    
@@ -163,7 +163,7 @@
     res.prototype.__defineGetter__('Involute', function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,1,-1][grades[i]%4]; return res; });
     res.prototype.__defineGetter__('Conjugate',function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; });
     res.prototype.__defineGetter__('Dual',function(){ return this.map((x,i,a)=>a[drm[i]]); var res = new this.constructor(); res[res.length-1]=-1; return res.Mul(this); });
-    res.prototype.__defineGetter__('Length',  function(){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]*Math.abs(metric[i]); return Math.sqrt(res); });
+    res.prototype.__defineGetter__('Length',  function(){  return Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); }); 
     res.prototype.__defineGetter__('VLength',  function(){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]; return Math.sqrt(res); });
     res.prototype.__defineGetter__('Normalized', function(){ var res = new this.constructor(),l=0; for (var i=0; i<this.length; i++) l += this[i]*this[i]*metric[i]; if (!l) return this; l=1/Math.sqrt(Math.abs(l)); for (var i=0; i<this.length; i++)res[i]=this[i]*l; return res; });
     res.prototype.__defineGetter__('Inverse', function(){  // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf
