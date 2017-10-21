@@ -19,7 +19,7 @@ rewrite functions containing algebraic constructs to their procedural counterpar
 (**Seriously**, look at the [examples](https://enkimute.github.io/ganja.js/examples/coffeeshop.html)
 or play [the wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) first.)
 
-### Contents
+## Contents
 
 [1. Reasons to use ganja](#Features)<BR>
 [2. Using ganja for the first time](#Started)<BR>
@@ -30,7 +30,7 @@ or play [the wedge game](https://enkimute.github.io/ganja.js/examples/example_ga
 [7. Ganja starterkit : PGA3D P(R*<sub>3,0,1</sub>)](#P3)<BR>
 
 <A NAME="Features"></A>
-### Reasons to use ganja
+## Reasons to use ganja
 
 Ganja.js makes doing Geometric Algebra in your browser easy and fun. Its
 inline syntax and graphing makes math in the browser feel like .. math.
@@ -47,14 +47,14 @@ inline syntax and graphing makes math in the browser feel like .. math.
 * There's a [game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) that teaches you how to use ganja.js !
 
 <A NAME="Started"></A>
-### Using ganja for the first time
+## Using ganja for the first time
 
 Start off by including the ganja.js script. (ganja.js has no dependencies - just 7.9kb on the wire)
 
 ```html
 <SCRIPT SRC="https://raw.githubusercontent.com/enkimute/ganja.js/master/ganja.js"></SCRIPT>
 ```
-#### The Algebra Function
+### The Algebra Function
 
 To create an Algebra, call the **_Algebra_** function specifying the metric
 signature (number of positive,negative and zero dimensions). The result is 
@@ -125,7 +125,7 @@ This however, is not very pretty. It's not that much fun either. Luckily,
 ganja.js provides an alternate way to write algebraic functions, literals
 and expressions. 
 
-#### The inline function
+### The inline function
 
 Your Algebra class exposes this interface through the
 **_inline_** function. It accepts a javascript function, and translates it to
@@ -191,7 +191,7 @@ Because I'm out of aspirin, I'll leave the proof of that to the reader.
 See the [coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html) for more
 examples of how to use the inline syntax.
 
-#### The graph function.
+### The graph function.
 
 Your Algebra also exposes a static **_graph_** function that allows you to
 easily graph 1D or 2D functions as well as 2D and 3D PGA elements.
@@ -207,7 +207,7 @@ svg = Algebra(3,0,1,()=>this.graph([1e123,1e23,1e13,1e12],{camera:1+.5e01-.5e02}
 ```
 Again, many more examples can be found at [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html).
 
-#### The describe function.
+### The describe function.
 
 To display the basis blade names, metric, Cayley table and more, use the
 static **_describe_** function.
@@ -233,7 +233,7 @@ Matrix Form:
 
 
 <A NAME="samples"></A>
-### Getting free ganja samples.
+## Getting free ganja samples.
 
 Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html)
 and play around with the examples. They are interactive and you can easily
@@ -308,7 +308,7 @@ Or - get some hands on experience with eucledian plane PGA by playing the [wedge
 
 
 <A NAME="custom"></A>
-### Ganja for experienced users.
+## Ganja for experienced users.
 
 Ganja.js allows you to further customise the algebra class it
 generates, allowing you to generate subalgebras (who's elements use
@@ -320,7 +320,7 @@ and expect ganja.js to make appropriate sign changes)
 The advanced options are available by passing in an options object as
 the first parameter to the *Algebra* call.  
 
-#### Custom subalgebra's
+### Custom subalgebra's
 
 ```javascript
 
@@ -332,7 +332,7 @@ var H = Algebra({p:3,basis:['1','e12','e13','e23']});
 
 ```
 
-#### Custom basis names.
+### Custom basis names.
 
 When not specified, ganja.js will generate basis names that are
 grouped by rank and numerically sorted. By default, a single zero
@@ -363,7 +363,7 @@ var R3_64 = Algebra({p:3,baseType:Float64Array});
 
 ```
 
-#### Custom Cayley Table
+### Custom Cayley Table
 
 Or take things a bit further and simply specify a Cayley table to your liking. The example below shows
 automatic numerical differentiation and calculates the value, 1st, 2nd and 3rd derivative of any polynomial.
@@ -397,7 +397,7 @@ outputs : x [f(x),f'(x),f''(x)/2!,f'''(x)/3!]
 
 
 <A NAME="syntax"></A>
-### Ganja ingredients and syntax.
+## Ganja ingredients and syntax.
 
 Here's a list of the supported operators in all syntax flavors : 
 
@@ -422,7 +422,7 @@ Here's a list of the supported operators in all syntax flavors :
 | 2e12     |  2e_12    | new A([0,0,0,2])| A.Bivector(2)
 
 <A NAME="P2"></A>
-### Ganja starterkit : PGA2D P(R*<sub>2,0,1</sub>)
+## Ganja starterkit : PGA2D P(R*<sub>2,0,1</sub>)
 
 Want to get started quickly with 2D Projective Geometric Algebra ? The boiler plate below gets you going with a bunch of usefull identities. (and the coffeeshop has plenty of examples).
 
@@ -486,7 +486,7 @@ PGA2D.inline(function(){
 ![ganja p2 example](images/ganja_p2.jpg)
 
 <A NAME="P3"></A>
-### Ganja starterkit : PGA3D P(R*<sub>3,0,1</sub>)
+## Ganja starterkit : PGA3D P(R*<sub>3,0,1</sub>)
 
 
 This example implements the table on page 15 of [Gunn's Geometric Algebra for Computer Graphics](http://page.math.tu-berlin.de/~gunn/Documents/Papers/GAforCGTRaw.pdf). 
