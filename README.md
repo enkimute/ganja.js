@@ -23,8 +23,8 @@ or play [the wedge game](https://enkimute.github.io/ganja.js/examples/example_ga
 
 [1. Reasons to use ganja](#Features)<BR>
 [2. Using ganja for the first time](#Started)<BR>
-[3. Ganja for experienced users](#custom)<BR>
-[4. Getting free ganja samples](#samples)<BR>
+[3. Getting free ganja samples](#samples)<BR>
+[4. Ganja for experienced users](#custom)<BR>
 [5. Ganja ingredients and syntax](#syntax)<BR>
 [6. Ganja starterkit : PGA2D P(R*<sub>2,0,1</sub>)](#P2)<BR>
 [7. Ganja starterkit : PGA3D P(R*<sub>3,0,1</sub>)](#P3)<BR>
