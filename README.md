@@ -66,7 +66,10 @@ function Algebra( p, q, r, func );
   // q    = optional number of negative dimensions.
   // r    = optional number of zero dimensions.
   // func = optional function. (shorthand .. it is passed to .inline and executed) 
+```
+An extended syntax is also available that allows you to further tweak the created Algebra.
 
+``` javascript
 function Algebra( options, func );
   // options = object containing subset of 
   //           { 
@@ -75,20 +78,21 @@ function Algebra( options, func );
   //             r,            integer number of zero dimensions.
   //             metric,       [a,b,..] array with metric per generating dimensions. (e.g. [0,1,1] for PGA2D)
   //             basis,        ["1","e1","e2"] basis that overrules the standard cannonical basis.
-  //             Cayley,       [["1","e1"],["e1","-1"]] Caeyey table to overrule standard GA tables.
+  //             Cayley,       [["1","e1"],["e1","-1"]] Cayley table to overrule standard GA tables.
   //             baseType      float32Array (default), float64Array, .. baseType to be used for the Elements. 
   //           }
 
 
   // returns : algebra class if no func supplied, function result if func supplied.
 ```
-
+Here are some examples :
 
 ```javascript
 // Basic 
+var Hyper   = Algebra(1);       // Hyperbolic numbers. 
 var Complex = Algebra(0,1);     // Complex numbers.
+var Dual    = Algebra(0,0,1);   // Dual numbers.
 var H = Algebra(0,2);           // Quaternions.
-var Dual = Algebra(0,0,1);      // Dual numbers.
 
 // Clifford
 var Cl2 = Algebra(2);           // Clifford algebra for 2D vector space.
@@ -106,7 +110,7 @@ var CGA2D = Algebra(3,1);       // conformal 2D space.
 var CGA3D = Algebra(4,1);       // Conformal 3D space. 
 ```
 
-You can now use this class to generate elements of your algebra. Those elements will have all of the
+You can now use these classes to generate algebraic elements. Those elements will have all of the
 expected properties. (Length, blade access, Dot, Wedge, Mul, Dual, Inverse, etc ...)
 
 And while not advised you could use them in a 'classic' programming style syntax like the example below.
@@ -226,6 +230,83 @@ Matrix Form:
  B, A
 ```
 
+
+
+<A NAME="samples"></A>
+### Getting free ganja samples.
+
+Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html)
+and play around with the examples. They are interactive and you can easily
+change the code online. No need to download or install anything !
+
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
+<TR><TD ALIGN=CENTER>
+Complex Mandelbrot<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#complex_mandelbrot"           TARGET="_blank" TITLE="Complex Mandelbrot"><IMG SRC="images/complex_mandelbrot.jpg"/></A>
+<TD ALIGN=CENTER>
+Mandelbrot with Quaternion Hue colorisation<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_mandelbrot"        TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/quaternion_mandelbrot.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+Quaternion color rotations<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_hue"               TARGET="_blank" TITLE="Quaternion Hue Rotations"><IMG SRC="images/quaternion_hue.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA3D Points and Lines<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_points_and_lines"       TARGET="_blank" TITLE="PGA3D Points and Lines"><IMG SRC="images/pga3d_points_and_lines.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+PGA3D Distances and Angles<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_distances_and_angles"   TARGET="_blank" TITLE="PGA3D Distances and Angles"><IMG SRC="images/pga3d_distances_and_angles.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA3D Rotors and Translators<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_rotors_and_translators" TARGET="_blank" TITLE="PGA3D Rotors and Translators"><IMG SRC="images/pga3d_rotors_and_translators.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+PGA3D Slicing<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_slicing"                TARGET="_blank" TITLE="PGA3D Slicing"><IMG SRC="images/pga3d_slicing.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA3D Icosahedron<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_icosahedron"            TARGET="_blank" TITLE="PGA3D Icosahedron"><IMG SRC="images/pga3d_icosahedron.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+PGA3D Sampling<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_sampling"               TARGET="_blank" TITLE="PGA3D Sampling"><IMG SRC="images/pga3d_sampling.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA3D Automatic Differentiation<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_differentiation"        TARGET="_blank" TITLE="PGA3D Automatic Differentiation"><IMG SRC="images/pga3d_differentiation.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+PGA2D Points and Lines<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA2D Distances and Angles<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_distances_and_angles"   TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/pga2d_distances_and_angles.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+PGA2D Project and Reject<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_project_and_reject"     TARGET="_blank" TITLE="PGA2D Project and Reject"><IMG SRC="images/pga2d_project_and_reject.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA2D Rotors and Translators<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_rotors_and_translators" TARGET="_blank" TITLE="PGA2D Rotors and Translators"><IMG SRC="images/pga2d_rotors_and_translators.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+PGA2D Isometries<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_isometries"             TARGET="_blank" TITLE="PGA2D Isometries"><IMG SRC="images/pga2d_isometries.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA2D Inverse Kinematics<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_inverse_kinematics"     TARGET="_blank" TITLE="PGA2D Inverse Kinematics"><IMG SRC="images/pga2d_inverse_kinematics.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+PGA2D Separating Axis<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_separating_axis"        TARGET="_blank" TITLE="PGA2D Separating Axis"><IMG SRC="images/pga2d_separating_axis.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA2D Pose Estimation<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_pose_estimation"        TARGET="_blank" TITLE="PGA2D Pose Estimation"><IMG SRC="images/pga2d_pose_estimation.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+PGA2D Euler Line<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_euler_line"             TARGET="_blank" TITLE="PGA2D Euler Line"><IMG SRC="images/pga2d_euler_line.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA2D Desargues Theorem<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_desargues_theorem"      TARGET="_blank" TITLE="PGA2D Desargues Theorem"><IMG SRC="images/pga2d_desargues_theorem.jpg"/></A>
+</TABLE>
+
+Or - get some hands on experience with eucledian plane PGA by playing the [wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html).
+
+![Wedge screenshot](images/wedge.png)
+
+
 <A NAME="custom"></A>
 ### Ganja for experienced users.
 
@@ -314,79 +395,6 @@ outputs : x [f(x),f'(x),f''(x)/2!,f'''(x)/3!]
 ```
 
 
-<A NAME="samples"></A>
-### Getting free ganja samples.
-
-Please visit [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html)
-and play around with the examples. They are interactive and you can easily
-change the code online. No need to download or install anything !
-
-<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
-<TR><TD ALIGN=CENTER>
-Complex Mandelbrot<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#complex_mandelbrot"           TARGET="_blank" TITLE="Complex Mandelbrot"><IMG SRC="images/complex_mandelbrot.jpg"/></A>
-<TD ALIGN=CENTER>
-Mandelbrot with Quaternion Hue colorisation<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_mandelbrot"        TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/quaternion_mandelbrot.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-Quaternion color rotations<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_hue"               TARGET="_blank" TITLE="Quaternion Hue Rotations"><IMG SRC="images/quaternion_hue.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA3D Points and Lines<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_points_and_lines"       TARGET="_blank" TITLE="PGA3D Points and Lines"><IMG SRC="images/pga3d_points_and_lines.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-PGA3D Distances and Angles<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_distances_and_angles"   TARGET="_blank" TITLE="PGA3D Distances and Angles"><IMG SRC="images/pga3d_distances_and_angles.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA3D Rotors and Translators<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_rotors_and_translators" TARGET="_blank" TITLE="PGA3D Rotors and Translators"><IMG SRC="images/pga3d_rotors_and_translators.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-PGA3D Slicing<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_slicing"                TARGET="_blank" TITLE="PGA3D Slicing"><IMG SRC="images/pga3d_slicing.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA3D Icosahedron<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_icosahedron"            TARGET="_blank" TITLE="PGA3D Icosahedron"><IMG SRC="images/pga3d_icosahedron.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-PGA3D Sampling<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_sampling"               TARGET="_blank" TITLE="PGA3D Sampling"><IMG SRC="images/pga3d_sampling.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA3D Automatic Differentiation<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_differentiation"        TARGET="_blank" TITLE="PGA3D Automatic Differentiation"><IMG SRC="images/pga3d_differentiation.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-PGA2D Points and Lines<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA2D Distances and Angles<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_distances_and_angles"   TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/pga2d_distances_and_angles.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-PGA2D Project and Reject<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_project_and_reject"     TARGET="_blank" TITLE="PGA2D Project and Reject"><IMG SRC="images/pga2d_project_and_reject.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA2D Rotors and Translators<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_rotors_and_translators" TARGET="_blank" TITLE="PGA2D Rotors and Translators"><IMG SRC="images/pga2d_rotors_and_translators.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-PGA2D Isometries<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_isometries"             TARGET="_blank" TITLE="PGA2D Isometries"><IMG SRC="images/pga2d_isometries.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA2D Inverse Kinematics<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_inverse_kinematics"     TARGET="_blank" TITLE="PGA2D Inverse Kinematics"><IMG SRC="images/pga2d_inverse_kinematics.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-PGA2D Separating Axis<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_separating_axis"        TARGET="_blank" TITLE="PGA2D Separating Axis"><IMG SRC="images/pga2d_separating_axis.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA2D Pose Estimation<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_pose_estimation"        TARGET="_blank" TITLE="PGA2D Pose Estimation"><IMG SRC="images/pga2d_pose_estimation.jpg"/></A>
-<TR><TD ALIGN=CENTER>
-PGA2D Euler Line<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_euler_line"             TARGET="_blank" TITLE="PGA2D Euler Line"><IMG SRC="images/pga2d_euler_line.jpg"/></A>
-<TD ALIGN=CENTER>
-PGA2D Desargues Theorem<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_desargues_theorem"      TARGET="_blank" TITLE="PGA2D Desargues Theorem"><IMG SRC="images/pga2d_desargues_theorem.jpg"/></A>
-</TABLE>
-
-Or - get some hands on experience with eucledian plane PGA by playing the [wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html).
-
-![Wedge screenshot](images/wedge.png)
 
 <A NAME="syntax"></A>
 ### Ganja ingredients and syntax.
