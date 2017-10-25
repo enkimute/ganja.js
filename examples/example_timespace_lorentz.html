@@ -8,7 +8,7 @@ Algebra(1,3,()=>{
   // We implement the example from https://www.youtube.com/watch?v=MvEJat0T_Kw&gl=BE
   // in a coordinate free way. (without any difficult formulas .. )
 
-  // In the earths reference frame, a tree is at the origin and a pole is at x=20km
+  // In the earth's reference frame, a tree is at the origin and a pole is at x=20km
   // Lightning strikes both the tree and the pole at t=10microseconds. The lightning
   // strikes are observed by a rocket traveling in the positive x direction at 0.5c
 
@@ -19,7 +19,7 @@ Algebra(1,3,()=>{
   var micros = (x)=>x*0.000001*1e1;
   var km = (x,y,z)=>(x*1e2+y*1e3+z*1e4)/299792.458;
 
-  // Define two events in our own reference frame. (the earths)
+  // Define two events in our own reference frame. (the earth's)
   var strike_tree = micros(10) + km(0,0,0);
   var strike_pole = micros(10) + km(20,0,0);
 
