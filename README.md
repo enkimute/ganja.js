@@ -97,7 +97,7 @@ var H = Algebra(0,2);           // Quaternions.
 // Clifford
 var Cl2 = Algebra(2);           // Clifford algebra for 2D vector space.
 var Cl3 = Algebra(3);           // Clifford algebra for 3D vector space.
-var timeSpace = Algebra(3,1);   // Clifford algebra for timespace vectors.
+var timeSpace = Algebra(1,3);   // Clifford algebra for timespace vectors.
 
 // SubAlgebras
 var Complex = Algebra({p:3,basis:['1','e123']});        // Complex Numbers as subalgebra of Cl3
