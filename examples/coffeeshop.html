@@ -24,12 +24,15 @@
     .game.SELECTED { background-color:#fef; color:#806080; }
     .quaternion          { background-color:#cfc; color:#686; }
     .quaternion.SELECTED { background-color:#efe; color:#608060; }
+    .timespace          { background-color:#f88; color:#844; }
+    .timespace.SELECTED { background-color:#fee; color:#804040; }
     #HEADER { background-color:#eee; }
     .TAB { display:none; }
     #HEADER.complex > .TAB.complex { display:block; }
     #HEADER.dual > .TAB.dual { display:block; }
     #HEADER.game > .TAB.game { display:block; }
     #HEADER.quaternion > .TAB.quaternion { display:block; }
+    #HEADER.timespace > .TAB.timespace { display:block; }
     #HEADER.pga2d > .TAB.pga2d { display:block; }
     #HEADER.pga3d > .TAB.pga3d { display:block; }
     #RUN { box-sizing:border-box; position:absolute; top:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
@@ -52,11 +55,12 @@
     <SPAN CLASS="complex" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('complex'); ">Complex</SPAN>
     <SPAN CLASS="Dual" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('dual'); ">Dual</SPAN>
     <SPAN CLASS="quaternion" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('quaternion'); ">Quaternion</SPAN>
+    <SPAN CLASS="timespace" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('timespace'); ">Timespace</SPAN>
     <SPAN CLASS="pga2d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga2d'); ">PGA 2D</SPAN>
     <SPAN CLASS="pga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga3d'); ">PGA 3D</SPAN>
     <SPAN CLASS="game" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('game'); ">Games</SPAN>
   </DIV>
-  <DIV ID="HEADER" CLASS="complex dual quaternion pga2d pga3d game">
+  <DIV ID="HEADER" CLASS="complex dual quaternion timespace pga2d pga3d game">
   </DIV>
   <DIV ID="MAIN">
     <DIV ID="RUN">&#x25B6; Run Changes <SPAN STYLE="opacity:0.5; float:right; margin-left:30px">Ctrl+Enter</SPAN></DIV>
@@ -64,7 +68,7 @@
     <PRE ID="SOURCE"></PRE>
   </DIV>
   <SCRIPT>
-    var examples = ["complex_mandelbrot","dual_differentiation","quaternion_hue","quaternion_mandelbrot","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_separating_axis","pga2d_pose_estimation","pga2d_euler_line","pga2d_desargues_theorem","pga2d_differentiation","pga3d_points_and_lines","pga3d_distances_and_angles","pga3d_rotors_and_translators","pga3d_icosahedron","pga3d_sampling","pga3d_slicing","pga3d_differentiation","game_wedge"]
+    var examples = ["complex_mandelbrot","dual_differentiation","quaternion_hue","quaternion_mandelbrot","timespace_lorentz","pga2d_points_and_lines","pga2d_distances_and_angles","pga2d_project_and_reject","pga2d_rotors_and_translators","pga2d_isometries", "pga2d_inverse_kinematics","pga2d_separating_axis","pga2d_pose_estimation","pga2d_euler_line","pga2d_desargues_theorem","pga2d_differentiation","pga3d_points_and_lines","pga3d_distances_and_angles","pga3d_rotors_and_translators","pga3d_icosahedron","pga3d_sampling","pga3d_slicing","pga3d_differentiation","game_wedge"]
     
     var $ = document.getElementById.bind(document);
     
