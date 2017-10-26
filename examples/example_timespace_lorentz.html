@@ -5,15 +5,15 @@
 // Create a timespace Algebra with 1,3 metric.
 Algebra(1,3,()=>{
 
-  // We implement the example from https://www.youtube.com/watch?v=MvEJat0T_Kw&gl=BE
-  // in a coordinate free way. (without any difficult formulas .. )
+  document.body.innerHTML += `<PRE>
+  We implement the example from <A HREF="https://www.youtube.com/watch?v=MvEJat0T_Kw&gl=BE">here</A> in a coordinate free way.
+  
+  In the earth's reference frame, a tree is at the origin and a pole is at x=20km
+  Lightning strikes both the tree and the pole at t=10microseconds. The lightning
+  strikes are observed by a rocket traveling in the positive x direction at 0.5c
 
-  // In the earth's reference frame, a tree is at the origin and a pole is at x=20km
-  // Lightning strikes both the tree and the pole at t=10microseconds. The lightning
-  // strikes are observed by a rocket traveling in the positive x direction at 0.5c
-
-  // 1. what time does the lightning strikes take place for the rocket.
-  // 2. are they still simultanious ?
+  1. what time does the lightning strikes take place for the rocket.
+  2. are they still simultanious ?</PRE>`;
 
   // The spacetime unit we use is lightseconds (for both time and space)
   var micros = (x)=>x*0.000001*1e1;
@@ -38,15 +38,17 @@ Algebra(1,3,()=>{
     ${Math.abs(strike_tree_r.e1-strike_pole_r.e1)<0.0000000001?"Hey that's at the same time !":"Wow! That's not at the same time!"}
   </PRE>`;
   
-  // Lets also do https://www.khanacademy.org/science/physics/special-relativity/lorentz-transformation/v/evaluating-a-lorentz-transformation
-  // what is the timespace event at (1,1) to a static observer look like for an observer going at 0.5c ?
+  document.body.innerHTML += `<HR><PRE>
+  Lets also do <A HREF="https://www.khanacademy.org/science/physics/special-relativity/lorentz-transformation/v/evaluating-a-lorentz-transformation">this one</A><BR>
+  what does the timespace event at (1,1) to a static observer look like for an observer 
+  going at 0.5c ?</PRE>`;
   
   var event = 1e1 + 1e2;
   var frame = (Math.atanh(0.5)*.5e12).Exp();
   var event_in_frame = frame >>> event;
   document.body.innerHTML += `<PRE>
-    event time as seen by other guy = ${event_in_frame.e1} 
-    event position as seen by other guy = ${event_in_frame.e2} 
+    event time as seen at 0.5c = ${event_in_frame.e1} 
+    event position as seen at 0.5c = ${event_in_frame.e2} 
   </PRE>`;
 });
 </SCRIPT></BODY>
