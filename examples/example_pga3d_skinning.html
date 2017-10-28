@@ -13,7 +13,7 @@ Algebra(3,0,1,()=>{
   
   // Our camera position and orientation
   var  camera=0e0, edges=4,
-       points=[], points_orig=[], items=[];
+       points=[], points_orig=[], items=[''];
 
   // vertices
   for (var i=0;i<15;i++) for (var j=0;j<edges;j++) points.push(rotor(1e13,(Math.PI*2/edges)*j)>>>point(-0.5,-1+i/7.5,0));
@@ -32,7 +32,13 @@ Algebra(3,0,1,()=>{
     for (var i in points) {
       var w1 = (points[i].e013+1)/2;
       var w2 = 1-w1;
-      points[i].set(( w1*b1 + w2*b2 ) >>> points_orig[i]);
+      if ((time%2)<1) {
+        items[0]='Dual Quaternion Skinning';  
+        points[i].set(( w1*b1 + w2*b2 ) >>> points_orig[i]);
+      } else {
+        items[0]='Linear Blend Skinning';  
+        points[i].set(( b1 >>> points_orig[i] )*w1+w2*(b2 >>> points_orig[i]));
+      }
     }
     camera.set(rotor(1e13,time));                // animate camera
     return items;
