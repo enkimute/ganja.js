@@ -5,45 +5,47 @@
 // Create a Clifford Algebra with 3,0,1 metric. 
 Algebra(3,0,1,()=>{ 
 
-  // We demonstrate dual quaternion skinning in the PGA3D framework.
+  // We demonstrate dual quaternion skinning in the PGA3D framework, and show
+  // how it resolves the candywrapping artefacts known from linear blend skinning.
     
   // Specify a point directly (trivectors specified with overloaded e-notation.)
   var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
   var rotor = (P,a)=>Math.cos(a/2)+Math.sin(a/2)*P;
+  var motor = (d,V)=>(1+d*V);
   
-  // Our camera position and orientation
-  var  camera=0e0, edges=4,
-       points=[], points_orig=[], items=[''];
+  // our point and edge lists
+  var  sides=4, points=[], points_orig, items=[''];
 
-  // vertices
-  for (var i=0;i<15;i++) for (var j=0;j<edges;j++) points.push(rotor(1e13,(Math.PI*2/edges)*j)>>>point(-0.5,-1+i/7.5,0));
-  for (var i=0;i<15;i++) for (var j=0;j<edges;j++) points_orig.push(rotor(1e13,(Math.PI*2/edges)*j)>>>point(-0.5,-1+i/7.5,0));
-  
-  // edges 
-  for (var i=0;i<15;i++) for (var j=0;j<edges;j++) items.push([points[i*edges+j],points[i*edges+((j+1)%edges)]]);
-  for (var i=0;i<14;i++) for (var j=0;j<edges;j++) items.push([points[i*edges+j],points[(i+1)*edges+j]]);
+  // vertices and edges for a square rod.
+  for (var i=0;i<15;i++) for (var j=0;j<sides;j++) points.push(rotor(1e13,(Math.PI*2/sides)*j)>>>point(-0.5,-1+i/7.5,0));
+  for (var i=0;i<15;i++) for (var j=0;j<sides;j++) items.push([points[i*sides+j],points[i*sides+((j+1)%sides)]]);
+  for (var i=0;i<14;i++) for (var j=0;j<sides;j++) items.push([points[i*sides+j],points[(i+1)*sides+j]]);
+  points_orig = points.map(x=>x.slice());
   
   // Graph the 3D items
   document.body.appendChild(this.graph(()=>{
     var time=performance.now()/4000;    
+    
     // two bones, one at the top, one at the bottom
-    var b1 = rotor(-1e13,Math.PI*.6*Math.sin(time*10)) * (1+Math.sin(time)*.2e01);
-    var b2 = rotor(1e13,Math.PI*.6*Math.sin(time*10)) * (1+Math.sin(time/2)*.2e01);
+    var b1 = rotor(-1e13,Math.PI*.6*Math.sin(time*10)) * motor(Math.sin(time),.2e01);
+    var b2 = rotor(1e13,Math.PI*.6*Math.sin(time*10))  * motor(Math.sin(time/2),.2e01);
+    
+    // Transform all points.
     for (var i in points) {
-      var w1 = (points[i].e013+1)/2;
-      var w2 = 1-w1;
+    // Weights for both bones.
+      var w1 = (points[i].e013+1)/2, w2 = 1-w1;
+    
+    // Alternate between DQS and LBS  
       if ((time%2)<1) {
         items[0]='Dual Quaternion Skinning';  
-        var b = w1*b1 + w2*b2;
-        points[i].set(( b/b.Length ) >>> points_orig[i]);
+        points[i].set((w1*b1+w2*b2).Normalized >>> points_orig[i]);
       } else {
         items[0]='Linear Blend Skinning';  
-        points[i].set(( b1 >>> points_orig[i] )*w1+w2*(b2 >>> points_orig[i]));
+        points[i].set(w1*(b1>>>points_orig[i]) + w2*(b2>>>points_orig[i]));
       }
     }
-    camera.set(rotor(1e13,time));                // animate camera
     return items;
-  },{animate:true,camera})); 
+  },{animate:true})); 
   
 });
 </SCRIPT></BODY>
