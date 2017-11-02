@@ -173,7 +173,9 @@
 </HEAD>
 <BODY>
   <DIV CLASS="help">
-  
+    <H4>The Galculator - powered by Ganja.js</H4>
+    The Galculator can be forked on <A HREF="https://github.com/enkimute/ganja.js">github</A><BR><BR>
+    It works great on your phone - full screen if you add it to your homescreen.<BR><BR>
     <h4>Example in &#x2102; :</H4>
     <p>Calculate (3+2i)*(1+4i)</p>
     <ul>
@@ -276,10 +278,10 @@
      var graph=document.getElementById('graph');
      var title=document.getElementById('title');
      var show=(x)=>{
-       x=x.replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/\<\</,'&#x2981;')
+       x=x.replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/\^/g,'&#x2227;').replace(/&/g,'&#x2228;').replace(/\<\</,'&#x2981;')
        document.getElementById('screen').innerHTML=x||'0';
-       while(graph.firstChild) graph.removeChild(graph.firstChild);
        if ((mode==3 || mode==4) && [x1,x2,x3,x4,x5].filter(x=>x).length){ 
+          while(graph.firstChild) graph.removeChild(graph.firstChild);
           var c=graph.appendChild(Al.graph([x1,x2,x3,x4,x5].filter(x=>x)))
           c.style.width = c.style.height = '100%'; c.style.backgroundColor='transparent';
        }
