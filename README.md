@@ -16,7 +16,8 @@ involutions and automorphisms.)
 and expressions by using reflection, a built-in tokenizer and a simple AST translator to 
 rewrite functions containing algebraic constructs to their procedural counterparts.)
 
-(**Seriously**, look at the [examples](https://enkimute.github.io/ganja.js/examples/coffeeshop.html)
+(**Seriously**, look at the [examples](https://enkimute.github.io/ganja.js/examples/coffeeshop.html), 
+run some quick numbers using the [GAlculator](https://enkimute.github.io/ganja.js/examples/galculator.html)
 or play [the wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) first.)
 
 ## Contents
