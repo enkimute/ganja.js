@@ -2,9 +2,12 @@
   <TITLE>GAlculator</TITLE>
   <SCRIPT SRC="../ganja.js"></SCRIPT>
   <link href="https://fonts.googleapis.com/css?family=Exo:500" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=0.6, maximum-scale=0.6, user-scalable=0"/>
   <STYLE>
     .calcBody {
       width         : 600px;
+      max-width     : 98%;
+      max-height:100%;
       margin        : auto;
       position       : relative;
       user-select   : none;
@@ -26,7 +29,7 @@
     .numInput {
       position:relative;
       display:block;
-      width:590px;
+      width:calc(100% - 2px);
       height:48px;
       line-height:43px;
       margin:auto;
@@ -159,6 +162,11 @@
       left:20px;
       color:#888;
       font-size:22pt;
+    }
+    @media (max-width:800px) {
+      .help { display:none; }
+      .calcBody { box-shadow: 0px 0px 0px black; border-radius:0px; }
+      body { background-color:rgb(230,220,200); }
     }
   </STYLE>
 </HEAD>
