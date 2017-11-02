@@ -1,0 +1,269 @@
+<HEAD>
+  <TITLE>GAlculator</TITLE>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+  <link href="https://fonts.googleapis.com/css?family=Exo:500" rel="stylesheet">
+  <STYLE>
+    .calcBody {
+      width         : 600px;
+      margin        : auto;
+      user-select   : none;
+      background    : rgb(230,220,200);
+      border-radius : 40px;
+      border-bottom-left-radius : 15px;
+      border-bottom-right-radius : 15px;
+      padding       : 5px;
+      font-family   : Exo, sans-serif;
+      display       : flex;
+      flex-direction : column;
+      box-shadow:inset 0px -2px 3px 3px rgba(80,50,40,0.2),
+                  0px 2px 2px rgba(0,0,0,0.8),
+                  inset 0px -1px 1px rgba(255,255,255,0.5),
+                  inset 0px -2px 2px rgba(70,50,40,0.8),
+                  inset 0px -3px 2px rgba(90,50,40,0.3),
+                  4px 4px 32px rgba(0,0,0,0.5);
+    }
+    .numInput {
+      position:relative;
+      display:block;
+      width:590px;
+      height:48px;
+      line-height:43px;
+      margin:auto;
+      font-size:28pt;
+      text-align:right;
+      padding-right:9px;
+      box-sizing:border-box;
+      background:rgba(206,206,182,0.7);
+      border-radius:15px;
+      border:1px solid rgba(255,255,255,0.7);
+      margin-bottom: 5px;
+      margin-top:5px;
+      box-shadow:inset 0px -3px 10px rgba(0,0,0,0.05),
+                  inset 1px 3px 9px rgba(0,0,0,0.3),
+                  inset 1px 1px 1px rgba(0,0,0,0.2),
+                  inset -1px -1px 1px rgba(0,0,0,0.1),
+                  inset 0px 2px 1px 2px rgba(0,0,0,0.1);
+    }
+    .numButton {
+      position:relative;
+      user-select:none;
+      outline:none;
+      width:85px;
+      height:54px;
+      display:block-inline;
+      text-align:center; 
+      line-height:46px;
+      display:inline-block;
+      font-size:20pt;
+      color: rgba(0,0,0,0.65);
+      margin:3px;
+      background: rgba(240,230,220,1);
+      border-radius:10px;
+      border:1px solid;
+      box-shadow:inset 0px -1px 2px 2px rgba(80,50,40,0.2),
+                       0px 1px 1px rgba(0,0,0,0.8),
+                  inset 0px -1px 1px rgba(70,50,40,0.8),
+                  inset 0px -2px 1px rgba(90,50,40,0.3);
+    }
+    .numButton:focus {
+      outline:none;
+    }
+    .numButton:active {
+      top:2px;
+      box-shadow:inset 0px -1px 0px 2px rgba(80,50,40,0.2),
+                       0px -1px 0px rgba(0,0,0,0.8);
+    }
+    .wide {
+      width : 100px;
+      line-height:54px;
+      background-color: rgba(240,255,220,1);
+    }
+    .wide2 {
+      line-height:54px;
+      background-color: rgba(240,255,220,1);
+    }
+    .wide3 {
+      line-height:54px;
+      background-color: rgba(230,220,250,1);
+    }
+    .wide4 {
+      line-height:54px;
+      background-color: rgba(250,220,250,1);
+    }
+    .wide5 {
+      line-height:54px;
+      background-color: rgba(250,210,200,1);
+    }
+    .group { 
+      display:flex;
+      width:100%;
+       
+    }
+    .mini {
+      position: absolute;
+      bottom:2px;
+      right:5px;
+      font-size:45%;
+      line-height:20px;
+      color:rgba(0,0,0,0.5);
+    }
+    .graph {
+      min-width:512px;
+      min-height:512px;
+      transition:opacity 0.2s linear;
+    }
+    .e {
+      position:relative;
+      top : -3px;
+      font-size:45%;
+    }
+  </STYLE>
+</HEAD>
+<BODY>
+
+  <DIV CLASS="calcBody">
+    <CENTER>Enki's GAlculator</CENTER>
+    <DIV CLASS="graph numInput" ID="graph"></DIV>
+    <DIV CLASS="numInput" ID="screen">0</DIV>
+    <DIV CLASS="group">
+      <DIV CLASS="numButton wide2" STYLE="font-weight:1000">&#x211d;</DIV>
+      <DIV CLASS="numButton wide2" STYLE="font-weight:1000">&#x2102;  <DIV CLASS="mini">0,1</DIV></DIV>
+      <DIV CLASS="numButton wide2" STYLE="font-weight:1000">&#x1D544; <DIV CLASS="mini">1,3</DIV></DIV>
+      <DIV CLASS="numButton wide2">P2D<DIV CLASS="mini">2,0,1</DIV></DIV>
+      <DIV CLASS="numButton wide2">P3D<DIV CLASS="mini">3,0,1</DIV></DIV>
+      <DIV CLASS="numButton wide2">C2D<DIV CLASS="mini">3,1</DIV></DIV>
+      <DIV CLASS="numButton wide2">C3D<DIV CLASS="mini">4,1</DIV></DIV>
+    </DIV>
+    <DIV CLASS="group">
+      <DIV CLASS="numButton">e<SUB>0</SUB></DIV>
+      <DIV CLASS="numButton">e<SUB>1</SUB></DIV>
+      <DIV CLASS="numButton">e<SUB>2</SUB></DIV>
+      <DIV CLASS="numButton">e<SUB>3</SUB></DIV>
+      <DIV CLASS="numButton">e<SUB>4</SUB></DIV>
+      <DIV CLASS="numButton">e<SUB>5</SUB></DIV>
+      <DIV CLASS="numButton wide4">ST</DIV>
+    </DIV>
+    <DIV CLASS="group">
+      <DIV CLASS="numButton">E<SUB>0</SUB></DIV>
+      <DIV CLASS="numButton">E<SUB>1</SUB></DIV>
+      <DIV CLASS="numButton">E<SUB>2</SUB></DIV>
+      <DIV CLASS="numButton">E<SUB>3</SUB></DIV>
+      <DIV CLASS="numButton">E<SUB>4</SUB></DIV>
+      <DIV CLASS="numButton">E<SUB>5</SUB></DIV>
+      <DIV CLASS="numButton wide4">x1</DIV>
+    </DIV>
+    <DIV CLASS="group">
+      <DIV CLASS="numButton">7</DIV>
+      <DIV CLASS="numButton">8</DIV>
+      <DIV CLASS="numButton">9</DIV>
+      <DIV CLASS="numButton wide3">-</DIV>
+      <DIV CLASS="numButton wide3">/</DIV>
+      <DIV CLASS="numButton wide3">Exp</DIV>
+      <DIV CLASS="numButton wide4">x2</DIV>
+    </DIV>
+    <DIV CLASS="group">
+      <DIV CLASS="numButton">4</DIV>
+      <DIV CLASS="numButton">5</DIV>
+      <DIV CLASS="numButton">6</DIV>
+      <DIV CLASS="numButton wide3">+</DIV>
+      <DIV CLASS="numButton wide3">&#x2217;</DIV>
+      <DIV CLASS="numButton wide3">x&#772;</DIV>
+      <DIV CLASS="numButton wide4">x3</DIV>
+    </DIV>
+    <DIV CLASS="group">
+      <DIV CLASS="numButton">1</DIV>
+      <DIV CLASS="numButton">2</DIV>
+      <DIV CLASS="numButton">3</DIV>
+      <DIV CLASS="numButton wide3">&#x2227;</DIV>
+      <DIV CLASS="numButton wide3">&#x2981;</DIV>
+      <DIV CLASS="numButton wide3">(</DIV>
+      <DIV CLASS="numButton wide4">x4</DIV>
+    </DIV>
+    <DIV CLASS="group">
+      <DIV CLASS="numButton wide2">Cl</DIV>
+      <DIV CLASS="numButton">0</DIV>
+      <DIV CLASS="numButton">.</DIV>
+      <DIV CLASS="numButton wide3">&#x2228;</DIV>
+      <DIV CLASS="numButton wide5">=</DIV>
+      <DIV CLASS="numButton wide3">)</DIV>
+      <DIV CLASS="numButton wide4">x5</DIV>
+    </DIV>
+  </DIV>
+  <SCRIPT>
+     var Al = Algebra(2,0,1), mode=3, cur='', store=false, x1, x2, x3, x4, x5;
+     var graph=document.getElementById('graph');
+     var show=(x)=>{
+       document.getElementById('screen').innerHTML=x||'0';
+       while(graph.firstChild) graph.removeChild(graph.firstChild);
+       if ((mode==3 || mode==4) && [x1,x2,x3,x4,x5].filter(x=>x).length){ 
+          var c=graph.appendChild(Al.graph([x1,x2,x3,x4,x5].filter(x=>x)))
+          c.style.width = c.style.height = '100%'; c.style.backgroundColor='transparent';
+       }
+     }
+     var patch = (x)=>x.replace(/i/g,'e_1').replace(/[^\d]e_/g,'1e_').replace(/e_/g,'e');
+
+     var buttons = {
+     // metric selection.
+       "R" : { label : "&#x211d;",  click : ()=>{ Al=Algebra();      graph.style.opacity=0.3; mode=0; } },
+       "C" : { label : "&#x2102;",  click : ()=>{ Al=Algebra(0,1);   graph.style.opacity=0.3; mode=1; } },
+       "M" : { label : "&#x1D544;", click : ()=>{ Al=Algebra(1,3);   graph.style.opacity=0.3; mode=2; } },
+       "P2D" : { label : "P2D",     click : ()=>{ Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; } },
+       "P3D" : { label : "P3D",     click : ()=>{ Al=Algebra(3,0,1); graph.style.opacity=1;   mode=4; } },
+       "C2D" : { label : "C2D",     click : ()=>{ Al=Algebra(3,1,0); graph.style.opacity=0.3; mode=5; } },
+       "C3D" : { label : "C3D",     click : ()=>{ Al=Algebra(4,1,0); graph.style.opacity=0.3; mode=6; } },
+     // basis vectors + store
+       "e0" :  { label : "e0", click : ()=> { cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?'e0':'1e0'; show(cur); } },
+       "e1" :  { label : "e1", click : ()=> { cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?'e1':'1e1'; show(cur); } },
+       "e2" :  { label : "e2", click : ()=> { cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?'e2':'1e2'; show(cur); } },
+       "e3" :  { label : "e3", click : ()=> { cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?'e3':'1e3'; show(cur); } },
+       "e4" :  { label : "e4", click : ()=> { cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?'e4':'1e4'; show(cur); } },
+       "e5" :  { label : "e5", click : ()=> { cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?'e5':'1e5'; show(cur); } },
+       "st" :  { label : "st", click : ()=> { store = true; } },
+     // basis dual vectors + x1
+       "E0" :  { label : "E0", click : ()=> { var s=Al.inline('1e0.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
+       "E1" :  { label : "E1", click : ()=> { var s=Al.inline('1e1.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
+       "E2" :  { label : "E2", click : ()=> { var s=Al.inline('1e2.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
+       "E3" :  { label : "E3", click : ()=> { var s=Al.inline('1e3.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
+       "E4" :  { label : "E4", click : ()=> { var s=Al.inline('1e4.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
+       "E5" :  { label : "E5", click : ()=> { var s=Al.inline('1e5.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
+       "x1" :  { label : "x1", click : ()=> { if (store) { store = false; x1=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x1'; show(cur); } },
+     // 7,8,9,-,/,Exp,x2
+       "_7" :  { label : "7",   click : ()=> { cur += '7'; show(cur); } },
+       "_8" :  { label : "8",   click : ()=> { cur += '8'; show(cur); } },
+       "_9" :  { label : "9",   click : ()=> { cur += '9'; show(cur); } },
+       "-"  :  { label : "-",   click : ()=> { cur += '-'; show(cur); } },
+       "/"  :  { label : "/",   click : ()=> { cur += '/'; show(cur); } },
+       "Exp":  { label : "Exp", click : ()=> { cur += '.Exp()'; show(cur); } },
+       "x2" :  { label : "x2",  click : ()=> { if (store) { store = false; x2=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x2'; show(cur); } },
+     // 4,5,6,+,*,Conjugate,x3
+       "_4" :  { label : "4",   click : ()=> { cur += '4'; show(cur); } },
+       "_5" :  { label : "5",   click : ()=> { cur += '5'; show(cur); } },
+       "_6" :  { label : "6",   click : ()=> { cur += '6'; show(cur); } },
+       "_+" :  { label : "+",   click : ()=> { cur += '+'; show(cur); } },
+       "_*" :  { label : "*",   click : ()=> { cur += '*'; show(cur); } },
+       "Conj": { label : "Conj", click : ()=> { cur += '.Conjugate'; show(cur); } },
+       "x3" :  { label : "x3",  click : ()=> { if (store) { store = false; x3=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x3'; show(cur); } },
+     // 1,2,3,^,.,(,x4
+       "_1" :  { label : "1",   click : ()=> { cur += '1'; show(cur); } },
+       "_2" :  { label : "2",   click : ()=> { cur += '2'; show(cur); } },
+       "_3" :  { label : "3",   click : ()=> { cur += '3'; show(cur); } },
+       "^"  :  { label : "^",   click : ()=> { cur += '^'; show(cur); } },
+       "."  :  { label : ".",   click : ()=> { cur += '<<'; show(cur); } },
+       "("  :  { label : "(",   click : ()=> { cur += '('; show(cur); } },
+       "x4" :  { label : "x4",  click : ()=> { if (store) { store = false; x4=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x4'; show(cur); } },
+     // Cl,0,.,
+       "Cl" :  { label : "Cl",  click : ()=> { cur = ''; show(cur); } },
+       "_0" :  { label : "0",   click : ()=> { cur += '0'; show(cur); } },
+       "_." :  { label : ".",   click : ()=> { cur += '.'; show(cur); } },
+       "V"  :  { label : "V",   click : ()=> { cur += '&'; show(cur); } },
+       "="  :  { label : "=",   click : ()=> { cur = patch(Al.inline(new Function('return '+cur))().toString()); show(cur); } },
+       ")"  :  { label : ")",   click : ()=> { cur += ')'; show(cur); } },
+       "x5" :  { label : "x5",  click : ()=> { if (store) { store = false; x5=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x5'; show(cur); } },
+     }
+
+     var htb = document.querySelectorAll('.numButton');
+     var bk = Object.keys(buttons);
+     for (var i=0; i<bk.length; i++) htb[i].onclick = buttons[bk[i]].click;
+
+  </SCRIPT>
+</BODY>
