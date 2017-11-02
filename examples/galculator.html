@@ -6,6 +6,7 @@
     .calcBody {
       width         : 600px;
       margin        : auto;
+      position       : relative;
       user-select   : none;
       background    : rgb(230,220,200);
       border-radius : 40px;
@@ -29,7 +30,8 @@
       height:48px;
       line-height:43px;
       margin:auto;
-      font-size:28pt;
+      font-size:22pt;
+      overflow:hidden;
       text-align:right;
       padding-right:9px;
       box-sizing:border-box;
@@ -117,13 +119,84 @@
       top : -3px;
       font-size:45%;
     }
+    .help {
+      max-width:400px;
+      position:fixed;
+      top:0px;
+      left:10px;
+      overflow:auto;
+    }
+    .help .green { background-color: rgba(240,255,220,1); } 
+    .help .red { background-color: rgba(250,210,200,1); } 
+    .help .blue { background-color: rgba(230,220,250,1); } 
+    .help .purple { background-color: rgba(250,220,250,1); } 
+    .help  i {
+      position:relative;
+      user-select:none;
+      outline:none;
+      width:30px;
+      height:30px;
+      display:block-inline;
+      text-align:center; 
+      line-height:30px;
+      display:inline-block;
+      font-size:15pt;
+      color: rgba(0,0,0,0.65);
+      margin:3px;
+      font-family:Exo;
+      font-style:normal;
+      background: rgba(240,230,220,1);
+      border-radius:10px;
+      border:1px solid;
+      box-shadow:inset 0px -1px 1px 1px rgba(80,50,40,0.2),
+                       0px 1px 1px rgba(0,0,0,0.8),
+                  inset 0px -1px 1px rgba(70,50,40,0.8),
+                  inset 0px -1px 1px rgba(90,50,40,0.3);
+    }
+    .title {
+      position:absolute;
+      top:40px;
+      left:20px;
+      color:#888;
+      font-size:22pt;
+    }
   </STYLE>
 </HEAD>
 <BODY>
-
+  <DIV CLASS="help">
+  
+    <h4>Example in &#x2102; :</H4>
+    <p>Calculate (3+2i)*(1+4i)</p>
+    <ul>
+      <LI><i class="green">&#x2102;</i>
+      <LI><i class="blue">(</i><i>3</i><i class="blue">+</i><i>2</i><i>e<sub>1</sub></i><i class="blue">)</i>
+      <LI><i class="blue">*</i>
+      <LI><i class="blue">(</i><i>1</i><i class="blue">+</i><i>4</i><i>e<sub>1</sub></i><i class="blue">)</i>
+      <LI><i class="red">=</i>
+    </ul>
+    
+    <h4>Example in PGA 2D (2,0,1)</H4>
+    <p>Solve the system of equations :
+       <LI>x+y-0.5=0
+       <LI>2x-1y=0
+    </p>
+    <UL>
+      <LI><i class="green" STYLE="width:60px">P2D</i>
+      <LI><i>e<sub>1</sub></i><i class="blue">+</i><i>e<sub>2</sub></i><i class="blue">-</i><i>0</i><i>.</i><i>5</i><i>e<sub>0</sub></i>
+      <LI><i class="purple">ST</i><i class="purple">x1</i>
+      <LI><i class="green">Cl</i><i>2</i><i>e<sub>1</sub></i><i class="blue">-</i><i>e<sub>2</sub></i>
+      <LI><i class="purple">ST</i><i class="purple">x2</i>
+      <LI><i class="green">Cl</i><i class="purple">x1</i><i class="blue">&#x2227;</i><i class="purple">x2</i>
+      <LI><i class="purple">ST</i><i class="purple">x3</i>
+      <LI><i class="green">Cl</i><i class="purple">x3</i><i class="blue">/</i><i class="blue">(</i><i class="purple">x3</i><i class="blue">&#x2981;</i><i>E<sub>0</sub></i><i class="blue">)</i>
+      <LI><i class="red">=</i>
+    </UL>
+  
+  </DIV>
   <DIV CLASS="calcBody">
     <CENTER>Enki's GAlculator</CENTER>
     <DIV CLASS="graph numInput" ID="graph"></DIV>
+    <DIV CLASS="title" ID="title">P2D</DIV>
     <DIV CLASS="numInput" ID="screen">0</DIV>
     <DIV CLASS="group">
       <DIV CLASS="numButton wide2" STYLE="font-weight:1000">&#x211d;</DIV>
@@ -192,7 +265,9 @@
   <SCRIPT>
      var Al = Algebra(2,0,1), mode=3, cur='', store=false, x1, x2, x3, x4, x5;
      var graph=document.getElementById('graph');
+     var title=document.getElementById('title');
      var show=(x)=>{
+       x=x.replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/\<\</,'&#x2981;')
        document.getElementById('screen').innerHTML=x||'0';
        while(graph.firstChild) graph.removeChild(graph.firstChild);
        if ((mode==3 || mode==4) && [x1,x2,x3,x4,x5].filter(x=>x).length){ 
@@ -200,17 +275,19 @@
           c.style.width = c.style.height = '100%'; c.style.backgroundColor='transparent';
        }
      }
-     var patch = (x)=>x.replace(/i/g,'e_1').replace(/[^\d]e_/g,'1e_').replace(/e_/g,'e');
+     var patch = (x)=>{ 
+       return x.replace(/([^\d]*\d*\.\d\d\d\d\d\d)(\d*)/g,'$1').replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e');
+     }
 
      var buttons = {
      // metric selection.
-       "R" : { label : "&#x211d;",  click : ()=>{ Al=Algebra();      graph.style.opacity=0.3; mode=0; } },
-       "C" : { label : "&#x2102;",  click : ()=>{ Al=Algebra(0,1);   graph.style.opacity=0.3; mode=1; } },
-       "M" : { label : "&#x1D544;", click : ()=>{ Al=Algebra(1,3);   graph.style.opacity=0.3; mode=2; } },
-       "P2D" : { label : "P2D",     click : ()=>{ Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; } },
-       "P3D" : { label : "P3D",     click : ()=>{ Al=Algebra(3,0,1); graph.style.opacity=1;   mode=4; } },
-       "C2D" : { label : "C2D",     click : ()=>{ Al=Algebra(3,1,0); graph.style.opacity=0.3; mode=5; } },
-       "C3D" : { label : "C3D",     click : ()=>{ Al=Algebra(4,1,0); graph.style.opacity=0.3; mode=6; } },
+       "R" : { label : "&#x211d;",  click : ()=>{ Al=Algebra();      graph.style.opacity=0.3; mode=0; title.innerHTML="&#x211d;"; } },
+       "C" : { label : "&#x2102;",  click : ()=>{ Al=Algebra(0,1);   graph.style.opacity=0.3; mode=1; title.innerHTML="&#x2102;"; } },
+       "M" : { label : "&#x1D544;", click : ()=>{ Al=Algebra(1,3);   graph.style.opacity=0.3; mode=2; title.innerHTML="&#x1D544;"; } },
+       "P2D" : { label : "P2D",     click : ()=>{ Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; title.innerHTML="P2D"; } },
+       "P3D" : { label : "P3D",     click : ()=>{ Al=Algebra(3,0,1); graph.style.opacity=1;   mode=4; title.innerHTML="P3D";} },
+       "C2D" : { label : "C2D",     click : ()=>{ Al=Algebra(3,1,0); graph.style.opacity=0.3; mode=5; title.innerHTML="C2D";} },
+       "C3D" : { label : "C3D",     click : ()=>{ Al=Algebra(4,1,0); graph.style.opacity=0.3; mode=6; title.innerHTML="C3D";} },
      // basis vectors + store
        "e0" :  { label : "e0", click : ()=> { cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?'e0':'1e0'; show(cur); } },
        "e1" :  { label : "e1", click : ()=> { cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?'e1':'1e1'; show(cur); } },
