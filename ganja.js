@@ -129,7 +129,7 @@
               if ((t=tokens[i])[1] == '(') { var open=1,sub=[],pre=[]; while(res.length && (res[res.length-1][0]==5 || res[res.length-1][1]=='.')) pre.unshift(res.pop()[1]);  while (open) { t = tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; if (open) sub.push(t); }; res.push([[2,pre.join('')+'(']].concat(translate(sub)).concat([[2,')']])); } 
               else if ((t=tokens[i])[1] == '[') { var open=1,sub=[],pre=[]; while(res.length && (res[res.length-1][0]==5 || res[res.length-1][1]=='.')) pre.unshift(res.pop()[1]);  while (open) { t = tokens[++i]; if (t[1] == '[') open++; else if (t[1] == ']') open--; if (open) sub.push(t); }; res.push([[2,pre.join('')+'[']].concat(translate(sub)).concat([[2,']']])); } 
               else if (~'~!'.indexOf(t[1])) { res.push(t); var sub=[], open=0; while (~'~!-'.indexOf(t[1]) || open) { t=tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; sub.push(t); }; res.push([[2,'']].concat(translate(sub))); } 
-              else if (t[1]=='-'&&res.length&&res[res.length-1][0]==4) { res.push([[2,'']].concat(translate([t,tokens[++i]])))  }
+              else if (t[1]=='-'&&res.length&&(res[res.length-1][0]==4 || res[res.length-1][1]=='return'|| (res[res.length-1][0]==0 && res[res.length-2][1]=='return'))) { res.push([[2,'']].concat(translate([t,tokens[++i]])))  }
               else res.push(t);
             syntax.forEach( (op)=>{ tokens=res;res=[]; // now translate ops .. 
               if (op[3]) { /* right-to-left */ for (var i=tokens.length-1;  i >= 0; i--) { if (tokens[i][1] == op[0]) {
