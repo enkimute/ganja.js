@@ -10,7 +10,6 @@
       max-width     : 98%;
       max-height:100%;
       margin        : auto;
-      position       : relative;
       user-select   : none;
       background    : rgb(230,220,200);
       border-radius : 40px;
@@ -19,6 +18,10 @@
       padding       : 5px;
       font-family   : Exo, sans-serif;
       display       : flex;
+      position : fixed;
+      min-height:920px;
+      top:10px;
+      right:50px;
       flex-direction : column;
       box-shadow:inset 0px -2px 3px 3px rgba(80,50,40,0.2),
                   0px 2px 2px rgba(0,0,0,0.8),
@@ -113,22 +116,38 @@
       line-height:20px;
       color:rgba(0,0,0,0.5);
     }
-    .graph {
+    .graph, .history {
       min-width:512px;
       min-height:512px;
       transition:opacity 0.2s linear;
     }
+    
+    .historypos {
+       position:absolute;
+       top:0;left:0;right:0;bottom:0;
+    }
+    .history {
+       position:relative;
+       background-color:transparenct;
+       color:#222; 
+       padding:10px;
+       display:table-cell;
+       vertical-align:bottom;
+       width:580px;
+       height:512px;
+       top:10px;
+       text-align:right;
+    }
+    
     .e {
       position:relative;
       top : -3px;
       font-size:45%;
     }
     .help {
-      max-width:400px;
-      position:fixed;
+      position:absolute;
       top:0px;
       left:10px;
-      overflow:auto;
     }
     .help .green { background-color: rgba(240,255,220,1); } 
     .help .red { background-color: rgba(250,210,200,1); } 
@@ -162,12 +181,35 @@
       top:40px;
       left:20px;
       color:#888;
-      font-size:22pt;
+      font-size:16pt;
+      font-family:serif;
     }
+    .outline {
+      font-family : serif;
+      -webkit-text-stroke : 1px #888;
+      -moz-text-stroke : 1px #888;
+      -ms-text-stroke : 1px #888;
+      text-stroke : 1px #888;
+      color:transparent;
+    }
+    .wide2 .outline, .help .outline {
+      -webkit-text-stroke : 1px #444;
+      -moz-text-stroke : 1px #444;
+      -ms-text-stroke : 1px #444;
+      text-stroke : 1px #444;
+    }
+    
     @media (max-width:800px) {
       .help { display:none; }
-      .calcBody { box-shadow: 0px 0px 0px black; border-radius:0px; }
+      
+      .calcBody { top:0px; position:Relative; right:0px; box-shadow: 0px 0px 0px black; border-radius:0px; margin:auto; }
       body { background-color:rgb(230,220,200); }
+    }
+    @media (max-height:980px) {
+      .numButton {
+        height:44px;
+        line-height:40px;
+      }
     }
   </STYLE>
 </HEAD>
@@ -176,22 +218,61 @@
     <H4>The Galculator - powered by Ganja.js</H4>
     The Galculator can be forked on <A HREF="https://github.com/enkimute/ganja.js">github</A><BR><BR>
     It works great on your phone - full screen if you add it to your homescreen.<BR><BR>
-    <h4>Example in &#x2102; :</H4>
+    <h4>Example in <SPAN CLASS='outline'>C</SPAN> :</H4>
     <p>Calculate (3+2i)*(1+4i)</p>
-    <ul>
-      <LI><i class="green">&#x2102;</i>
+    <input type="button" value="show solution" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
+    <ul style="display:none">
+      <LI><i class="green"><SPAN CLASS='outline'>C</SPAN></i>
       <LI><i class="blue">(</i><i>3</i><i class="blue">+</i><i>2</i><i>e<sub>1</sub></i><i class="blue">)</i>
       <LI><i class="blue">*</i>
       <LI><i class="blue">(</i><i>1</i><i class="blue">+</i><i>4</i><i>e<sub>1</sub></i><i class="blue">)</i>
       <LI><i class="red">=</i>
+      <LI>answer is -5+14e<sub>1</sub>
     </ul>
+
+    <h4>Example in <span class="outline">D</span></h4>
+    Calculate the value of the function and first derivative at x=3<BR>
+    <BR>
+    f(x)=x<sup>3</sup>-2x<sup>2</sup>+3
+    <BR><BR>
+    <input type="button" value="show solution" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
+    <ul style="display:none">
+      <LI><i class="green"><SPAN CLASS='outline'>D</SPAN></i>
+      <LI><i>3</i><i class="blue">+</i><i>e<sub>0</sub></i>
+      <LI><i class="purple">ST</i><i class="purple">x1</i>
+      <LI><i class="green">Cl</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">-</i><i>2</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">+</i><i>3</i>
+      <LI><i class="red">=</i>
+      <LI>answer is f(3)=12 and f'(3)=15
+    </UL>
+
+    <h4>Example in spacetime <span class="outline">M</span></h4>
+    You see two simultanious lightning strikes in 10 microseconds, one where you are, one 20 km in the x-direction.<BR>
+    Are these events simultanious for a spaceship flying at 0.5c in the x-direction? (given : atanh(0.5)=0.5493)
+    <BR><BR>
+    <input type="button" value="show solution" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
+    <ul style="display:none">
+      <LI><i class="green"><SPAN CLASS='outline'>M</SPAN></i>
+      <LI><i>0</i><i>.</i><i>0</i><i>0</i><i>0</i><i>0</i><i>1</i><i>e<sub>1</sub></i>
+      <LI><i class="purple">ST</i><i class="purple">x1</i>
+      <LI><i class="blue">+</i><i>2</i><i>0</i><i>e<sub>2</sub></i><i class="blue">/</i><i>3</i><i>0</i><i>0</i><i>0</i><i>0</i><i>0</i>
+      <LI><i class="purple">ST</i><i class="purple">x2</i>
+      <LI><i class="green">Cl</i><i class="blue">(</i><I>0</i><I>.</i><I>5</i><I>4</i><I>9</i><I>3</i><i class="blue">*</i><i>.</i><i>5</i><i>e<sub>1</sub></i><i>e<sub>2</sub></i><i class="blue">)</i><i class="blue" STYLE="width:50px">Exp</i>
+      <LI><i class="purple">ST</i><i class="purple">x3</i>
+      <LI><i class="green">Cl</i><i class="purple">x3</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x3</i><i class="blue">x&#772;</i>
+      <LI><i class="purple">ST</i><i class="purple">x4</i>
+      <LI><i class="green">Cl</i><i class="purple">x3</i><i class="blue">*</i><i class="purple">x2</i><i class="blue">*</i><i class="purple">x3</i><i class="blue">x&#772;</i>
+      <LI><i class="purple">ST</i><i class="purple">x5</i>
+      <LI>answer is strikes happen at (X4 : 11ms) and (x5 : -26ms) - not the same time.
+    </UL>
+    
     
     <h4>Example in PGA 2D (2,0,1)</H4>
     <p>Solve the system of equations :
        <LI>x+y-0.5=0
        <LI>2x-1y=0
     </p>
-    <UL>
+    <input type="button" value="show solution" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
+    <ul style="display:none">
       <LI><i class="green" STYLE="width:60px">P2D</i>
       <LI><i>e<sub>1</sub></i><i class="blue">+</i><i>e<sub>2</sub></i><i class="blue">-</i><i>0</i><i>.</i><i>5</i><i>e<sub>0</sub></i>
       <LI><i class="purple">ST</i><i class="purple">x1</i>
@@ -199,20 +280,28 @@
       <LI><i class="purple">ST</i><i class="purple">x2</i>
       <LI><i class="green">Cl</i><i class="purple">x1</i><i class="blue">&#x2227;</i><i class="purple">x2</i>
       <LI><i class="purple">ST</i><i class="purple">x3</i>
-      <LI><i class="green">Cl</i><i class="purple">x3</i><i class="blue">/</i><i class="blue">(</i><i class="purple">x3</i><i class="blue">&#x2981;</i><i>E<sub>0</sub></i><i class="blue">)</i>
+      <LI><i class="green">Cl</i><i class="purple">x3</i><i class="blue">/</i><i class="blue">(</i><i class="purple">x3</i><i class="blue">&#x2981;</i><i>E<sub>0</sub></i><i class="blue">)</i><i class="blue">*</i><i>E<sub>0</sub></i>
       <LI><i class="red">=</i>
+      <LI>answer is x=0.166666 and y=0.3333333 
+      
     </UL>
   
   </DIV>
   <DIV CLASS="calcBody">
     <CENTER>Enki's GAlculator</CENTER>
-    <DIV CLASS="graph numInput" ID="graph"></DIV>
-    <DIV CLASS="title" ID="title">P2D</DIV>
+    <DIV STYLE="position:relative">
+      <DIV CLASS="graph numInput" ID="graph"></DIV>
+      <DIV CLASS="historypos">
+        <DIV CLASS="history" ID="hist"></DIV>
+      </DIV>
+    </DIV>
+    <DIV CLASS="title" ID="title">P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)</DIV>
     <DIV CLASS="numInput" ID="screen">0</DIV>
     <DIV CLASS="group">
-      <DIV CLASS="numButton wide2" STYLE="font-weight:1000">&#x211d;</DIV>
-      <DIV CLASS="numButton wide2" STYLE="font-weight:1000">&#x2102;  <DIV CLASS="mini">0,1</DIV></DIV>
-      <DIV CLASS="numButton wide2" STYLE="font-weight:1000">&#x1D544; <DIV CLASS="mini">1,3</DIV></DIV>
+      <DIV CLASS="numButton wide2" STYLE="font-weight:1000"><SPAN CLASS='outline'>R</SPAN></DIV>
+      <DIV CLASS="numButton wide2" STYLE="font-weight:1000"><SPAN CLASS='outline'>C</SPAN>  <DIV CLASS="mini">0,1</DIV></DIV>
+      <DIV CLASS="numButton wide2" STYLE="font-weight:1000"><SPAN CLASS='outline'>D</SPAN>  <DIV CLASS="mini">0,0,1</DIV></DIV>
+      <DIV CLASS="numButton wide2" STYLE="font-weight:1000"><SPAN CLASS="outline">M</SPAN><DIV CLASS="mini">1,3</DIV></DIV>
       <DIV CLASS="numButton wide2">P2D<DIV CLASS="mini">2,0,1</DIV></DIV>
       <DIV CLASS="numButton wide2">P3D<DIV CLASS="mini">3,0,1</DIV></DIV>
       <DIV CLASS="numButton wide2">C2D<DIV CLASS="mini">3,1</DIV></DIV>
@@ -274,8 +363,9 @@
     </DIV>
   </DIV>
   <SCRIPT>
-     var Al = Algebra(2,0,1), mode=3, cur='', store=false, x1, x2, x3, x4, x5;
+     var Al = Algebra(2,0,1), mode=3, histor='', cur='', store=false, x1, x2, x3, x4, x5;
      var graph=document.getElementById('graph');
+     var hist=document.getElementById('hist');
      var title=document.getElementById('title');
      var show=(x)=>{
        x=x.replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/&/g,'&#x2228;').replace(/\^/g,'&#x2227;').replace(/\<\</,'&#x2981;')
@@ -287,18 +377,22 @@
        }
      }
      var patch = (x)=>{ 
+       
+       histor+='<BR>'+(((!x.match(/=/))?cur+'=':'')+x).replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e').replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/&/g,'&#x2228;').replace(/\^/g,'&#x2227;').replace(/\<\</,'&#x2981;');
+       hist.innerHTML=histor.split('<BR>').slice(-10).join('<BR>');
        return x.replace(/([^\d]*\d*\.\d\d\d\d\d\d)(\d*)/g,'$1').replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e');
      }
 
      var buttons = {
      // metric selection.
-       "R" : { label : "&#x211d;",  click : ()=>{ Al=Algebra();      graph.style.opacity=0.3; mode=0; title.innerHTML="&#x211d;"; } },
-       "C" : { label : "&#x2102;",  click : ()=>{ Al=Algebra(0,1);   graph.style.opacity=0.3; mode=1; title.innerHTML="&#x2102;"; } },
-       "M" : { label : "&#x1D544;", click : ()=>{ Al=Algebra(1,3);   graph.style.opacity=0.3; mode=2; title.innerHTML="&#x1D544;"; } },
-       "P2D" : { label : "P2D",     click : ()=>{ Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; title.innerHTML="P2D"; } },
-       "P3D" : { label : "P3D",     click : ()=>{ Al=Algebra(3,0,1); graph.style.opacity=1;   mode=4; title.innerHTML="P3D";} },
-       "C2D" : { label : "C2D",     click : ()=>{ Al=Algebra(3,1,0); graph.style.opacity=0.3; mode=5; title.innerHTML="C2D";} },
-       "C3D" : { label : "C3D",     click : ()=>{ Al=Algebra(4,1,0); graph.style.opacity=0.3; mode=6; title.innerHTML="C3D";} },
+       "R" : { label : "<SPAN CLASS='outline'>R</SPAN>",  click : ()=>{ Al=Algebra();      graph.style.opacity=0.3; hist.style.visibility='visible'; mode=0; title.innerHTML="<SPAN CLASS='outline'>R</SPAN>"; } },
+       "C" : { label : "<SPAN CLASS='outline'>C</SPAN>",  click : ()=>{ Al=Algebra(0,1);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=1; title.innerHTML="<SPAN CLASS='outline'>C</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,1</sub>"; } },
+       "D" : { label : "<SPAN CLASS='outline'>D</SPAN>", click : ()=>{ Al=Algebra(0,0,1); graph.style.opacity=0.3; hist.style.visibility='visible'; mode=7; title.innerHTML="<SPAN CLASS='outline'>D</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,0,1</sub>"; } },
+       "M" : { label : "<SPAN CLASS='outline'>M</SPAN>", click : ()=>{ Al=Algebra(1,3);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=2; title.innerHTML="<SPAN CLASS='outline'>M</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>1,3</sub>"; } },
+       "P2D" : { label : "P2D",     click : ()=>{ Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; hist.style.visibility='visible';title.innerHTML="P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)"; } },
+       "P3D" : { label : "P3D",     click : ()=>{ Al=Algebra(3,0,1); graph.style.opacity=1;   mode=4; hist.style.visibility='visible';title.innerHTML="P3D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>3,0,1</sub>)";} },
+       "C2D" : { label : "C2D",     click : ()=>{ Al=Algebra(3,1,0); graph.style.opacity=0.3; mode=5; hist.style.visibility='visible';title.innerHTML="C2D - C(<SPAN CLASS='outline'>R</SPAN><sub>3,1</sub>)";} },
+       "C3D" : { label : "C3D",     click : ()=>{ Al=Algebra(4,1,0); graph.style.opacity=0.3; mode=6; hist.style.visibility='visible';title.innerHTML="C3D - C(<SPAN CLASS='outline'>R</SPAN><sub>4,1</sub>)";} },
      // basis vectors + store
        "e0" :  { label : "e0", click : ()=> { cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?'e0':'1e0'; show(cur); } },
        "e1" :  { label : "e1", click : ()=> { cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?'e1':'1e1'; show(cur); } },
@@ -314,7 +408,7 @@
        "E3" :  { label : "E3", click : ()=> { var s=Al.inline('1e3.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
        "E4" :  { label : "E4", click : ()=> { var s=Al.inline('1e4.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
        "E5" :  { label : "E5", click : ()=> { var s=Al.inline('1e5.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
-       "x1" :  { label : "x1", click : ()=> { if (store) { store = false; x1=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x1'; show(cur); } },
+       "x1" :  { label : "x1", click : ()=> { if (store) { store = false; x1=Al.inline(new Function('return '+cur))(); patch('x1='+x1.toString()); return show(cur); } cur += 'x1'; show(cur); } },
      // 7,8,9,-,/,Exp,x2
        "_7" :  { label : "7",   click : ()=> { cur += '7'; show(cur); } },
        "_8" :  { label : "8",   click : ()=> { cur += '8'; show(cur); } },
@@ -322,7 +416,7 @@
        "-"  :  { label : "-",   click : ()=> { cur += '-'; show(cur); } },
        "/"  :  { label : "/",   click : ()=> { cur += '/'; show(cur); } },
        "Exp":  { label : "Exp", click : ()=> { cur += '.Exp()'; show(cur); } },
-       "x2" :  { label : "x2",  click : ()=> { if (store) { store = false; x2=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x2'; show(cur); } },
+       "x2" :  { label : "x2",  click : ()=> { if (store) { store = false; x2=Al.inline(new Function('return '+cur))(); patch('x2='+x2.toString()); return show(cur); } cur += 'x2'; show(cur); } },
      // 4,5,6,+,*,Conjugate,x3
        "_4" :  { label : "4",   click : ()=> { cur += '4'; show(cur); } },
        "_5" :  { label : "5",   click : ()=> { cur += '5'; show(cur); } },
@@ -330,7 +424,7 @@
        "_+" :  { label : "+",   click : ()=> { cur += '+'; show(cur); } },
        "_*" :  { label : "*",   click : ()=> { cur += '*'; show(cur); } },
        "Conj": { label : "Conj", click : ()=> { cur += '.Conjugate'; show(cur); } },
-       "x3" :  { label : "x3",  click : ()=> { if (store) { store = false; x3=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x3'; show(cur); } },
+       "x3" :  { label : "x3",  click : ()=> { if (store) { store = false; x3=Al.inline(new Function('return '+cur))(); patch('x3='+x3.toString()); return show(cur); } cur += 'x3'; show(cur); } },
      // 1,2,3,^,.,(,x4
        "_1" :  { label : "1",   click : ()=> { cur += '1'; show(cur); } },
        "_2" :  { label : "2",   click : ()=> { cur += '2'; show(cur); } },
@@ -338,15 +432,15 @@
        "^"  :  { label : "^",   click : ()=> { cur += '^'; show(cur); } },
        "."  :  { label : ".",   click : ()=> { cur += '<<'; show(cur); } },
        "("  :  { label : "(",   click : ()=> { cur += '('; show(cur); } },
-       "x4" :  { label : "x4",  click : ()=> { if (store) { store = false; x4=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x4'; show(cur); } },
+       "x4" :  { label : "x4",  click : ()=> { if (store) { store = false; x4=Al.inline(new Function('return '+cur))(); patch('x4='+x4.toString()); return show(cur); } cur += 'x4'; show(cur); } },
      // Cl,0,.,
-       "Cl" :  { label : "Cl",  click : ()=> { cur = ''; show(cur); } },
+       "Cl" :  { label : "Cl",  click : ()=> { if (cur=='') { histor=''; hist.innerHTML=histor; }; cur = ''; show(cur); } },
        "_0" :  { label : "0",   click : ()=> { cur += '0'; show(cur); } },
        "_." :  { label : ".",   click : ()=> { cur += '.'; show(cur); } },
        "V"  :  { label : "V",   click : ()=> { cur += '&'; show(cur); } },
        "="  :  { label : "=",   click : ()=> { cur = patch(Al.inline(new Function('return '+cur))().toString()); show(cur); } },
        ")"  :  { label : ")",   click : ()=> { cur += ')'; show(cur); } },
-       "x5" :  { label : "x5",  click : ()=> { if (store) { store = false; x5=Al.inline(new Function('return '+cur))(); return show(cur); } cur += 'x5'; show(cur); } },
+       "x5" :  { label : "x5",  click : ()=> { if (store) { store = false; x5=Al.inline(new Function('return '+cur))(); patch('x5='+x5.toString()); return show(cur); } cur += 'x5'; show(cur); } },
      }
 
      var htb = document.querySelectorAll('.numButton');
