@@ -305,7 +305,7 @@ PGA2D Desargues Theorem<BR>
 
 ganja.js is also the engine behind the GAlculator - try it [online](https://enkimute.github.io/ganja.js/examples/galculator.html) or get it on the [play store](https://play.google.com/store/apps/details?id=io.github.enkimute) 
 
-![galculator screenshot](images/galculator_thumb.png)(https://enkimute.github.io/ganja.js/examples/galculator.html)
+![galculator screenshot](images/galculator_thumb.png)
 
 Or - get some hands on experience with eucledian plane PGA by playing the [wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html).
 
