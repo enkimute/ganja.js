@@ -445,7 +445,13 @@
 
      var htb = document.querySelectorAll('.numButton');
      var bk = Object.keys(buttons);
-     for (var i=0; i<bk.length; i++) htb[i].onclick = buttons[bk[i]].click;
+     bk.forEach((x,i)=>{
+       htb[i].onclick = buttons[x].click;
+       htb[i].ontouchstart = function(e) {
+         e.preventDefault(); e.stopPropagation();
+         buttons[x].click;
+       }
+     });
 
   </SCRIPT>
 </BODY>
