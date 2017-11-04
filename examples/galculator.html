@@ -449,6 +449,7 @@
        htb[i].onclick = buttons[x].click;
        htb[i].ontouchstart = function(e) {
          e.preventDefault(); e.stopPropagation();
+         navigator.vibrate(50);
          buttons[x].click();
        }
      });
