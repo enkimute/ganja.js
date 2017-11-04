@@ -77,7 +77,7 @@
     .numButton:focus {
       outline:none;
     }
-    .numButton:active {
+    .numButton:active:not(.disabled) {
       top:2px;
       box-shadow:inset 0px -1px 0px 2px rgba(80,50,40,0.2),
                        0px -1px 0px rgba(0,0,0,0.8);
@@ -191,12 +191,18 @@
       -ms-text-stroke : 1px #888;
       text-stroke : 1px #888;
       color:transparent;
+      font-style:normal;
     }
     .wide2 .outline, .help .outline {
       -webkit-text-stroke : 1px #444;
       -moz-text-stroke : 1px #444;
       -ms-text-stroke : 1px #444;
       text-stroke : 1px #444;
+    }
+    .disabled {
+      color:#ccc;
+      pointer-events:none;
+      box-shadow:none;
     }
     
     @media (max-width:800px) {
@@ -280,7 +286,7 @@
       <LI><i class="purple">ST</i><i class="purple">x2</i>
       <LI><i class="green">Cl</i><i class="purple">x1</i><i class="blue">&#x2227;</i><i class="purple">x2</i>
       <LI><i class="purple">ST</i><i class="purple">x3</i>
-      <LI><i class="green">Cl</i><i class="purple">x3</i><i class="blue">/</i><i class="blue">(</i><i class="purple">x3</i><i class="blue">&#x2981;</i><i>E<sub>0</sub></i><i class="blue">)</i><i class="blue">*</i><i>E<sub>0</sub></i>
+      <LI><i class="green">Cl</i><i class="purple">x3</i><i class="blue">/</i><i class="blue">(</i><i class="purple">x3</i><i class="blue">&#x25cf;</i><i>E<sub>0</sub></i><i class="blue">)</i><i class="blue">*</i><i>E<sub>0</sub></i>
       <LI><i class="red">=</i>
       <LI>answer is x=0.166666 and y=0.3333333 
       
@@ -295,7 +301,7 @@
         <DIV CLASS="history" ID="hist"></DIV>
       </DIV>
     </DIV>
-    <DIV CLASS="title" ID="title">P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)</DIV>
+    <DIV CLASS="title" ID="title"><SPAN CLASS='outline'>R</SPAN></DIV>
     <DIV CLASS="numInput" ID="screen">0</DIV>
     <DIV CLASS="group">
       <DIV CLASS="numButton wide2" STYLE="font-weight:1000"><SPAN CLASS='outline'>R</SPAN></DIV>
@@ -315,6 +321,7 @@
       <DIV CLASS="numButton">e<SUB>4</SUB></DIV>
       <DIV CLASS="numButton">e<SUB>5</SUB></DIV>
       <DIV CLASS="numButton wide4">ST</DIV>
+      <DIV CLASS="numButton wide3">?</DIV>
     </DIV>
     <DIV CLASS="group">
       <DIV CLASS="numButton">E<SUB>0</SUB></DIV>
@@ -324,6 +331,7 @@
       <DIV CLASS="numButton">E<SUB>4</SUB></DIV>
       <DIV CLASS="numButton">E<SUB>5</SUB></DIV>
       <DIV CLASS="numButton wide4">x1</DIV>
+      <DIV CLASS="numButton wide4">x6</DIV>
     </DIV>
     <DIV CLASS="group">
       <DIV CLASS="numButton">7</DIV>
@@ -333,6 +341,7 @@
       <DIV CLASS="numButton wide3">/</DIV>
       <DIV CLASS="numButton wide3">Exp</DIV>
       <DIV CLASS="numButton wide4">x2</DIV>
+      <DIV CLASS="numButton wide4">x7</DIV>
     </DIV>
     <DIV CLASS="group">
       <DIV CLASS="numButton">4</DIV>
@@ -342,15 +351,17 @@
       <DIV CLASS="numButton wide3">&#x2217;</DIV>
       <DIV CLASS="numButton wide3">x&#772;</DIV>
       <DIV CLASS="numButton wide4">x3</DIV>
+      <DIV CLASS="numButton wide4">x8</DIV>
     </DIV>
     <DIV CLASS="group">
       <DIV CLASS="numButton">1</DIV>
       <DIV CLASS="numButton">2</DIV>
       <DIV CLASS="numButton">3</DIV>
       <DIV CLASS="numButton wide3">&#x2227;</DIV>
-      <DIV CLASS="numButton wide3">&#x2981;</DIV>
+      <DIV CLASS="numButton wide3">&#x25cf;</DIV>
       <DIV CLASS="numButton wide3">(</DIV>
       <DIV CLASS="numButton wide4">x4</DIV>
+      <DIV CLASS="numButton wide4">x9</DIV>
     </DIV>
     <DIV CLASS="group">
       <DIV CLASS="numButton wide2">Cl</DIV>
@@ -360,15 +371,17 @@
       <DIV CLASS="numButton wide5">=</DIV>
       <DIV CLASS="numButton wide3">)</DIV>
       <DIV CLASS="numButton wide4">x5</DIV>
+      <DIV CLASS="numButton wide4">x10</DIV>
     </DIV>
   </DIV>
   <SCRIPT>
-     var Al = Algebra(2,0,1), mode=3, histor='', cur='', store=false, x1, x2, x3, x4, x5;
+     var Al = Algebra(), mode=3, histor='', cur='', store=false, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
      var graph=document.getElementById('graph');
      var hist=document.getElementById('hist');
      var title=document.getElementById('title');
+     var help=false;
      var show=(x)=>{
-       x=x.replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/&/g,'&#x2228;').replace(/\^/g,'&#x2227;').replace(/\<\</,'&#x2981;')
+       x=x.replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/&/g,'&#x2228;').replace(/\^/g,'&#x2227;').replace(/\<\</,'&#x25cf;')
        document.getElementById('screen').innerHTML=x||'0';
        if ((mode==3 || mode==4) && [x1,x2,x3,x4,x5].filter(x=>x).length){ 
           while(graph.firstChild) graph.removeChild(graph.firstChild);
@@ -376,83 +389,129 @@
           c.style.width = c.style.height = '100%'; c.style.backgroundColor='transparent';
        }
      }
-     var patch = (x)=>{ 
-       
-       histor+='<BR>'+(((!x.match(/=/))?cur+'=':'')+x).replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e').replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/&/g,'&#x2228;').replace(/\^/g,'&#x2227;').replace(/\<\</,'&#x2981;');
+     var print = (x)=>{
+       histor += '<BR>'+x;
        hist.innerHTML=histor.split('<BR>').slice(-10).join('<BR>');
+     }
+     var patch = (x)=>{ 
+       print((((!x.match(/=/))?cur+'=':'')+x).replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e').replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/&/g,'&#x2228;').replace(/\^/g,'&#x2227;').replace(/\<\</,'&#x25cf;'));
        return x.replace(/([^\d]*\d*\.\d\d\d\d\d\d)(\d*)/g,'$1').replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e');
      }
 
+
      var buttons = {
      // metric selection.
-       "R" : { label : "<SPAN CLASS='outline'>R</SPAN>",  click : ()=>{ Al=Algebra();      graph.style.opacity=0.3; hist.style.visibility='visible'; mode=0; title.innerHTML="<SPAN CLASS='outline'>R</SPAN>"; } },
-       "C" : { label : "<SPAN CLASS='outline'>C</SPAN>",  click : ()=>{ Al=Algebra(0,1);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=1; title.innerHTML="<SPAN CLASS='outline'>C</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,1</sub>"; } },
-       "D" : { label : "<SPAN CLASS='outline'>D</SPAN>", click : ()=>{ Al=Algebra(0,0,1); graph.style.opacity=0.3; hist.style.visibility='visible'; mode=7; title.innerHTML="<SPAN CLASS='outline'>D</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,0,1</sub>"; } },
-       "M" : { label : "<SPAN CLASS='outline'>M</SPAN>", click : ()=>{ Al=Algebra(1,3);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=2; title.innerHTML="<SPAN CLASS='outline'>M</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>1,3</sub>"; } },
-       "P2D" : { label : "P2D",     click : ()=>{ Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; hist.style.visibility='visible';title.innerHTML="P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)"; } },
-       "P3D" : { label : "P3D",     click : ()=>{ Al=Algebra(3,0,1); graph.style.opacity=1;   mode=4; hist.style.visibility='visible';title.innerHTML="P3D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>3,0,1</sub>)";} },
-       "C2D" : { label : "C2D",     click : ()=>{ Al=Algebra(3,1,0); graph.style.opacity=0.3; mode=5; hist.style.visibility='visible';title.innerHTML="C2D - C(<SPAN CLASS='outline'>R</SPAN><sub>3,1</sub>)";} },
-       "C3D" : { label : "C3D",     click : ()=>{ Al=Algebra(4,1,0); graph.style.opacity=0.3; mode=6; hist.style.visibility='visible';title.innerHTML="C3D - C(<SPAN CLASS='outline'>R</SPAN><sub>4,1</sub>)";} },
+       "R" : { label : "<SPAN CLASS='outline'>R</SPAN>", click : ()=>{ E();e(); Al=Algebra();      graph.style.opacity=0.3; hist.style.visibility='visible'; mode=0; title.innerHTML="<SPAN CLASS='outline'>R</SPAN>"; }, help:"<I CLASS='outline'>R</I>: Real Numbers."},
+       "C" : { label : "<SPAN CLASS='outline'>C</SPAN>", click : ()=>{ E();e(0,1,0,0,0,0); Al=Algebra(0,1);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=1; title.innerHTML="<SPAN CLASS='outline'>C</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,1</sub>"; }, help:"<I CLASS='outline'>C</I>: Complex Numbers." },
+       "D" : { label : "<SPAN CLASS='outline'>D</SPAN>", click : ()=>{ E();e(1,0,0,0,0,0); Al=Algebra(0,0,1); graph.style.opacity=0.3; hist.style.visibility='visible'; mode=7; title.innerHTML="<SPAN CLASS='outline'>D</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,0,1</sub>"; } , help:"<I CLASS='outline'>D</I>: Dual Numbers." },
+       "M" : { label : "<SPAN CLASS='outline'>M</SPAN>", click : ()=>{ E(0,1,1,1,1,0); Al=Algebra(1,3);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=2; title.innerHTML="<SPAN CLASS='outline'>M</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>1,3</sub>"; }, help:"<I CLASS='outline'>M</I> : <I CLASS='outline'>R</I><SUB>1,3</SUB> : Minkowski spacetime."  },
+       "P2D" : { label : "P2D",     click : ()=>{ E(1,1,1,0,0,0); Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; hist.style.visibility='visible';title.innerHTML="P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)"; }, help:"P(<I CLASS='outline'>R</I>*<SUB>2,0,1</SUB>): Projective 2D Geometric Algebra. (Eucledian plane)."  },
+       "P3D" : { label : "P3D",     click : ()=>{ E(1,1,1,1,0,0); Al=Algebra(3,0,1); graph.style.opacity=1;   mode=4; hist.style.visibility='visible';title.innerHTML="P3D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>3,0,1</sub>)";}, help:"P(<I CLASS='outline'>R</I>*<SUB>3,0,1</SUB>): Projective 3D Geometric Algebra. (Eucledian space)." },
+       "C2D" : { label : "C2D",     click : ()=>{ E(0,1,1,1,1,0); Al=Algebra(3,1,0); graph.style.opacity=0.3; mode=5; hist.style.visibility='visible';title.innerHTML="C2D - C(<SPAN CLASS='outline'>R</SPAN><sub>3,1</sub>)";}, help:"C(<I CLASS='outline'>R</I><SUB>3,1</SUB>): Conformal 2D Geometric Algebra." },
+       "C3D" : { label : "C3D",     click : ()=>{ E(0,1,1,1,1,1); Al=Algebra(4,1,0); graph.style.opacity=0.3; mode=6; hist.style.visibility='visible';title.innerHTML="C3D - C(<SPAN CLASS='outline'>R</SPAN><sub>4,1</sub>)";}, help:"C(<I CLASS='outline'>R</I><SUB>4,1</SUB>): Conformal 3D Geometric Algebra." },
      // basis vectors + store
-       "e0" :  { label : "e0", click : ()=> { cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?'e0':'1e0'; show(cur); } },
-       "e1" :  { label : "e1", click : ()=> { cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?'e1':'1e1'; show(cur); } },
-       "e2" :  { label : "e2", click : ()=> { cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?'e2':'1e2'; show(cur); } },
-       "e3" :  { label : "e3", click : ()=> { cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?'e3':'1e3'; show(cur); } },
-       "e4" :  { label : "e4", click : ()=> { cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?'e4':'1e4'; show(cur); } },
-       "e5" :  { label : "e5", click : ()=> { cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?'e5':'1e5'; show(cur); } },
-       "st" :  { label : "st", click : ()=> { store = true; } },
+       "e0" :  { label : "e0", click : ()=> { cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?'e0':'1e0'; show(cur); }, help:"e<sub>0</sub> basisvector." },
+       "e1" :  { label : "e1", click : ()=> { cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?'e1':'1e1'; show(cur); }, help:"e<sub>1</sub> basisvector." },
+       "e2" :  { label : "e2", click : ()=> { cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?'e2':'1e2'; show(cur); }, help:"e<sub>2</sub> basisvector." },
+       "e3" :  { label : "e3", click : ()=> { cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?'e3':'1e3'; show(cur); }, help:"e<sub>3</sub> basisvector." },
+       "e4" :  { label : "e4", click : ()=> { cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?'e4':'1e4'; show(cur); }, help:"e<sub>4</sub> basisvector." },
+       "e5" :  { label : "e5", click : ()=> { cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?'e5':'1e5'; show(cur); }, help:"e<sub>5</sub> basisvector." },
+       "st" :  { label : "st", click : ()=> { store = true; }, help:"ST : Store variable. (follow by x1 to x10)" },
+       "_?" :  { label : "?",  click : ()=> { help = true; }, help:"Click help and any button for more help." },
      // basis dual vectors + x1
-       "E0" :  { label : "E0", click : ()=> { var s=Al.inline('1e0.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
-       "E1" :  { label : "E1", click : ()=> { var s=Al.inline('1e1.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
-       "E2" :  { label : "E2", click : ()=> { var s=Al.inline('1e2.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
-       "E3" :  { label : "E3", click : ()=> { var s=Al.inline('1e3.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
-       "E4" :  { label : "E4", click : ()=> { var s=Al.inline('1e4.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
-       "E5" :  { label : "E5", click : ()=> { var s=Al.inline('1e5.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?s:('1'+s); show(cur); } },
-       "x1" :  { label : "x1", click : ()=> { if (store) { store = false; x1=Al.inline(new Function('return '+cur))(); patch('x1='+x1.toString()); return show(cur); } cur += 'x1'; show(cur); } },
+       "E0" :  { label : "E0", click : ()=> { var s=Al.inline('1e0.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'0':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>0</sub> basisvector."  },
+       "E1" :  { label : "E1", click : ()=> { var s=Al.inline('1e1.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'1':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>1</sub> basisvector."  },
+       "E2" :  { label : "E2", click : ()=> { var s=Al.inline('1e2.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'2':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>2</sub> basisvector."  },
+       "E3" :  { label : "E3", click : ()=> { var s=Al.inline('1e3.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>3</sub> basisvector."  },
+       "E4" :  { label : "E4", click : ()=> { var s=Al.inline('1e4.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>4</sub> basisvector."  },
+       "E5" :  { label : "E5", click : ()=> { var s=Al.inline('1e5.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>5</sub> basisvector."  },
+       "x1" :  { label : "x1", click : ()=> { if (store) { store = false; x1=Al.inline(new Function('return '+cur))(); patch('x1='+x1.toString()); return show(cur); } cur += 'x1'; show(cur); }, help:"x1 variable" },
+       "x6" :  { label : "x6", click : ()=> { if (store) { store = false; x6=Al.inline(new Function('return '+cur))(); patch('x6='+x6.toString()); return show(cur); } cur += 'x6'; show(cur); }, help:"x6 variable" },
      // 7,8,9,-,/,Exp,x2
        "_7" :  { label : "7",   click : ()=> { cur += '7'; show(cur); } },
        "_8" :  { label : "8",   click : ()=> { cur += '8'; show(cur); } },
        "_9" :  { label : "9",   click : ()=> { cur += '9'; show(cur); } },
-       "-"  :  { label : "-",   click : ()=> { cur += '-'; show(cur); } },
-       "/"  :  { label : "/",   click : ()=> { cur += '/'; show(cur); } },
-       "Exp":  { label : "Exp", click : ()=> { cur += '.Exp()'; show(cur); } },
-       "x2" :  { label : "x2",  click : ()=> { if (store) { store = false; x2=Al.inline(new Function('return '+cur))(); patch('x2='+x2.toString()); return show(cur); } cur += 'x2'; show(cur); } },
+       "-"  :  { label : "-",   click : ()=> { cur += '-'; show(cur); }, help: "subtract" },
+       "/"  :  { label : "/",   click : ()=> { cur += '/'; show(cur); }, help: "divide" },
+       "Exp":  { label : "Exp", click : ()=> { cur += '.Exp()'; show(cur); }, help: "exponentiate" },
+       "x2" :  { label : "x2",  click : ()=> { if (store) { store = false; x2=Al.inline(new Function('return '+cur))(); patch('x2='+x2.toString()); return show(cur); } cur += 'x2'; show(cur); } , help:"x2 variable"},
+       "x7" :  { label : "x7",  click : ()=> { if (store) { store = false; x7=Al.inline(new Function('return '+cur))(); patch('x7='+x7.toString()); return show(cur); } cur += 'x7'; show(cur); } , help:"x7 variable"},
      // 4,5,6,+,*,Conjugate,x3
        "_4" :  { label : "4",   click : ()=> { cur += '4'; show(cur); } },
        "_5" :  { label : "5",   click : ()=> { cur += '5'; show(cur); } },
        "_6" :  { label : "6",   click : ()=> { cur += '6'; show(cur); } },
-       "_+" :  { label : "+",   click : ()=> { cur += '+'; show(cur); } },
-       "_*" :  { label : "*",   click : ()=> { cur += '*'; show(cur); } },
-       "Conj": { label : "Conj", click : ()=> { cur += '.Conjugate'; show(cur); } },
-       "x3" :  { label : "x3",  click : ()=> { if (store) { store = false; x3=Al.inline(new Function('return '+cur))(); patch('x3='+x3.toString()); return show(cur); } cur += 'x3'; show(cur); } },
+       "_+" :  { label : "+",   click : ()=> { cur += '+'; show(cur); }, help: "add" },
+       "_*" :  { label : "*",   click : ()=> { cur += '*'; show(cur); }, help: "multiply (Geometric Product)" },
+       "Conj": { label : "Conj", click : ()=> { cur += '.Conjugate'; show(cur); }, help:"Clifford Conjugate" },
+       "x3" :  { label : "x3",  click : ()=> { if (store) { store = false; x3=Al.inline(new Function('return '+cur))(); patch('x3='+x3.toString()); return show(cur); } cur += 'x3'; show(cur); }, help:"x3 variable" },
+       "x8" :  { label : "x8",  click : ()=> { if (store) { store = false; x8=Al.inline(new Function('return '+cur))(); patch('x8='+x8.toString()); return show(cur); } cur += 'x8'; show(cur); }, help:"x8 variable" },
      // 1,2,3,^,.,(,x4
        "_1" :  { label : "1",   click : ()=> { cur += '1'; show(cur); } },
        "_2" :  { label : "2",   click : ()=> { cur += '2'; show(cur); } },
        "_3" :  { label : "3",   click : ()=> { cur += '3'; show(cur); } },
-       "^"  :  { label : "^",   click : ()=> { cur += '^'; show(cur); } },
-       "."  :  { label : ".",   click : ()=> { cur += '<<'; show(cur); } },
+       "^"  :  { label : "^",   click : ()=> { cur += '^'; show(cur); }, help: "outer product" },
+       "."  :  { label : ".",   click : ()=> { cur += '<<'; show(cur); }, help: "inner product (left contraction)" },
        "("  :  { label : "(",   click : ()=> { cur += '('; show(cur); } },
-       "x4" :  { label : "x4",  click : ()=> { if (store) { store = false; x4=Al.inline(new Function('return '+cur))(); patch('x4='+x4.toString()); return show(cur); } cur += 'x4'; show(cur); } },
+       "x4" :  { label : "x4",  click : ()=> { if (store) { store = false; x4=Al.inline(new Function('return '+cur))(); patch('x4='+x4.toString()); return show(cur); } cur += 'x4'; show(cur); }, help:"x4 variable" },
+       "x9" :  { label : "x9",  click : ()=> { if (store) { store = false; x9=Al.inline(new Function('return '+cur))(); patch('x9='+x9.toString()); return show(cur); } cur += 'x9'; show(cur); }, help:"x9 variable" },
      // Cl,0,.,
-       "Cl" :  { label : "Cl",  click : ()=> { if (cur=='') { histor=''; hist.innerHTML=histor; }; cur = ''; show(cur); } },
+       "Cl" :  { label : "Cl",  click : ()=> { if (cur=='') { histor=''; hist.innerHTML=histor; while(graph.firstChild) graph.removeChild(graph.firstChild); x1=x2=x3=x4=x5=x6=x7=x8=x9=x10=undefined; }; cur = ''; show(cur); }, help:"Cl : clear last result / all" },
        "_0" :  { label : "0",   click : ()=> { cur += '0'; show(cur); } },
        "_." :  { label : ".",   click : ()=> { cur += '.'; show(cur); } },
-       "V"  :  { label : "V",   click : ()=> { cur += '&'; show(cur); } },
+       "V"  :  { label : "V",   click : ()=> { cur += '&'; show(cur); }, help: "dual outer product." },
        "="  :  { label : "=",   click : ()=> { cur = patch(Al.inline(new Function('return '+cur))().toString()); show(cur); } },
        ")"  :  { label : ")",   click : ()=> { cur += ')'; show(cur); } },
-       "x5" :  { label : "x5",  click : ()=> { if (store) { store = false; x5=Al.inline(new Function('return '+cur))(); patch('x5='+x5.toString()); return show(cur); } cur += 'x5'; show(cur); } },
+       "x5" :  { label : "x5",  click : ()=> { if (store) { store = false; x5=Al.inline(new Function('return '+cur))(); patch('x5='+x5.toString()); return show(cur); } cur += 'x5'; show(cur); } , help:"x5 variable"},
+       "x10" :  { label : "x10",  click : ()=> { if (store) { store = false; x10=Al.inline(new Function('return '+cur))(); patch('x10='+x10.toString()); return show(cur); } cur += 'x10'; show(cur); } , help:"x10 variable" }
+     }
+
+     var e = function(x0,x1,x2,x3,x4,x5){ 
+       if (arguments.length==0) buttons["Conj"].el.classList.add('disabled');
+                           else buttons["Conj"].el.classList.remove('disabled');
+
+       buttons.e0.el.classList[x0?'remove':'add']('disabled');
+       buttons.e1.el.classList[x1?'remove':'add']('disabled');
+       buttons.e2.el.classList[x2?'remove':'add']('disabled');
+       buttons.e3.el.classList[x3?'remove':'add']('disabled');
+       buttons.e4.el.classList[x4?'remove':'add']('disabled');
+       buttons.e5.el.classList[x5?'remove':'add']('disabled');
+     }
+     var E = function(x0,x1,x2,x3,x4,x5){ 
+       if (arguments.length==0) {
+         buttons["^"].el.classList.add('disabled');
+         buttons.V.el.classList.add('disabled');
+         buttons["."].el.classList.add('disabled');
+       } else {
+         buttons["^"].el.classList.remove('disabled');
+         buttons.V.el.classList.remove('disabled');
+         buttons["."].el.classList.remove('disabled');
+       }
+       e(x0,x1,x2,x3,x4,x5);
+       buttons.E0.el.classList[x0?'remove':'add']('disabled');
+       buttons.E1.el.classList[x1?'remove':'add']('disabled');
+       buttons.E2.el.classList[x2?'remove':'add']('disabled');
+       buttons.E3.el.classList[x3?'remove':'add']('disabled');
+       buttons.E4.el.classList[x4?'remove':'add']('disabled');
+       buttons.E5.el.classList[x5?'remove':'add']('disabled');
      }
 
      var htb = document.querySelectorAll('.numButton');
      var bk = Object.keys(buttons);
      bk.forEach((x,i)=>{
-       htb[i].onclick = buttons[x].click;
-       htb[i].ontouchstart = function(e) {
+       buttons[x].el = htb[i];
+       htb[i].ontouchstart = htb[i].onclick = function(e) {
          e.preventDefault(); e.stopPropagation();
          navigator.vibrate(50);
+         if (help) {
+           help=false;
+           print(buttons[x].help||'no help for this button.');
+           return;
+         }
          buttons[x].click();
        }
      });
+     
+     E();e();
 
   </SCRIPT>
 </BODY>
