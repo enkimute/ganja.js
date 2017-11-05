@@ -157,24 +157,21 @@
       position:relative;
       user-select:none;
       outline:none;
-      width:30px;
-      height:30px;
+      width:25px;
+      height:25px;
       display:block-inline;
       text-align:center; 
-      line-height:30px;
+      line-height:25px;
       display:inline-block;
-      font-size:15pt;
+      font-size:13pt;
+      opacity:0.8;
       color: rgba(0,0,0,0.65);
-      margin:3px;
+      margin:2px;
       font-family:Exo;
       font-style:normal;
       background: rgba(240,230,220,1);
       border-radius:10px;
       border:1px solid;
-      box-shadow:inset 0px -1px 1px 1px rgba(80,50,40,0.2),
-                       0px 1px 1px rgba(0,0,0,0.8),
-                  inset 0px -1px 1px rgba(70,50,40,0.8),
-                  inset 0px -1px 1px rgba(90,50,40,0.3);
     }
     .title {
       position:absolute;
@@ -252,12 +249,12 @@
     </UL>
 
     <h4>Example in spacetime <span class="outline">M</span></h4>
-    You see two simultanious lightning strikes in 10 microseconds, one where you are, one 20 km in the x-direction.<BR>
-    Are these events simultanious for a spaceship flying at 0.5c in the x-direction? (given : atanh(0.5)=0.5493)
+    You see two simultaneous lightning strikes in 10 microseconds, one where you are, one 20 km in the x-direction.<BR>
+    Are these events simultaneous for a spaceship flying at 0.5c in the x-direction? (given : atanh(0.5)=0.5493)
     <BR><BR>
     <input type="button" value="show solution" onclick="this.style.display='none'; this.nextElementSibling.style.display='block'"/>
     <ul style="display:none">
-      <LI><i class="green"><SPAN CLASS='outline'>M</SPAN></i>
+      <LI><i class="green"><SPAN CLASS="outline">M</SPAN></i>
       <LI><i>0</i><i>.</i><i>0</i><i>0</i><i>0</i><i>0</i><i>1</i><i>e<sub>1</sub></i>
       <LI><i class="purple">ST</i><i class="purple">x1</i>
       <LI><i class="blue">+</i><i>2</i><i>0</i><i>e<sub>2</sub></i><i class="blue">/</i><i>3</i><i>0</i><i>0</i><i>0</i><i>0</i><i>0</i>
@@ -271,6 +268,7 @@
       <LI>answer is strikes happen at (X4 : 11ms) and (x5 : -26ms) - not the same time.
     </UL>
     
+
     
     <h4>Example in PGA 2D (2,0,1)</H4>
     <p>Solve the system of equations :
@@ -291,6 +289,11 @@
       <LI>answer is x=0.166666 and y=0.3333333 
       
     </UL>
+
+
+
+
+
   
   </DIV>
   <DIV CLASS="calcBody">
@@ -399,13 +402,16 @@
      }
 
 
+     print('Enki\'s GAlculator<HR><DIV class="help" style="position:relative">for examples press <i class="blue">?</i> + <i class="green"><SPAN CLASS="outline">C</SPAN></i>, <i class="green"><SPAN CLASS="outline">D</SPAN></i>, <i class="green"><SPAN CLASS="outline">M</SPAN></i>, ...&nbsp;&nbsp;</DIV>')
+
+
      var buttons = {
      // metric selection.
        "R" : { label : "<SPAN CLASS='outline'>R</SPAN>", click : ()=>{ E();e(); Al=Algebra();      graph.style.opacity=0.3; hist.style.visibility='visible'; mode=0; title.innerHTML="<SPAN CLASS='outline'>R</SPAN>"; }, help:"<I CLASS='outline'>R</I>: Real Numbers."},
-       "C" : { label : "<SPAN CLASS='outline'>C</SPAN>", click : ()=>{ E();e(0,1,0,0,0,0); Al=Algebra(0,1);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=1; title.innerHTML="<SPAN CLASS='outline'>C</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,1</sub>"; }, help:"<I CLASS='outline'>C</I>: Complex Numbers." },
-       "D" : { label : "<SPAN CLASS='outline'>D</SPAN>", click : ()=>{ E();e(1,0,0,0,0,0); Al=Algebra(0,0,1); graph.style.opacity=0.3; hist.style.visibility='visible'; mode=7; title.innerHTML="<SPAN CLASS='outline'>D</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,0,1</sub>"; } , help:"<I CLASS='outline'>D</I>: Dual Numbers." },
-       "M" : { label : "<SPAN CLASS='outline'>M</SPAN>", click : ()=>{ E(0,1,1,1,1,0); Al=Algebra(1,3);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=2; title.innerHTML="<SPAN CLASS='outline'>M</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>1,3</sub>"; }, help:"<I CLASS='outline'>M</I> : <I CLASS='outline'>R</I><SUB>1,3</SUB> : Minkowski spacetime."  },
-       "P2D" : { label : "P2D",     click : ()=>{ E(1,1,1,0,0,0); Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; hist.style.visibility='visible';title.innerHTML="P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)"; }, help:"P(<I CLASS='outline'>R</I>*<SUB>2,0,1</SUB>): Projective 2D Geometric Algebra. (Eucledian plane)."  },
+       "C" : { label : "<SPAN CLASS='outline'>C</SPAN>", click : ()=>{ E();e(0,1,0,0,0,0); Al=Algebra(0,1);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=1; title.innerHTML="<SPAN CLASS='outline'>C</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,1</sub>"; }, help:'<I CLASS="outline">C</I>: Complex Numbers.<HR>Example: calculate (3+2i)*(1+4i)<HR><DIV class="help" style="position:relative"><i class="green"><SPAN CLASS="outline">C</SPAN></i><i class="blue">(</i><i>3</i><i class="blue">+</i><i>2</i><i>e<sub>1</sub></i><i class="blue">)</i><i class="blue">*</i><i class="blue">(</i><i>1</i><i class="blue">+</i><i>4</i><i>e<sub>1</sub></i><i class="blue">)</i><i class="red">=</i></DIV><HR>' },
+       "D" : { label : "<SPAN CLASS='outline'>D</SPAN>", click : ()=>{ E();e(1,0,0,0,0,0); Al=Algebra(0,0,1); graph.style.opacity=0.3; hist.style.visibility='visible'; mode=7; title.innerHTML="<SPAN CLASS='outline'>D</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>0,0,1</sub>"; } , help:'<I CLASS="outline">D</I>: Dual Numbers.<HR>Example: Calculate the value of the function and first derivative at x=3<BR>x<sup>3</sup>-2x<sup>2</sup>+3<HR><DIV class="help" style="position:relative"><i class="green"><SPAN CLASS="outline">D</SPAN></i><i>3</i><i class="blue">+</i><i>e<sub>0</sub></i><i class="purple">ST</i><i class="purple">x1</i><BR><i class="green">Cl</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">-</i><i>2</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">+</i><i>3</i><i class="red">=</i></DIV><HR>' },
+       "M" : { label : "<SPAN CLASS='outline'>M</SPAN>", click : ()=>{ E(0,1,1,1,1,0); Al=Algebra(1,3);   graph.style.opacity=0.3; hist.style.visibility='visible'; mode=2; title.innerHTML="<SPAN CLASS='outline'>M</SPAN> - <SPAN CLASS='outline'>R</SPAN><sub>1,3</sub>"; }, help:'<I CLASS="outline">M</I> : <I CLASS="outline">R</I><SUB>1,3</SUB> : Minkowski spacetime.<HR>You see two simultaneous lightning strikes in 10 microseconds, one where you are, one 20 km in the x-direction. Are these events simultaneous for a spaceship flying at 0.5c in the x-direction? (given : atanh(0.5)=0.5493)<HR><DIV class="help" style="position:relative"><i class="green"><SPAN CLASS="outline">M</SPAN></i><i>0</i><i>.</i><i>0</i><i>0</i><i>0</i><i>0</i><i>1</i><i>e<sub>1</sub></i><i class="purple">ST</i><i class="purple">x1</i><BR><i class="blue">+</i><i>2</i><i>0</i><i>e<sub>2</sub></i><i class="blue">/</i><i>3</i><i>0</i><i>0</i><i>0</i><i>0</i><i>0</i><i class="purple">ST</i><i class="purple">x2</i><BR><i class="green">Cl</i><i class="blue">(</i><I>0</i><I>.</i><I>5</i><I>4</i><I>9</i><I>3</i><i class="blue">*</i><i>.</i><i>5</i><i>e<sub>1</sub></i><i>e<sub>2</sub></i><i class="blue">)</i><i class="blue" STYLE="width:50px">Exp</i><i class="purple">ST</i><i class="purple">x3</i><BR><i class="green">Cl</i><i class="purple">x3</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x3</i><i class="blue">x&#772;</i><i class="purple">ST</i><i class="purple">x4</i><BR><i class="green">Cl</i><i class="purple">x3</i><i class="blue">*</i><i class="purple">x2</i><i class="blue">*</i><i class="purple">x3</i><i class="blue">x&#772;</i><i class="purple">ST</i><i class="purple">x5</i></DIV><HR>'  },
+       "P2D" : { label : "P2D",     click : ()=>{ E(1,1,1,0,0,0); Al=Algebra(2,0,1); graph.style.opacity=1;   mode=3; hist.style.visibility='visible';title.innerHTML="P2D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>2,0,1</sub>)"; }, help:'P(<I CLASS="outline">R</I>*<SUB>2,0,1</SUB>): Projective 2D Geometric Algebra. (Eucledian plane).<HR>Solve the system of equations : x+y-0.5=0 and 2x-y=0<HR><DIV class="help" style="position:relative"> <i class="green" STYLE="width:60px">P2D</i><i>e<sub>1</sub></i><i class="blue">+</i><i>e<sub>2</sub></i><i class="blue">-</i><i>0</i><i>.</i><i>5</i><i>e<sub>0</sub></i><i class="purple">ST</i><i class="purple">x1</i><BR><i class="green">Cl</i><i>2</i><i>e<sub>1</sub></i><i class="blue">-</i><i>e<sub>2</sub></i><i class="purple">ST</i><i class="purple">x2</i><BR><i class="green">Cl</i><i class="purple">x1</i><i class="blue">&#x2227;</i><i class="purple">x2</i><i class="purple">ST</i><i class="purple">x3</i><BR><i class="green">Cl</i><i class="purple">x3</i><i class="blue">/</i><i class="blue">(</i><i class="purple">x3</i><i class="blue">&#x25cf;</i><i>E<sub>0</sub></i><i class="blue">)</i><i class="blue">*</i><i>E<sub>0</sub></i><i class="red">=</i> </DIV><HR>'  },
        "P3D" : { label : "P3D",     click : ()=>{ E(1,1,1,1,0,0); Al=Algebra(3,0,1); graph.style.opacity=1;   mode=4; hist.style.visibility='visible';title.innerHTML="P3D - P(<SPAN CLASS='outline'>R</SPAN>*<sub>3,0,1</sub>)";}, help:"P(<I CLASS='outline'>R</I>*<SUB>3,0,1</SUB>): Projective 3D Geometric Algebra. (Eucledian space)." },
        "C2D" : { label : "C2D",     click : ()=>{ E(0,1,1,1,1,0); Al=Algebra(3,1,0); graph.style.opacity=0.3; mode=5; hist.style.visibility='visible';title.innerHTML="C2D - C(<SPAN CLASS='outline'>R</SPAN><sub>3,1</sub>)";}, help:"C(<I CLASS='outline'>R</I><SUB>3,1</SUB>): Conformal 2D Geometric Algebra." },
        "C3D" : { label : "C3D",     click : ()=>{ E(0,1,1,1,1,1); Al=Algebra(4,1,0); graph.style.opacity=0.3; mode=6; hist.style.visibility='visible';title.innerHTML="C3D - C(<SPAN CLASS='outline'>R</SPAN><sub>4,1</sub>)";}, help:"C(<I CLASS='outline'>R</I><SUB>4,1</SUB>): Conformal 3D Geometric Algebra." },
@@ -455,7 +461,7 @@
        "x4" :  { label : "x4",  click : ()=> { if (store) { store = false; x4=Al.inline(new Function('return '+cur))(); patch('x4='+x4.toString()); return show(cur); } cur += 'x4'; show(cur); }, help:"x4 variable" },
        "x9" :  { label : "x9",  click : ()=> { if (store) { store = false; x9=Al.inline(new Function('return '+cur))(); patch('x9='+x9.toString()); return show(cur); } cur += 'x9'; show(cur); }, help:"x9 variable" },
      // Cl,0,.,
-       "Cl" :  { label : "Cl",  click : ()=> { if (cur=='') { histor=''; hist.innerHTML=histor; while(graph.firstChild) graph.removeChild(graph.firstChild); x1=x2=x3=x4=x5=x6=x7=x8=x9=x10=undefined; }; cur = ''; show(cur); }, help:"Cl : clear last result / all" },
+       "Cl" :  { label : "Cl",  click : ()=> { if (cur=='') { if (histor=='') { while(graph.firstChild) graph.removeChild(graph.firstChild); x1=x2=x3=x4=x5=x6=x7=x8=x9=x10=undefined; }; histor=''; hist.innerHTML=histor;  }; cur = ''; show(cur); }, help:"Cl : clear last result / all" },
        "_0" :  { label : "0",   click : ()=> { cur += '0'; show(cur); } },
        "_." :  { label : ".",   click : ()=> { cur += '.'; show(cur); } },
        "V"  :  { label : "V",   click : ()=> { cur += '&'; show(cur); }, help: "dual outer product." },
@@ -503,7 +509,7 @@
          e.preventDefault(); e.stopPropagation();
          navigator.vibrate(50);
          if (help) {
-           help=false;
+           help=false; histor='';
            print(buttons[x].help||'no help for this button.');
            return;
          }
