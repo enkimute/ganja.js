@@ -442,5 +442,8 @@
 
      E();e();
 
+     // patch for cocoon.io
+     document.body.ontouchstart=function(e){e.preventDefault(); e.stopPropagation(); }
+
   </SCRIPT>
 </BODY>
