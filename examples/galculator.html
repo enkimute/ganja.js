@@ -94,9 +94,6 @@
       line-height:20px;
       color:rgba(0,0,0,0.5);
     }
-    .graph, .history {
-      transition:opacity 0.2s linear;
-    }
     .historypos {
        position:absolute;
        top:0;left:2;right:2;bottom:5;
@@ -188,10 +185,11 @@
       .calcBody .help { display:block; }
       .calcBody { 
         top:0px; position:Relative; right:0px; box-shadow: 0px 0px 0px black; border-radius:0px; margin:auto; 
-             height:100%;
+             height:100%; max-height:100%; width: calc(100% - 10px);
  
        }
-      body { background-color:rgb(230,220,200); margin:0px; margin-bottom:10px; overflow:hidden; height:100%; width:100%; max-height:100%; min-height:100%; }
+      html { height:100%; overflow:hidden; }
+      body { background-color:rgb(230,220,200); display:flex; flex-direction:column; margin:0px; margin-bottom:10px; overflow:hidden; height:100%; width:100%; max-height:100%; min-height:100%; }
     }
     @media (max-height:180px) {
       .numButton {
@@ -295,6 +293,7 @@
   <SCRIPT>
      var Al = Algebra(), mode=3, histor='', cur='', store=false, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
      var graph=document.getElementById('graph');
+     graph.style.opacity=0.3;
      var hist=document.getElementById('hist');
      var title=document.getElementById('title');
      var help=false;
