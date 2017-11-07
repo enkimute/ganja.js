@@ -145,6 +145,7 @@
       margin:2px;
       font-family:Exo;
       font-style:normal;
+      font-weight:bold;
       background: rgba(240,230,220,1);
       border-radius:5px;
       border:1px solid;
@@ -315,7 +316,7 @@
        return x.replace(/([^\d]*\d*\.\d\d\d\d\d\d)(\d*)/g,'$1').replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e');
      }
 
-     var toHelp=(x)=>x.replace(/([eE])(\d+)/g,'<i>$1<SUB>$2</SUB></i>').replace(/_([\+\-\*\/\?\(\)])/g,'<i class="blue">$1</i>').replace(/_\^/g,'<i class="blue">&#x2227;</i>').replace(/_\&/g,'<i class="blue">&#x2228;</i>').replace(/_\./g,'<i class="blue">&#x25cf;</i>');
+     var toHelp=(x)=>x.replace(/([eE])(\d+)/g,'<i>$1<SUB>$2</SUB></i>').replace(/_([\+\-\/\?\(\)])/g,'<i class="blue">$1</i>').replace(/_\^/g,'<i class="blue">&#x2227;</i>').replace(/_\&/g,'<i class="blue">&#x2228;</i>').replace(/_\./g,'<i class="blue">&#x25cf;</i>').replace(/_\*/g,'<i class="blue">&#x2217;</i>');
     
      function hello() {
      print(toHelp('Enki\'s GAlculator - Geometric Algebra Pocket Calculator<DIV class="help" style="position:relative"><HR>Cheat sheet : _?<i class="green" STYLE="width:40px">P2D</i>&nbsp;<BR>Examples : _? + <I>1</I>, <I>2</I>, <i>3</i>, <i>4</i>&nbsp;<HR>'))
@@ -363,7 +364,7 @@
        "_5" :  { label : "5",   click : ()=> { cur += '5'; show(cur); } },
        "_6" :  { label : "6",   click : ()=> { cur += '6'; show(cur); } },
        "_+" :  { color:'blue',label : "+",   click : ()=> { cur += '+'; show(cur); }, help: "add" },
-       "_*" :  { color:'blue',label : "&#x2217",   click : ()=> { cur += '*'; show(cur); }, help: "multiply (Geometric Product)" },
+       "_*" :  { color:'blue',label : "&#x2217;",   click : ()=> { cur += '*'; show(cur); }, help: "multiply (Geometric Product)" },
        "Conj": { color:'blue',label : "Conj", click : ()=> { cur += '.Conjugate'; show(cur); }, help:"Clifford Conjugate" },
        "x3" :  { color:'purple',label : "x3",  click : ()=> { if (store) { store = false; x3=Al.inline(new Function('return '+cur))(); patch('x3='+x3.toString()); return show(cur); } cur += 'x3'; show(cur); }, help:"x3 variable" },
        "x8" :  { color:'purple',label : "x8",  click : ()=> { if (store) { store = false; x8=Al.inline(new Function('return '+cur))(); patch('x8='+x8.toString()); return show(cur); } cur += 'x8'; show(cur); }, help:"x8 variable" },
