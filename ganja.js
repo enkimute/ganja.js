@@ -112,40 +112,41 @@
       }
       static inline(intxt) {
         var txt = (intxt instanceof Function)?intxt.toString():`function(){return (${intxt})}`;
-        var tok = [], res, t, tokens = [/^[\s\uFFFF]|^[\u000A\u000D\u2028\u2029]|^\/\/[^\n]*\n|^\/\*[\s\S]*?\*\//g,                     // 0: whitespace/comments
-          /^\"\"|^\'\'|^\".*?[^\\]\"|^\'.*?[^\\]\'|^\`[\s\S]*?[^\\]\`/g,                                                                // 1: literal strings 
+        var tok = [], res=[], t, tokens = [/^[\s\uFFFF]|^[\u000A\u000D\u2028\u2029]|^\/\/[^\n]*\n|^\/\*[\s\S]*?\*\//g,                     // 0: whitespace/comments
+          /^\"\"|^\'\'|^\".*?[^\\]\"|^\'.*?[^\\]\'|^\`[\s\S]*?[^\\]\`/g,                                                                // 1: literal strings
           /^\d+[.]{0,1}\d*[eEi][\+\-_]{0,1}\d*|^\.\d+[eEi][\+\-_]{0,1}\d*|^e_\d*/g,                                                     // 2: literal numbers in scientific notation (with small hack for i and e_ asciimath)
           /^0x\d+|^\d+[.]{0,1}\d*|^\.\d+|^\(\/.*[^\\]\/\)/g,                                                                            // 3: literal hex, nonsci numbers and regex (surround regex with extra brackets!)
           /^(\.Normalized|\.Length|>>>=|===|!==|>>>|<<=|>>=|=>|[<>\+\-\*%&|^\/!\=]=|\*\*|\+\+|\-\-|<<|>>|\&\&|\^\^|^[{}()\[\];.,<>\+\-\*%|&^!~?:=\/]{1})/g,   // 4: punctuator
           /^[A-Za-z0-9_]*/g]                                                                                                            // 5: identifier
-        while (txt.length) for(t in tokens) if(res=txt.match(tokens[t])){ tok.push([t|0,res[0]]); txt=txt.slice(res[0].length); break;} // tokenise
+        while (txt.length) for(t in tokens) if(res=txt.match(tokens[t])){ tok.push([t|0,res[0]]); txt=txt.slice(res[0].length); break;} // tokenise 
         tok=tok.map(t=>(t[0]==2)?[2,'this.Coeff('+basis.indexOf('e'+(t[1].split(/e_|e|i/)[1]||1))+','+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);   // translate scientific notation into algebra elements.
-        var syntax = (intxt instanceof Function)?[['.Normalized','Normalize',2],['.Length','Length',2],['.','.',3],['~','Conjugate',1],['!','Dual',1],['**','Pow',0,1],['>>>','sw',0,1],['*','Mul'],['/','Div'],['^','Wedge'],['&','Vee'],['<<','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]
-                                                :[['pi','Math.PI'],['sin','Math.sin'],['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual'],['hat',''],['~','Conjugate',1],['!','Involute',1],['^','Pow',0,1],['**','Mul'],['/','Div'],['^^','Wedge'],['*','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']];
-        tok=tok.map(t=>(t[0]!=5)?t:syntax.filter(x=>x[0]==t[1]).length?[5,syntax.filter(x=>x[0]==t[1])[0][1]]:t); // static function translations (mostly for asciimath)                                       
-        function translate(tokens) { 
-            var res=[]; 
+        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2],['.','.',3]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['>>>','sw',0,1],['^','Wedge'],['&','Vee'],['<<','Dot']],[['*','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
+                                                :[[['pi','Math.PI'],['sin','Math.sin'],['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual'],['hat',''],['~','Conjugate',1],['!','Involute',1],['^','Pow',0,1],['**','Mul'],['/','Div'],['^^','Wedge'],['*','Dot'],['-','Sub'],['+','Add'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]];
+        tok=tok.map(t=>(t[0]!=5)?t:syntax.filter(x=>x[0]==t[1]).length?[5,syntax.filter(x=>x[0]==t[1])[0][1]]:t); // static function translations (mostly for asciimath)
+        function translate(tokens) { var res=[];
             for (var i=0,t; i<tokens.length; i++) // recurse brackets and unary operators into subarrays first.
-              if ((t=tokens[i])[1] == '(') { var open=1,sub=[],pre=[]; while(res.length && (res[res.length-1][0]==5 || res[res.length-1][1]=='.')) pre.unshift(res.pop()[1]);  while (open) { t = tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; if (open) sub.push(t); }; res.push([[2,pre.join('')+'(']].concat(translate(sub)).concat([[2,')']])); } 
-              else if ((t=tokens[i])[1] == '[') { var open=1,sub=[],pre=[]; while(res.length && (res[res.length-1][0]==5 || res[res.length-1][1]=='.')) pre.unshift(res.pop()[1]);  while (open) { t = tokens[++i]; if (t[1] == '[') open++; else if (t[1] == ']') open--; if (open) sub.push(t); }; res.push([[2,pre.join('')+'[']].concat(translate(sub)).concat([[2,']']])); } 
-              else if (~'~!'.indexOf(t[1])) { res.push(t); var sub=[], open=0; while (~'~!-'.indexOf(t[1]) || open) { t=tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; sub.push(t); }; res.push([[2,'']].concat(translate(sub))); } 
+              if ((t=tokens[i])[1] == '(') { var open=1,sub=[],pre=[]; while(res.length && (res[res.length-1][0]==5 || res[res.length-1][1]=='.')) pre.unshift(res.pop()[1]);  while (open) { t = tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; if (open) sub.push(t); }; res.push([[2,pre.join('')+'(']].concat(translate(sub)).concat([[2,')']])); }
+              else if ((t=tokens[i])[1] == '[') { var open=1,sub=[],pre=[]; while(res.length && (res[res.length-1][0]==5 || res[res.length-1][1]=='.')) pre.unshift(res.pop()[1]);  while (open) { t = tokens[++i]; if (t[1] == '[') open++; else if (t[1] == ']') open--; if (open) sub.push(t); }; res.push([[2,pre.join('')+'[']].concat(translate(sub)).concat([[2,']']])); }
+              else if (~'~!'.indexOf(t[1])) { res.push(t); var sub=[], open=0; while (~'~!-'.indexOf(t[1]) || open) { t=tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; sub.push(t); }; res.push([[2,'']].concat(translate(sub))); }
               else if (t[1]=='-'&&res.length&&(res[res.length-1][0]==4 || res[res.length-1][1]=='return'|| (res[res.length-1][0]==0 && res[res.length-2][1]=='return'))) { res.push([[2,'']].concat(translate([t,tokens[++i]])))  }
-              else res.push(t);
-            syntax.forEach( (op)=>{ tokens=res;res=[]; // now translate ops .. 
+              else res.push(t);  
+           syntax.forEach((syntaxd,k)=>{ var ops=syntaxd.map(x=>x[0]);   
+            syntaxd.forEach( (op)=>{ tokens=res;res=[]; // now translate ops ..
               if (op[3]) { /* right-to-left */ for (var i=tokens.length-1;  i >= 0; i--) { if (tokens[i][1] == op[0]) {
-                      while(res.length&&res[res.length-1][1].match&&res[res.length-1][1].match(/^\s+$/)) res.pop(); 
+                      while(res.length&&res[res.length-1][1].match&&res[res.length-1][1].match(/^\s+$/)) res.pop();
                       if (!op[2]) var after=tokens[i-1]; while (after[1].match&&after[1].match(/^\s+$/)) after = tokens[--i-1];
                       if (op[2]||!res.length||res[res.length-1][0]==4) res[res.length]=[[1,'this.'+op[1]+'('],res[res.length-1],[1,')']]; else res[res.length-1]=[[1,'this.'+op[1]+'('],after,[1,','],res[res.length-1],[1,')']];
                       i -= 1; } else res.push(tokens[i]); }
                   res=res.reverse();
-               } else { /* left-to-right */ for (var i=0;  i < tokens.length; i++) { if (tokens[i][1] == op[0]) {
-                      if (op[2]!=1) while(res.length&&res[res.length-1][1].match&&res[res.length-1][1].match(/^\s+$/)) res.pop(); 
+               } else { /* left-to-right */ for (var i=0;  i < tokens.length; i++) { if (ops.indexOf(tokens[i][1]) != -1) { op = syntaxd.filter(x=>x[0]==tokens[i][1])[0];
+                      if (op[2]!=1) while(res.length&&res[res.length-1][1].match&&res[res.length-1][1].match(/^\s+$/)) res.pop();
                       if (op[2]!=2) { var after=tokens[i+1]; while (after[1].match&&after[1].match(/^\s+$/)) after = tokens[++i+1]; }
-                      if (op[2]==3) res[res.length-1]=[res[res.length-1],[1,'.'],after]; 
+                      if (op[2]==3) res[res.length-1]=[res[res.length-1],[1,'.'],after];
                       else if (op[2]==2) res[res.length-1]=[[1,'this.'+op[1]+'('],res[res.length-1],[1,')']];
                       else if (op[2]||!res.length||res[res.length-1][0]==4) res[res.length]=[[1,'this.'+op[1]+'('],after,[1,')']]; else res[res.length-1]=[[1,'this.'+op[1]+'('],res[res.length-1],[1,','],after,[1,')']];
-                      if (op[2]!=2) i += 1; } else res.push(tokens[i]); }} 
+                      if (op[2]!=2) i += 1; } else res.push(tokens[i]); }}
             });
+           });
             return res;
         }
         return eval('('+(function f(t){return t.map(t=>t[0]instanceof Array?f(t):t[1]).join('');})(translate(tok))+')').bind(Element);
