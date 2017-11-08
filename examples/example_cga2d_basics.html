@@ -10,39 +10,30 @@ Algebra(3,1,()=>{
   var en = 0.5*(1e4+1e3);     // e-origin
   
 // Define points, circles using the null basis.  
-  var point=(x,y)=>en + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ei;
-  var circle=(point,radius)=>point-ei*0.5*radius;
+  var point =(x,y)=>en + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ei;
+  var circle=(x,y,r)=>point(x+r,y)^point(x-r,y)^point(x,y+r);
   
 // Our distance function based on the inner product.  
-  var dist=(x,y)=>Math.abs(2*((x<<y).Length))**0.5;
+  var dist=(x,y)=>(2*(x<<y).Length)**0.5;
 
 // Define two points
-  var o = point(0,0), p = point(1,0);
+  var o = point(0,0), p = point(0.5,0), p2 = point(0.5,0.5);
   
 // Define two circles  
-  var c=circle(o,0.5), d=circle(p,0.5);
+  var c=circle(0,0,0.5), d=circle(0.5,0,0.5);
   
 // We can't graph conformal objects directly yet with ganja.js - untill I'm
 // less lazy, we'll visualize using the (slow) canvas renderer. It calls a
 // function with x,y coordinates. We graph the distance between those x,y points 
 // and any given CGA object (c).
+  var render=(c)=>document.body.appendChild(this.graph((x,y)=>dist(c,point(x,y)),{nocompile:true}));
 
-  // origin
-  document.body.appendChild(this.graph((x,y)=>dist(o,point(x,y)),{nocompile:true}));
-
-  // point x
-  document.body.appendChild(this.graph((x,y)=>dist(p,point(x,y)),{nocompile:true}));
-
-  // circle at origin
-  document.body.appendChild(this.graph((x,y)=>dist(c,point(x,y)),{nocompile:true}));
-
-  // circle at x
-  document.body.appendChild(this.graph((x,y)=>dist(d,point(x,y)),{nocompile:true}));
-
-  // intersection of our two circles.
-  document.body.appendChild(this.graph((x,y)=>dist(c^d,point(x,y)),{nocompile:true}));
-
-  // origin and x joined with infinity.
-  document.body.appendChild(this.graph((x,y)=>dist(o^p^ei,point(x,y)),{nocompile:true}));
+// Render the distances to some objects..
+  render(o);       // origin
+  render(p);       // point p at 0.5,0
+  render(c);       // circle at origin
+  render(d);       // circle at p
+  render(c&d);     // meet of circles
+  render(o^p^ei)   // join of o,p and infinity
 });
 </SCRIPT></BODY>
