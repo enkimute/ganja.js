@@ -406,25 +406,29 @@ outputs : x [f(x),f'(x),f''(x)/2!,f'''(x)/3!]
 
 Here's a list of the supported operators in all syntax flavors : 
 
-|Inline JS | AsciiMath | Object Oriented | Functional
-|----------|-----------|-----------------|------------
-| ~x       |  hat(x)   | x.Conjugate     | A.Conjugate(x)
-| x.Involute|  tilde(x) | x.Involute      | A.Involute(x)
-| x.Reverse|  ddot(x)  | x.Reverse       | A.Reverse(x)
-| !x       |  bar(x)   | x.Dual          | A.Dual(x)
-| x**-1    |  x^-1     | x.Inverse       | A.Inverse(x)
-| x**y     |  x^y      | x.Pow(y)        | A.Pow(x,y)
-| x*y      |  x**y     | x.Mul(y)        | A.Mul(x,y)
-| x/y      |  x/y      | x.Div(y)        | A.Div(x,y)
-| x^y      |  x^^y     | x.Wedge(y)      | A.Wedge(x,y)
-| x<<y     |  x*y      | x.Dot(y)        | A.Dot(x,y)
-| x&y      |  bar(bar(x)^^bar(y)) | x.Vee(y) | A.Vee(x,y)
-| x>>>y    |  x ** y ** hat(x) | x.Mul(y).Mul(x.Conjugate) | A.sw(x,y)
-| x-y      |  x-y      | x.Sub(y)        | A.Sub(x,y)
-| x+y      |  x+y      | x.Add(y)        | A.Add(x,y)
-| 1e1      |  1e_1     | new A([0,1])    | A.Vector(1)
-| 2e2      |  2e_2     | new A([0,0,2,0])| A.Vector(0,2)
-| 2e12     |  2e_12    | new A([0,0,0,2])| A.Bivector(2)
+Please note that operator precedence is as always in javaScript, except
+for Wedge, Vee, Dot and Sandwich which have higher precedence than * and /,
+resulting in less brackets in many common GA expressions.
+
+|Precedence |Inline JS | AsciiMath | Object Oriented | Functional
+|-----------|----------|-----------|-----------------|------------
+|5          | x.Involute|  tilde(x) | x.Involute      | A.Involute(x)
+|5          | x.Reverse|  ddot(x)  | x.Reverse       | A.Reverse(x)
+|5          | ~x       |  hat(x)   | x.Conjugate     | A.Conjugate(x)
+|5          | !x       |  bar(x)   | x.Dual          | A.Dual(x)
+|4 rtl      | x**-1    |  x^-1     | x.Inverse       | A.Inverse(x)
+|4 rtl      | x**y     |  x^y      | x.Pow(y)        | A.Pow(x,y)
+|3          | x^y      |  x^^y     | x.Wedge(y)      | A.Wedge(x,y)
+|3          | x<<y     |  x*y      | x.Dot(y)        | A.Dot(x,y)
+|3          | x&y      |  bar(bar(x)^^bar(y)) | x.Vee(y) | A.Vee(x,y)
+|3          | x>>>y    |  x ** y ** hat(x) | x.Mul(y).Mul(x.Conjugate) | A.sw(x,y)
+|2          | x*y      |  x**y     | x.Mul(y)        | A.Mul(x,y)
+|2          | x/y      |  x/y      | x.Div(y)        | A.Div(x,y)
+|1          | x-y      |  x-y      | x.Sub(y)        | A.Sub(x,y)
+|1          | x+y      |  x+y      | x.Add(y)        | A.Add(x,y)
+|           | 1e1      |  1e_1     | new A([0,1])    | A.Vector(1)
+|           | 2e2      |  2e_2     | new A([0,0,2,0])| A.Vector(0,2)
+|           | 2e12     |  2e_12    | new A([0,0,0,2])| A.Bivector(2)
 
 <A NAME="P2"></A>
 ## Ganja starterkit : PGA2D P(R*<sub>2,0,1</sub>)
