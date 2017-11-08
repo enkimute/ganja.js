@@ -399,7 +399,7 @@
          buttons[i].el.ontouchstart = buttons[i].el.onmouseup = function(e) {
           e.preventDefault(); e.stopPropagation();
           if (window.TouchEvent && e instanceof TouchEvent) this.classList.add('active');
-          navigator.vibrate(50);
+          navigator.vibrate&&navigator.vibrate(50);
           if (help) {
             help=false; histor='';
             print(buttons[x].help||'no help for this button.');
