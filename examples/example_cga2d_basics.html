@@ -26,7 +26,7 @@ Algebra(3,1,()=>{
 // less lazy, we'll visualize using the (slow) canvas renderer. It calls a
 // function with x,y coordinates. We graph the distance between those x,y points 
 // and any given CGA object (c).
-  var render=(c)=>document.body.appendChild(this.graph((x,y)=>dist(c,point(x,y)),{nocompile:true}));
+  var render=(c)=>Object.assign(document.body.appendChild(this.graph((x,y)=>dist(c,point(x,y)),{nocompile:true,width:32,height:32})).style,{width:256,height:256});
 
 // Render the distances to some objects..
   render(o);       // origin
