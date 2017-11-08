@@ -1,0 +1,48 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 3,1 metric for 2D CGA. 
+Algebra(3,1,()=>{ 
+    
+// A null basis to work in. (e3=e+ and e4=e-)
+  var ei = 1e4-1e3;           // e-infinite
+  var en = 0.5*(1e4+1e3);     // e-origin
+  
+// Define points, circles using the null basis.  
+  var point=(x,y)=>en + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ei;
+  var circle=(point,radius)=>point-ei*0.5*radius;
+  
+// Our distance function based on the inner product.  
+  var dist=(x,y)=>Math.abs(2*((x<<y).Length))**0.5;
+
+// Define two points
+  var o = point(0,0), p = point(1,0);
+  
+// Define two circles  
+  var c=circle(o,0.5), d=circle(p,0.5);
+  
+// We can't graph conformal objects directly yet with ganja.js - untill I'm
+// less lazy, we'll visualize using the (slow) canvas renderer. It calls a
+// function with x,y coordinates. We graph the distance between those x,y points 
+// and any given CGA object (c).
+
+  // origin
+  document.body.appendChild(this.graph((x,y)=>dist(o,point(x,y)),{nocompile:true}));
+
+  // point x
+  document.body.appendChild(this.graph((x,y)=>dist(p,point(x,y)),{nocompile:true}));
+
+  // circle at origin
+  document.body.appendChild(this.graph((x,y)=>dist(c,point(x,y)),{nocompile:true}));
+
+  // circle at x
+  document.body.appendChild(this.graph((x,y)=>dist(d,point(x,y)),{nocompile:true}));
+
+  // intersection of our two circles.
+  document.body.appendChild(this.graph((x,y)=>dist(c^d,point(x,y)),{nocompile:true}));
+
+  // origin and x joined with infinity.
+  document.body.appendChild(this.graph((x,y)=>dist(o^p^ei,point(x,y)),{nocompile:true}));
+});
+</SCRIPT></BODY>
