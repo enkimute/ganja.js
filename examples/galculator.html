@@ -348,8 +348,8 @@
        "E3" :  { label : "E3", click : ()=> { var s=Al.inline('1e3.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'3':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>3</sub> basisvector."  },
        "E4" :  { label : "E4", click : ()=> { var s=Al.inline('1e4.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'4':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>4</sub> basisvector."  },
        "E5" :  { label : "E5", click : ()=> { var s=Al.inline('1e5.Dual')().toString().replace('_',''); cur += cur.match(/e\d+$/)?'5':cur.match(/\d+$/)?s:('1'+s); show(cur); }, help:"dual of e<sub>5</sub> basisvector."  },
-       "x1" :  { color:'purple',label : "x1", click : ()=> { if (store) { store = false; x1=Al.inline(new Function('return '+cur))(); patch('x1='+x1.toString()); return show(cur); } cur += 'x1'; show(cur); }, help:"x1 variable" },
-       "x6" :  { color:'purple',label : "x6", click : ()=> { if (store) { store = false; x6=Al.inline(new Function('return '+cur))(); patch('x6='+x6.toString()); return show(cur); } cur += 'x6'; show(cur); }, help:"x6 variable" },
+       "x1" :  { color:'purple',label : "x<sub>1</sub>", click : ()=> { if (store) { store = false; x1=Al.inline(new Function('return '+cur))(); patch('x1='+x1.toString()); return show(cur); } cur += 'x1'; show(cur); }, help:"x1 variable" },
+       "x6" :  { color:'purple',label : "x<sub>6</sub>", click : ()=> { if (store) { store = false; x6=Al.inline(new Function('return '+cur))(); patch('x6='+x6.toString()); return show(cur); } cur += 'x6'; show(cur); }, help:"x6 variable" },
      // 7,8,9,-,/,Exp,x2
        "_7" :  { label : "7",   click : ()=> { cur += '7'; show(cur); } },
        "_8" :  { label : "8",   click : ()=> { cur += '8'; show(cur); } },
@@ -357,8 +357,8 @@
        "-"  :  { color:'blue',label : "-",   click : ()=> { cur += '-'; show(cur); }, help: "subtract" },
        "/"  :  { color:'blue',label : "/",   click : ()=> { cur += '/'; show(cur); }, help: "divide" },
        "Exp":  { color:'blue',label : "Exp", click : ()=> { cur += '.Exp()'; show(cur); }, help: "exponentiate" },
-       "x2" :  { color:'purple',label : "x2",  click : ()=> { if (store) { store = false; x2=Al.inline(new Function('return '+cur))(); patch('x2='+x2.toString()); return show(cur); } cur += 'x2'; show(cur); } , help:"x2 variable"},
-       "x7" :  { color:'purple',label : "x7",  click : ()=> { if (store) { store = false; x7=Al.inline(new Function('return '+cur))(); patch('x7='+x7.toString()); return show(cur); } cur += 'x7'; show(cur); } , help:"x7 variable"},
+       "x2" :  { color:'purple',label : "x<sub>2</sub>",  click : ()=> { if (store) { store = false; x2=Al.inline(new Function('return '+cur))(); patch('x2='+x2.toString()); return show(cur); } cur += 'x2'; show(cur); } , help:"x2 variable"},
+       "x7" :  { color:'purple',label : "x<sub>7</sub>",  click : ()=> { if (store) { store = false; x7=Al.inline(new Function('return '+cur))(); patch('x7='+x7.toString()); return show(cur); } cur += 'x7'; show(cur); } , help:"x7 variable"},
      // 4,5,6,+,*,Conjugate,x3
        "_4" :  { label : "4",   click : ()=> { cur += '4'; show(cur); }, help:'P(<I CLASS="outline">R</I>*<SUB>2,0,1</SUB>): Projective 2D Geometric Algebra. (Eucledian plane).<HR>Solve the system of equations : x+y-0.5=0 and 2x-y=0<HR><DIV class="help" style="position:relative"> <i class="green" STYLE="width:60px">P2D</i><i>e<sub>1</sub></i><i class="blue">+</i><i>e<sub>2</sub></i><i class="blue">-</i><i>0</i><i>.</i><i>5</i><i>e<sub>0</sub></i><i class="purple">ST</i><i class="purple">x1</i><BR><i class="green">Cl</i><i>2</i><i>e<sub>1</sub></i><i class="blue">-</i><i>e<sub>2</sub></i><i class="purple">ST</i><i class="purple">x2</i><BR><i class="green">Cl</i><i class="purple">x1</i><i class="blue">&#x2227;</i><i class="purple">x2</i><i class="purple">ST</i><i class="purple">x3</i><BR><i class="green">Cl</i><i class="purple">x3</i><i class="blue">/</i><i class="blue">(</i><i class="blue">-</i><i class="purple">x3</i><i class="blue">&#x25cf;</i><i>E<sub>0</sub></i><i class="blue">)</i><i class="red">=</i> </DIV><HR>' },
        "_5" :  { label : "5",   click : ()=> { cur += '5'; show(cur); } },
@@ -366,8 +366,8 @@
        "_+" :  { color:'blue',label : "+",   click : ()=> { cur += '+'; show(cur); }, help: "add" },
        "_*" :  { color:'blue',label : "&#x2217;",   click : ()=> { cur += '*'; show(cur); }, help: "multiply (Geometric Product)" },
        "Conj": { color:'blue',label : "Conj", click : ()=> { cur += '.Conjugate'; show(cur); }, help:"Clifford Conjugate" },
-       "x3" :  { color:'purple',label : "x3",  click : ()=> { if (store) { store = false; x3=Al.inline(new Function('return '+cur))(); patch('x3='+x3.toString()); return show(cur); } cur += 'x3'; show(cur); }, help:"x3 variable" },
-       "x8" :  { color:'purple',label : "x8",  click : ()=> { if (store) { store = false; x8=Al.inline(new Function('return '+cur))(); patch('x8='+x8.toString()); return show(cur); } cur += 'x8'; show(cur); }, help:"x8 variable" },
+       "x3" :  { color:'purple',label : "x<sub>3</sub>",  click : ()=> { if (store) { store = false; x3=Al.inline(new Function('return '+cur))(); patch('x3='+x3.toString()); return show(cur); } cur += 'x3'; show(cur); }, help:"x3 variable" },
+       "x8" :  { color:'purple',label : "x<sub>8</sub>",  click : ()=> { if (store) { store = false; x8=Al.inline(new Function('return '+cur))(); patch('x8='+x8.toString()); return show(cur); } cur += 'x8'; show(cur); }, help:"x8 variable" },
      // 1,2,3,^,.,(,x4
        "_1" :  { label : "1",   click : ()=> { cur += '1'; show(cur); }, help:'<I CLASS="outline">C</I>: Complex Numbers.<HR>Example: calculate (3+2i)*(1+4i)<HR><DIV class="help" style="position:relative"><i class="green"><SPAN CLASS="outline">C</SPAN></i><i class="blue">(</i><i>3</i><i class="blue">+</i><i>2</i><i>e<sub>1</sub></i><i class="blue">)</i><i class="blue">*</i><i class="blue">(</i><i>1</i><i class="blue">+</i><i>4</i><i>e<sub>1</sub></i><i class="blue">)</i><i class="red">=</i></DIV><HR>' },
        "_2" :  { label : "2",   click : ()=> { cur += '2'; show(cur); }, help:'<I CLASS="outline">D</I>: Dual Numbers.<HR>Example: Calculate the value of the function and first derivative at x=3<BR>x<sup>3</sup>-2x<sup>2</sup>+3<HR><DIV class="help" style="position:relative"><i class="green"><SPAN CLASS="outline">D</SPAN></i><i>3</i><i class="blue">+</i><i>e<sub>0</sub></i><i class="purple">ST</i><i class="purple">x1</i><BR><i class="green">Cl</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">-</i><i>2</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">*</i><i class="purple">x1</i><i class="blue">+</i><i>3</i><i class="red">=</i></DIV><HR>' },
@@ -375,8 +375,8 @@
        "^"  :  { color:'blue',label : "&#x2227;",   click : ()=> { cur += '^'; show(cur); }, help: "outer product" },
        "."  :  { color:'blue',label : "&#x25cf;",   click : ()=> { cur += '<<'; show(cur); }, help: "inner product (left contraction)" },
        "("  :  { color:'blue',label : "(",   click : ()=> { cur += '('; show(cur); } },
-       "x4" :  { color:'purple',label : "x4",  click : ()=> { if (store) { store = false; x4=Al.inline(new Function('return '+cur))(); patch('x4='+x4.toString()); return show(cur); } cur += 'x4'; show(cur); }, help:"x4 variable" },
-       "x9" :  { color:'purple',label : "x9",  click : ()=> { if (store) { store = false; x9=Al.inline(new Function('return '+cur))(); patch('x9='+x9.toString()); return show(cur); } cur += 'x9'; show(cur); }, help:"x9 variable" },
+       "x4" :  { color:'purple',label : "x<sub>4</sub>",  click : ()=> { if (store) { store = false; x4=Al.inline(new Function('return '+cur))(); patch('x4='+x4.toString()); return show(cur); } cur += 'x4'; show(cur); }, help:"x4 variable" },
+       "x9" :  { color:'purple',label : "x<sub>9</sub>",  click : ()=> { if (store) { store = false; x9=Al.inline(new Function('return '+cur))(); patch('x9='+x9.toString()); return show(cur); } cur += 'x9'; show(cur); }, help:"x9 variable" },
      // Cl,0,.,
        "Cl" :  { color:'green', label : "Cl",  click : ()=> { if (cur=='') { if (histor=='') { while(graph.firstChild) graph.removeChild(graph.firstChild); x1=x2=x3=x4=x5=x6=x7=x8=x9=x10=undefined; return hello(); }; histor=''; hist.innerHTML=histor;  }; cur = ''; show(cur); }, help:"Cl : clear last result / all" },
        "_0" :  { label : "0",   click : ()=> { cur += '0'; show(cur); } },
@@ -384,8 +384,8 @@
        "V"  :  { color:'blue',label : "&#x2228;", click : ()=> { cur += '&'; show(cur); }, help: "dual outer product." },
        "="  :  { color:'red',label : "=",   click : ()=> { cur = patch(Al.inline(new Function('return '+cur))().toString()); show(cur); } },
        ")"  :  { color:'blue',label : ")",   click : ()=> { cur += ')'; show(cur); } },
-       "x5" :  { color:'purple',label : "x5",  click : ()=> { if (store) { store = false; x5=Al.inline(new Function('return '+cur))(); patch('x5='+x5.toString()); return show(cur); } cur += 'x5'; show(cur); } , help:"x5 variable"},
-       "x10" :  { color:'purple',label : "x10",  click : ()=> { if (store) { store = false; x10=Al.inline(new Function('return '+cur))(); patch('x10='+x10.toString()); return show(cur); } cur += 'x10'; show(cur); } , help:"x10 variable" }
+       "x5" :  { color:'purple',label : "x<sub>5</sub>",  click : ()=> { if (store) { store = false; x5=Al.inline(new Function('return '+cur))(); patch('x5='+x5.toString()); return show(cur); } cur += 'x5'; show(cur); } , help:"x5 variable"},
+       "x10" :  { color:'purple',label : "x<sub>10</sub>",  click : ()=> { if (store) { store = false; x10=Al.inline(new Function('return '+cur))(); patch('x10='+x10.toString()); return show(cur); } cur += 'x10'; show(cur); } , help:"x10 variable" }
      }
      
      var j=0; for (var i in buttons) {
