@@ -74,8 +74,12 @@
                   inset 0px -1px 1px rgba(70,50,40,0.8),
                   inset 0px -2px 1px rgba(90,50,40,0.3);
       cursor:pointer;
+      /* Prevent text selection. Prefixed versions needed, per https://caniuse.com/#feat=user-select-none */
+      -webkit-user-select: none; /* Safari */
+         -moz-user-select: none; /* Firefox */
+          -ms-user-select: none; /* IE/Edge */
+              user-select: none; /* Unprefixed version, currently supported by Chrome and Opera */
     }
-    .numButton.disabled{ pointer-events:all; cursor:not-allowed; }
     .numButton:focus { outline:none; }
     .numButton:active:not(.disabled), .numButton.active:not(.disabled) { top:2px; }
     .wide {
