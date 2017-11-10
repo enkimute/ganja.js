@@ -105,7 +105,7 @@
           res=build(f); res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return; var x=(e.clientX-res.getBoundingClientRect().left)/(res.getBoundingClientRect().width/4||128)-2,y=((e.clientY-res.getBoundingClientRect().top)/(res.getBoundingClientRect().height/4||128)-2)*(res.getBoundingClientRect().height/res.getBoundingClientRect().width||1); f[res.sel][drm[2]]=(drm[1]==6)?-x:x; f[res.sel][drm[3]]=y; f[res.sel][drm[1]]=1; if (!anim) res.innerHTML=build(f).innerHTML; }; return res;
         }  
       // 1d and 2d functions  
-        if (cvs!==false&&options.nocompile!==true) f=this.inline(f); cvs=cvs||document.createElement('canvas'); if(ww)cvs.width=ww; if(hh)cvs.height=hh; var w=cvs.width,h=cvs.height,context=cvs.getContext('2d'), data=context.getImageData(0,0,w,h);
+        cvs=cvs||document.createElement('canvas'); if(ww)cvs.width=ww; if(hh)cvs.height=hh; var w=cvs.width,h=cvs.height,context=cvs.getContext('2d'), data=context.getImageData(0,0,w,h);
         if (f.length==2) for (var px=0; px<w; px++) for (var py=0; py<h; py++) { var res=f(px/w*2-1, py/h*2-1); res=res.buffer?[].slice.call(res):res.slice?res:[res,res,res]; data.data.set(res.map(x=>x*255).concat([255]),py*w*4+px*4); }
         else if (f.length==1) for (var px=0; px<w; px++) { var res=f(px/w*2-1); res=Math.round((res/2+0.5)*h); if (res > 0 && res < h-1) data.data.set([0,0,0,255],res*w*4+px*4); }
         return context.putImageData(data,0,0),cvs;       

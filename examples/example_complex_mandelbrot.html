@@ -3,12 +3,12 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a complex Algebra.
-  var Complex = Algebra(0,1);
+Algebra(0,1,()=>{
 
 // Graph a two dimensional function to a canvas.
 // In this case we output the iterations it takes for z*z+c to converge to
 // infinity. (well, more than 2). 
-  var canvas = Complex.graph(function(x,y){
+  var canvas = this.graph((x,y)=>{
     var n=35, z=0e1, c=x*1.75-1+y*1e1;
     while (z < 2 && n--) z=z**2+c;
     return (n/30);
@@ -16,4 +16,6 @@
 
 // Show the result
   document.body.appendChild(canvas);
+  
+});
 </SCRIPT></BODY>
