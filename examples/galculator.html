@@ -5,208 +5,232 @@
   <meta name="viewport" content="width=device-width, initial-scale=0.6, maximum-scale=0.6, user-scalable=0"/>
   <meta name="mobile-web-app-capable" content="yes">
   <STYLE>
+  /* Calculator main body ******************************************************************/
     .calcBody {
-//      width         : 600px;
-//      max-width     : 98%;
-      max-height    : 100%;
-      margin        : auto;
-      user-select   : none;
-      background    : rgb(250,245,240);
-      border-radius : 40px;
-      border-bottom-left-radius : 15px;
-      border-bottom-right-radius : 15px;
-      padding       : 5px;
-      font-family   : Exo, sans-serif;
-      display       : flex;
-      position : fixed;
-      min-height:920px;
-      height:960px;
-      top:10px;
-      padding-bottom:10px;
-      right:50px;
+      display        : flex;
       flex-direction : column;
-      box-shadow:inset 0px -2px 3px 3px rgba(80,50,40,0.2),
-                  0px 2px 2px rgba(0,0,0,0.8),
-                  inset 0px -1px 1px rgba(255,255,255,0.5),
-                  inset 0px -2px 2px rgba(70,50,40,0.8),
-                  inset 0px -3px 2px rgba(90,50,40,0.3),
-                  4px 4px 32px rgba(0,0,0,0.5);
+      font-family    : Exo, sans-serif;
+      position       : fixed;
+      top            : 10px;
+      right          : 50px;
+      height         : 960px;
+      min-height     : 920px;
+      max-height     : 100%;
+      background     : rgb(250,245,240);
+      padding        : 5px;
+      padding-bottom : 10px;
+      border-radius  : 40px 40px 15px 15px;
+      box-shadow     : inset 0px -2px 3px 3px rgba(80,50,40,0.2),
+                       0px 2px 2px rgba(0,0,0,0.8),
+                       inset 0px -1px 1px rgba(255,255,255,0.5),
+                       inset 0px -2px 2px rgba(70,50,40,0.8),
+                       inset 0px -3px 2px rgba(90,50,40,0.3),
+                       4px 4px 32px rgba(0,0,0,0.5);
     }
+
+  /* Numerical input and graphical display *************************************************/
     .numInput {
-      position:relative;
-      display:block;
-      width:calc(100% - 2px);
-      height:48px;
-      line-height:43px;
-      margin:auto;
-      font-size:22pt;
-      overflow:hidden;
-      text-align:right;
-      padding-right:9px;
-      box-sizing:border-box;
-      background:rgba(206,206,182,0.7);
-      border-radius:15px;
-      border:1px solid rgba(255,255,255,0.7);
+      position     : relative;
+      display      : block;
+      width        : calc(100% - 2px);
+      height       : 48px;
+      line-height  : 43px;
+      margin       : auto;
+      font-size    : 22pt;
+      overflow     : hidden;
+      text-align   : right;
+      padding-right: 9px;
+      box-sizing   : border-box;
+      background   : rgba(206,206,182,0.7);
+      border-radius: 15px;
+      border       : 1px solid rgba(255,255,255,0.7);
       margin-bottom: 5px;
-      box-shadow:inset 0px -3px 10px rgba(0,0,0,0.05),
-                  inset 1px 3px 9px rgba(0,0,0,0.3),
-                  inset 1px 1px 1px rgba(0,0,0,0.2),
-                  inset -1px -1px 1px rgba(0,0,0,0.1),
-                  inset 0px 2px 1px 2px rgba(0,0,0,0.1);
+      box-shadow   : inset 0px -3px 10px rgba(0,0,0,0.05),
+                     inset 1px 3px 9px rgba(0,0,0,0.3),
+                     inset 1px 1px 1px rgba(0,0,0,0.2),
+                     inset -1px -1px 1px rgba(0,0,0,0.1),
+                     inset 0px 2px 1px 2px rgba(0,0,0,0.1);
     }
+
+  /* Calculator Buttons (group, buttons, colors, subscript labels) *************************/
+    .group { display:flex;     width:100%; }
     .numButton {
-      position:relative;
-      user-select:none;
-      outline:none;
-      width:70px;
-      flex-grow:1;
-      height:54px;
-      display:block-inline;
-      text-align:center; 
-      line-height:54px;
-      display:inline-block;
-      font-size:20pt;
-      color: rgba(0,0,0,0.65);
-      margin:2px;
-      background: rgba(245,240,235,1);
-      box-shadow:inset 0px -1px 2px 2px rgba(80,50,40,0.2),
-                  inset 0px 1px 0px rgba(0,0,0,0.2),
-                  inset 0px -1px 1px rgba(70,50,40,0.8),
-                  inset 0px -2px 1px rgba(90,50,40,0.3);
-      cursor:pointer;
-      /* Prevent text selection. Prefixed versions needed, per https://caniuse.com/#feat=user-select-none */
-      -webkit-user-select: none; /* Safari */
-         -moz-user-select: none; /* Firefox */
-          -ms-user-select: none; /* IE/Edge */
-              user-select: none; /* Unprefixed version, currently supported by Chrome and Opera */
+      position     : relative;
+      user-select  : none;
+      outline      : none;
+      width        : 70px;
+      flex-grow    : 1;
+      height       : 54px;
+      display      : block-inline;
+      text-align   : center; 
+      line-height  : 54px;
+      display      : inline-block;
+      font-size    : 20pt;
+      color        : rgba(0,0,0,0.65);
+      margin       : 2px;
+      background   : rgba(245,240,235,1);
+      box-shadow   : inset 0px -1px 2px 2px rgba(80,50,40,0.2),
+                     inset 0px 1px 0px rgba(0,0,0,0.2),
+                     inset 0px -1px 1px rgba(70,50,40,0.8),
+                     inset 0px -2px 1px rgba(90,50,40,0.3);
+      cursor       : pointer;
+      webkit-user-select : none;
+      moz-user-select    : none; 
+      ms-user-select     : none;
+      user-select        : none; 
     }
     .numButton:focus { outline:none; }
     .numButton:active:not(.disabled), .numButton.active:not(.disabled) { top:2px; }
-    .wide {
-      width : 100px;
-      line-height:54px;
-      background-color: rgba(240,255,220,1);
-    }
     .green { line-height:54px; background-color: rgba(240,255,220,1); }
     .blue  { line-height:54px; background-color: rgba(230,220,250,1); }
     .purple{ line-height:54px; background-color: rgba(250,220,250,1); }
     .red   { line-height:54px; background-color: rgba(250,210,200,1); }
-    .group { display:flex; width:100%; }
     .mini {
-      position: absolute;
-      bottom:2px;
-      right:5px;
-      font-size:45%;
-      line-height:20px;
-      color:rgba(0,0,0,0.5);
+       position    : absolute;
+       bottom      : 2px;
+       right       : 5px;
+       font-size   : 45%;
+       line-height : 20px;
+       color       : rgba(0,0,0,0.5);
     }
+    .disabled {
+      color          : #ccc;
+      pointer-events : none;
+      box-shadow     : none;
+      border         : 1px solid rgba(0,0,0,0.3);
+      box-sizing     : border-box;
+    }
+
+  /* Calculator History and help displays **************************************************/
     .historypos {
-       position:absolute;
-       top:0;left:2;right:2;bottom:5;
-       display:flex;
-       flex-direction:column;
-       justify-content:flex-end;
-       overflow:hidden;
+       position        : absolute;
+       top             : 0px;
+       left            : 2px;
+       right           : 2px;
+       bottom          : 5px;
+       display         : flex;
+       flex-direction  : column;
+       justify-content : flex-end;
+       overflow        : hidden;
     }
     .history {
-       position:relative;
-       background-color:transparent;
-       min-height:0px;
-       color:#222; 
-       padding:10px;
-       flex-grow:0;
-       min-width:0px;
-       top:10px;
-       left:0px;
-       text-align:right;
+       position         : relative;
+       background-color : transparent;
+       min-height       : 0px;
+       color            : #222; 
+       padding          : 10px;
+       flex-grow        : 0;
+       min-width        : 0px;
+       top              : 10px;
+       left             : 0px;
+       text-align       : right;
     }
     .e {
-      position:relative;
-      top : -3px;
-      font-size:45%;
+      position          : relative;
+      top               : -3px;
+      font-size         : 45%;
     }
     .help {
-      position:absolute;
-      top:0px;
-      left:10px;
+      position          : absolute;
+      top               : 0px;
+      left              : 10px;
     }
     .history > .help { left:0px; }
-    .help .green { background-color: rgba(240,255,220,1); } 
-    .help .red { background-color: rgba(250,210,200,1); } 
-    .help .blue { background-color: rgba(230,220,250,1); } 
+    .help .green  { background-color: rgba(240,255,220,1); } 
+    .help .red    { background-color: rgba(250,210,200,1); } 
+    .help .blue   { background-color: rgba(230,220,250,1); } 
     .help .purple { background-color: rgba(250,220,250,1); } 
     .help  i {
-      position:relative;
-      user-select:none;
-      outline:none;
-      width:25px;
-      height:25px;
-      display:block-inline;
-      text-align:center; 
-      line-height:25px;
-      display:inline-block;
-      font-size:13pt;
-      opacity:0.8;
-      color: rgba(0,0,0,0.65);
-      margin:2px;
-      font-family:Exo;
-      font-style:normal;
-      font-weight:bold;
-      background: rgba(240,230,220,1);
-      border-radius:5px;
-      border:1px solid;
+      position     : relative;
+      user-select  : none;
+      outline      : none;
+      width        : 25px;
+      height       : 25px;
+      display      : block-inline;               
+      text-align   : center; 
+      line-height  : 25px;
+      display      : inline-block;
+      font-size    : 13pt;
+      opacity      : 0.8;
+      color        : rgba(0,0,0,0.65);
+      margin       : 2px;
+      font-family  : Exo;
+      font-style   : normal;
+      font-weight  : bold;
+      background   : rgba(240,230,220,1);
+      border-radius: 5px;
+      border       : 1px solid;
     }
+
+  /* Current mode display top left of calculator *******************************************/
     .title {
-      position:absolute;
-      top:40px;
-      left:20px;
-      color:#888;
-      font-size:16pt;
-      font-family:serif;
-    }
-    .outline {
+      position    : absolute;
+      top         : 40px;
+      left        : 20px;
+      color       : #888;
+      font-size   : 16pt;
       font-family : serif;
+    }
+
+  /* Class to render C R M outline letters for sets ****************************************/
+    .outline {
+      font-family         : serif;
       -webkit-text-stroke : 1px #888;
-      -moz-text-stroke : 1px #888;
-      -ms-text-stroke : 1px #888;
-      text-stroke : 1px #888;
-      color:transparent;
-      font-style:normal;
+      -moz-text-stroke    : 1px #888;
+      -ms-text-stroke     : 1px #888;
+      text-stroke         : 1px #888;
+      color               : transparent;
+      font-style          : normal;
     }
     .green .outline, .help .outline {
       -webkit-text-stroke : 1px #444;
-      -moz-text-stroke : 1px #444;
-      -ms-text-stroke : 1px #444;
-      text-stroke : 1px #444;
-    }
-    .disabled {
-      color:#ccc;
-      pointer-events:none;
-      box-shadow:none;
-      border:1px solid rgba(0,0,0,0.3);
-      box-sizing:border-box;
+      -moz-text-stroke    : 1px #444;
+      -ms-text-stroke     : 1px #444;
+      text-stroke         : 1px #444;
     }
     
+  /* On small displays (mobile) only display the calculator. *******************************/
     @media (max-width:800px) {
-      .help { display:none; }
+      .help           { display:none; }
       .calcBody .help { display:block; }
       .calcBody { 
-        top:0px; position:Relative; right:0px; box-shadow: 0px 0px 0px black; border-radius:0px; margin:auto; 
-             height:100%; max-height:100%; width: calc(100% - 10px);
- 
-       }
+        top           : 0px; 
+        position      : Relative; 
+        right         : 0px; 
+        box-shadow    : 0px 0px 0px black; 
+        border-radius : 0px; 
+        margin        : auto; 
+        height        : 100%; 
+        max-height    : 100%; 
+        width         : calc(100% - 10px);
+      }
       html { height:100%; overflow:hidden; }
-      body { background-color:rgb(230,220,200); position:fixed; top:0; left:0; display:flex; flex-direction:column; margin:0px; margin-bottom:10px; overflow:hidden; height:100%; width:100%; max-height:100%; min-height:100%; }
+      body { 
+        background-color : rgb(230,220,200); 
+        position         : fixed; 
+        top              : 0; 
+        left             : 0; 
+        display          : flex; 
+        flex-direction   : column; 
+        margin           : 0px; 
+        margin-bottom    : 10px; 
+        overflow         : hidden; 
+        height           : 100%; 
+        width            : 100%; 
+        max-height       : 100%; 
+        min-height       : 100%; 
+      }
     }
     @media (max-height:180px) {
       .numButton {
-        height:44px;
-        line-height:40px;
+        height      : 44px;
+        line-height : 40px;
       }
     }
   </STYLE>
 </HEAD>
 <BODY>
+  <!-- help section - only visible on desktop ---------------------------------------------->
   <DIV CLASS="help">
     <H4>The Galculator - powered by Ganja.js</H4>
     The Galculator can be forked on <A HREF="https://github.com/enkimute/ganja.js">github</A><BR><BR>
@@ -258,8 +282,6 @@
       <LI>answer is strikes happen at (X4 : 11ms) and (x5 : -26ms) - not the same time.
     </UL>
     
-
-    
     <h4>Example in PGA 2D (2,0,1)</H4>
     <p>Solve the system of equations :
        <LI>x+y-0.5=0
@@ -277,15 +299,11 @@
       <LI><i class="green">Cl</i><i class="purple">x3</i><i class="blue">/</i><i class="blue">(</i><i class="purple">x3</i><i class="blue">&#x25cf;</i><i>E<sub>0</sub></i><i class="blue">)</i><i class="blue">*</i><i>E<sub>0</sub></i>
       <LI><i class="red">=</i>
       <LI>answer is x=0.166666 and y=0.3333333 
-      
     </UL>
-
-
-
-
-
-  
   </DIV>
+
+  <!-- Calculator main body and layout.  -------------------------------------------------->
+
   <DIV CLASS="calcBody" ID="calcBody">
     <CENTER>Enki's GAlculator</CENTER>
     <DIV STYLE="position:relative; flex-grow:1; display:flex; flex-direction:column; flex-grow:1">
@@ -297,13 +315,17 @@
     <DIV CLASS="title" ID="title"><SPAN CLASS='outline'>R</SPAN></DIV>
     <DIV CLASS="numInput" ID="screen">0</DIV>
   </DIV>
+
   <SCRIPT>
-     var Al = Algebra(), mode=3, histor='', cur='', store=false, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
-     var graph=document.getElementById('graph');
-     graph.style.opacity=0.3;
+   // Minimal calculator implementation. Globals for our current algebra, mode, history, variables etc ..  
+     var Al = Algebra(), mode=0, histor='', cur='', store=false, help=false, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10;
+     
+   // Grab some of our elements.  
+     var graph=document.getElementById('graph'); graph.style.opacity=0.3;
      var hist=document.getElementById('hist');
      var title=document.getElementById('title');
-     var help=false;
+     
+   // Pretty print into the numerical and graphical displays.  
      var show=(x)=>{
        x=x.replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/&/g,'&#x2228;').replace(/\^/g,'&#x2227;').replace(/\<\</,'&#x25cf;')
        document.getElementById('screen').innerHTML=x||'0';
@@ -313,21 +335,29 @@
           c.style.width = c.style.height = '100%'; c.style.backgroundColor='transparent';
        }
      }
+     
+   // Print into the history.  
      var print = (x)=>{
        histor += '<BR>'+x;
        hist.innerHTML=histor.split('<BR>').slice(-10).join('<BR>');
      }
+     
+   // Patch up of ganja.js asciimath output to our input format.  
      var patch = (x)=>{ 
        print((((!x.match(/=/))?cur+'=':'')+x).replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e').replace(/e([012345]+)/g,'e<sub>$1</sub>').replace(/&/g,'&#x2228;').replace(/\^/g,'&#x2227;').replace(/\<\</,'&#x25cf;'));
        return x.replace(/([^\d]*\d*\.\d\d\d\d\d\d)(\d*)/g,'$1').replace(/i/g,'e_1').replace(/([^\d])e_|^e_/g,'$11e_').replace(/e_/g,'e');
      }
 
+   // Helper to display pretty help.
      var toHelp=(x)=>x.replace(/([eE])(\d+)/g,'<i>$1<SUB>$2</SUB></i>').replace(/_([\+\-\/\?\(\)])/g,'<i class="blue">$1</i>').replace(/_\^/g,'<i class="blue">&#x2227;</i>').replace(/_\&/g,'<i class="blue">&#x2228;</i>').replace(/_\./g,'<i class="blue">&#x25cf;</i>').replace(/_\*/g,'<i class="blue">&#x2217;</i>');
     
+   // Welcome message 
      function hello() {
-     print(toHelp('Enki\'s GAlculator - Geometric Algebra Pocket Calculator<DIV class="help" style="position:relative"><HR>Cheat sheet : _? + <i class="green" STYLE="width:40px">P2D</i>,<i class="green" STYLE="width:40px">P3D</i> &nbsp;<BR>Examples : _? + <I>1</I>, <I>2</I>, <i>3</i>, <i>4</i>&nbsp;<HR>'))
+       print(toHelp('Enki\'s GAlculator - Geometric Algebra Pocket Calculator<DIV class="help" style="position:relative"><HR>Cheat sheet : _? + <i class="green" STYLE="width:40px">P2D</i>,<i class="green" STYLE="width:40px">P3D</i> &nbsp;<BR>Examples : _? + <I>1</I>, <I>2</I>, <i>3</i>, <i>4</i>&nbsp;<HR>'))
      };
      hello();    
+   
+   // Our calculator buttons.   
      var buttons = {
      // metric selection.
        "R" : { color:'green', label : "<SPAN CLASS='outline'>R</SPAN>", click : ()=>{ E();e(); Al=Algebra();      graph.style.opacity=0.3; hist.style.visibility='visible'; mode=0; title.innerHTML="<SPAN CLASS='outline'>R</SPAN>"; }, help:"<I CLASS='outline'>R</I>: Real Numbers."},
@@ -394,28 +424,31 @@
        "x10" :  { color:'purple',label : "x<sub>10</sub>",  click : ()=> { if (store) { store = false; x10=Al.inline(new Function('return '+cur))(); patch('x10='+x10.toString()); return show(cur); } cur += 'x10'; show(cur); } , help:"x10 variable" }
      }
      
-     var j=0; for (var i in buttons) {
-       var p;
+   // Add all the buttons and install mouse and touch handlers. 
+     var j=0,p; for (var i in buttons) {
+     // Every 8 buttons, start a new group.
        if (j%8==0) p = document.getElementById("calcBody").appendChild(Object.assign(document.createElement('div'),{className:'group'}));
+     // Add the button to the current group.  
        buttons[i].el = p.appendChild( Object.assign(document.createElement('div'),{className:"numButton "+(buttons[i].color||''),innerHTML:buttons[i].label}) );
+     // Link the handlers  
        (function(x){ 
-         buttons[i].el.ontouchend = function(e) { 
-           this.classList.remove('active');
-         }
+         buttons[i].el.ontouchend = function(e) { this.classList.remove('active'); }
          buttons[i].el.ontouchstart = buttons[i].el.onmouseup = function(e) {
-          e.preventDefault(); e.stopPropagation();
-          if (window.TouchEvent && e instanceof TouchEvent) this.classList.add('active');
-          navigator.vibrate&&navigator.vibrate(50);
-          if (help) {
-            help=false; histor='';
-            print(buttons[x].help||'no help for this button.');
-            return;
-          }
-          buttons[x].click();}
-       })(i);
-       j++;
+           e.preventDefault(); e.stopPropagation();
+         // Show touch response and vibrate on mobile.
+           if (window.TouchEvent && e instanceof TouchEvent) this.classList.add('active');
+           navigator.vibrate&&navigator.vibrate(50);
+         // Show help if needed. 
+           if (help) {
+             help=false; histor='';
+             return print(buttons[x].help||'no help for this button.');
+           }
+         // Call button click handler.  
+           buttons[x].click();}
+       })(i); j++;
      }
 
+   // Shorthand to enable/disable buttons depending on mode.
      var e = function(x0,x1,x2,x3,x4,x5){ 
        if (arguments.length==0) buttons["Conj"].el.classList.add('disabled');
                            else buttons["Conj"].el.classList.remove('disabled');
@@ -445,12 +478,10 @@
        buttons.E4.el.classList[x4?'remove':'add']('disabled');
        buttons.E5.el.classList[x5?'remove':'add']('disabled');
      }
-
      E();e();
 
-     // patch for cocoon.io
+   // patch for cocoon.io
      document.body.ontouchstart=function(e){ e.preventDefault(); e.stopPropagation(); }
      document.body.ontouchmove=function(e){ e.preventDefault(); e.stopPropagation(); }
-
   </SCRIPT>
 </BODY>
