@@ -21,10 +21,12 @@ Algebra(3,1,()=>{
 // Define three points
   var o = point(-0.5,-0.5), p = point(0.5,0), p2 = point(0.5,0.5);
   
+// Graph these items.
   document.body.appendChild(this.graph([
-    o,"o",p,"p",p2,"p2",
-    ()=>p2^o^p,"circle",
-    ()=>p2^o^ei,()=>"line "+(dist(o,p2).toFixed(2))],{conformal:true}));
-  return;
+    0xFF8888, ()=>p2^o^p, "circle",
+    0xFF88FF, ()=>p2^o^ei, ()=>"line "+(dist(o,p2).toFixed(2)),
+    0x666666, o, "o", p, "p", p2, "p2",
+  ],{conformal:true}));    
+
 });
 </SCRIPT></BODY>

@@ -98,7 +98,7 @@
              if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly+=0.1; return res2; }
              if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
              var b1=o.Blade(1).VLength>0.001,b2=o.Blade(2).VLength>0.001,b3=o.Blade(3).VLength>0.001; 
-             if (b1 && !b2 && !b3) { lx=o.e1; ly=-o.e2; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; }
+             if (b1 && !b2 && !b3) { lx=o.e1; ly=-o.e2; lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; }
              else if (!b1 && !b2 && b3) { var isLine=o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))).Length==0; 
                if (isLine) { var loc=(o.Dot(Element.Coeff(4,-.5).Add(Element.Coeff(3,-.5)))).Div(o), att=o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))); lx=-loc.e1; ly=loc.e2; lr=Math.atan2(att[8],att[7])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;};
                var loc=o.Div(o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1)))); lx=-loc.e1; ly=loc.e2; var r=-o.Mul(o.Conjugate).s/(Element.Pow(o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))),2).s); r=r**0.5; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`; return res2;  
