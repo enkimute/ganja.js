@@ -6,34 +6,25 @@
 Algebra(3,1,()=>{ 
     
 // A null basis to work in. (e3=e+ and e4=e-)
-  var ei = 1e4-1e3;           // e-infinite
-  var en = 0.5*(1e4+1e3);     // e-origin
+  var ei = 1e4-1e3,           // e-infinite
+      eo = 0.5*(1e4+1e3);     // e-origin
   
-// Define points, circles using the null basis.  
-  var point =(x,y)=>en + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ei;
-  var circle=(x,y,r)=>point(x+r,y)^point(x-r,y)^point(x,y+r);
+// Define points, lines, circles using the null basis.  
+  var point  = (x,y)=>eo + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ei,
+      line   = (a,b,c)=>!(a*1e1 + b*1e2 - c/2*ei),
+      circle = (x,y,r)=>!(point(x,y) - r**2/2*ei);
   
-// Our distance function based on the inner product.  
-  var dist=(x,y)=>(2*(x<<y).Length)**0.5;
+// Dist, Angle
+  var dist=(x,y)=>(2*(x<<y).Length)**0.5,
+      angle=(x,y)=>Math.acos(!x.Normalized<<!y.Normalized);
 
-// Define two points
-  var o = point(0,0), p = point(0.5,0), p2 = point(0.5,0.5);
+// Define three points
+  var o = point(-0.5,-0.5), p = point(0.5,0), p2 = point(0.5,0.5);
   
-// Define two circles  
-  var c=circle(0,0,0.5), d=circle(0.5,0,0.5);
-  
-// We can't graph conformal objects directly yet with ganja.js - untill I'm
-// less lazy, we'll visualize using the (slow) canvas renderer. It calls a
-// function with x,y coordinates. We graph the distance between those x,y points 
-// and any given CGA object (c).
-  var render=(c)=>Object.assign(document.body.appendChild(this.graph((x,y)=>dist(c,point(x,y)),{nocompile:true,width:48,height:48})).style,{width:256,height:256});
-
-// Render the distances to some objects..
-  render(o);       // origin
-  render(p);       // point p at 0.5,0
-  render(c);       // circle at origin
-  render(d);       // circle at p
-  render(c&d);     // meet of circles
-  render(o^p^ei)   // join of o,p and infinity
+  document.body.appendChild(this.graph([
+    o,"o",p,"p",p2,"p2",
+    ()=>p2^o^p,"circle",
+    ()=>p2^o^ei,()=>"line "+(dist(o,p2).toFixed(2))],{conformal:true}));
+  return;
 });
 </SCRIPT></BODY>
