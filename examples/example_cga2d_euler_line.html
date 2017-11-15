@@ -1,0 +1,36 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 2,0,1 metric.
+Algebra(3,1,()=>{
+
+  // The Euler line connects several important points in any non equilateral triangle.
+  // We repeat the example from 2D PGA using our new conformal tools.
+
+  // Null basis and point helper.
+  var ei = 1e4-1e3, eo = 0.5*(1e4+1e3), 
+      point  = (x,y)=>eo + x*1e1 - y*1e2 + 0.5*(x*x+y*y)*ei,
+
+  // Three points.
+      A=point(-1.5,0.5), B=point(0.5,-1.5), C=point(1,0.5),
+  
+  // Circle around triangle.
+      circle = ()=>A^B^C,     
+      circum = ()=>-circle/(circle<<ei),
+      
+  // The centroid      
+      centroid = ()=>(A+B+C)/3,
+  
+  // The Euler line      
+      line = ()=>centroid^circum^ei;
+   
+  document.body.appendChild(this.graph([
+      0xFFFFEE,[A,B,C],                        // triangle
+      0x88AA88,circum,circle,                  // circumcenter
+      0x8888FF,centroid,line,"Euler Line",     // centroid and euler line
+      0x444444,A,B,C,                          // triangle vertices
+  ],{conformal:true}));
+
+});
+</SCRIPT></BODY>
