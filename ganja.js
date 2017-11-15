@@ -95,6 +95,7 @@
           if (f instanceof Function) f=f();if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k])); 
           function build(f,or) { if (or && f && f instanceof Function) f=f(); lx=-2;ly=-1.85;lr=0;color='#444'; return new DOMParser().parseFromString(`<SVG viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; user-select:none">
            ${options.conformal?f.map&&f.map((o,oidx)=>{ while (o.call) o=o();
+             if (o instanceof Array)  { lx=ly=lr=0; o.forEach((o)=>{o=(o.call)?o():o; lx+=o.e1;ly+=-o.e2});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(o.e1+','+(-o.e2)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1} y1=${-o[0].e2} x2=${o[1].e1} y2=${-o[1].e2} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
              if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly+=0.14; return res2; }
              if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
              var b1=o.Blade(1).VLength>0.001,b2=o.Blade(2).VLength>0.001,b3=o.Blade(3).VLength>0.001; 
