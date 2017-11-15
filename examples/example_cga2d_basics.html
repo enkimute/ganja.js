@@ -19,13 +19,29 @@ Algebra(3,1,()=>{
       angle=(x,y)=>Math.acos(!x.Normalized<<!y.Normalized);
 
 // Define three points
-  var o = point(-0.5,-0.5), p = point(0.5,0), p2 = point(0.5,0.5);
+  var p1 = point(-0.5,-0.5), 
+      p2 = point(0.5,-.5), 
+      p3 = point(0,1.5);
+  
+// Define two circles, one by wedging 3 points, one directly.
+  var C = ()=>p1^p2^p3,
+      D = circle(1,1,0.9);
+  
+// Define two lines, one directly, one by wedging two points and infinity.
+  var X = line(0,1,0),
+      Y = ()=>-p1^p3^ei;
+      
+// Create point pairs by intersecting a circle(s) and a line(s).
+  var pp1 = ()=>X&C, 
+      pp2 = ()=>C&D;
   
 // Graph these items.
   document.body.appendChild(this.graph([
-    0xFF8888, ()=>p2^o^p, "circle",
-    0xFF88FF, ()=>p2^o^ei, ()=>"line "+(dist(o,p2).toFixed(2)),
-    0x666666, o, "o", p, "p", p2, "p2",
+    "2D CGA - drag p1,p2,p3",                   // title
+    0xFF8888, C, "C", D, "D",                   // circles
+    0x44AA44, X, "X", Y, "Y",                   // lines
+    0x4444FF, pp1, "pp1", pp2,                  // point pairs
+    0x666666, p1, "p1", p2, "p2", p3, "p3",     // points
   ],{conformal:true}));    
 
 });

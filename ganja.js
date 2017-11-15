@@ -102,11 +102,11 @@
              else if (!b1 && !b2 && b3) { var isLine=o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))).Length==0; 
                if (isLine) { var loc=(o.Dot(Element.Coeff(4,-.5).Add(Element.Coeff(3,-.5)))).Div(o), att=o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))); lx=-loc.e1; ly=loc.e2; lr=Math.atan2(att[8],att[7])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;};
                var loc=o.Div(o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1)))); lx=-loc.e1; ly=loc.e2; var r=-o.Mul(o.Conjugate).s/(Element.Pow(o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))),2).s); r=r**0.5; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`; return res2;  
-             } else if (!b1 && b2 &&!b3) { o=o.Normalized;
-               var inf=Element.Coeff(4,1).Sub(Element.Coeff(3,1));
-               var loc=o.Div(o.Dot( inf ));
-               var att=inf.Wedge(o.Dot(inf)).Mul(Element.Scalar(0.25)).Add(Element.Scalar(1));
-               lx=loc.e1; ly=-loc.e2;  return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`;
+             } else if (!b1 && b2 &&!b3) { o=o.Normalized; lr=0; var inf=Element.Coeff(4,1).Sub(Element.Coeff(3,1)), oi=o.Dot(inf),loc=o.Div(oi),rad=o.Mul(o.Conjugate).s/(Element.Pow(oi,2).s); if (rad>0) return '';
+               var att=inf.Wedge(oi).Normalized.Mul(Element.Scalar(rad*0.5)).Add(Element.Scalar(1)); 
+               var loc2=Element.sw(att,loc); lx=loc2.e1; ly=-loc2.e2; var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; 
+               loc2=Element.sw(att.Conjugate,loc); lx=loc2.e1; ly=-loc2.e2; res2+=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; 
+               return res2;
              }
            }):f.map&&f.map((o,oidx)=>{  if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; } while (o instanceof Function) o=o(); o=(o instanceof Array)?o.map(project):project(o); if (o===undefined) return; 
              if (o instanceof Array)  { lx=ly=lr=0; o.forEach((o)=>{o=(o.call)?o():o; lx+=((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]];ly+=o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${((drm[1]==6||drm[1]==14)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${o[0][drm[3]]/o[0][drm[1]]} x2=${((drm[1]==6||drm[1]==14)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${o[1][drm[3]]/o[1][drm[1]]} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
