@@ -44,7 +44,7 @@ inline syntax and graphing makes math in the browser feel like .. math.
 * geometric, inner (contraction), outer (wedge) and vee product
 * conjugate, Reverse, Involute, Dual (Poincare), Negative
 * 4 API's (inline, asciimath, object oriented, functional)
-* Easy graph function for 1D and 2D functions and Projective 2D and 3D elements.
+* Easy graph function for 1D and 2D functions, Projective 2D, 3D and conformal 2D elements.
 * There's a [game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) that teaches you how to use ganja.js !
 
 <A NAME="Started"></A>
@@ -301,6 +301,12 @@ PGA2D Euler Line<BR>
 <TD ALIGN=CENTER>
 PGA2D Desargues Theorem<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_desargues_theorem"      TARGET="_blank" TITLE="PGA2D Desargues Theorem"><IMG SRC="images/pga2d_desargues_theorem.jpg"/></A>
+<TR><TD ALIGN=CENTER>
+CGA2D Euler Line<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga2d_euler_line"             TARGET="_blank" TITLE="CGA2D Euler Line"><IMG SRC="images/cga2d_euler_line.jpg"/></A>
+<TD ALIGN=CENTER>
+CGA2D Basics<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga2d_basics"                 TARGET="_blank" TITLE="CGA2D Basics"><IMG SRC="images/cga2d_basics.jpg"/></A>
 </TABLE>
 
 ganja.js is also the engine behind the GAlculator - try it [online](https://enkimute.github.io/ganja.js/examples/galculator.html) or get it on the [play store](https://play.google.com/store/apps/details?id=io.github.enkimute) 
