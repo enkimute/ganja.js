@@ -80,7 +80,8 @@ function Algebra( options, func );
   //             metric,       [a,b,..] array with metric per generating dimensions. (e.g. [0,1,1] for PGA2D)
   //             basis,        ["1","e1","e2"] basis that overrules the standard cannonical basis.
   //             Cayley,       [["1","e1"],["e1","-1"]] Cayley table to overrule standard GA tables.
-  //             baseType      float32Array (default), float64Array, .. baseType to be used for the Elements. 
+  //             baseType,     float32Array (default), float64Array, .. baseType to be used for the Elements. 
+  //             mix           Set to true to enable interoperable sub-algebras. (defaults to false).
   //           }
 
 
