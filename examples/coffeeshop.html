@@ -40,6 +40,7 @@
     #HEADER.cga2d > .TAB.cga2d { display:block; }
     #RUN { box-sizing:border-box; position:absolute; top:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
     #RUN:hover { border : 2px solid #886; top:9px; left:9px}
+    .error { position:absolute; background:rgba(200,100,100,0.5); z-index:20 }
   </STYLE>
   <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></SCRIPT>
   <SCRIPT SRC="../ganja.js"></SCRIPT>
@@ -126,12 +127,25 @@
       });
 
       $('RUN').onclick = function(e) { 
+        if (window._marker) editor.session.removeMarker(_marker);
         e.preventDefault(); e.stopPropagation(); 
         if (!changed || !loaded) return; changed=false; 
         $('RUN').style.opacity=0;
         $('SAMPLE').contentDocument.body.innerHTML='';
-        try { $('SAMPLE').contentWindow.eval( editor.getValue() ); }
-        catch (e) { $('SAMPLE').contentDocument.body.innerHTML='<PRE>'+e.message+'</PRE>';}
+        try { 
+          $('SAMPLE').contentWindow.eval( editor.getValue() ); 
+        } catch (e) { 
+          $('SAMPLE').contentDocument.body.innerHTML='<PRE>'+e.message+'\n'+e.stack+'</PRE>';
+          var m=e.stack.split('\n').filter(x=>x.match('eval'))[0].match(/\d+/g);
+          if (m) {
+            m = m.slice(-2);
+            var line = m[0]|0;
+            var col = m[1]|0;
+            console.log('error at ', line, col);
+            var Range = ace.require('ace/range').Range;
+            window._marker=editor.session.addMarker(new Range(line, 0, line, 1), "error", "fullLine");
+          }
+        }
         editor.focus();
         a=$$('svg');
         if (a[0]) a[0].style.height='100%';
