@@ -52,8 +52,6 @@
     // constructor - create a floating point array with the correct number of coefficients.
       constructor(a) { super(a||basis.length); return this; }                                                                                                 // Construct with correct default lenght.
       Blade(grade,res) { var res=res||new Element(); for (var i=0,l=res.length; i<l; i++) if (grades[i]==grade) res[i]=this[i]; else res[i]=0; return res; }  // Construct a pure blade of given grade from a multivector.
-      Add  (b,res) { if (!(b instanceof Element)) { var c=new Element(b.length&&b); b.length||(c[0]=b); b=c; }; res = res||new Element(); for (var i=0; i<res.length; i++) res[i] = this[i]+b[i]; return res; }  // Component add.
-      Sub  (b,res) { if (!(b instanceof Element)) { var c=new Element(b.length&&b); b.length||(c[0]=b); b=c; }; res = res||new Element(); for (var i=0; i<res.length; i++) res[i] = this[i]-b[i]; return res; }  // Component add.
       Div  (b,res) { return this.Mul(b.Inverse,res); }                                                                                                        // right inverse assumed here.
       LDiv (b,res) { return b.Inverse.Mul(this,res); }                                                                                                        // left inverse assumed here.
       Exp  ()      { var r = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<15; x++) { r=r.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return r; } // do something smarter.
@@ -69,7 +67,7 @@
       static nVector(n)  { var res = new Element(); res.set([].slice.call(arguments,1),grade_start[n]); return res; }                                         // Create an nVector of desired grade.
     // Static operators (easier integration with scalars when using inline operator overloading)
       static toEl(x)        { if (x instanceof Function) x=x(); if (x instanceof Array) return new Element(x); if (!(x instanceof Element)) x=Element.Scalar(x); return x; }
-      static Add(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if ((typeof a=='string')||(typeof b=='string')) return a.toString()+b.toString(); if (!(a instanceof Element || b instanceof Element)) return a+b; res=res||new Element(); a=Element.toEl(a); b=Element.toEl(b); for(var i=0;i<res.length;i++)res[i]=a[i]+b[i]; return res; }  
+      static Add(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if ((typeof a=='string')||(typeof b=='string')) return a.toString()+b.toString(); if (!(a instanceof Element || b instanceof Element)) return a+b; res=res||new Element(); a=Element.toEl(a); b=Element.toEl(b); for(var i=0;i<res.length;i++)res[i]=a[i]+b[i]; return res; }
       static Sub(a,b,res)   {  a=a.call?a():a; b=(b&&b.call)?b():b; if (arguments.length==1) return Element.Mul(a,-1); if (!(a instanceof Element || b instanceof Element)) return a-b; res=res||new Element(); a=Element.toEl(a); b=Element.toEl(b); for(var i=0;i<res.length;i++)res[i]=a[i]-b[i]; return res; }
       static Mul(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; var r=a*b; if (!isNaN(r)) return r; a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b,res); }  
       static Div(a,b,res)   {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a/b; a=Element.toEl(a);b=Element.toEl(b); return a.Div(b,res); }  
@@ -95,7 +93,7 @@
           if (f instanceof Function) f=f();if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k])); 
           function build(f,or) { if (or && f && f instanceof Function) f=f(); lx=-2;ly=-1.85;lr=0;color='#444'; return new DOMParser().parseFromString(`<SVG viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; user-select:none">
            ${options.conformal?f.map&&f.map((o,oidx)=>{ if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; }while (o.call) o=o();
-             if (o instanceof Array)  { lx=ly=lr=0; o.forEach((o)=>{o=(o.call)?o():o; lx+=o.e1;ly+=-o.e2});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(o.e1+','+(-o.e2)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1} y1=${-o[0].e2} x2=${o[1].e1} y2=${-o[1].e2} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
+             if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o; }); o.forEach((o)=>{lx+=o.e1;ly+=-o.e2});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(o.e1+','+(-o.e2)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1} y1=${-o[0].e2} x2=${o[1].e1} y2=${-o[1].e2} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
              if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly+=0.14; return res2; }
              if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
              var b1=o.Blade(1).VLength>0.001,b2=o.Blade(2).VLength>0.001,b3=o.Blade(3).VLength>0.001; 
@@ -160,18 +158,18 @@
                       else if (op[2]==2) res[res.length-1]=[[1,'this.'+op[1]+'('],res[res.length-1],[1,')']];
                       else if (op[2]||!res.length||res[res.length-1][0]==4) res[res.length]=[[1,'this.'+op[1]+'('],after,[1,')']]; else res[res.length-1]=[[1,'this.'+op[1]+'('],res[res.length-1],[1,','],after,[1,')']];
                       if (op[2]!=2) i += 1; } else res.push(tokens[i]); }}
-            });
-           });
-            return res;
+           });}); return res;
         }
         return eval('('+(function f(t){return t.map(t=>t[0]instanceof Array?f(t):t[1]).join('');})(translate(tok))+')').bind(Element);
       }
     }
   // Convert symbolic matrices to code. (skipping zero's on dot and wedge matrices).
-    res.prototype.Mul   = new Function('b,res','res=res||new this.constructor();\n'+gp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-')+';').join('\n')+'\nreturn res;');
-    res.prototype.Dot   = new Function('b,res','res=res||new this.constructor();\n'+cp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'')+';').join('\n')+'\nreturn res;');
-    res.prototype.Wedge = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'')+';').join('\n')+'\nreturn res;');
-    res.prototype.Vee   = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+drm[ri]+']='+r.map(x=>x.replace(/\[(.*?)\]/g,function(a,b){return '['+(drm[b|0])+']'})).join('+').replace(/\+\-/g,'-').replace(/\+0/g,'')+';').join('\n')+'\nreturn res;');
+    res.prototype.Add   = new Function('b,res','res = res||new this.constructor();\n'+basis.map((x,xi)=>'res['+xi+']=b['+xi+']+this['+xi+']').join(';\n').replace(/(b|this)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';\nreturn res')
+    res.prototype.Sub   = new Function('b,res','res = res||new this.constructor();\n'+basis.map((x,xi)=>'res['+xi+']=this['+xi+']-b['+xi+']').join(';\n').replace(/(b|this)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';\nreturn res')
+    res.prototype.Mul   = new Function('b,res','res=res||new this.constructor();\n'+gp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
+    res.prototype.Dot   = new Function('b,res','res=res||new this.constructor();\n'+cp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
+    res.prototype.Wedge = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
+    res.prototype.Vee   = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+drm[ri]+']='+r.map(x=>x.replace(/\[(.*?)\]/g,function(a,b){return '['+(drm[b|0])+']'})).join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
   // Reversion, Involutions, Conjugation for any number of grades, component acces shortcuts.
     basis.forEach((b,i)=>{res.prototype.__defineGetter__(i?b:'s',function(){ return this[i] }); }); basis.forEach((b,i)=>{res.prototype.__defineSetter__(i?b:'s',function(x){ this[i]=x; }); });
     res.prototype.__defineGetter__('Negative', function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= -this[i]; return res; });
