@@ -27,9 +27,17 @@ Algebra(3,1,()=>{
   var translate = (v)=>(1-.5*v^ei),
       rotate    = (P,a)=>Math.cos(a/2) + Math.sin(a/2)*(1e12+1e12<<P^ei);
 
+// Some identities
+  var line_through_P_parallel_with_X = (P,X)=>X<<(P^ei)*(P^ei),
+      project_point_on_circle        = (P,C)=>C<<(P^ei)*C,
+      position                       = (C)=>C/(C^ei),
+      radius                         = (C)=>(C*~C).s/((C<<ei)**2).s,
+      attitude                       = (C)=>(ei^(C<<ei)),
+      split                          = (PP)=>(1+attitude(PP)*radius(PP)*.5)>>>(PP/(PP<<ei));
+
 // Define three points
   var p1 = point(-0.5, -0.5),
-      p2 = point( 0.5, -0.5), 
+      p2 = point( 1, -0.5), 
       p3 = point(   0,  1.5);
   
 // Define two circles, one by wedging 3 points, one directly.
@@ -42,19 +50,44 @@ Algebra(3,1,()=>{
 // Create point pairs by intersecting a circle(s) and a line(s).
   var pp1=()=>X&C, pp2=()=>C&D, pp3=()=>Y&D;
       
-// Distances and angles between all items.
-  var dp1  = ()=>dist(D,p1).toFixed(2),
+// Distances and angles.
+  var dp1  = ()=>( (p1-split(project_point_on_circle(p1,D).Normalized)).Length  ).toFixed(2),
       beta = ()=>angle(X,Y).toFixed(2); 
+  
+  
+  var round = (X)=>{ while(X.call) X=X();
+       var nix      = X^ei, 
+           r        = ((X<<X).s/(nix<<nix).s)**.5,
+           attitude = (nix<<(ei^eo)).Normalized,
+           pos      = X/nix;
+       pos = pos/(-ei<<pos);     
+       if (X.Blade(2).VLength>0.00001 && r) return pos+r*attitude; //[pos+attitude,pos-attitude];
+       return pos;
+  }
+  
+  //gav(D);
+  //gav(pp1);
   
 // Graph these items.
   document.body.appendChild(this.graph([
     "2D CGA - drag p1,p2,p3","",             // title
     ()=>"|D,p1|="+dp1,                       // distance
     ()=>"&beta; = "+beta,                    // distance
-    0xFF8888, C, "C", D, "D",                // circles
+    0xFF8888, C, D, "D",                // circles
     0x44AA44, X, "X", Y, "Y",                // lines
     0x4444FF, pp1, "pp1", pp2, pp3,          // point pairs
+    0x448844,
+    ()=>position(C), ()=>"C "+(Math.sqrt(-radius(C)).toFixed(2)),
+    ()=>position(D), ()=>"D "+(Math.sqrt(-radius(D)).toFixed(2)),
+    ()=>line_through_P_parallel_with_X(p1,D),"parallel to D",
+    ()=>line_through_P_parallel_with_X(split(project_point_on_circle(p1,D).Normalized),D),"parallel to D",
+    ()=>ei^p1^split(project_point_on_circle(p1,D).Normalized),  "p1 on D",
+    ()=>split(project_point_on_circle(p1,D).Normalized),  "p1 on D",
+    ()=>split(-project_point_on_circle(p1,C).Normalized), "p1 on C",
     0x666666, p1, "p1", p2, "p2", p3, "p3",  // points
+    0xFF0000, ()=>round(pp1),
+    0xFF0000, ()=>round(C),
+    0xFF0000, ()=>round(p1),
   ],{conformal:true}));                      // conformal flag!  
 
 });

@@ -306,8 +306,8 @@ PGA2D Desargues Theorem<BR>
 CGA2D Euler Line<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga2d_euler_line"             TARGET="_blank" TITLE="CGA2D Euler Line"><IMG SRC="images/cga2d_euler_line.jpg"/></A>
 <TD ALIGN=CENTER>
-CGA2D Basics<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga2d_basics"                 TARGET="_blank" TITLE="CGA2D Basics"><IMG SRC="images/cga2d_basics.jpg"/></A>
+CGA2D Points and Circles<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga2d_points_and_circles"     TARGET="_blank" TITLE="CGA2D Points and Circles"><IMG SRC="images/cga2d_points_and_circles.jpg"/></A>
 </TABLE>
 
 ganja.js is also the engine behind the GAlculator - try it [online](https://enkimute.github.io/ganja.js/examples/galculator.html) or get it on the [play store](https://play.google.com/store/apps/details?id=io.github.enkimute) 

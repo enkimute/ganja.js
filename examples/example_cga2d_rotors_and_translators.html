@@ -12,7 +12,7 @@ Algebra(3,1,()=>{
   
 // Rotator, Translator
   var translate = (v)=>(1-.5*v^ei),
-      rotate    = (P,a)=>Math.cos(a/2) + Math.sin(a/2)*(1e12+1e12<<P^ei);
+      rotate    = (P,a)=>Math.cos(a/2) - Math.sin(a/2)*(1e12+1e12<<P^ei);
  
 // Define a translation and a rotation and apply them to two points
   var tr = ()=>translate( Math.sin(performance.now()/1000)*1e1 ),
@@ -22,7 +22,10 @@ Algebra(3,1,()=>{
       
 // Graph these items.
   document.body.appendChild(this.graph([
-      p1,"tr>>>p1",p2,"rt>>>p2",()=>[p1,p2]
+      p1,"tr>>>p1",                       // point 1
+      p2,"rt>>>p2",                       // point 2
+      ()=>[p1,p2],                        // segment from 1 to 2
+      ()=>p1^p2^point(0,2,0)              // pretty circle
   ],{conformal:true,animate:true}));
   
 });
