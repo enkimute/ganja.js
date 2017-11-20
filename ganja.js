@@ -59,7 +59,7 @@
       get Vector ()    { return this.slice(grade_start[1],grade_start[2]); };
     // Factories - Make it easy to generate blades.
       static Element()   { var res = new Element(); for (var i=0; i<res.length; i++) res[i]=arguments[i]||0; return res; }                                    // Create a fully specified element.
-      static Coeff(x,y)  { var res = new Element(); res[x]=y; return res; }
+      static Coeff()  { var res = new Element(), i=0; while(i<arguments.length) res[arguments[i++]]=arguments[i++]; return res; }
       static Scalar(x)   { var res = new Element(); res[0]=x; return res; }                                                                                   // Create a scalar element.
       static Vector()    { var res = new Element(); res.set(arguments,grade_start[1]); return res; }                                                          // Create a vector element.
       static Bivector()  { var res = new Element(); res.set(arguments,grade_start[2]); return res; }                                                          // Create a bivector element.
@@ -98,14 +98,14 @@
              if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
              var b1=o.Blade(1).VLength>0.001,b2=o.Blade(2).VLength>0.001,b3=o.Blade(3).VLength>0.001; 
              if (b1 && !b2 && !b3) { lx=o.e1; ly=-o.e2; lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; }
-             else if (!b1 && !b2 && b3) { var isLine=o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))).Length==0; 
-               if (isLine) { var loc=(o.Dot(Element.Coeff(4,-.5).Add(Element.Coeff(3,-.5)))).Div(o), att=o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))); lx=-loc.e1; ly=loc.e2; lr=Math.atan2(att[8],att[7])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;};
-               var loc=o.Div(o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1)))); lx=-loc.e1; ly=loc.e2; var r=-o.Mul(o.Conjugate).s/(Element.Pow(o.Dot(Element.Coeff(4,1).Sub(Element.Coeff(3,1))),2).s); r=r**0.5; return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`;   
-             } else if (!b1 && b2 &&!b3) { o=o.Normalized; lr=0; var inf=Element.Coeff(4,1).Sub(Element.Coeff(3,1)), oi=o.Dot(inf),loc=o.Div(oi),rad=o.Mul(o.Conjugate).s/(Element.Pow(oi,2).s); if (rad>0) return '';
-               var att=inf.Wedge(oi).Normalized.Mul(Element.Scalar(rad*0.5)).Add(Element.Scalar(1)); 
-               var loc2=Element.sw(att,loc); lx=loc2.e1; ly=-loc2.e2; var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; 
-               loc2=Element.sw(att.Conjugate,loc); lx=loc2.e1; ly=-loc2.e2; res2+=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; 
-               return res2;
+             else if (!b1 && !b2 && b3) { var isLine=o.Dot(Element.Coeff(4,1,3,-1)).Length==0; 
+               if (isLine) { var loc=(o.Dot(Element.Coeff(4,-.5).Add(Element.Coeff(3,-.5)))).Div(o), att=o.Dot(Element.Coeff(4,1,3,-1)); lx=-loc.e1; ly=loc.e2; lr=Math.atan2(att[8],att[7])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;};
+               var loc=o.Div(o.Dot(Element.Coeff(4,1,3,-1))); lx=-loc.e1; ly=loc.e2; var r=-o.Mul(o.Conjugate).s/(Element.Pow(o.Dot(Element.Coeff(4,1,3,-1)),2).s); r=r**0.5; return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`;   
+             } else if (!b1 && b2 &&!b3) { 
+               lr=0; var ei=Element.Coeff(4,1,3,-1),eo=Element.Coeff(4,.5,3,.5), nix=o.Wedge(ei), sqr=o.Dot(o).s/nix.Dot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=(nix.Dot(ei.Wedge(eo))).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div(Element.Sub(ei).Dot(pos)); 
+               lx=pos.e1; ly=-pos.e2; if (sqr<0) return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`;
+               lx=pos.e1+attitude.e1; ly=-pos.e2-attitude.e2; var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`;
+               lx=pos.e1-attitude.e1; ly=-pos.e2+attitude.e2; return res2+`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`;
              }
            }):f.map&&f.map((o,oidx)=>{  if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; } while (o instanceof Function) o=o(); o=(o instanceof Array)?o.map(project):project(o); if (o===undefined) return; 
              if (o instanceof Array)  { lx=ly=lr=0; o.forEach((o)=>{o=(o.call)?o():o; lx+=((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]];ly+=o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${((drm[1]==6||drm[1]==14)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${o[0][drm[3]]/o[0][drm[1]]} x2=${((drm[1]==6||drm[1]==14)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${o[1][drm[3]]/o[1][drm[1]]} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
