@@ -11,9 +11,9 @@ Algebra(2,0,1,()=>{
       dist_pp    = (X,Y)=>(X&Y).Length,
       dist_pl    = (P,l)=>(P.Normalized^l.Normalized).e012,
       angle      = (x,y)=>Math.acos(x.Normalized<<y.Normalized),
-      project_pl = (P,l)=>(P<<l)*l,
-      project_lp = (P,l)=>(P<<l)*-P,
-      reject_lp  = (P,l)=>(P<<l);
+      project_pl = (P,l)=>(l<<P)*l,
+      project_lp = (P,l)=>(l<<P)*P,
+      reject_lp  = (P,l)=>(l<<P);
 
   // Rotations can be specified through exponentiation (angle around point).
   var rotor = (point,angle)=>Math.cos(angle/2) + Math.sin(angle/2)*point.Normalized;
@@ -33,6 +33,6 @@ Algebra(2,0,1,()=>{
   // Graph it
   document.body.appendChild(this.graph([
     "Versors", ()=>[tr>>>A,rt>>>B], ()=>tr>>>A, "tr>>>A", ()=>rt>>>B, "rt>>>B",
-  ],{animate:true}));
+  ],{grid:true, animate:true}));
 });
 </SCRIPT></BODY>

@@ -17,10 +17,10 @@ Algebra(2,0,1,()=>{
       a=()=>B&C,b=()=>C&A,c=()=>A&B,
 
   // The orthocenter
-     oa=()=>A<<a, ob=()=>B<<b, oc=()=>C<<c, ortho=()=>oa^ob,
+     oa=()=>a<<A, ob=()=>b<<B, oc=()=>c<<C, ortho=()=>oa^ob,
   
   // The circumcenter
-      ca=()=>(A+B)<<c, cb=()=>(B+C)<<a, cc=()=>(C+A)<<b, circum=()=>ca^cb,
+      ca=()=>c<<(A+B), cb=()=>a<<(B+C), cc=()=>b<<(C+A), circum=()=>ca^cb,
       
   // The centroid      
       centroid = ()=>A+B+C,
@@ -34,6 +34,6 @@ Algebra(2,0,1,()=>{
       0x88AA88,ca,cb,cc,circum,                // circumcenter
       0x8888FF,centroid,line,"Euler Line",     // centroid and euler line
       0x444444,A,B,C                           // triangle vertices
-      ]));
+      ],{grid:true}));
 });
 </SCRIPT></BODY>

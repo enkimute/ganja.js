@@ -15,12 +15,12 @@ Algebra(3,1,()=>{
       circle = (x,y,r)=>!(point(x,y) - r**2/2*ei);
   
 // Some identities
-  var line_through_P_parallel_with_X = (P,X)=>X<<(P^ei)*(P^ei),
-      project_point_on_circle        = (P,C)=>C<<(P^ei)*C,
-      project_point_on_line          = (P,L)=>L.Normalized<<P*L.Normalized,
-      position                       = (X)=>{ X=X/(X^ei); return X/(-ei<<X); },
+  var line_through_P_parallel_with_X = (P,X)=>(P^ei)<<X*(P^ei),
+      project_point_on_circle        = (P,C)=>(P^ei)<<C*C,
+      project_point_on_line          = (P,L)=>P<<L.Normalized*L.Normalized,
+      position                       = (X)=>{ X=X/(X^ei); return X/(X<<-ei); },
       radius                         = (X)=>Math.abs(((X<<X).s/((X^ei)**2).s))**.5,
-      attitude                       = (X)=>(X^ei<<(ei^eo)).Normalized,
+      attitude                       = (X)=>(ei^eo<<(X^ei)).Normalized,
       split                          = (pp)=>position(pp)-radius(pp)*attitude(pp);
 
 // Define some elements.
@@ -42,7 +42,7 @@ Algebra(3,1,()=>{
     ()=>project_point_on_line(p1,X), "p1 on X",         // project on line
     ()=>project_point_on_line(p1,Y), "p1 on Y",         // project on line
     0x444444,p1,"p1",p2,"p2",p3,"p3",                   // render the points
-  ],{conformal:true}));                                 // conformal flag!  
+  ],{conformal:true,grid:true}));                       // conformal flag!  
 
 });
 </SCRIPT></BODY>

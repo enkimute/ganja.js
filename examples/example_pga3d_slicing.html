@@ -28,7 +28,7 @@ Algebra(3,0,1,()=>{
       document.body.appendChild(this.graph([0xCCCCCC].concat(edges),{camera}));
       
       // Precalculate face and edge bivectors.
-      var facedata = faces.map(x=>{ var f; return [f=x[0]&x[1]&x[2],((x[0]&x[1])<<f),((x[1]&x[2])<<f),((x[2]&x[0])<<f)]});
+      var facedata = faces.map(x=>{ var f; return [f=x[0]&x[1]&x[2],(f<<(x[0]&x[1])),(f<<(x[1]&x[2])),(f<<(x[2]&x[0]))]});
       
       // Now graph (animated) the cut .. 
       Object.assign(document.body.appendChild(this.graph(()=>{

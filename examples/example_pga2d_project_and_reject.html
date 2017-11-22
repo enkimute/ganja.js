@@ -13,13 +13,13 @@ Algebra(2,0,1,()=>{
       angle   = (x,y)=>Math.acos(x.Normalized<<y.Normalized);
       
   // Projecting a point onto a line.
-  var project_pl = (P,l)=>(P<<l)*l,
+  var project_pl = (P,l)=>(l<<P)*l,
   
   // Or we can project a line on a point.
-      project_lp = (P,l)=>(P<<l)*-P,
+      project_lp = (P,l)=>(l<<P)*P,
       
   // We can also reject a line from a point.
-      reject_lp = (P,l)=>(P<<l);    
+      reject_lp = (P,l)=>(l<<P);    
     
   // Define some points and lines.
   var A=point(-1,1), B=point(-1,-1), C=point(1,-1), AC=()=>A&C;
@@ -32,6 +32,6 @@ Algebra(2,0,1,()=>{
     ()=>project_lp(B,AC), "project AC onto B",
     0xff8888,
     ()=>reject_lp(B,AC), "reject AC from B"
-  ]));
+  ],{grid:true}));
 });
 </SCRIPT></BODY>

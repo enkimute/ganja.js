@@ -26,7 +26,7 @@ Algebra(2,0,1,()=>{
       M=()=>m^m2, a=()=>join(A,A2),
       
   // Find the midpoint between A and A2 and the orthogonal line through it.      
-      Am=()=>A+A2, r=()=>(Am<<a).Normalized,
+      Am=()=>A+A2, r=()=>(a<<Am).Normalized,
       
   // Find the line between m and m2 and cut that with r to find the center of our isometry      
       c=()=>m-m2, C=()=>r^c,

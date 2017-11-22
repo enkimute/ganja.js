@@ -69,13 +69,13 @@ var PGA2D = Algebra(2,0,1), given=0xffffff, find=0xff8888, hint=0x535364, levels
     ()=>["Drag points together to <B>Add</B> them.",find,A+B,given,A,B],
     ()=>["Drag lines apart to <B>Add</B> them.",find,c+b,given,c,b],
     `Holding a point and dragging a line towards it will project that line through the point.<BR><BR>Click here to continue<BR>${help.dot}`,
-    ()=>{ var a=line(1,0,0),B=point(0,1); return ["Select a point, drag the line to it.",find,B<<a,given,a,B]; },
+    ()=>{ var a=line(1,0,0),B=point(0,1); return ["Select a point, drag the line to it.",find,a<<B,given,a,B]; },
     `PGA2D Elements : <BR>${help.points}${help.lines}<BR><BR>PGA2D Operations<BR>${help.join}${help.addP}${help.wedge}${help.addL}${help.dot}`,
-    ()=>{ var a=line(1,0,0),B=point(0,1),C=point(1,1); return [".. find the red elements ..",find,B<<a,a+B<<a,given,a,B]; },
-    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Find the orthocenter",hint,A&B,(C<<(A&B)),find,((C<<(A&B))^(A<<(B&C))), given,A,B,C];},
-    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Find the circumcenter",hint,A+B,(A+B)<<(A&B),find,(((A+B)<<(A&B))^((B+C)<<(B&C))),given,A,B,C];},
+    ()=>{ var a=line(1,0,0),B=point(0,1),C=point(1,1); return [".. find the red elements ..",find,a<<B,a+a<<B,given,a,B]; },
+    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Find the orthocenter",hint,A&B,((A&B)<<C),find,(((A&B)<<C)^((B&C)<<A)), given,A,B,C];},
+    ()=>{ var A=point(-0.4,1.5), B=point(1.5,-1), C=point(-1,-1.5); return ["Find the circumcenter",hint,A+B,(A&B)<<(A+B),find,(((A&B)<<(A+B))^((B&C)<<(B+C))),given,A,B,C];},
     ()=>{
-      var A=point(1.2,1.3), B=point(0.4,-0.5), C=point(-1,-0.4), ortho=((C<<(A&B))^(A<<(B&C))), circum=(((A+B)<<(A&B))^((B+C)<<(B&C)));
+      var A=point(1.2,1.3), B=point(0.4,-0.5), C=point(-1,-0.4), ortho=(((A&B)<<C)^((B&C)<<A)), circum=(((A&B)<<(A+B))^((B&C)<<(B+C)));
       return ["Find Eulers line",hint,ortho,circum,find,ortho&circum,given,A,B,C];
     },
     ()=>[`Well done.<BR><BR><BR>Moves : ${moves}<BR>Time : ${(dt/1000/60)|0}:${((dt/1000)|0)%60}<BR>Score : ${score|0}`,find,1e12+5e01]
@@ -121,8 +121,8 @@ function handle_operation() {
       holda=al<0.1,holdb=bl<0.1,aout=al>0.1&&ca<0,bout=bl>0.1&&cb<0,ain=al>0.1&&ca>0,bin=bl>0.1&&cb>0; 
        if (aout && bout) var n=selection[0][0].P.Vee(selection[1][0].P).Normalized; 
   else if (ain  && bin)  var n=selection[0][0].P.Wedge(selection[1][0].P).Normalized; 
-  else if (holda && bin) var n=selection[0][0].P.Dot(selection[1][0].P).Normalized; 
-  else if (holdb && ain) var n=selection[1][0].P.Dot(selection[0][0].P).Normalized; 
+  else if (holda && bin) var n=selection[1][0].P.Dot(selection[0][0].P).Normalized; 
+  else if (holdb && ain) var n=selection[0][0].P.Dot(selection[1][0].P).Normalized; 
   else return setTimeout(selectionClear,600);
   // upgrade wedge of points or vee of lines to sum.
   if ((ain&&bin&&n.Length==0)||(aout&&bout&&n.Length==0) ) { 

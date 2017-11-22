@@ -17,7 +17,7 @@ Algebra(3,1,()=>{
   
   // Circle around triangle.
       circle = ()=>A^B^C,     
-      circum = ()=>-circle/(circle<<ei),
+      circum = ()=>-circle/(ei<<circle),
       
   // The centroid      
       centroid = ()=>(A+B+C)/3,
@@ -30,7 +30,7 @@ Algebra(3,1,()=>{
       0x88AA88,circum,circle,                  // circumcenter
       0x8888FF,centroid,line,"Euler Line",     // centroid and euler line
       0x444444,A,B,C,                          // triangle vertices
-  ],{conformal:true}));
+  ],{conformal:true, grid:true}));
 
 });
 </SCRIPT></BODY>

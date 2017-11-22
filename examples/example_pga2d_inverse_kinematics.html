@@ -39,7 +39,7 @@ Algebra(2,0,1,()=>{
     0x0000ff,points.slice(1,l),                         // render joint points. [A,B,C,..]
     points.map((x,i,a)=>[a[i-1],x]).slice(1,l),         // render line segments. [[A,B],[B,C],..]
     0x000000,points[l],"Target"                         // render target in black
-  )));
+  ),{grid:true}));
   
 });
 </SCRIPT></BODY>
