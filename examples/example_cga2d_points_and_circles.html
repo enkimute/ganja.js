@@ -36,13 +36,13 @@ Algebra(3,1,()=>{
   var X=line(0,1,0), Y=()=>p2^p3^ei;
       
 // Create point pairs by intersecting circle(s) and a line(s).
-  var pp1=()=>X&C, pp2=()=>C&D, pp3=()=>Y&D;
+  var pp1=()=>X&C, pp2=()=>C&D, pp3=()=>Y&D, p4=()=>-eo<<(X&Y).Normalized;
       
 // Graph these items.
   document.body.appendChild(this.graph([
     "2D CGA - drag p1,p2,p3","",                  // title
     0xFF8888, C, "C", D, "D",                     // circles
-    0x44AA44, X, "X", Y, "Y",                     // lines
+    0x44AA44, X, "X", Y, "Y", p4,                 // lines
     0x4444FF, pp1, "pp1", pp2, "pp2", pp3, "pp3", // point pairs
     0x666666, p1, "p1", p2, "p2", p3, "p3",       // points
   ],{conformal:true,grid:true}));                 // conformal flag!  
