@@ -468,63 +468,86 @@ resulting in less brackets in many common GA expressions.
 <A NAME="P2"></A>
 ## Ganja starterkit : PGA2D P(R*<sub>2,0,1</sub>)
 
-Want to get started quickly with 2D Projective Geometric Algebra ? The boiler plate below gets you going with a bunch of usefull identities. (and the coffeeshop has plenty of examples).
+Want to get started quickly with 2D Projective Geometric Algebra ? The
+boiler plate below gets you going with a bunch of usefull identities. 
+(and the coffeeshop has plenty of examples).
 
-We start off with a clifford algebra with signature (2,0,1). 
-
-```javascript
-var PGA2D = Algebra(2,0,1);
-```
-
-Next, we upgrade it to a geometric algebra by extending it with geometric
+We start off with a clifford algebra with signature (2,0,1). We then
+upgrade it to a geometric algebra by extending it with geometric
 operators. (this is where we decide our bivectors will be points,
 effectively making this P(R*<sub>2,0,1</SUB>). 
 
-```javascript
-PGA2D.inline(function(){ 
-  this.point           = (X,Y)=>1e12-X*1e02+Y*1e01;
-  this.line            = (a,b,c)=>a*1e1+b*1e2+c*1e0;
-  this.join            = (x,y)=>x&y;
-  this.meet            = (x,y)=>x^y;
-  this.dist_points     = (P1,P2)=>(P1.Normalized&P2.Normalized).Length;
-  this.dist_point_line = (P,l)=>((P.Normalized)^(l.Normalized)).e012;
-  this.angle_lines     = (l1,l2)=>(l1.Normalized<<l2.Normalized).s;
-  this.project         = (P,l)=>(P<<l)*l;
-  this.parallel        = (P,l)=>(P<<l)*P;
-  this.ortho           = (P,l)=>P<<l;
-  this.rotor           = (a,P)=>Math.cos(a*0.5)+Math.sin(a*0.5)*P;
-  this.translator      = (x,y)=>1+0.5*(x*1e20-y*1e01);
-})();
-```
-We can now use our 2D Projective Algebra. We'll use the graph function to
-visualize some algebraic objects (i.e. lines and points).
+Simply include the ganja.js script and put the block below in a **SCRIPT** tag
+to get started .. 
 
 ```javascript
-PGA2D.inline(function(){ 
-
-   var O = PGA2D.point(-1,-1), 
-       Y = PGA2D.point( 1,-1), 
-       X = PGA2D.point(-1, 1),
-       z = PGA2D.join(Y,X),
-       o = -1*PGA2D.ortho(O,z),
-       rot = this.rotor(0.3,O);
-
-   document.body.appendChild(this.graph({
-     O,X,Y,
-     "color1"        : 0xff0000,
-     "O˅X"           : PGA2D.join(O,X),
-     "O˅Y"           : PGA2D.join(Y,O),
-     "z=X˅Y"         : z,
-     "color2"        : 0x008800,
-     "o=ortho(O,z)"  : o,
-     "parallel(O,z)" : PGA2D.parallel(O,z),
-     "rot*o*~rot"    : rot>>>o,
-     "color3"        : 0x8888ff,
-     "proj(O,z)"     : PGA2D.project(O,z),
-     "rot*X*~rot"    : rot>>>X,
-   }))
-
-})();
+// Create a Clifford Algebra with 2 positive and one zero generator.
+Algebra(2,0,1,()=>{
+    
+    // Output algebra info to the console.
+    this.describe();
+    
+    // The default basis is s,e0,e1,e2,e01,e02,e12,e012
+    // The metric for vectors is    0,  1,  1 - Vectors will represent lines.
+    // The metric for bivectors is  0,  0, -1 - Bivectors will represent points.
+    // The pseudoscalar is degenerate, so use the built-in duality operator instead.
+    
+    // The bivectors consist of two motor elements and one rotation element -
+    // exactly what is needed to represent translations and rotations in the plane.
+    
+    // In dual projectivized space, the origin is represented by the e12 bivector.
+    var origin = 1e12, EX=-1e02, EY=1e01;
+    
+    // Points and lines can be specified directly. (note : -e02 = e20)
+    var point = (x,y)=>origin+x*EX+y*EY;
+    var line  = (a,b,c)=>a*1e1+b*1e2+c*1e0;
+    
+    // Or through join and meet operations. (dual so wedge is meet and vee is join.)
+    var join = (p1,p2)=>p1&p2;
+    var meet = (l1,l2)=>l1^l2;
+    
+    // Distances and angles
+    var dist_points     = (P1,P2)=>(P1.Normalized&P2.Normalized).Length;
+    var dist_point_line = (P,l)=>((P.Normalized)^(l.Normalized)).e012;
+    var angle_lines     = (l1,l2)=>(l1.Normalized<<l2.Normalized).s;
+  
+    // Points and lines can be projected and rejected.
+    var project         = (P,l)=>(P<<l)*l;
+    var parallel        = (P,l)=>(P<<l)*P;
+    var ortho           = (P,l)=>P<<l;
+  
+    // translations and rotations.
+    var rotor           = (a,P)=>Math.cos(a*0.5)+Math.sin(a*0.5)*P;
+    var translator      = (x,y)=>1+0.5*(x*1e20-y*1e01); 
+    
+    // To demonstrate graphing, we create some points and lines.
+    // Users can drag points in the graph, lambda expressions can be
+    // used to create dynamic updating items.
+    var A = point(-1,-1), B = point(1,-1), C = point(-1,1), l = line(-1,1,0.5);
+    
+    // Ganja.js can directly graph 2D PGA elements. Pass in an array of
+    // items to render. (numbers are colors, strings are labels, PGA points
+    // and lines are rendered automatically and arrays can be used for line
+    // segments and polygons). The graph function returns a HTML SVG element.
+    document.body.appendChild(this.graph([
+      // use numbers to set the current color.    
+        0x444444,
+      // strings label the items they follow, first string is a title.    
+        "title",
+      // render points (user can drag these)     
+        A, B, C, "Label for point",
+      // render lines    
+        l,"Label for line",
+      // line segments
+        ()=>[A,B], "Label for segment",
+      // polygons
+        0xffeeee,
+        ()=>[A,B,C], 0xff7777, "Label for polygon"
+    ],{grid:true, animate:false}));
+    
+    // When using the animation mode, all lambda's will be evaluated every frame.
+    // Use Date.now() or similar. (many examples in the coffeeshop.)
+});
 ```
 
 ![ganja p2 example](images/ganja_p2.jpg)
