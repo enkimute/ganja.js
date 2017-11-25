@@ -36,7 +36,7 @@ Algebra(3,1,()=>{
   var X=line(0,1,0), Y=()=>p2^p3^ei;
       
 // Create point pairs by intersecting circle(s) and a line(s).
-  var pp1=()=>X&C, pp2=()=>C&D, pp3=()=>Y&D, p4=()=>-eo<<(X&Y).Normalized;
+  var pp1=()=>X&C, pp2=()=>C&D, pp3=()=>Y&D, p4=()=>0.5*(eo<<(X&Y).Normalized)>>>ei;
       
 // Graph these items.
   document.body.appendChild(this.graph([
