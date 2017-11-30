@@ -512,13 +512,13 @@ Algebra(2,0,1,()=>{
     var angle_lines     = (l1,l2)=>(l1.Normalized<<l2.Normalized).s;
   
     // Points and lines can be projected and rejected.
-    var project         = (P,l)=>(P<<l)*l;
-    var parallel        = (P,l)=>(P<<l)*P;
+    var project         = (P,l)=>P<<l*l;
+    var parallel        = (P,l)=>P<<l*P;
     var ortho           = (P,l)=>P<<l;
   
     // translations and rotations.
     var rotor           = (a,P)=>Math.cos(a*0.5)+Math.sin(a*0.5)*P;
-    var translator      = (x,y)=>1+0.5*(x*1e20-y*1e01); 
+    var translator      = (x,y)=>1+0.5*(x*1e02-y*1e01); 
     
     // To demonstrate graphing, we create some points and lines.
     // Users can drag points in the graph, lambda expressions can be
