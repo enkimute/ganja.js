@@ -12,10 +12,10 @@ Algebra(0,0,1,()=>{
   var f = (x)=>0.25*x*x*x*x-0.5;
   
   // On the left the function.
-  document.body.appendChild(this.graph((x)=>f([x,1])[0],{nocompile:true}));
+  document.body.appendChild(this.graph((x)=>f([x,1])[0]));
   
   // On the right its derivative.
-  document.body.appendChild(this.graph((x)=>f([x,1])[1],{nocompile:true}));
+  document.body.appendChild(this.graph((x)=>f([x,1])[1]));
 
   // A selection of numerical values of both :
   document.body.appendChild(Object.assign(document.createElement('table'),{
@@ -41,6 +41,6 @@ var Cayley=[['1', 'e1','e2','e3','e4'],
 
 Algebra({basis,Cayley},()=>{
   var f = (x)=>0.25*x*x*x*x-0.5;
-  for (var i=0; i<5; i++) document.body.appendChild(this.graph((x)=>f(x+1e1)[i],{nocompile:true}));
+  for (var i=0; i<5; i++) document.body.appendChild(this.graph((x)=>f(x+1e1)[i]));
 });
 </SCRIPT></BODY>
