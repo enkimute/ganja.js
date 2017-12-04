@@ -5,7 +5,6 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'UA-96802693-2');
   </script>
   <link rel="shortcut icon" type="image/x-icon" href="https://enkimute.github.io/ganja.js/images/favicon.ico">
   <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Condensed" rel="stylesheet">
@@ -159,8 +158,12 @@
         if (a[0]) a[0].style.height='100%';
         if (a[0]) a[0].style.width='100%';
       };
-
-      gtag&&gtag('event','screen_view',{screen_name:document.location.hash.slice(1)});  
+      gtag&&gtag('config', 'UA-96802693-2', {
+        'page_title': 'coffeeshop - '+document.location.hash.slice(1),
+        'page_location': 'https://enkimute.github.io/ganja.js/examples/coffeeshop.html'+document.location.hash,
+        'page_path': '/ganja.js/examples/coffeeshop.html'+document.location.hash
+      });
+      //gtag&&gtag('event','screen_view',{screen_name:document.location.hash.slice(1)});  
     };
   </SCRIPT>
 </BODY>
