@@ -20,7 +20,7 @@ Algebra(2,0,1,()=>{
   // testcase integrate dx=x to approximate e in 1 RK4 timestep : RK4(s=>s,[1],1); 
     var RK4=(f,y,h)=>{
        var k1=f(y), k2=f(y+0.5*h*k1), k3=f(y+0.5*h*k2), k4=f(y+h*k3);
-       return y.map((x,xi)=>x+h*((k2[xi]+k3[xi])/3+(k1[xi]+k4[xi])/6));
+       return  y+(h/3)*(k2+k3+(k1+k4)*0.5);
     }
   
   // Acceleration of p1,m1 due to gravity between p1,m1 and p2,m2
