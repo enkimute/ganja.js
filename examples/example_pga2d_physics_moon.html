@@ -1,0 +1,59 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 2,0,1 metric.
+Algebra(2,0,1,()=>{
+  // Some constants. (scientific notation with uppercase E not overloaded)
+  var G          = 6.6703E-11, // N*m2/kg2 
+      mEarth     = 5.97237E24, // kg
+      mMoon      = 7.342E22,   // kg
+      vMoon      = 1085,       // m/s
+      dEarthMoon = 362400E3,   // m
+      CoG        = dEarthMoon*mMoon/(mEarth+mMoon); // CoG of earth/moon in earth coords.
+
+  // Points and vectors (scientific notation with lowercase e is GA overloaded)
+  var point  = (x,y)=>1e12-x*1e02+y*1e01;
+  var vector = (x,y)=>-x*1e02+y*1e01;
+
+  // Runge-Kuta order 4. f=function, y=array of values, h=timestep
+  // testcase integrate dx=x to approximate e in 1 RK4 timestep : RK4(s=>s,[1],1); 
+  var RK4=(f,y,h)=>{
+     var k1=f(y),
+         k2=f(y.map((y,yi)=>y+0.5*h*k1[yi])),
+         k3=f(y.map((y,yi)=>y+0.5*h*k2[yi])),
+         k4=f(y.map((y,yi)=>y+h*k3[yi]));
+     return y.map((x,xi)=>x+h*(k2[xi]+k3[xi])/3+h*(k1[xi]+k4[xi])/6);
+  }
+  
+  // Acceleration of p1,m1 due to gravity between p1,m1 and p2,m2
+  var A=(p1,p2,m1,m2)=>{var v=p2-p1, d=v.VLength; return G*m1*m2/(d*d*m1)*v/d; }
+  
+  // Positions and velocities of earth and moon. (with the origin=CoG)
+  var state = [ point(-CoG,0),                                    // pos earth
+                point(dEarthMoon-CoG,0),                          // pos moon
+                vector(0,-vMoon*CoG/dEarthMoon),                  // speed earth
+                vector(0,vMoon*(dEarthMoon-CoG)/dEarthMoon) ];    // speed moon
+  
+  // Totaltime, Average time, Timestep, revolutions.
+  var tt=0, at=0, dt=5000, revolutions=0;
+
+  // Graph it
+  document.body.appendChild(this.graph(()=>{ 
+    // Remember if we start below the x axis
+      var below = state[1].e01<0;
+    // Integrate to the next state.   
+      state = RK4((s)=>[s[2],s[3],A(s[0],s[1],mEarth,mMoon),A(s[1],s[0],mMoon,mEarth)],state,dt);
+      tt+=dt;
+    // See if we crossed the x-axis and count the revolutions.  
+      if (below&&(state[1].e01>0)) { revolutions++; at = (tt/86400)/revolutions; };
+    // Output stats and visualise motion.  
+      return ["Moon/Earth Elliptical Orbit",
+              ((tt/86400).toFixed(1))+" days",
+              "Distance : "+(((state[1]-state[0]).VLength/1000).toFixed(0))+" km",
+              "Speed : " + (state[3].VLength.toFixed(0)) + " km/s" ,
+              "#"+revolutions+" @"+at.toFixed(4)+" days",
+              state[0],"Earth",state[1],"Moon"];
+  },{scale:0.000000003,grid:true, animate:true}));
+});
+</SCRIPT></BODY>
