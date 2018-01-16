@@ -4,25 +4,26 @@
 <BODY><SCRIPT>
 // Dual Numbers Example : Automatic Differentiation.
 Algebra(0,0,1,()=>{
-    
+
   // This is our function. If you pass in a scalar x it returns f(x),
   // if you pass in a dual number [x,1], it returns [f(x),f'(x)]
-  // Feel free to change this function.  
+  // Feel free to change this function.
 
   var f = (x)=>0.25*x*x*x*x-0.5;
-  
+
   // On the left the function.
-  document.body.appendChild(this.graph((x)=>f([x,1])[0]));
-  
+  document.body.appendChild(this.graph((x)=>f(x+1e0)[0]));
+
   // On the right its derivative.
-  document.body.appendChild(this.graph((x)=>f([x,1])[1]));
+  document.body.appendChild(this.graph((x)=>f(x+1e0)[1]));
 
   // A selection of numerical values of both :
+  var values=[-3,-2,-1,0,1,2,3].map(x=>f(1e0+x));
   document.body.appendChild(Object.assign(document.createElement('table'),{
    width:200,
-   innerHTML:`<TR><TH>x<TH>f(x)<TH>f'(x)${[-3,-2,-1,0,1,2,3].map(x=>'<TR><TD>'+x+'<TD>'+f([x,1])[0]+'<TD>'+f([x,1])[1]).join('')}`
+   innerHTML:`<TR><TH>x<TH>f(x)<TH>f'(x)${values.map((x,xi)=>'<TR><TD>'+(xi-3)+'<TD>'+(x[0]||0)+'<TD>'+(x[1]||0)).join('')}`
   }))
-    
+
 });
 
 // You can use ganja.js and a custom Cayley table to extend this concept to n-th order derivatives.
@@ -30,7 +31,7 @@ Algebra(0,0,1,()=>{
 // For that we need an algebra with multiple zero dimensions, that 'spill over' .. e1*e1=e2, e2*e2=e3, .. en*en=0
 // This algebra will contain no bivector elements and we have to manually supply a cayley table :
 //
-// We plot f, f', f'2/2!, f'3/3!, f'4/4! : 
+// We plot f, f', f'2/2!, f'3/3!, f'4/4! :
 
 var basis=['1','e1','e2','e3','e4'];
 var Cayley=[['1', 'e1','e2','e3','e4'],
