@@ -17,14 +17,15 @@ Algebra(2,0,1,()=>{
     var vector = (x,y)=>-x*1e02+y*1e01;
   
   // Runge-Kuta order 4. f=function, y=array of values, h=timestep
-  // testcase integrate dx=x to approximate e in 1 RK4 timestep : RK4(s=>s,[1],1); 
+  // testcase integrate dx=x to approximate e in 1 RK4 timestep : RK4(s=>s,1,1);
+  // inside ganja, you can call this with reals, multivectors, arrays, ..  
     var RK4=(f,y,h)=>{
        var k1=f(y), k2=f(y+0.5*h*k1), k3=f(y+0.5*h*k2), k4=f(y+h*k3);
        return  y+(h/3)*(k2+k3+(k1+k4)*0.5);
     }
   
   // Acceleration of p1,m1 due to gravity between p1,m1 and p2,m2
-    var A=(p1,p2,m1,m2)=>{var v=p2-p1, d=v.VLength; return G*m1*m2/(d*d*m1)*v/d; }
+    var A=(p1,p2,m1,m2)=>{ var v=p2-p1, d=v.VLength; return G*m1*m2/(d*d*m1)*v/d; }
     
   // Positions and velocities of earth and moon. (with the origin=CoG)
     var state = [ point(-CoG,0),                                    // pos earth
@@ -45,12 +46,12 @@ Algebra(2,0,1,()=>{
       // See if we crossed the x-axis and count the revolutions.  
         if (below&&(state[1].e01>0)) { revolutions++; at = (tt/86400)/revolutions; };
       // Output stats and visualise motion.  
-        return ["Moon/Earth Elliptical Orbit",
-                ((tt/86400).toFixed(1))+" days",
-                "Distance : "+(((state[1]-state[0]).VLength/1000).toFixed(0))+" km",
-                "Speed : " + (state[3].VLength.toFixed(0)) + " km/s" ,
-                "#"+revolutions+" @"+at.toFixed(4)+" days",
-                state[0],"Earth",state[1],"Moon"];
+        return ["Moon/Earth Elliptical Orbit",                                          // title
+                ((tt/86400).toFixed(1))+" days",                                        // sim time
+                "Distance : "+(((state[1]-state[0]).VLength/1000).toFixed(0))+" km",    // distance
+                "Speed : " + (state[3].VLength.toFixed(0)) + " m/s",                    // speed
+                "#"+revolutions+" @"+at.toFixed(4)+" days",                             // avg period
+                state[0],"Earth",state[1],"Moon"];                                      // planets
     },{scale:0.000000003,grid:true, animate:true}));
 });
 </SCRIPT></BODY>
