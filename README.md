@@ -146,8 +146,8 @@ Algebra(0,1,()=>(3+2e1)*(1+4e1)); // return [-5,14]
 
 The inline syntax is powerful and flexible. It offers full operator
 overloading, overloads scientific e-notation to allow you to directly
-specify basis blades and allows using lambda expressions without the need
-for calling brackets in algebraic expressions.
+specify basis blades and allows using arrays or lambda expressions without 
+the need for calling brackets in algebraic expressions.
 
 ```javascript
 Algebra(2,0,1,()={
@@ -170,6 +170,12 @@ Algebra(2,0,1,()={
 
   // Same line as above.. but as function.. (so will update if the point changes)
   var function_that_returns_join = ()=>some_point & function_that_returns_point;
+
+  // Binary operations on arrays also work as expected.
+  var even = [1,2,3,4,5]*2;
+
+  // Even if those contain multivectors or other arrays : 
+  var funky = [1, 1e01+0.5e02, [3,4]] * 3 + [1,2,3];
 
   // All elements and functions can be rendered directly. (again, no calling brackets). 
   var canvas = this.graph([ some_point, function_that_returns_point, function_that_returns_join ]);
