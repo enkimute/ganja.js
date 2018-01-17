@@ -1,0 +1,39 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 3,0,1 metric. 
+Algebra({p:3,q:0,r:1,baseType:Float64Array},()=>{ 
+
+  // Basic GA points and vectors. (in KM)
+  var point  = (x,y,z)=>1e123-x*1000e012+y*1000e013+z*1000e023,
+      vector = (x,y,z)=>-x*1000e012+y*1000e013+z*1000e023;
+       
+  // Data from jpl.nasa.gov on 16/01/2018, mass, x,y,z, vx,vy,vz 
+  var S = { // kg, x y z km, vx vy vz km/s,
+       Sun              : [1.988544E30,point( 2.564294388666002E+05, 9.282480498916068E+05,-1.766238790604926E+04),vector(-1.032271613682197E-02, 8.506510987745193E-03, 2.500579386306204E-04)],
+       Mercury          : [3.302E23   ,point(-4.261433008703040E+07,-5.180047961851221E+07,-3.933312499175891E+05),vector( 2.791200817718316E+01,-2.845907905315504E+01,-4.887507665269149E+00)],
+       Venus            : [48.685E23  ,point( 5.357396412032661E+07,-9.395832506522638E+07,-4.396021713049673E+06),vector( 3.028389624261208E+01, 1.704407507992616E+01,-1.514240016876114E+00)],
+       Earth            : [5.97219E24 ,point(-6.321181522689363E+07, 1.337035149539065E+08,-2.323422257646173E+04),vector(-2.738214042693713E+01,-1.295254402346621E+01, 1.833826936016081E-03)],
+       Mars             : [6.4185E23  ,point(-2.261872038770745E+08,-8.456074820817514E+07, 3.748261255788427E+06),vector( 9.452949401620625E+00,-2.058946931255050E+01,-6.636171336482146E-01)],
+       Jupiter          : [1898.13E24 ,point(-6.267852905434124E+08,-5.152098357372769E+08, 1.615654184230065E+07),vector( 8.141900694513106E+00,-9.472185978646950E+00,-1.428289208967608E-01)],
+      }, G = 6.6723E-11, start = 1516057200000, count=0, scale=.2E-14,
+      names = Object.keys(S), mass = names.map(x=>S[x][0]),
+      state = [].concat.apply([],names.map(x=>S[x].slice(1)));
+      
+  // RK4 integration
+  var RK4=(f,y,h)=>{ var k1=f(y), k2=f(y+0.5*h*k1), k3=f(y+0.5*h*k2), k4=f(y+h*k3); return  y+(h/3)*(k2+k3+(k1+k4)*0.5); };
+
+  // Acceleration of p1,m1 due to gravity between p1,m1 and p2,m2
+  var A=(p1,p2,m1,m2)=>{ var v=p2-p1, d=v.VLength; return G*m1*m2/(d*d*m1)*v/d; }
+
+  // Graph the 3D items
+  document.body.appendChild(this.graph(()=>{
+    state = RK4((s)=>s.map((si,i)=>((i%2==0)?s[i+1]:(mass.reduce((F,x,j)=>((i-1)/2==j)?F:F+A(s[i-1],s[j*2],mass[(i-1)/2],x),0)))),state,14400);
+    return [].concat.apply(
+             [(new Date(start+(count++)*14400000)).toDateString()],
+             names.map((x,xi)=>[point(state[xi*2].e012*scale,state[xi*2].e013*scale,state[xi*2].e023*scale),x])
+           )        
+  },{animate:true})); 
+});
+</SCRIPT></BODY>
