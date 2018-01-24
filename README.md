@@ -471,6 +471,32 @@ resulting in less brackets in many common GA expressions.
 |           | 2e2      |  2e_2     | new A([0,0,2,0])| A.Vector(0,2)
 |           | 2e12     |  2e_12    | new A([0,0,0,2])| A.Bivector(2)
 
+### Duality
+
+The Duality operator implements Poincare duality, a definition and implementation that works
+even if the pseudoscalar of the subspace in consideration is degenerate. It is defined for any
+k-vector **x**  of an n-dimensional subspace as the n-k vector **y** containing all the basis 
+vectors that are not in **x**. For non-degenerate metrics, you can still use multiplication
+with the pseudoscalar if so desired (although it will be less efficient)
+
+### Dot Product
+
+The dot product implemented is the left contraction - without any extensions or modifications.
+The geometric meaning is usually formulated as the dot product between **x** and **y** gives the orthogonal
+complement in **y** of the projection of **x** onto **y**.
+
+### Vee product
+
+The vee product is available as an optimized shorthand for the dual of the wedge of the duals.
+
+```
+a&b = !(!a^!b)
+```  
+I've chosen the **&** symbol as it can be interpreted as 'join' or 'meet' depending on the geometric
+meaning given to vectors. (planes/lines or points) 
+
+
+
 <A NAME="P2"></A>
 ## Ganja starterkit : PGA2D P(R*<sub>2,0,1</sub>)
 
