@@ -272,42 +272,63 @@ PGA3D Slicing<BR>
 <TD ALIGN=CENTER>
 PGA3D Icosahedron<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_icosahedron"            TARGET="_blank" TITLE="PGA3D Icosahedron"><IMG SRC="images/pga3d_icosahedron.jpg"/></A>
+
 <TR><TD ALIGN=CENTER>
 PGA3D Sampling<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_sampling"               TARGET="_blank" TITLE="PGA3D Sampling"><IMG SRC="images/pga3d_sampling.jpg"/></A>
 <TD ALIGN=CENTER>
 PGA3D Automatic Differentiation<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_differentiation"        TARGET="_blank" TITLE="PGA3D Automatic Differentiation"><IMG SRC="images/pga3d_differentiation.jpg"/></A>
+
+<TR><TD ALIGN=CENTER>
+PGA3D Physics Planets<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_physics_planets"        TARGET="_blank" TITLE="PGA3D Physics Planets"><IMG SRC="images/pga3d_physics_planets.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA3D Physics Symmetric Top<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_physics_symmetric_top"  TARGET="_blank" TITLE="PGA3D Physics Symmetric Top"><IMG SRC="images/pga3d_physics_symmetric_top.jpg"/></A>
+
+<TR><TD ALIGN=CENTER>
+PGA3D Physics Free Top<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_physics_free_top"       TARGET="_blank" TITLE="PGA3D Physics Free Top"><IMG SRC="images/pga3d_physics_free_top.jpg"/></A>
+<TD ALIGN=CENTER>
+PGA2D Physics Moon<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_physics_moon"           TARGET="_blank" TITLE="PGA2D Physics Moon"><IMG SRC="images/pga2d_physics_moon.jpg"/></A>
+
 <TR><TD ALIGN=CENTER>
 PGA2D Points and Lines<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines"       TARGET="_blank" TITLE="PGA2D Points and Lines"><IMG SRC="images/pga2d_points_and_lines.jpg"/></A>
 <TD ALIGN=CENTER>
 PGA2D Distances and Angles<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_distances_and_angles"   TARGET="_blank" TITLE="PGA2D Distances and Angles"><IMG SRC="images/pga2d_distances_and_angles.jpg"/></A>
+
 <TR><TD ALIGN=CENTER>
 PGA2D Project and Reject<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_project_and_reject"     TARGET="_blank" TITLE="PGA2D Project and Reject"><IMG SRC="images/pga2d_project_and_reject.jpg"/></A>
 <TD ALIGN=CENTER>
 PGA2D Rotors and Translators<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_rotors_and_translators" TARGET="_blank" TITLE="PGA2D Rotors and Translators"><IMG SRC="images/pga2d_rotors_and_translators.jpg"/></A>
+
 <TR><TD ALIGN=CENTER>
 PGA2D Isometries<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_isometries"             TARGET="_blank" TITLE="PGA2D Isometries"><IMG SRC="images/pga2d_isometries.jpg"/></A>
 <TD ALIGN=CENTER>
 PGA2D Inverse Kinematics<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_inverse_kinematics"     TARGET="_blank" TITLE="PGA2D Inverse Kinematics"><IMG SRC="images/pga2d_inverse_kinematics.jpg"/></A>
+
 <TR><TD ALIGN=CENTER>
 PGA2D Separating Axis<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_separating_axis"        TARGET="_blank" TITLE="PGA2D Separating Axis"><IMG SRC="images/pga2d_separating_axis.jpg"/></A>
 <TD ALIGN=CENTER>
 PGA2D Pose Estimation<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_pose_estimation"        TARGET="_blank" TITLE="PGA2D Pose Estimation"><IMG SRC="images/pga2d_pose_estimation.jpg"/></A>
+
 <TR><TD ALIGN=CENTER>
 PGA2D Euler Line<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_euler_line"             TARGET="_blank" TITLE="PGA2D Euler Line"><IMG SRC="images/pga2d_euler_line.jpg"/></A>
 <TD ALIGN=CENTER>
 PGA2D Desargues Theorem<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_desargues_theorem"      TARGET="_blank" TITLE="PGA2D Desargues Theorem"><IMG SRC="images/pga2d_desargues_theorem.jpg"/></A>
+
 <TR><TD ALIGN=CENTER>
 CGA2D Euler Line<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga2d_euler_line"             TARGET="_blank" TITLE="CGA2D Euler Line"><IMG SRC="images/cga2d_euler_line.jpg"/></A>
