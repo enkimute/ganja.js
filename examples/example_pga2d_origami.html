@@ -55,8 +55,8 @@ Algebra(2,0,1,()=>{
       O10 = Ori(O9,Ori1(p7,p6),[17,18]),
       O11 = Ori(O10,Ori1(p7,p6),[4]);
 
-  var draw = (O)=>[].concat.apply(O.concat([0]),O.map(p=>p.map((e,i,a)=>[e,a[(i+1)%a.length]]))).concat(0xAAAAAA);
-  document.body.appendChild(this.graph(["Origami - Kabuto", 0xAAAAAA].concat(
+  var draw = (O)=>[].concat.apply(O.concat([0x666666]),O.map(p=>p.map((e,i,a)=>[e,a[(i+1)%a.length]]))).concat(0xFFFFFF);
+  document.body.appendChild(this.graph(["Origami - Kabuto", 0xFFFFFF].concat(
        draw(O0-1e01+1e02), draw(O1-1e01-1e02),
        draw(O2+1.2e01+1.8e02), draw(O3+.7e01+0.8e02),   draw(O4+.7e01-0.2e02), draw(O5+.7e01-1.2e02),
        draw(O6+1.6e01+0.8e02), draw(O7+1.6e01-0.2e02),  draw(O8+1.6e01-1.2e02),
