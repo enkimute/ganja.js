@@ -32,7 +32,7 @@ Algebra(2,0,1,()=>{
       return res;
   }
 
-  // The first few steps for Kabuto from the exmple in the paper.
+  // We follow the procedure from the paper to fold Kabuto
   var point = (x,y)=>1e12-x*1e01+y*1e02;
   var s = 0.75, p1 = point(-s,s), p2 = point(-s,-s), p3 = point(s,-s), p4 = point(s,s);
   
@@ -49,12 +49,18 @@ Algebra(2,0,1,()=>{
   var p8=(p3+p5)/2, p9=(p5+p6)/2, p10=(p5+p7)/2,
       O7 = Ori(O6,Ori3(p8&p5,p9&p8),[7,8]),
       O8 = Ori(O7,Ori3(p5&p8,p8&p10),[13,14]);
+      
+  var p11=(p8+p5)/2,
+      O9 = Ori(O8,Ori2(p3,p11),[17]),
+      O10 = Ori(O9,Ori1(p7,p6),[17,18]),
+      O11 = Ori(O10,Ori1(p7,p6),[4]);
 
   var draw = (O)=>[].concat.apply(O.concat([0]),O.map(p=>p.map((e,i,a)=>[e,a[(i+1)%a.length]]))).concat(0xAAAAAA);
   document.body.appendChild(this.graph(["Origami - Kabuto", 0xAAAAAA].concat(
        draw(O0-1e01+1e02), draw(O1-1e01-1e02),
-       draw(O2+1e01+1.8e02), draw(O3+1e01+0.8e02), draw(O4+1e01-0.2e02), draw(O5+1e01-1.2e02),
-       draw(O6+2e01+0.8e02), draw(O7+2e01-0.2e02), draw(O8+2e01-1.2e02)
+       draw(O2+1.2e01+1.8e02), draw(O3+.7e01+0.8e02),   draw(O4+.7e01-0.2e02), draw(O5+.7e01-1.2e02),
+       draw(O6+1.6e01+0.8e02), draw(O7+1.6e01-0.2e02),  draw(O8+1.6e01-1.2e02),
+       draw(O9+2.5e01+0.8e02), draw(O10+2.5e01-0.2e02), draw(O11+2.5e01-1.2e02)
   )));
 });
 </SCRIPT></BODY>
