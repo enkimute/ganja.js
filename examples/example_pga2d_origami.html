@@ -17,18 +17,18 @@ Algebra(2,0,1,()=>{
   // Quick and dirty folder that splits and ignores connectivity updates.
   // Takes a figure O, fold line l, list of faces to fold f. Returns updated O. 
   var Ori = (O,l,f) => {
-      var res=[]; O.filter((O,oi)=>f.indexOf(oi)!=-1).forEach(s=>{ 
-        s = s.map(s=>s.slice());
-        var signs = s.map(p=>Math.sign(((p/p.e12)^l).e012.toFixed(2)));
-        var t=[]; s.forEach((x,i)=>{
-            var j=(i+1)%s.length; t.push(x);
-            if (signs[i]&&signs[j]&&signs[i]!=signs[j]) t.push((x&s[j]^l))
+      var res=[]; O.forEach((s,si)=>{ 
+        if (f.indexOf(si)==-1) return res.push(s);                              // no split needed
+        var signs = s.map(p=>Math.sign(((p/p.e12)^l).e012.toFixed(2)));         // side of ray points are on
+        var t=[]; s.forEach((x,i)=>{                                            // loop over edges
+            var j=(i+1)%s.length; t.push(x.slice());                            // insert vertex
+            if (signs[i]&&signs[j]&&signs[i]!=signs[j]) t.push((x&s[j]^l))      // insert cut point
         });
-        signs = t.map(p=>Math.sign(((p/p.e12)^l).e012.toFixed(2)));
-        res.push(t.filter((p,i)=>signs[i]<=0),t.filter((p,i)=>signs[i]>=0));
-        signs.forEach((sign,i)=>{ if (sign<0) t[i].set(l>>>t[i]) });
+        signs = t.map(p=>Math.sign(((p/p.e12)^l).e012.toFixed(2)));             // recalc signs
+        res.push(t.filter((p,i)=>signs[i]<=0),t.filter((p,i)=>signs[i]>=0));    // push split faces
+        signs.forEach((sign,i)=>{ if (sign<0) t[i].set(l>>>t[i]) });            // turn around
       })
-      return O.filter((O,oi)=>f.indexOf(oi)==-1).concat(res);
+      return res;
   }
 
   // The first few steps for Kabuto.
