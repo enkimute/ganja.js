@@ -21,35 +21,25 @@ Algebra(2,0,1,()=>{
         if (f.indexOf(si)==-1) return res.push(s);                              // no split needed
         var signs = s.map(p=>Math.sign(((p/p.e12)^l).e012.toFixed(2)));         // side of ray points are on
         var t=[]; s.forEach((x,i)=>{                                            // loop over edges
-            var j=(i+1)%s.length; t.push(x.slice());                            // insert vertex
+            var j=(i+1)%s.length; t.push(x.Normalized);                         // insert vertex
             if (signs[i]&&signs[j]&&signs[i]!=signs[j]) t.push((x&s[j]^l))      // insert cut point
         });
         signs = t.map(p=>Math.sign(((p/p.e12)^l).e012.toFixed(2)));             // recalc signs
-        res.push(t.filter((p,i)=>signs[i]<=0),t.filter((p,i)=>signs[i]>=0));    // push split faces
-        signs.forEach((sign,i)=>{ if (sign<0) t[i].set(l>>>t[i]) });            // turn around
+        res.push(t.filter((p,i)=>signs[i]<=0).map(x=>(l>>>x)).map(x=>x/x.e12),  // push turned face
+                 t.filter((p,i)=>signs[i]>=0).map(x=>x/x.e12));                 // push split face
       })
       return res;
   }
 
   // The first few steps for Kabuto.
   var point = (x,y)=>1e12-x*1e01+y*1e02;
-  var s = 1.8, p1 = point(-s,s), p2 = point(-s,-s), p3 = point(s,-s), p4 = point(s,s);
+  var s = 0.8, p1 = point(-s,s), p2 = point(-s,-s), p3 = point(s,-s), p4 = point(s,s);
   
-  var O0 = [[p1,p2,p3,p4]];
-  document.body.appendChild(this.graph(["step 0",0xAAAAAA].concat(O0,[0,p1,p3,Ori2(p1,p3)])));
+  var O0 = [[p1,p2,p3,p4]],
+      O1 = Ori(O0,Ori2(p1,p3),[0]),
+      O2 = Ori(O1,Ori2(p4,p3),[0,1]),
+      O3 = Ori(O2,Ori2(p2,p3),[1,3]);
 
-  var O1 = Ori(O0,Ori2(p1,p3),[0]);
-  document.body.appendChild(this.graph(["step 1",0xAAAAAA].concat(O1,[0,p4,p3,Ori2(p4,p3)])));
-
-  var O2 = Ori(O1,Ori2(p4,p3),[0,1]);
-  document.body.appendChild(this.graph(["step 2", 0xAAAAAA].concat(O2,[0,p2,p3,Ori2(p2,p3)])));
-
-  var O3 = Ori(O2,Ori2(p2,p3),[1,3]);
-  document.body.appendChild(this.graph(["step 3", 0xAAAAAA].concat(O3)));
- 
-  // layout patch.
-  Object.assign(document.body.style,{display:'flex',flexDirection:'column',maxHeight:'100%'});
-  setTimeout(()=>document.querySelectorAll('svg').forEach(x=>{x.style.height='';x.style.width=''}),10);
-
+  document.body.appendChild(this.graph(["Origami - Kabuto", 0xAAAAAA].concat(O0-1e01+1e02,O1-1e01-1e02,O2+1e01+1e02,O3+1e01-1e02)));
 });
 </SCRIPT></BODY>
