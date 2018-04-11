@@ -21,11 +21,11 @@ Algebra(2,0,1,()=>{
         if (f.indexOf(si)==-1) return res.push(s);                              // no split needed
         var signs = s.map(p=>Math.sign(((p/p.e12)^l).e012.toFixed(2)));         // side of ray points are on
         var t=[]; s.forEach((x,i)=>{                                            // loop over edges
-            var j=(i+1)%s.length; t.push(x.Normalized);                         // insert vertex
-            if (signs[i]&&signs[j]&&signs[i]!=signs[j]) t.push((x&s[j]^l))      // insert cut point
+            var j=(i+1)%s.length; t.push(x);                                    // insert vertex
+            if (signs[i]&&signs[j]&&signs[i]!=signs[j]) t.push(x&s[j]^l)        // insert cut point
         });
         signs = t.map(p=>Math.sign(((p/p.e12)^l).e012.toFixed(2)));             // recalc signs
-        res.push(t.filter((p,i)=>signs[i]<=0).map(x=>(l>>>x)).map(x=>x/x.e12),  // push turned face
+        res.push(t.filter((p,i)=>signs[i]<=0).map(x=>l>>>x).map(x=>x/x.e12),    // push turned face
                  t.filter((p,i)=>signs[i]>=0).map(x=>x/x.e12));                 // push split face
       })
       return res;
