@@ -1,0 +1,27 @@
+{
+  "name": "ganja.js",
+  "version": "1.0.1",
+  "description": "Geometric Algebra for javascript with operator overloading and algebraic literals",
+  "main": "ganja.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "Algebra(0,1,()=>(3+2e1)*(1+4e1));"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/enkimute/ganja.js.git"
+  },
+  "keywords": [
+    "Geometric Algebra",
+    "Math",
+    "operator Overloading"
+  ],
+  "author": "enki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/enkimute/ganja.js/issues"
+  },
+  "homepage": "https://github.com/enkimute/ganja.js#readme"
+}
