@@ -81,7 +81,7 @@
       static gt(a,b)        {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>b; }
       static lte(a,b)       {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a<=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a<=b; }
       static gte(a,b)       {  a=a.call?a():a; b=b.call?b():b; if (!(a instanceof Element || b instanceof Element)) return a>=b; a=Element.toEl(a);b=Element.toEl(b); a=(a instanceof Element)?a.Length:a; b=(b instanceof Element)?b.Length:b; return a>=b; }
-      static sw(a,b)        {  a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b).Mul(a.Conjugate); }
+      static sw(a,b)        {  if (b instanceof Array) return b.map(x=>Element.sw(a,x)); a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b).Mul(a.Conjugate); }
       static exp(a)         {  a=a.call?a():a; return a.Exp(); }
     // Debug  
       static describe() { console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d+\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); }    
@@ -148,6 +148,7 @@
               else if (~'~!'.indexOf(t[1])) { resi.push(t); var sub=[], open=0; while (~'~!-'.indexOf(t[1]) || open) { t=tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; sub.push(t); }; resi.push([[2,'']].concat(translate(sub))); }
               else if (t[1]=='-'&&resi.length&&(isTok(resi.length-1,4) || resi[resi.length-1][1]=='return'|| (resi[resi.length-1][0]==0 && resi[resi.length-2][1]=='return'))) { resi.push([[2,'']].concat(translate([t,tokens[++i]])))  }
               else resi.push(t);  
+           var c=[]; for (var i=0; i<resi.length; i++) { if (resi[i][0][0]==2 && /[\[\(]/.test(resi[i][0][1][0]) && resi[i+1] && resi[i+1][0][0]=='2' && /[\[\(]/.test(resi[i+1][0][1][0])) c.push([resi[i],resi[++i]]); else c.push(resi[i]); }; resi=c;
            syntax.forEach((syntaxd,k)=>{ var ops=syntaxd.map(x=>x[0]);   
             syntaxd.forEach( (op)=>{ tokens=resi;resi=[]; // now translate ops ..
               if (op[3]) { /* right-to-left */ for (var i=tokens.length-1;  i >= 0; i--) { if (tokens[i][1] == op[0]) {
