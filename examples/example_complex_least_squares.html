@@ -1,0 +1,47 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Given a set of input points A
+var A = [[0,1],[2,0],[1,0],[0,-1]];
+
+// And a set of (noisy) output points Y
+var Y = [[2,0.89],[1.8,-4.1],[0.91,-2.1],[-1.9,-0.9]];
+
+// Find the unique scaling and rotation X that most
+// closely transforms A into Y. (i.e. find X when Y=AX)
+
+// We will solve this problem in the complex plane, using
+// ganja matrix functions and the Moore Penrose pseudo inverse.
+
+var C = Algebra(0,1);
+
+// Matrices and Vectors over arbitrary fields are represented
+// in ganja.js using javascript arrays. e.g. the 2x2 identity
+// matrix is written [[1,0],[0,1]]. The ~ operator denotes
+// the conjugate transpose.  
+
+var findTransform = C.inline((A,Y)=>{
+  A = A.map(p=>[new C(p)]);    // convert A to vector of complex numbers
+  Y = Y.map(p=>[new C(p)]);    // convert Y to vector of complex numbers
+  return (~A*A)**-1*~A*Y;      // calculate transform.
+});
+
+// To test the transform, we apply it.
+var testTransform = C.inline((A,X)=>A.map(p=>[...((new C(p))*X)]));
+
+// Now find and test for our data.
+var X = findTransform(A,Y);
+var Y2 = testTransform(A,X);
+
+// We visualise this result (in a PGA2D algebra)
+Algebra(2,0,1,()=>{
+  document.body.appendChild(this.graph([].concat(
+    [0,'best fit rotation/scale : '+X],
+    [0,'Input A',0xFF0000,'Input Y',0x0000FF,'Fit A*X'],
+    [0x000000], A.map(x=>x[0]*.5e02-x[1]*.5e01+1e12),
+    [0xFF0000], Y.map(x=>x[0]*.5e02-x[1]*.5e01+1e12),
+    [0x0000FF], Y2.map(x=>x[0]*.5e02-x[1]*.5e01+1e12),
+  )));
+});
+</SCRIPT></BODY>
