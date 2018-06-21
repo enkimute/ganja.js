@@ -1,6 +1,6 @@
 {
   "name": "ganja.js",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "description": "Geometric Algebra for javascript with operator overloading and algebraic literals",
   "main": "ganja.js",
   "directories": {
@@ -16,7 +16,8 @@
   "keywords": [
     "Geometric Algebra",
     "Math",
-    "operator Overloading"
+    "operator Overloading",
+    "Clifford Algebra"
   ],
   "author": "enki",
   "license": "MIT",
