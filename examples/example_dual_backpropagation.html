@@ -1,0 +1,60 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// The code below implements a simple 3 layer neural network and trains it
+// using automatic differentiation. We'll need a basis with real numbers and
+// a dual independent component for each of the weights and biases.
+
+// Example from (https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/)
+// but also optimizing the bias values b1 and b2, and using automatic differentiation.
+
+// We construct a custom basis and Cayley table for the task.
+var basis=['1',...Array(12)].map((x,i)=>i?'e'+i:'1'),
+    Cayley=basis.map((a,i)=>basis.map((b,j)=>i==0?b:j==0?a:"0"));
+
+// Helpers to print HTML
+var a = Object.assign.bind(Object),
+    write = x=>a(document.body.appendChild(a(document.createElement('PRE'),{innerHTML:x})).style,{margin:0});
+
+// Next, we create an algebra over these numbers.
+Algebra({basis,Cayley},()=>{
+
+  // helper : invert
+  var inv = x=>x.map((c,i)=>i?-c/(x.s**2):1/c);
+
+  // 3 neural network layers, input, hidden, output.
+  var input  = [.05,.10,1];                                              // input sample.
+  var WH     = [[.15+1e1,.20+1e2,.35+1e3],[.25+1e4,.30+1e5,.35+1e6]];    // hidden layer weights and bias
+  var WO     = [[.40+1e7,.45+1e8,.60+1e9],[.50+1e10,.55+1e11,.60+1e12]]; // output layer weights and bias
+  var output = [0.01,0.99];                                              // desired output.
+
+  // non-linear activation function.
+  var logistic = x=>inv(0e0+1+this.exp(-x));
+  
+  // Forward network evaluation and error function.
+  var forward=(sample)=>(WO*[...(WH*sample).map(logistic),1]).map(logistic);
+  var error = (sample,output)=>{ var d = (output-sample.slice(0,2)); return .5*d*d; }
+
+  write(`Backpropagation using automatic derivatives.\n\n\tSample : [0.05,0.1]\n\tDesired outcome : [0.01,0.99]
+        Initial hidden weights : ${WH.map(x=>x.map(x=>x.s.toFixed(2)))}
+        Initial output weights : ${WO.map(x=>x.map(x=>x.s.toFixed(2)))}\n\n`);
+           
+  // Now train the network.           
+  var epoch=0, once=()=>{
+    // First use current weights on sample, calculate error  
+      var guess = forward(input), err = error(guess, output);
+    // Print some debug info  
+      if (epoch++%100==0||epoch<7) write(`iteration : ${epoch-1}   \tfound ${guess.map(x=>x.s.toFixed(3))}\terror = ${err.s.toFixed(5)}`);
+    // Backpropagation .. update weights using the derivatives in err. (learning rate=0.5)
+      var newWO = [ ((-0.75*err).slice(7,10)) + WO[0], ((-0.75*err).slice(10,13)) + WO[1] ];
+      var newWH = [ ((-0.75*err).slice(1,4))  + WH[0], ((-0.75*err).slice(4,7))   + WH[1] ];
+    // Now update the weights and repeat  
+      for (var i=0;i<2;i++) for (var j=0; j<3; j++) { WO[i][j][0] = newWO[i][j].s; WH[i][j][0] = newWH[i][j].s; }
+    // Till we are done  
+      if (epoch < 1001) setTimeout(once,10);
+      else write(`\n\nWeights after 1000 epochs :\n\tHidden : ${WH.map(x=>x.map(x=>x.s.toFixed(2)))}\n\tOutput : ${WO.map(x=>x.map(x=>x.s.toFixed(2)))}`)
+  }; once();
+
+});
+</SCRIPT></BODY>
