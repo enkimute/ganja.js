@@ -42,18 +42,19 @@ Algebra({basis,Cayley},()=>{
            
   // Now train the network.           
   var epoch=0, once=()=>{
+    for (var k=0;k<400;k++) {
     // First use current weights on sample, calculate error  
       var guess = forward(input), err = error(guess, output);
     // Print some debug info  
-      if (epoch++%100==0||epoch<7) write(`iteration : ${epoch-1}   \tfound ${guess.map(x=>x.s.toFixed(3))}\terror = ${err.s.toFixed(5)}`);
+      if (epoch++%400==0||epoch<7) write(`iteration : ${epoch-1}   \tfound ${guess.map(x=>x.s.toFixed(4))}\terror = ${err.s.toFixed(6)}`);
     // Backpropagation .. update weights using the derivatives in err. (learning rate=0.5)
-      var newWO = [ ((-0.75*err).slice(7,10)) + WO[0], ((-0.75*err).slice(10,13)) + WO[1] ];
-      var newWH = [ ((-0.75*err).slice(1,4))  + WH[0], ((-0.75*err).slice(4,7))   + WH[1] ];
+      var newWO = [ ((-0.5*err).slice(7,10)) + WO[0], ((-0.5*err).slice(10,13)) + WO[1] ];
+      var newWH = [ ((-0.5*err).slice(1,4))  + WH[0], ((-0.5*err).slice(4,7))   + WH[1] ];
     // Now update the weights and repeat  
       for (var i=0;i<2;i++) for (var j=0; j<3; j++) { WO[i][j][0] = newWO[i][j].s; WH[i][j][0] = newWH[i][j].s; }
-    // Till we are done  
-      if (epoch < 1001) setTimeout(once,10);
-      else write(`\n\nWeights after 1000 epochs :\n\tHidden : ${WH.map(x=>x.map(x=>x.s.toFixed(2)))}\n\tOutput : ${WO.map(x=>x.map(x=>x.s.toFixed(2)))}`)
+    }
+    if (epoch < 4001) setTimeout(once,1);
+    else write(`\n\nWeights after 4000 epochs :\n\tHidden : ${WH.map(x=>x.map(x=>x.s.toFixed(3)))}\n\tOutput : ${WO.map(x=>x.map(x=>x.s.toFixed(3)))}`)
   }; once();
 
 });
