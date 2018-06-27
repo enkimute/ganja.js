@@ -48,8 +48,8 @@ Algebra({basis,Cayley},()=>{
     // Print some debug info  
       if (epoch++%400==0||epoch<7) write(`iteration : ${epoch-1}   \tfound ${guess.map(x=>x.s.toFixed(4))}\terror = ${err.s.toFixed(6)}`);
     // Backpropagation .. update weights using the derivatives in err. (learning rate=0.5)
-      var newWO = [ ((-0.5*err).slice(7,10)) + WO[0], ((-0.5*err).slice(10,13)) + WO[1] ];
-      var newWH = [ ((-0.5*err).slice(1,4))  + WH[0], ((-0.5*err).slice(4,7))   + WH[1] ];
+      var newWO = [ [...((-0.5*err).slice(7,10))] + WO[0], [...((-0.5*err).slice(10,13))] + WO[1] ];
+      var newWH = [ [...((-0.5*err).slice(1,4))]  + WH[0], [...((-0.5*err).slice(4,7))]   + WH[1] ];
     // Now update the weights and repeat  
       for (var i=0;i<2;i++) for (var j=0; j<3; j++) { WO[i][j][0] = newWO[i][j].s; WH[i][j][0] = newWH[i][j].s; }
     }
