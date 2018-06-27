@@ -42,11 +42,11 @@ Algebra({basis,Cayley},()=>{
            
   // Now train the network.           
   var epoch=0, once=()=>{
-    for (var k=0;k<400;k++) {
+    for (var k=0;k<400;k++,epoch++) {
     // First use current weights on sample, calculate error and state update (learn rate = 0.5)  
       var guess = forward(input), update = -0.5*error(guess, output);
     // Print some debug info  
-      if (k==0||(++epoch)<7) write(`iteration : ${epoch-1}   \tfound ${guess.map(x=>x.s.toFixed(3))}\terror = ${(-2*update.s).toFixed(6)}`);
+      if (k==0||epoch<7) write(`iteration : ${epoch}   \tfound ${guess.map(x=>x.s.toFixed(3))}\terror = ${(-2*update.s).toFixed(6)}`);
     // Backpropagation .. update weights using the derivatives in update. (converted to scalars with [...])
       WO = WO+[[...update.slice(7,10)],[...update.slice(10,13)]];
       WH = WH+[[...update.slice(1,4)],[...update.slice(4,7)]];
