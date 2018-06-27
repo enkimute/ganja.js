@@ -29,10 +29,10 @@ Algebra({basis,Cayley},()=>{
   var WO     = [[.40+1e7,.45+1e8,.60+1e9],[.50+1e10,.55+1e11,.60+1e12]]; // output layer weights and bias
   var output = [0.01,0.99];                                              // desired output.
 
-  // non-linear activation function.
+  // non-linear activation function. (for this problem - should use identity - but not as interesting for a demo)
   var logistic = x=>inv(0e0+1+this.exp(-x));
   
-  // Forward network evaluation and error function.
+  // Forward network evaluation and l2 error function.
   var forward=(sample)=>(WO*[...(WH*sample).map(logistic),1]).map(logistic);
   var error = (sample,output)=>{ var d = (output-sample.slice(0,2)); return .5*d*d; }
 
@@ -43,15 +43,13 @@ Algebra({basis,Cayley},()=>{
   // Now train the network.           
   var epoch=0, once=()=>{
     for (var k=0;k<400;k++) {
-    // First use current weights on sample, calculate error  
-      var guess = forward(input), err = error(guess, output);
+    // First use current weights on sample, calculate error and state update (learn rate = 0.5)  
+      var guess = forward(input), update = -0.5*error(guess, output);
     // Print some debug info  
-      if (epoch++%400==0||epoch<7) write(`iteration : ${epoch-1}   \tfound ${guess.map(x=>x.s.toFixed(4))}\terror = ${err.s.toFixed(6)}`);
-    // Backpropagation .. update weights using the derivatives in err. (learning rate=0.5)
-      var newWO = [ [...((-0.5*err).slice(7,10))] + WO[0], [...((-0.5*err).slice(10,13))] + WO[1] ];
-      var newWH = [ [...((-0.5*err).slice(1,4))]  + WH[0], [...((-0.5*err).slice(4,7))]   + WH[1] ];
-    // Now update the weights and repeat  
-      for (var i=0;i<2;i++) for (var j=0; j<3; j++) { WO[i][j][0] = newWO[i][j].s; WH[i][j][0] = newWH[i][j].s; }
+      if (k==0||(++epoch)<7) write(`iteration : ${epoch-1}   \tfound ${guess.map(x=>x.s.toFixed(3))}\terror = ${(-2*update.s).toFixed(6)}`);
+    // Backpropagation .. update weights using the derivatives in update. (converted to scalars with [...])
+      WO = WO+[[...update.slice(7,10)],[...update.slice(10,13)]];
+      WH = WH+[[...update.slice(1,4)],[...update.slice(4,7)]];
     }
     if (epoch < 4001) setTimeout(once,1);
     else write(`\n\nWeights after 4000 epochs :\n\tHidden : ${WH.map(x=>x.map(x=>x.s.toFixed(3)))}\n\tOutput : ${WO.map(x=>x.map(x=>x.s.toFixed(3)))}`)
