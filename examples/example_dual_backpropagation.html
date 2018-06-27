@@ -2,10 +2,11 @@
   <SCRIPT SRC="../ganja.js"></SCRIPT>
 </HEAD>
 <BODY><SCRIPT>
+// A 3 layer convolutional network with AD and Back-Propagation.
 // Example from (https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/)
 // (using automatic differentiation instead, and also optimizing the bias values)
 
-// A 13 element algebra, scalars and 12 duals for weights and bias derivatives
+// A 13 element algebra, scalars and 12 duals for derivatives
 var basis=[...Array(13)].map((x,i)=>i?'e'+i:'1'),
     Cayley=basis.map((a,i)=>basis.map((b,j)=>i==0?b:j==0?a:"0"));
 
@@ -20,9 +21,9 @@ Algebra({basis,Cayley},()=>{
       output = [0.01,0.99];                                              // desired output.
 
   // The activation function, forward evaluator and error function.
-  var logistic = x=>inv(0e0+1+this.exp(-x)),
+  var logistic = x=>inv(1+this.exp(-x)),
       forward=(sample)=>(WO*[...(WH*sample).map(logistic),1]).map(logistic),
-      error = (sample,output)=>{ var d = (output-sample.slice(0,2)); return .5*d*d; }
+      error = (sample,output)=>.5*(output-sample.slice(0,2))**2;
 
   // Now train the network.           
   for (var k=0;k<4000;k++) {
@@ -34,6 +35,5 @@ Algebra({basis,Cayley},()=>{
   // Now output the result after 4000 epochs :
   document.body.innerHTML+=`<PRE>Result : ${forward(input).map(x=>x.s)}\nError : ${(-2*update.s).toFixed(6)}
   WH : ${WH.map(x=>x.map(x=>x.s.toFixed(3)))}\n  WO : ${WO.map(x=>x.map(x=>x.s.toFixed(3)))}</PRE>`
-  
 });
 </SCRIPT></BODY>
