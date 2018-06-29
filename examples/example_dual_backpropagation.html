@@ -2,38 +2,41 @@
   <SCRIPT SRC="../ganja.js"></SCRIPT>
 </HEAD>
 <BODY><SCRIPT>
-// A 3 layer convolutional network with AD and Back-Propagation.
-// Example from (https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/)
-// (using automatic differentiation instead, and also optimizing the bias values)
+// A 3 layer convolutional network with AD and Back-Propagation is trained to learn
+// an 'AND' relationship using 500 epochs of 4 noisy samples.
+// The resulting decision boundary is displayed.
 
-// A 13 element algebra, scalars and 12 duals for derivatives
+// A 13 element algebra, scalars and 12 duals for derivatives with a custom cayley table.
 var basis=[...Array(13)].map((x,i)=>i?'e'+i:'1'),
     Cayley=basis.map((a,i)=>basis.map((b,j)=>i==0?b:j==0?a:"0"));
-
+    
 Algebra({basis,Cayley},()=>{
-  // Helper to invert dual numbers with many dual components.
+  // Output Algebra info to the console
+  this.describe();
+    
+  // Helper to invert numbers with many dual components.
   var inv = x=>x.map((c,i)=>i?-c/(x.s**2):1/c);
 
   // The initial weights, input and desired output of our network.
-  var input  = [.05,.10,1],                                              // input sample.
-      WH     = [[.15+1e1,.20+1e2,.35+1e3],[.25+1e4,.30+1e5,.35+1e6]],    // hidden layer weights and bias
-      WO     = [[.40+1e7,.45+1e8,.60+1e9],[.50+1e10,.55+1e11,.60+1e12]], // output layer weights and bias
-      output = [0.01,0.99];                                              // desired output.
+  var input    = [[.35,.20],[0.7,0.55],[0.17,0.8],[0.9,0.3]],              // input samples.
+      WH       = [[.15+1e1,.20+1e2,.35+1e3],[.25+1e4,.30+1e5,.35+1e6]],    // hidden layer weights and bias
+      WO       = [[.40+1e7,.45+1e8,.60+1e9],[.50+1e10,.55+1e11,.60+1e12]], // output layer weights and bias
+      expected = [[0.01,0.99],[0.99,0.01],[0.01,0.99],[0.01,0.99]];        // desired outputs.
 
   // The activation function, forward evaluator and error function.
   var logistic = x=>inv(1+this.exp(-x)),
-      forward=(sample)=>(WO*[...(WH*sample).map(logistic),1]).map(logistic),
-      error = (sample,output)=>.5*(output-sample.slice(0,2))**2;
+      forward=(sample)=>(WO*[...(WH*[...sample,1]).map(logistic),1]).map(logistic),
+      error = (sample,expected)=>0.5*(expected-sample)**2;
 
-  // Now train the network.           
-  for (var k=0;k<4000;k++) {
-     var update = -0.5*error(forward(input), output);               // forward evaluation and error calc
-     WO = WO+[[...update.slice(7,10)],[...update.slice(10,13)]];    // backpropagate output layer
-     WH = WH+[[...update.slice(1,4)],[...update.slice(4,7)]];       // backpropagate hidden layer
+  // Now train the network.            
+  for (var k=0;k<500;k++) {
+     var update=input.reduce((l,c,i)=>l-2.5*error(forward(c), expected[i]),0); // forward eval, calculate derivatives on error
+     WO = WO+[[...update.slice(7,10)],[...update.slice(10,13)]];               // backpropagate output layer
+     WH = WH+[[...update.slice(1,4)],[...update.slice(4,7)]];                  // backpropagate hidden layer
   }
 
-  // Now output the result after 4000 epochs :
-  document.body.innerHTML+=`<PRE>Result : ${forward(input).map(x=>x.s)}\nError : ${(-2*update.s).toFixed(6)}
-  WH : ${WH.map(x=>x.map(x=>x.s.toFixed(3)))}\n  WO : ${WO.map(x=>x.map(x=>x.s.toFixed(3)))}</PRE>`
+  // Display the decision boundary.
+  var canvas = document.body.appendChild(this.graph((x,y)=>forward([x/2+0.5,y/2+0.5])[0].s,{width:64,height:64}));
+  Object.assign(canvas.style,{width:256,height:256})
 });
 </SCRIPT></BODY>
