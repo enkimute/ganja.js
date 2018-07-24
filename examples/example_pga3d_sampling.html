@@ -14,7 +14,7 @@ Algebra(3,0,1,()=>{
         n = 0, a = 0, camera=0e0;                              // Our samplecount, algorithm count and camera position.
 
     // For visualisation purposes, its nice that the randoms are the same each run. 
-    var rnd_map = Array.apply([],{length:2048}).map(x=>Math.random()), rnd_count=0, rnd=()=>rnd_map[(rnd_count++)%rnd_map.length];    
+    var rnd_map = [...Array(2048)].map(x=>Math.random()), rnd_count=0, rnd=()=>rnd_map[(rnd_count++)%rnd_map.length];    
         
     // sunflower sampling
     var disc_sunflower   = (i,n)=>{ i+=0.5; var r=(i/n)**0.5, t=Math.PI*(1+(5**0.5))*i; return P(r*Math.cos(t),r*Math.sin(t))},
@@ -45,7 +45,7 @@ Algebra(3,0,1,()=>{
         var time=performance.now()/4000; camera.set((1-1e03)*((pat.name.match(/disc|plane/))?1+1e13:Math.cos(time)+Math.sin(time)*1e13));
         
       // visualise the different patterns with increasing samplecount.   
-        return [pat.name+' [n='+n+']'].concat(Array.apply([],{length:Math.max(10,n)}).map((x,i)=>pat(i,n))) 
+        return [pat.name+' [n='+n+']'].concat([...Array(Math.max(10,n))].map((x,i)=>pat(i,n))) 
       }, {animate:true,camera}    
     ));
 

@@ -13,7 +13,7 @@ Algebra(2,0,1,()=>{
   var point      = (x,y)=>1e12-x*1e02+y*1e01,
       dist_pl    = (P,l)=>(P.Normalized^l.Normalized).e012,
       rotor      = (point,angle)=>Math.cos(angle/2) + Math.sin(angle/2)*point.Normalized,
-      ngon       = (p,n,d,a)=>Array.apply([],{length:n}).map((x,i)=>rotor(p,(a||0)+2*Math.PI*i/n)>>>(p+d*1e01));
+      ngon       = (p,n,d,a)=>[...Array(n)].map((x,i)=>rotor(p,(a||0)+2*Math.PI*i/n)>>>(p+d*1e01));
 
   // the shapes can be moved around.
   var pa=point(0,-0.2), pb=point(-0.8,-1);

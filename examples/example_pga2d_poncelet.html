@@ -26,9 +26,9 @@ Algebra(2,0,1,()=>{
   var curve=(pts)=>pts.map((pt,i,arr)=>[pt, pts[i+1%arr.length]])
   
   var N=100, Nc=30
-  var conic_pts = Array.apply([],{length:N}).map((x,i)=>()=>locus(i*Math.PI/N)),
+  var conic_pts = [...Array(N)].map((x,i)=>()=>locus(i*Math.PI/N)),
       conic = curve(conic_pts),
-      circle_pts = Array.apply([],{length:Nc}).map((x,i)=>()=>O+vec(r*Math.cos(i*2*Math.PI/Nc), r*Math.sin(i*2*Math.PI/Nc))),
+      circle_pts = [...Array(Nc)].map((x,i)=>()=>O+vec(r*Math.cos(i*2*Math.PI/Nc), r*Math.sin(i*2*Math.PI/Nc))),
       circle = curve(circle_pts)
   
   var poncelet=(P,l)=>{   // Poncelet map

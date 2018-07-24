@@ -35,7 +35,7 @@ Algebra(2,0,1,()=>{
       s=()=>join(A,C), g=()=>r*s,
   
   // Interpolate the isometry to illustrate the solution. 
-      lines = Array.apply([],{length:100}).map((x,xi)=>()=>lerp(1,g,xi*0.01)>>>m);
+      lines = [...Array(100)].map((x,xi)=>()=>lerp(1,g,xi*0.01)>>>m);
 
   // Reproduce the graph from the paper
   document.body.appendChild(this.graph([0xCCCCCC].concat(lines).concat([

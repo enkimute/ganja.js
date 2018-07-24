@@ -18,7 +18,7 @@ Algebra(2,0,1,()=>{
   var translator = (line,dist)=>1+0.5*dist*(line.Normalized*1e012);
 
   // Create chain of points. (l = number of segments in chain)
-  var l=6, d=3/l, points=Array.apply([],{length:l+1}).map((x,i)=>1e12+(1.5-i*d)*1e02);
+  var l=6, d=3/l, points=[...Array(l+1)].map((x,i)=>1e12+(1.5-i*d)*1e02);
 
   // solver. Last point in chain is the target. Set tip to target, then cycle to base and back
   // restoring original lengths.
