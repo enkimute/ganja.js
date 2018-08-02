@@ -65,7 +65,7 @@
     } else { options={}; p=p|0; r=r|0; q=q|0; };
 
   // Calculate the total number of dimensions.
-    var tot = options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length);
+    var tot = (options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length))|0;
  
   // Unless specified, generate a full set of Clifford basis names. We generate them as an array of strings by starting
   // from numbers in binary representation and changing the set bits into their relative position.  
@@ -441,7 +441,7 @@
                   // Find token to the right.  
                     if (!op[2]) var after=tokens[i-1]; while (after[1].match&&after[1].match(/^\s+$/)) after = tokens[--i-1];
                   // Find token to the left and concat.  
-                    if (op[2]||!resi.length||resi[resi.length-1][0]==4) resi[resi.length]=[[1,'this.'+op[1]+'('],resi[resi.length-1],[1,')']]; else resi[resi.length-1]=[[1,'this.'+op[1]+'('],after,[1,','],resi[resi.length-1],[1,')']];
+                    if (op[2]||!resi.length||resi[resi.length-1][0]==4) resi[resi.length]=[[1,'Element.'+op[1]+'('],resi[resi.length-1],[1,')']]; else resi[resi.length-1]=[[1,'Element.'+op[1]+'('],after,[1,','],resi[resi.length-1],[1,')']];
                   // Skip the token itself.  
                     i -= 1; 
                   // if not found, hold for next precedence loop.  
@@ -462,9 +462,9 @@
                   // Concat dot operator as complete identifier.  
                     if (op[2]==3) resi[resi.length-1]=[resi[resi.length-1],[1,'.'],after];
                   // Support for properties on literals etc..  
-                    else if (op[2]==2) resi[resi.length-1]=[[1,'this.'+op[1]+'('],resi[resi.length-1],[1,')']];
+                    else if (op[2]==2) resi[resi.length-1]=[[1,'Element.'+op[1]+'('],resi[resi.length-1],[1,')']];
                   // Translate current operator.  
-                    else if (op[2]||!resi.length||resi[resi.length-1][0]==4) resi[resi.length]=[[1,'this.'+op[1]+'('],after,[1,')']]; else resi[resi.length-1]=[[1,'this.'+op[1]+'('],resi[resi.length-1],[1,','],after,[1,')']];
+                    else if (op[2]||!resi.length||resi[resi.length-1][0]==4) resi[resi.length]=[[1,'Element.'+op[1]+'('],after,[1,')']]; else resi[resi.length-1]=[[1,'Element.'+op[1]+'('],resi[resi.length-1],[1,','],after,[1,')']];
                   // Skip operator.  
                     if (op[2]!=2) i += 1; 
                   // Not found, keep for next precedence loop.  
@@ -475,7 +475,7 @@
            return resi;
         }
       // Glue all back together and return as bound function.  
-        return eval('('+(function f(t){return t.map(t=>t[0]instanceof Array?f(t):t[1]).join('');})(translate(tok))+')').bind(Element);
+        return eval('('+(function f(t){return t.map(t=>t[0]instanceof Array?f(t):t[1]).join('');})(translate(tok))+')');
       }
     }
     
