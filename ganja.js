@@ -99,7 +99,8 @@
     var drm=basis.map((a,i)=>{ return {a:a,i:i} })
                  .sort((a,b)=>a.a.length>b.a.length?1:a.a.length<b.a.length?-1:(+a.a.slice(1).split('').sort().join(''))-(+b.a.slice(1).split('').sort().join('')) )
                  .map(x=>x.i)
-                 .reverse();
+                 .reverse()
+    var drms=drm.map((x,i)=>(x==0||i==0)?1:simplify(basis[x]+basis[i])[0]=='-'?-1:1);
     
   // Generate multiplication tables for the outer and geometric products.  
     var mulTable  = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),              // for the gp, with metric.
@@ -280,7 +281,7 @@
       }
       
     // Dual, Involute, Reverse, Conjugate, Normalize and length, all direct call through. Conjugate handles matrices.
-      static Dual(a)      { if (r) return Element.toEl(a).map((x,i,a)=>a[drm[i]]); return Element.toEl(a).Dual; }; 
+      static Dual(a)      { if (r) return Element.toEl(a).map((x,i,a)=>a[drm[i]]*drms[i]); return Element.toEl(a).Dual; }; 
       static Involute(a)  { return Element.toEl(a).Involute; }; 
       static Reverse(a)   { return Element.toEl(a).Reverse; }; 
       static Conjugate(a) { if (a instanceof Array) return a[0].map((c,ci)=>a.map((r,ri)=>Element.Conjugate(a[ri][ci]))); return Element.toEl(a).Conjugate; }
@@ -500,7 +501,7 @@
     res.prototype.__defineGetter__('Conjugate',function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; });
   
   // The Dual, Length, non-metric length and normalized getters.  
-    res.prototype.__defineGetter__('Dual',function(){ if (r) return this.map((x,i,a)=>a[drm[i]]); var res = new this.constructor(); res[res.length-1]=-1; return res.Mul(this); });
+    res.prototype.__defineGetter__('Dual',function(){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[i]); var res = new this.constructor(); res[res.length-1]=1; return res.Mul(this); });
     res.prototype.__defineGetter__('Length',  function(){  return Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); }); 
     res.prototype.__defineGetter__('VLength',  function(){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]; return Math.sqrt(res); });
     res.prototype.__defineGetter__('Normalized', function(){ var res = new this.constructor(),l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) res[i]=this[i]*l; return res; });
