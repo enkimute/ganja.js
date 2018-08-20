@@ -113,15 +113,18 @@
  
   // Convert Caeyley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
   // is the left contraction.           
-    var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0'));                          // Storage for our product tables.
-    basis.forEach((output,i)=>basis.forEach((x,xi)=>basis.forEach((y,yi)=>{ if (mulTable2b[xi][yi] == output) {                  // For each output component scan Cayley table.
-        gp[i][xi] = (mulTable2[xi][yi]=='0')?'0':((mulTable2[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                  // Fill in the geometric table         
-        op[i][xi] = ( grades[i] == grades[xi]+grades[yi] ) ? gp[i][xi]:'0';                                                      // strict sum of grades in outer
-        if ((mulTableb[xi][yi]==output)||(mulTable[xi][yi]=='0')) {
-          gp[i][xi] = (mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                  // Fill in the geometric table
-          cp[i][xi] = ( grades[i] == grades[yi]-grades[xi] ) ? gp[i][xi]:'0';                                                    // left contraction.
-        }  
-    }})));
+    var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0')), gpo={}, opo={};          // Storage for our product tables.
+    basis.forEach((x,xi)=>basis.forEach((y,yi)=>{
+      var n  = mulTable[xi][yi].replace(/^-/,''); if (n==0) n = mulTable2[xi][yi].replace(/^-/,''); if (!gpo[n]) gpo[n]=[]; gpo[n].push([xi,yi]);
+      var n2 = mulTable2[xi][yi].replace(/^-/,''); if (!opo[n2]) opo[n2]=[]; opo[n2].push([xi,yi]);
+    }));
+    basis.forEach((o,oi)=>{
+      opo[o].forEach(([xi,yi])=>op[oi][xi]=(grades[oi]==grades[xi]+grades[yi])?((mulTable2[xi][yi]=='0')?'0':((mulTable2[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']'):'0');
+      gpo[o].forEach(([xi,yi])=>{
+        gp[oi][xi]=(mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';
+        cp[oi][xi]=(grades[oi]==grades[yi]-grades[xi])?gp[oi][xi]:'0'; 
+      });
+    });
     
   // Generate a new class for our algebra. It extends the javascript typed arrays (default float32 but can be specified in options).
     var res = class Element extends (options.baseType||Float32Array) {
