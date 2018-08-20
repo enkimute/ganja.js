@@ -5,40 +5,33 @@
 // Create a Clifford Algebra with 3,0,1 metric. 
 Algebra(3,0,1,()=>{ 
 
-  // Setting the stage for rigid body physics, we start with a trivial boilerplate
-  // known as the symmetric euler top. The following restrictions apply :
-  // * Our object is entirely symmetric reducing the inertia tensor to a scalar. (and we pick our weight/size so it is 1)
-  // * Our object is fixed in space with its center of gravity
-  // * No external forces (torque=0)	
-
-  // Helpers (see earlier examples)
-  var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023,
+  // We store position/orientation and linear/angular momentum in a single bivector.
+  // In this example, we assume a symmetric object so we can ignore the inertia tensor. 
+ 
+  // Helper : points and RK4 integrator.
+  var point = (x,y,z)=>!(1e0+x*1e1+y*1e2+z*1e3),
       RK4 = (f,y,h)=>{ var k1=f(y), k2=f(y+0.5*h*k1), k3=f(y+0.5*h*k2), k4=f(y+h*k3); return  y+(h/3)*(k2+k3+(k1+k4)*0.5); };
 
-  // a cube. (its points in the body frame, a copy in the space frame, and its edges for rendering.)
-  var cubeB = [0,1,2,3,4,5,6,7].map(x=>('00'+x.toString(2)).slice(-3)).map(x=>x.split('').map(x=>x=='0'?-1:1)).map(x=>point.apply(this,x)),
+  // Our box definition, its vertices in Body and Space coordinates, its edges.
+  var mass  = 1, size  = [1,1,1],
+      cubeB = [...Array(8)].map((x,i)=>point.apply(this,size.map((s,j)=>s*(((i>>j)%2)-0.5)))),
       cubeS = cubeB.map(x=>x.slice()),
-      cubeE = [[0,1],[0,2],[2,3],[3,1],[4,5],[4,6],[5,7],[6,7],[0,4],[1,5],[2,6],[3,7]].map(x=>[cubeS[x[0]],cubeS[x[1]]]);                 
-  
-  // our physics state. [orientation (scalar+biv), angular momentum (biv)]
-  //   angular momentum is the conserved quantity, in this simple setup (inertia=unity), it equals angular velocity.
-  var State = [1,1e12+0.4e13];
-  
-  // Our dState function (returns the derivative of the state, given the state)
-  var dState = (s)=>[
-                 s[1]*s[0],  // angular velocity given current orientation.
-                 0           // torque
-               ];
+      cubeE = [[0,1],[0,2],[2,3],[3,1],[4,5],[4,6],[5,7],[6,7],[0,4],[1,5],[2,6],[3,7]].map(x=>[cubeS[x[0]],cubeS[x[1]]]);
+
+  // our physics state. [position/orientation, linear/angular velocity in body frame]
+  var State  = [1, 0.35e13-.27e12],
+      dState = ([g,v])=>[g*v,!(!v*v-v*!v)];
 
   // Graph the 3D items
   document.body.appendChild(this.graph(()=>{
-  // Advance the state one time step of 0.01      
-    State = RK4(dState,State,0.01);
-  // Rotate from body to space using the current state.    
-    cubeS.forEach((x,i)=>x.set( State[0] >>> cubeB[i] )) 
-  // Render the edges    
-    return cubeE;
-  },{animate:true})); 
+  // Advance the state one time step of 0.05 and renormalize.  
+    State = RK4(dState,State,0.05);
+    State[0] = State[0].Normalized;
+  // Rotate from body (cubeB) to space (cubeS) using the current state.    
+    cubeS.forEach((x,i)=>x.set(State[0]>>>cubeB[i])) 
+  // Render the edges and the center of gravity (the origin in the body frame)    
+    return cubeE.concat([State[0]>>>1e123]);
+  },{animate:true}));
   
 });
 </SCRIPT></BODY>

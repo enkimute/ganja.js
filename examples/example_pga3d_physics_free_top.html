@@ -3,49 +3,40 @@
 </HEAD>
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 3,0,1 metric. 
-Algebra(3,0,1,()=>{ 
+Algebra(3,0,1,()=>{
 
-  // We combine position and rotation for a rigid body kinematics setup 
-  // known as the free top. 
-  // * We require our object in the body frame to be aligned so that the
-  //   inertia tensor diagonalizes to the three principal moments of inertia.
-  // * No external forces (force,torque=0)	
-
-  // Helpers (see earlier examples)
-  var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023,
+  // We store position/orientation and linear/angular momentum in a single bivector.
+  // This is isomorph to dual quaternion rigid body physics. 
+ 
+  // Helper : points and RK4 integrator.
+  var point = (x,y,z)=>!(1e0+x*1e1+y*1e2+z*1e3),
       RK4 = (f,y,h)=>{ var k1=f(y), k2=f(y+0.5*h*k1), k3=f(y+0.5*h*k2), k4=f(y+h*k3); return  y+(h/3)*(k2+k3+(k1+k4)*0.5); };
 
-  // a cube. (its size, points in the body frame, a copy in the space frame, its edges for rendering)
-  var mass  = 1, size  = [.4,2,1],
-      cubeB = [[0,0,0],[0,0,1],[0,1,0],[0,1,1],[1,0,0],[1,0,1],[1,1,0],[1,1,1]].map(x=>point.apply(this,x.map((x,i)=>size[i]*(x-0.5)))),
+  // Our box definition, its vertices in Body and Space coordinates, its edges.
+  var mass  = 1, size  = [0.6,2,1],
+      cubeB = [...Array(8)].map((x,i)=>point.apply(this,size.map((s,j)=>s*(((i>>j)%2)-0.5)))),
       cubeS = cubeB.map(x=>x.slice()),
       cubeE = [[0,1],[0,2],[2,3],[3,1],[4,5],[4,6],[5,7],[6,7],[0,4],[1,5],[2,6],[3,7]].map(x=>[cubeS[x[0]],cubeS[x[1]]]);
 
-  // We calculate the inertia as a bivector. (so we can use component multiply)     
-  var I  = 1/12*mass*this.Bivector(12,12,12,size[0]**2+size[1]**2,size[0]**2+size[2]**2,size[1]**2+size[2]**2),
-      A  = (x)=>(0e0+x).map((x,i)=>x*(I[i]||1)),
-      Ai = (x)=>(0e0+x).map((x,i)=>x/(I[i]||1));
+  // Inertia tensor and a map to apply it on a momentum bivector. (and the inverse map).
+  // see https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors (diagonals)      
+  var I  = 1/12*mass*this.Bivector(size[0]**2+size[1]**2,size[0]**2+size[2]**2,size[1]**2+size[2]**2,12,12,12),
+      A  = (x)=>(0e0+x.Dual).map((x,i)=>x*(I[i]||1)),
+      Ai = (x)=>(0e0+x).map((x,i)=>x/(I[i]||1)).Dual;
       
-  // our physics state. [orientation, angular velocity body (biv), position, linear velocity world (biv)]
-  var State = [1,1e12+.4e13,1,-.5e01];
-  
-  // Our dState function (returns the derivative of the state, given the state)
-  var dState = (s)=>[
-                 (s[0]*s[1]).Normalized,         // D(orientation) = angular velocity world
-                 Ai(A(s[1])*s[1]-s[1]*A(s[1])),  // D(angular velocity body) + Torque/m
-                 s[3],                           // D(position) = velocity
-                 0                               // D(velocity) = acceleration = F/m
-               ];
+  // our physics state. [position/orientation, linear/angular velocity in body frame]
+  var State  = [1+1e03, -.035e03-0.35e13-.27e12],
+      dState = ([g,v])=>[g*v,Ai(A(v)*v-v*A(v))];
 
   // Graph the 3D items
   document.body.appendChild(this.graph(()=>{
-  // Advance the state one time step of 0.01      
-    State = RK4(dState,State,0.01);
+  // Advance the state one time step of 0.05 and renormalize.  
+    State = RK4(dState,State,0.05);
+    State[0] = State[0].Normalized;
   // Rotate from body (cubeB) to space (cubeS) using the current state.    
-    cubeS.forEach((x,i)=>x.set( (State[2]*State[0]) >>> cubeB[i] )) 
+    cubeS.forEach((x,i)=>x.set(State[0]>>>cubeB[i])) 
   // Render the edges and the center of gravity (the origin in the body frame)    
-    return cubeE.concat([ (State[2]*State[0])>>>1e123]);
-  },{animate:true})); 
-  
+    return cubeE.concat([State[0]>>>1e123]);
+  },{animate:true}));
 });
 </SCRIPT></BODY>
