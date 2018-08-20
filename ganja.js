@@ -84,7 +84,7 @@
   // String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)      
   // This is the function that implements e1e1 = +1/-1/0 and e1e2=-e2e1. The brm function creates the remap dictionary.
     var simplify = (s,p,q,r)=>{
-          var sign=1,c,l,t=[],f=true;s=[].slice.call(s.replace(/e/g,''));l=s.length;
+          var sign=1,c,l,t=[],f=true;s=[...s.replace(/e/g,'')];l=s.length;
           while (f) { f=false;
           // implement Ex*Ex = metric.
             for (var i=0; i<l;) if (s[i]===s[i+1]) { if ((s[i]-low)>=(p+r)) sign*=-1; else if ((s[i]-low)<r) sign=0; i+=2; f=true; } else t.push(s[i++]);
@@ -103,8 +103,10 @@
     var drms=drm.map((x,i)=>(x==0||i==0)?1:simplify(basis[x]+basis[i])[0]=='-'?-1:1);
     
   // Generate multiplication tables for the outer and geometric products.  
-    var mulTable  = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),              // for the gp, with metric.
-        mulTable2 = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0)));          // for the op, without metric.
+    var mulTable   = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),              // for the gp, with metric.
+        mulTable2  = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0))),          // for the op, without metric.
+        mulTableb  = mulTable.map(x=>x.map(y=>y.replace(/^-/,'')));
+        mulTable2b = mulTable2.map(x=>x.map(y=>y.replace(/^-/,'')));
    
   // Store the full metric (also for bivectors etc .. diagonal of Cayley)         
     var metric = basis.map((x,xi)=>mulTable[xi][xi]|0);
@@ -112,10 +114,10 @@
   // Convert Caeyley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
   // is the left contraction.           
     var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0'));                          // Storage for our product tables.
-    basis.forEach((output,i)=>basis.forEach((x,xi)=>basis.forEach((y,yi)=>{ if (mulTable2[xi][yi].replace('-','') == output) {   // For each output component scan Cayley table.
+    basis.forEach((output,i)=>basis.forEach((x,xi)=>basis.forEach((y,yi)=>{ if (mulTable2b[xi][yi] == output) {                  // For each output component scan Cayley table.
         gp[i][xi] = (mulTable2[xi][yi]=='0')?'0':((mulTable2[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                  // Fill in the geometric table         
         op[i][xi] = ( grades[i] == grades[xi]+grades[yi] ) ? gp[i][xi]:'0';                                                      // strict sum of grades in outer
-        if ((mulTable[xi][yi].replace('-','') == output)||(mulTable[xi][yi]=='0')) {
+        if ((mulTableb[xi][yi]==output)||(mulTable[xi][yi]=='0')) {
           gp[i][xi] = (mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';                  // Fill in the geometric table
           cp[i][xi] = ( grades[i] == grades[yi]-grades[xi] ) ? gp[i][xi]:'0';                                                    // left contraction.
         }  
