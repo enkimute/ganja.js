@@ -123,7 +123,7 @@
       a=$$('svg');
       if (a[0]) a[0].style.height='100%';
       if (a[0]) a[0].style.width='100%';
-      a=$$('canvas'); if (a[0].width>512) {
+      a=$$('canvas'); if (a && a[0] && a[0].width>512) {
         if (a[0]) a[0].style.height='100%';
         if (a[0]) a[0].style.width='100%';
       }
@@ -163,7 +163,7 @@
         a=$$('svg');
         if (a[0]) a[0].style.height='100%';
         if (a[0]) a[0].style.width='100%';
-        a=$$('canvas'); if (a[0].width>512) {
+        a=$$('canvas'); if (a && a[0] && a[0].width>512) {
           if (a[0]) a[0].style.height='100%';
           if (a[0]) a[0].style.width='100%';
         }
