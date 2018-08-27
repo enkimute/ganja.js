@@ -318,6 +318,8 @@
         var ww=options.width, hh=options.height, cvs=options.canvas, tpcam=new Element([0,0,0,0,0,0,0,0,0,0,0,-5,0,0,1,0]),tpy=this.Coeff(4,1),tp=new Element(), 
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.    
         project=(o)=>{ if (!o) return o; while (o.call) o=o(); return (tot==4 && (o.length==16))?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):o};
+      // gl escape.
+        if (options.gl) return Element.graphGL(f,options);  
       // if we get an array or function without parameters, we render c2d or p2d SVG points/lines/circles/etc
         if (!(f instanceof Function) || f.length===0) { 
         // Our current cursor, color, animation state and 2D mapping.
@@ -393,6 +395,90 @@
         else if (f.length==1) for (var px=0; px<w; px++) { var res=f(px/w*2-1); res=Math.round((res/2+0.5)*h); if (res > 0 && res < h-1) data.data.set([0,0,0,255],res*w*4+px*4); }
         return context.putImageData(data,0,0),cvs;       
       }
+      
+    // webGL2 Graphing function.
+      static graphGL(f,options) {
+        var canvas=document.createElement('canvas'); canvas.width=600; canvas.height=300; canvas.style.backgroundColor='#EEE';
+        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,antialias:true,powerPreference:'high-performance'}); 
+        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240/255,240/255,240/255,1.0);
+        
+        var compile=(vs,fs)=>{ 
+          var s=[gl.VERTEX_SHADER,gl.FRAGMENT_SHADER].map((t,i)=>{
+            var r=gl.createShader(t); gl.shaderSource(r,[vs,fs][i]); gl.compileShader(r);
+            return gl.getShaderParameter(r, gl.COMPILE_STATUS)&&r||console.error(gl.getShaderInfoLog(r));
+          });
+          var p = gl.createProgram(); gl.attachShader(p, s[0]); gl.attachShader(p, s[1]); gl.linkProgram(p);
+          gl.getProgramParameter(p, gl.LINK_STATUS)||console.error(gl.getProgramInfoLog(p));
+          return p;
+        };
+
+        var draw=function(p, tp, vtx, color, color2, r, texc){
+          gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1])
+          gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(r||2),0,0,0,0,1,2,0,0,-1,0])
+          gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
+          gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
+          var r = gl.createVertexArray(); gl.bindVertexArray(r);
+          var b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); 
+          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vtx), gl.STATIC_DRAW);
+          gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(0);
+          if (texc){
+            gl.uniform1i(gl.getUniformLocation(p, "texc"),0); var b2=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b2);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texc), gl.STATIC_DRAW);
+            gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(1);
+          }
+          gl.drawArrays(tp, 0, vtx.length/3); gl.deleteBuffer(b); if (texc) gl.deleteBuffer(b2); gl.deleteVertexArray(r);
+        }
+       
+        var program = compile(`#version 300 es
+                 layout (location=0) in vec4 position; out vec4 Pos; uniform mat4 mv; uniform mat4 p; 
+                 void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; }`,
+                `#version 300 es
+                 precision highp float; uniform vec3 color; uniform vec3 color2; in vec4 Pos; out vec4 fragColor;
+                 void main() { vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,vec3(.0,-0.4,1.0));
+                 fragColor = vec4(max(0.0,l)*color+color2, 1.0);  }`);
+
+        var fw=22, font = Object.assign(document.createElement('canvas'),{width:94*fw,height:32}), 
+            ctx = Object.assign(font.getContext('2d'),{font:'bold 32px lucida console, monospace'}),
+            ftx = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, ftx);
+            for (var i=33; i<127; i++) ctx.fillText(String.fromCharCode(i),(i-33)*fw,26);
+            gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,94*fw,32,0,gl.RGBA,gl.UNSIGNED_BYTE,font);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);  
+
+        var program2 = compile(`#version 300 es
+                 layout (location=0) in vec4 position; layout (location=1) in vec2 texc; out vec2 tex; out vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2; 
+                 void main() { tex=texc; gl_PointSize=6.0; Pos=mv*(position+vec4(color2,0.0)); gl_Position = p*Pos; }`,
+                `#version 300 es
+                 precision highp float; uniform vec3 color; in vec4 Pos; in vec2 tex; out vec4 fragColor;
+                 uniform sampler2D texm; void main() { vec4 c = texture(texm,tex); if (c.a<0.01) discard; fragColor = vec4(color,c.a);}`);
+        
+        canvas.update = (x)=>{
+          var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width); canvas.height = parseFloat(s.height); }
+          gl.viewport(0,0, canvas.width|0,canvas.height|0); var r=canvas.width/canvas.height;
+          var p=[],l=[],t=[],c=[.5,.5,.5],lastpos=[-2,2,0.2]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x(); var cam=(x)=>options.camera.Mul(x).Mul(options.camera.Conjugate);
+          for (var i=0,ll=x.length;i<ll;i++) { 
+            var e=x[i]; while (e.call) e=e(); 
+            if (e instanceof Element && e.Blade(2).Length) 
+               e=[e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
+            if (e.e123) p.push.apply(p,cam(e).slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
+            if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...cam(x).slice(11,14).map((y,i)=>(i==0?1:-1)*y/cam(x)[14]).reverse()])); 
+            if (e instanceof Array && e.length==3) t=t.concat.apply(t,e.map(x=>[...cam(x).slice(11,14).map((y,i)=>(i==0?1:-1)*y/cam(x)[14]).reverse()]));
+            if (!isNaN(e) || i==ll-1 || typeof e == 'string') {
+              if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); lastpos=[0,0,0]; t.forEach((x,i)=>lastpos[i%3]+=x/(t.length/3)); t=[];  }
+              if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
+              if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]+=0.1; p=[]; }
+              if (!isNaN(e)) { c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
+              if (typeof(e)=='string') {
+                gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); 
+                draw(program2,gl.TRIANGLES, 
+                     [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 1/(lastpos[2]-5)*-0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
+                     [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+              }
+            }  
+          }; if (options&&options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));  
+        }
+        return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
+      }  
     
     // The inline function is a js to js translator that adds operator overloading and algebraic literals.
     // It can be called with a function, a string, or used as a template function.  

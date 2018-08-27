@@ -25,7 +25,7 @@ Algebra(3,0,1,()=>{
   // Read obj
   obj("bunny.obj",(points,edges,faces)=>{
       // Graph the bunny as backdrop
-      document.body.appendChild(this.graph([0xCCCCCC].concat(edges),{camera}));
+      Object.assign(document.body.appendChild(this.graph([0xCCCCCC].concat(faces,edges),{gl:true,camera})).style,{width:'100%',height:'100%',left:0,right:0,position:'fixed'});
       
       // Precalculate face and edge bivectors.
       var facedata = faces.map(x=>{ var f; return [f=x[0]&x[1]&x[2],(f<<(x[0]&x[1])),(f<<(x[1]&x[2])),(f<<(x[2]&x[0]))]});
@@ -46,7 +46,7 @@ Algebra(3,0,1,()=>{
         })
         
         return contour;
-      },{animate:true,camera})).style,{backgroundColor:'transparent',position:'fixed',left:0,right:0,width:'100%',height:'100%'});
+      },{animate:true,gl:false,alpha:true,camera})).style,{backgroundColor:'transparent',position:'fixed',left:0,right:0,width:'100%',height:'100%'});
   });
 });
 </SCRIPT></BODY>

@@ -123,6 +123,10 @@
       a=$$('svg');
       if (a[0]) a[0].style.height='100%';
       if (a[0]) a[0].style.width='100%';
+      a=$$('canvas'); if (a[0].width>512) {
+        if (a[0]) a[0].style.height='100%';
+        if (a[0]) a[0].style.width='100%';
+      }
       $('RUN').style.opacity=0;
       var changed=false;
 
@@ -134,6 +138,8 @@
       });
 
       $('RUN').onclick = function(e) { 
+
+
         if (window._marker) editor.session.removeMarker(_marker);
         e.preventDefault(); e.stopPropagation(); 
         if (!changed || !loaded) return; changed=false; 
@@ -157,6 +163,10 @@
         a=$$('svg');
         if (a[0]) a[0].style.height='100%';
         if (a[0]) a[0].style.width='100%';
+        a=$$('canvas'); if (a[0].width>512) {
+          if (a[0]) a[0].style.height='100%';
+          if (a[0]) a[0].style.width='100%';
+        }
       };
       gtag&&gtag('config', 'UA-96802693-2', {
         'page_title': 'coffeeshop - '+document.location.hash.slice(1),
