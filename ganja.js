@@ -398,7 +398,7 @@
       
     // webGL2 Graphing function.
       static graphGL(f,options) {
-        var canvas=document.createElement('canvas'); canvas.width=600; canvas.height=300; canvas.style.backgroundColor='#EEE';
+        var canvas=document.createElement('canvas'); canvas.width=options.width||600; canvas.height=options.height||600; canvas.style.backgroundColor='#EEE';
         var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,antialias:true,powerPreference:'high-performance'}); 
         gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240/255,240/255,240/255,1.0);
         
@@ -435,8 +435,8 @@
           gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
           if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
           var v; if (!va) v = createVA(vtx, texc); else gl.bindVertexArray(va.r);
-          gl.drawArrays(tp, 0, vtx.length/3);
-          if (v); destroyVA(v);
+          gl.drawArrays(tp, 0, (va&&va.count)||vtx.length/3);
+          if (v) destroyVA(v);
         }
        
         var program = compile(`#version 300 es
@@ -484,7 +484,17 @@
                      [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 1/(lastpos[2]-5)*-0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
                      [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
               }
-            }  
+            } else if (e instanceof Object && e.data) {
+              if (!e.va) {
+                var et = [];
+                e.data.forEach(e=>{
+                  if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...cam(x).slice(11,14).map((y,i)=>(i==0?1:-1)*y/cam(x)[14]).reverse()]));
+                });
+                e.va = createVA(et);
+                e.va.count = e.data.length*3;
+              }
+              draw(program,gl.TRIANGLES,t,c,[0,0,0],r,undefined,e.va);
+            }
           }; if (options&&options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));  
         }
         return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
