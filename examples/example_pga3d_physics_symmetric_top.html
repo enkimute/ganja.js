@@ -16,7 +16,8 @@ Algebra(3,0,1,()=>{
   var mass  = 1, size  = [1,1,1],
       cubeB = [...Array(8)].map((x,i)=>point.apply(this,size.map((s,j)=>s*(((i>>j)%2)-0.5)))),
       cubeS = cubeB.map(x=>x.slice()),
-      cubeE = [[0,1],[0,2],[2,3],[3,1],[4,5],[4,6],[5,7],[6,7],[0,4],[1,5],[2,6],[3,7]].map(x=>[cubeS[x[0]],cubeS[x[1]]]);
+      cubeE = [[0,1],[0,2],[2,3],[3,1],[4,5],[4,6],[5,7],[6,7],[0,4],[1,5],[2,6],[3,7]].map(x=>[cubeS[x[0]],cubeS[x[1]]]),
+      cubeF = [[0,1,2],[1,2,3],[4,5,6],[5,6,7],[0,1,4],[4,5,1],[2,6,7],[2,3,7],[0,4,2],[4,2,6],[1,5,7],[1,3,7]].map(x=>x.map(i=>cubeS[i]));
 
   // our physics state. [position/orientation, linear/angular velocity in body frame]
   var State  = [1, 0.35e13-.27e12],
@@ -30,8 +31,8 @@ Algebra(3,0,1,()=>{
   // Rotate from body (cubeB) to space (cubeS) using the current state.    
     cubeS.forEach((x,i)=>x.set(State[0]>>>cubeB[i])) 
   // Render the edges and the center of gravity (the origin in the body frame)    
-    return cubeE.concat([State[0]>>>1e123]);
-  },{animate:true}));
+    return [0xFFCC44,...cubeF];
+  },{animate:true,gl:true}));
   
 });
 </SCRIPT></BODY>
