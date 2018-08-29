@@ -427,9 +427,27 @@
             destroyVA=function(va) {
               if (va.b) gl.deleteBuffer(va.b); if (va.b2) gl.deleteBuffer(va.b2); if (va.r) gl.deleteVertexArray(va.r);
             }
+            
+        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{
+          x=x.Normalized;
+          var X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=[...Array(4)].map(x=>Array(4));
+          var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W,
+              yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
+
+          m[0][0] = 1-2*(yy+zz); m[0][1] =   2*(xy-zw); m[0][2] =   2*(xz+yw);
+          m[1][0] =   2*(xy+zw); m[1][1] = 1-2*(xx+zz); m[1][2] =   2*(yz-xw);
+          m[2][0] =   2*(xz-yw); m[2][1] =   2*(yz+xw); m[2][2] = 1-2*(xx+yy);
+          m[3][0] = m[3][1] = m[3][2] = 0; m[3][3] = 1;
+          
+          var y = x.Mul(x.Dual);
+          m[0][3] = -2*y.e23; m[1][3] = -2*y.e13; m[2][3] = 2*y.e12+5; 
+
+          return [...Array(16)].map((x,i)=>m[i%4][i/4|0]);
+        }
+              
 
         var draw=function(p, tp, vtx, color, color2, ratio, texc, va){
-          gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1])
+          gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M); 
           gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||2),0,0,0,0,1,2,0,0,-1,0])
           gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
           gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
@@ -461,18 +479,19 @@
                 `#version 300 es
                  precision highp float; uniform vec3 color; in vec4 Pos; in vec2 tex; out vec4 fragColor;
                  uniform sampler2D texm; void main() { vec4 c = texture(texm,tex); if (c.a<0.01) discard; fragColor = vec4(color,c.a);}`);
-        
+        var armed=0;
         canvas.update = (x)=>{
           var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width); canvas.height = parseFloat(s.height); }
           gl.viewport(0,0, canvas.width|0,canvas.height|0); var r=canvas.width/canvas.height;
-          var p=[],l=[],t=[],c=[.5,.5,.5],lastpos=[-2,2,0.2]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x(); var cam=(x)=>options.camera.Mul(x).Mul(options.camera.Conjugate);
+          var p=[],l=[],t=[],c=[.5,.5,.5],lastpos=[-2,2,0.2]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x(); 
+          M = mtx(options.camera);
           for (var i=0,ll=x.length;i<ll;i++) { 
             var e=x[i]; while (e.call) e=e(); 
             if (e instanceof Element && e.Blade(2).Length) 
                e=[e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
-            if (e.e123) p.push.apply(p,cam(e).slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
-            if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...cam(x).slice(11,14).map((y,i)=>(i==0?1:-1)*y/cam(x)[14]).reverse()])); 
-            if (e instanceof Array && e.length==3) t=t.concat.apply(t,e.map(x=>[...cam(x).slice(11,14).map((y,i)=>(i==0?1:-1)*y/cam(x)[14]).reverse()]));
+            if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
+            if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()])); 
+            if (e instanceof Array && e.length==3) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
             if (!isNaN(e) || i==ll-1 || typeof e == 'string') {
               if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%3==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
               if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
@@ -488,14 +507,17 @@
               if (!e.va) {
                 var et = [];
                 e.data.forEach(e=>{
-                  if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...cam(x).slice(11,14).map((y,i)=>(i==0?1:-1)*y/cam(x)[14]).reverse()]));
+                  if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
                 });
                 e.va = createVA(et);
+                e.va.cam = options.camera;
                 e.va.count = e.data.length*3;
               }
               draw(program,gl.TRIANGLES,t,c,[0,0,0],r,undefined,e.va);
             }
-          }; if (options&&options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));  
+          }; 
+          armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
+          if (options&&options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));  
         }
         return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
       }  
