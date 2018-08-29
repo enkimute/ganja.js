@@ -503,11 +503,11 @@
           // if we're a number (color), label or the last item, we output the collected items.  
             if (!isNaN(e) || i==ll-1 || typeof e == 'string') {
             // render triangles, lines, points.
-              if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%3==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
+              if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
               if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
               if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
             // setup a new color  
-              if (!isNaN(e)) { c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
+              if (typeof e == "number") { c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
             // render a label  
               if (typeof(e)=='string') {
                 gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); 
