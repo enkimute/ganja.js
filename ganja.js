@@ -398,10 +398,11 @@
       
     // webGL2 Graphing function.
       static graphGL(f,options) {
+      // Create a canvas, webgl2 context and set some default GL options.
         var canvas=document.createElement('canvas'); canvas.width=options.width||600; canvas.height=options.height||600; canvas.style.backgroundColor='#EEE';
         var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,antialias:true,powerPreference:'high-performance'}); 
         gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240/255,240/255,240/255,1.0);
-        
+      // Compile vertex and fragment shader, return program.  
         var compile=(vs,fs)=>{ 
           var s=[gl.VERTEX_SHADER,gl.FRAGMENT_SHADER].map((t,i)=>{
             var r=gl.createShader(t); gl.shaderSource(r,[vs,fs][i]); gl.compileShader(r);
@@ -411,7 +412,7 @@
           gl.getProgramParameter(p, gl.LINK_STATUS)||console.error(gl.getProgramInfoLog(p));
           return p;
         };
-        
+      // Create vertex array and buffers, upload vertices and optionally texture coordinates.  
         var createVA=function(vtx, texc) {
               var r = gl.createVertexArray(); gl.bindVertexArray(r);
               var b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); 
@@ -424,10 +425,11 @@
               }
               return {r,b,b2}
             },
+      // Destroy Vertex array and delete buffers.
             destroyVA=function(va) {
               if (va.b) gl.deleteBuffer(va.b); if (va.b2) gl.deleteBuffer(va.b2); if (va.r) gl.deleteVertexArray(va.r);
             }
-            
+      // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{
           x=x.Normalized;
           var X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=[...Array(4)].map(x=>Array(4));
@@ -444,8 +446,7 @@
 
           return [...Array(16)].map((x,i)=>m[i%4][i/4|0]);
         }
-              
-
+      // Render the given vertices. (autocreates vertex array if not yet created).  
         var draw=function(p, tp, vtx, color, color2, ratio, texc, va){
           gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M); 
           gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||2),0,0,0,0,1,2,0,0,-1,0])
@@ -453,10 +454,10 @@
           gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
           if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
           var v; if (!va) v = createVA(vtx, texc); else gl.bindVertexArray(va.r);
-          gl.drawArrays(tp, 0, (va&&va.count)||vtx.length/3);
+          gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
           if (v) destroyVA(v);
         }
-       
+      // Program for the geometry. Derivative based normals. Basic lambert shading.    
         var program = compile(`#version 300 es
                  layout (location=0) in vec4 position; out vec4 Pos; uniform mat4 mv; uniform mat4 p; 
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; }`,
@@ -464,7 +465,7 @@
                  precision highp float; uniform vec3 color; uniform vec3 color2; in vec4 Pos; out vec4 fragColor;
                  void main() { vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,vec3(.0,-0.4,1.0));
                  fragColor = vec4(max(0.0,l)*color+color2, 1.0);  }`);
-
+      // Create a font texture, lucida console or otherwise monospaced.
         var fw=22, font = Object.assign(document.createElement('canvas'),{width:94*fw,height:32}), 
             ctx = Object.assign(font.getContext('2d'),{font:'bold 32px lucida console, monospace'}),
             ftx = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, ftx);
@@ -472,50 +473,60 @@
             gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,94*fw,32,0,gl.RGBA,gl.UNSIGNED_BYTE,font);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);  
-
+      // Font rendering program. Renders billboarded fonts, transforms offset passed as color2.
         var program2 = compile(`#version 300 es
                  layout (location=0) in vec4 position; layout (location=1) in vec2 texc; out vec2 tex; out vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2; 
-                 void main() { tex=texc; gl_PointSize=6.0; Pos=mv*(position+vec4(color2,0.0)); gl_Position = p*Pos; }`,
+                 void main() { tex=texc; gl_PointSize=6.0; vec4 o=mv*vec4(color2,0.0); Pos=(-1.0/(o.z-5.0))*position+vec4(0.0,0.0,5.0,0.0)+o; gl_Position = p*Pos; }`,
                 `#version 300 es
                  precision highp float; uniform vec3 color; in vec4 Pos; in vec2 tex; out vec4 fragColor;
                  uniform sampler2D texm; void main() { vec4 c = texture(texm,tex); if (c.a<0.01) discard; fragColor = vec4(color,c.a);}`);
+      // canvas update will (re)render the content.            
         var armed=0;
         canvas.update = (x)=>{
+        // Start by updating canvas size if needed and viewport.
           var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width); canvas.height = parseFloat(s.height); }
           gl.viewport(0,0, canvas.width|0,canvas.height|0); var r=canvas.width/canvas.height;
-          var p=[],l=[],t=[],c=[.5,.5,.5],lastpos=[-2,2,0.2]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x(); 
-          M = mtx(options.camera);
+        // Defaults, resolve function input  
+          var a,p=[],l=[],t=[],c=[.5,.5,.5],lastpos=[-2,2,0.2]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x();
+        // Create default camera matrix and initial lastposition (contra-compensated for camera)  
+          M = mtx(options.camera); lastpos = options.camera.Normalized.Conjugate.Mul(((a=new this()).set(lastpos,11),a)).Mul(options.camera.Normalized).slice(11,14);
+        // Loop over all items to render.  
           for (var i=0,ll=x.length;i<ll;i++) { 
             var e=x[i]; while (e.call) e=e(); 
+          // Convert lines to line segments.  
             if (e instanceof Element && e.Blade(2).Length) 
                e=[e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
+          // If euclidean point, store as point, store line segments and triangles.
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
             if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()])); 
             if (e instanceof Array && e.length==3) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
+          // if we're a number (color), label or the last item, we output the collected items.  
             if (!isNaN(e) || i==ll-1 || typeof e == 'string') {
+            // render triangles, lines, points.
               if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%3==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
               if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
               if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
+            // setup a new color  
               if (!isNaN(e)) { c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
+            // render a label  
               if (typeof(e)=='string') {
                 gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); 
                 draw(program2,gl.TRIANGLES, 
-                     [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 1/(lastpos[2]-5)*-0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
+                     [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
                      [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
               }
+            // we could also be an object with cached vertex array of triangles ..   
             } else if (e instanceof Object && e.data) {
+              // Create the vertex array and store it for re-use.
               if (!e.va) {
-                var et = [];
-                e.data.forEach(e=>{
-                  if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
-                });
-                e.va = createVA(et);
-                e.va.cam = options.camera;
-                e.va.count = e.data.length*3;
+                var et=[]; e.data.forEach(e=>{if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));});
+                e.va = createVA(et,undefined,el); e.va.tcount = e.data.length*3;
               }
+              // render the vertex array.
               draw(program,gl.TRIANGLES,t,c,[0,0,0],r,undefined,e.va);
             }
           }; 
+          // if we're no longer in the page .. stop doing the work.
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
           if (options&&options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));  
         }
