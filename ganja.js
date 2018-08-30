@@ -431,22 +431,11 @@
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{
-          x=x.Normalized;
-          var X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=[...Array(4)].map(x=>Array(4));
-          var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W,
-              yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
-
-          m[0][0] = 1-2*(yy+zz); m[0][1] =   2*(xy-zw); m[0][2] =   2*(xz+yw);
-          m[1][0] =   2*(xy+zw); m[1][1] = 1-2*(xx+zz); m[1][2] =   2*(yz-xw);
-          m[2][0] =   2*(xz-yw); m[2][1] =   2*(yz+xw); m[2][2] = 1-2*(xx+yy);
-          m[3][0] = m[3][1] = m[3][2] = 0; m[3][3] = 1;
-          
-          var y = x.Mul(x.Dual);
-          m[0][3] = -2*y.e23; m[1][3] = -2*y.e13; m[2][3] = 2*y.e12+5; 
-
-          return [...Array(16)].map((x,i)=>m[i%4][i/4|0]);
+          x=x.Normalized; var y=x.Mul(x.Dual),X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=Array(16);
+          var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W, yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
+          return [ 1-2*(yy+zz), 2*(xy+zw), 2*(xz-yw), 0, 2*(xy-zw), 1-2*(xx+zz), 2*(yz+xw), 0, 2*(xz+yw), 2*(yz-xw), 1-2*(xx+yy), 0, -2*y.e23, -2*y.e13, 2*y.e12+5, 1];
         }
-      // Render the given vertices. (autocreates vertex array if not yet created).  
+      // Render the given vertices. (autocreates/destroys vertex array if not supplied).  
         var draw=function(p, tp, vtx, color, color2, ratio, texc, va){
           gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M); 
           gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||2),0,0,0,0,1,2,0,0,-1,0])
@@ -500,8 +489,20 @@
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
             if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()])); 
             if (e instanceof Array && e.length==3) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
+          // we could also be an object with cached vertex array of triangles ..   
+            if (e instanceof Object && e.data) {
+              // Create the vertex array and store it for re-use.
+              if (!e.va) {
+                var et=[]; e.data.forEach(e=>{if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));});
+                e.va = createVA(et,undefined); e.va.tcount = e.data.length*3;
+              }
+              // render the vertex array.
+              if (e.transform) { M=mtx(options.camera.Mul(e.transform)); }
+              draw(program,gl.TRIANGLES,t,c,[0,0,0],r,undefined,e.va);
+              if (e.transform) { M=mtx(options.camera); }
+            }
           // if we're a number (color), label or the last item, we output the collected items.  
-            if (!isNaN(e) || i==ll-1 || typeof e == 'string') {
+            else if (!isNaN(e) || i==ll-1 || typeof e == 'string') {
             // render triangles, lines, points.
               if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
               if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
@@ -515,16 +516,7 @@
                      [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
                      [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
               }
-            // we could also be an object with cached vertex array of triangles ..   
-            } else if (e instanceof Object && e.data) {
-              // Create the vertex array and store it for re-use.
-              if (!e.va) {
-                var et=[]; e.data.forEach(e=>{if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));});
-                e.va = createVA(et,undefined); e.va.tcount = e.data.length*3;
-              }
-              // render the vertex array.
-              draw(program,gl.TRIANGLES,t,c,[0,0,0],r,undefined,e.va);
-            }
+            }  
           }; 
           // if we're no longer in the page .. stop doing the work.
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
