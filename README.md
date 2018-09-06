@@ -47,7 +47,7 @@ inline syntax and graphing makes math in the browser feel like .. math.
 * geometric, inner (contraction), outer (wedge) and vee product
 * conjugate, Reverse, Involute, Dual (Poincare), Negative
 * 4 API's (inline, asciimath, object oriented, functional)
-* Easy graph function for 1D and 2D functions, Projective 2D, 3D and conformal 2D elements.
+* Easy graph function for 1D and 2D functions, Projective 2D, 3D and conformal 2D and 3D elements.
 * Supports vectors and matrices in all its algebras.
 * There's a [game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) that teaches you how to use ganja.js !
 
@@ -219,14 +219,20 @@ examples of how to use the inline syntax.
 Your Algebra also exposes a static **_graph_** function that allows you to
 easily graph 1D or 2D functions as well as 2D and 3D PGA elements.
 
+canvas output is available for 1D and 2D functions.
+SVG output is available for 2D PGA, 3D PGA and 2D CGA.
+webGL output is available for 3D PGA and 3D CGA.
+
 ```javascript
 canvas = Algebra(0).graph(x=>Math.sin(x*5));                   // Graph a 1D function in R
 
 canvas = Algebra(0).graph((x,y)=>x+y);                         // Graph a 2D function in R
 
-svg = Algebra(2,0,1,()=>this.graph([1e12,1e1,1e2]));           // Graph the origin and x and y-axis in 2D
+svg = Algebra(2,0,1,()=>this.graph([1e12,1e1,1e2]));           // Graph the origin and x and y-axis in 2D PGA
 
-svg = Algebra(3,0,1,()=>this.graph([1e123,1e23,1e13,1e12],{camera:1+.5e01-.5e02})); // and in 3D 
+svg = Algebra(3,0,1,()=>this.graph([1e123,1e23,1e13,1e12],{camera:1+.5e01-.5e02})); // and in 3D PGA
+
+canvas = Algebra(4,1,()=>this.graph([.5e4-.5e5],{conformal:true,gl:true}); // The origin in 3D CGA
 ```
 Again, many more examples can be found at [the coffeeshop](https://enkimute.github.io/ganja.js/examples/coffeeshop.html).
 
@@ -327,6 +333,14 @@ PGA3D Physics Free Top<BR>
 PGA3D Origami<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_origami"                TARGET="_blank" TITLE="PGA3D Origami">
 <IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/pga3d_origami.jpg"></A>
+</TD></TR><TR><TD ALIGN=CENTER>
+PGA3D Objects<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_objects"                TARGET="_blank" TITLE="PGA3D Objects">
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/pga3d_objects.jpg"></A>
+</TD><TD ALIGN=CENTER>
+CGA3D Spheres<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_points_and_spheres"     TARGET="_blank" TITLE="CGA3D points and spheres">
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_spheres.jpg"></A>
 </TD></TR><TR><TD ALIGN=CENTER>
 PGA2D Origami<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_origami"                TARGET="_blank" TITLE="PGA2D Origami">
