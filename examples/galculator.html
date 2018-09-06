@@ -56,7 +56,6 @@
     .group { display:flex;     width:100%; }
     .numButton {
       position     : relative;
-      user-select  : none;
       outline      : none;
       width        : 70px;
       flex-grow    : 1;
@@ -74,10 +73,12 @@
                      inset 0px -1px 1px rgba(70,50,40,0.8),
                      inset 0px -2px 1px rgba(90,50,40,0.3);
       cursor       : pointer;
+    }
+    .noselect {
       -webkit-user-select : none;
-      -moz-user-select    : none; 
+      -moz-user-select    : none;
       -ms-user-select     : none;
-      user-select         : none; 
+      user-select         : none;
     }
     .numButton:focus { outline:none; }
     .numButton:active:not(.disabled), .numButton.active:not(.disabled) { top:2px; }
@@ -439,7 +440,7 @@
      // Every 8 buttons, start a new group.
        if (j%8==0) p = document.getElementById("calcBody").appendChild(Object.assign(document.createElement('div'),{className:'group'}));
      // Add the button to the current group.  
-       buttons[i].el = p.appendChild( Object.assign(document.createElement('div'),{className:"numButton "+(buttons[i].color||''),innerHTML:buttons[i].label}) );
+       buttons[i].el = p.appendChild( Object.assign(document.createElement('div'),{className:"numButton noselect "+(buttons[i].color||''),innerHTML:buttons[i].label}) );
      // Link the handlers  
        (function(x){ 
          buttons[i].el.ontouchend = function(e) { this.classList.remove('active'); }
