@@ -140,7 +140,7 @@
       LDiv (b,res) { return b.Inverse.Mul(this,res); }
     
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.  
-      Exp  ()      { var r = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<15; x++) { r=r.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return r; }
+      Exp  ()      { var r = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<25; x++) { r=r.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return r; }
       
     // Helper for efficient inverses and a helper to return the grade-1 part of a multivector as a trimmed typed array.   
       Map  (a,b  ) { var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*(((a===grades[i])||(b===grades[i]))?-1:1); return res; }
@@ -430,7 +430,8 @@
               if (va.b) gl.deleteBuffer(va.b); if (va.b2) gl.deleteBuffer(va.b2); if (va.r) gl.deleteVertexArray(va.r);
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
-        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{
+        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=performance.now()/1000;
+          if (tot==5) return [Math.cos(t),0,Math.sin(t),0,0,1,0,0,-Math.sin(t),0,Math.cos(t),0,0,0,5,1];
           x=x.Normalized; var y=x.Mul(x.Dual),X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=Array(16);
           var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W, yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
           return [ 1-2*(yy+zz), 2*(xy+zw), 2*(xz-yw), 0, 2*(xy-zw), 1-2*(xx+zz), 2*(yz+xw), 0, 2*(xz+yw), 2*(yz-xw), 1-2*(xx+yy), 0, -2*y.e23, -2*y.e13, 2*y.e12+5, 1];
@@ -469,8 +470,54 @@
                 `#version 300 es
                  precision highp float; uniform vec3 color; in vec4 Pos; in vec2 tex; out vec4 fragColor;
                  uniform sampler2D texm; void main() { vec4 c = texture(texm,tex); if (c.a<0.01) discard; fragColor = vec4(color,c.a);}`);
+      // Conformal space needs a bit extra magic to extract euclidean parametric representations.
+        var interprete = (x)=>{
+          if (!(x instanceof Element)) return { tp:0 };
+          // tp = { 0:unknown 1:point 2:line, 3:plane, 4:circle, 5:sphere
+          var ninf = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
+          var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ninf.Wedge(x), ipnix = ninf.Dot(x), 
+              attitude, pos, normal, tg,btg,epsilon = 0.001, I3=Element.Coeff(16,-1);
+          var x2zero = Math.abs(X2) < epsilon, ipnixzero = ipnix.VLength < epsilon, opnixzero = opnix.VLength < epsilon;
+          if (opnixzero && ipnixzero) {                 // free flat
+          } else if (opnixzero && !ipnixzero) {         // bound flat (lines)
+            attitude = no.Wedge(ninf).Dot(x); 
+            weight2 = Math.abs(attitude.Dot(attitude).s)**.5;
+            pos = attitude.Dot(x.Inverse);
+            pos = [-pos.e15/pos.e45,-pos.e25/pos.e45,-pos.e34/pos.e45];
+            if (x.Blade(3).VLength) {
+              normal = [attitude.e1/weight2,attitude.e2/weight2,attitude.e3/weight2]; tp=2; 
+            } else {
+              normal = (Element.Div(attitude,weight2).Dot(I3)).Normalized;
+              var r=normal.Mul(Element.Coeff(3,1)); r[0]+=1;
+              tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Inverse)].slice(1,4);
+              btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Inverse)].slice(1,4);
+              normal = [...normal.slice(1,4)]; tp=3;
+            }
+          } else if (!opnixzero && ipnixzero) {         // dual bound flat
+          } else if (x2zero) {                          // bound vec,biv,tri (points)
+            attitude = ninf.Wedge(no).Dot(ninf.Wedge(x)); 
+            pos = [...(Element.Dot((ninf.Dot(x)).Inverse,x)).slice(1,4)].map(x=>-x);
+            tp=1; 
+          } else if (!x2zero) {                          // round (point pair,circle,sphere)
+            tp = x.Blade(3).VLength?4:5; 
+            var nix  = ninf.Wedge(x), nix2 = (nix.Mul(nix)).s;
+            attitude = ninf.Wedge(no).Dot(ninf.Wedge(x));
+            pos = [...(x.Mul(ninf).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
+            weight2 = Math.abs((x.Dot(x)).s / nix2)**.5;
+            if (tp==4) {
+              normal = (Element.Div(attitude,weight2).Dot(I3)).Normalized;
+              var r=normal.Mul(Element.Coeff(3,1)); r[0]+=1;
+              tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Inverse)].slice(1,4);
+              btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Inverse)].slice(1,4);
+              normal = [...normal.slice(1,4)]; 
+            } else {
+              normal = [...((Element.Div(attitude,weight2).Dot(I3)).Normalized).slice(1,4)];
+            }
+          }
+          return {tp,pos,normal,tg,btg,weight2}
+        };                 
       // canvas update will (re)render the content.            
-        var armed=0;
+        var armed=0,sphere;
         canvas.update = (x)=>{
         // Start by updating canvas size if needed and viewport.
           var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width); canvas.height = parseFloat(s.height); }
@@ -481,7 +528,50 @@
           M = mtx(options.camera); lastpos = options.camera.Normalized.Conjugate.Mul(((a=new this()).set(lastpos,11),a)).Mul(options.camera.Normalized).slice(11,14);
         // Loop over all items to render.  
           for (var i=0,ll=x.length;i<ll;i++) { 
-            var e=x[i]; while (e.call) e=e(); 
+            var e=x[i]; while (e.call) e=e();
+          // CGA
+            if (tot==5 && options.conformal) {
+              var d = interprete(e);
+              if (d.tp==1) p.push.apply(p,d.pos);
+              if (d.tp==2) { l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]*10)); l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]*10)); }
+              if (d.tp==3) { t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]-d.btg[i])); 
+                             t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]-d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]-d.btg[i])); }
+              if (d.tp==4) {
+                var ne=0,la=0;
+                for (var j=0; j<65; j++) {
+                  ne = d.pos.map((x,i)=>x+Math.cos(j/32*Math.PI)*d.weight2*d.tg[i]+Math.sin(j/32*Math.PI)*d.weight2*d.btg[i]); if (ne&&la) { l.push.apply(l,la); l.push.apply(l,ne); }; la=ne;
+                }
+              }               
+              if (d.tp==5) {
+                if (!sphere) {
+                  var pnts = [], tris=[], S=Math.sin, C=Math.cos, pi=Math.PI, W=96, H=48;
+                  for (var j=0; j<W+1; j++) for (var k=0; k<H; k++) {
+                    pnts.push( [S(2*pi*j/W)*S(pi*k/(H-1)), C(2*pi*j/W)*S(pi*k/(H-1)), C(pi*k/(H-1))]);
+                    if (j && k) {
+                      tris.push.apply(tris, pnts[(j-1)*H+k-1]);tris.push.apply(tris, pnts[(j-1)*H+k]);tris.push.apply(tris, pnts[j*H+k-1]);
+                      tris.push.apply(tris, pnts[j*H+k-1]); tris.push.apply(tris, pnts[(j-1)*H+k]); tris.push.apply(tris, pnts[j*H+k]);
+                    }
+                  }
+                  sphere = { va : createVA(tris,undefined) }; sphere.va.tcount = tris.length/3;
+                }
+                var oldM = M;
+                M=[].concat.apply([],Element.Mul([[d.weight2,0,0,0],[0,d.weight2,0,0],[0,0,d.weight2,0],[d.pos[0],d.pos[1],d.pos[2],1]],[[M[0],M[1],M[2],M[3]],[M[4],M[5],M[6],M[7]],[M[8],M[9],M[10],M[11]],[M[12],M[13],M[14],M[15]]])).map(x=>x.s);
+                gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,0.5); gl.enable(gl.CULL_FACE)
+                draw(program,gl.TRIANGLES,undefined,c,[0,0,0],r,undefined,sphere.va);
+                gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
+                M = oldM;
+              }
+              if (i==ll-1 || d.tp==0) {
+              // render triangles, lines, points.
+                if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
+                if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
+                if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
+              // setup a new color  
+                if (typeof e == "number") { c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
+              }
+              continue;
+            }
+          // PGA   
           // Convert lines to line segments.  
             if (e instanceof Element && e.Blade(2).Length) 
                e=[e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
