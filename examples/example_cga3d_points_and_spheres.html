@@ -19,23 +19,19 @@ Algebra(4,1,()=>{
       d = up(1e3-.5e2), e=up(.5e2+1e1);
 
 // You can create circles by wedging three points.
-  var C1 = (a^b^c).Normalized,
-      C2 = (a^b^d).Normalized,
-      C3 = (a^c^d).Normalized,
-      C4 = (b^c^d).Normalized;
+  var C1 = a^b^c, C2 = a^b^d, C3 = a^c^d, C4 = b^c^d;
       
 // If one of those points is infinity .. you get a line.
-  var L1 = (a^b^ni).Normalized,
-      L2 = (c^d^ni).Normalized;
+  var L1 = a^b^ni, L2 = c^d^ni;
       
 // Wedging four points makes sphere.
-  var S = (a^b^c^d).Normalized;
+  var S = a^b^c^d;
   
 // If on of those is infinity .. you get a plane.
-  var P = (c^d^e^ni).Normalized;
+  var P = c^d^e^ni;
   
 // Intersecting a plane and a sphere gives another circle.
-  var PS = (P&S).Normalized;
+  var PS = P&S;
 
   document.body.appendChild(this.graph([
      0xFF0000, a,b,c,d,          // points
