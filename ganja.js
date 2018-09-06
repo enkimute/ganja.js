@@ -333,7 +333,7 @@
           // Reset position and color for cursor.  
             lx=-2;ly=-1.85;lr=0;color='#444'; 
           // Create the svg element. (master template string till end of function)  
-            var svg=new DOMParser().parseFromString(`<SVG onmousedown="if(evt.target==this)this.sel=undefined" viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; user-select:none">
+            var svg=new DOMParser().parseFromString(`<SVG onmousedown="if(evt.target==this)this.sel=undefined" viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none">
             // Add a grid (option)
             ${options.grid?[...Array(11)].map((x,xi)=>`<line x1="-10" y1="${(xi-5)/2}" x2="10" y2="${(xi-5)/2}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${(xi-5)/2}" y2="10" x2="${(xi-5)/2}"  stroke-width="0.005" stroke="#CCC"/>`):''}
             // Handle conformal 2D elements. 
