@@ -487,8 +487,8 @@
             if (x.Blade(3).VLength) {
               normal = [attitude.e1/weight2,attitude.e2/weight2,attitude.e3/weight2]; tp=2; 
             } else {
-              normal = (Element.Mul(attitude,1/weight2).Dot(I3)).Normalized;
-              var r=normal.Mul(Element.Coeff(3,1)); r[0]+=1; r=r.Normalized;
+              normal = Element.Dot(Element.Mul(attitude,1/weight2),I3).Normalized;
+              var r=normal.Mul(Element.Coeff(3,1)); if (r[0]==-1) r[0]=1; else {r[0]+=1; r=r.Normalized;}
               tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Conjugate)].slice(1,4);
               btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Conjugate)].slice(1,4);
               normal = [...normal.slice(1,4)]; tp=3;
@@ -501,17 +501,18 @@
           } else if (!x2zero) {                          // round (point pair,circle,sphere)
             tp = x.Blade(3).VLength?4:5; 
             var nix  = ninf.Wedge(x), nix2 = (nix.Mul(nix)).s;
-            attitude = ninf.Wedge(no).Dot(ninf.Wedge(x));
+            attitude = ninf.Wedge(no).Dot(nix);
             pos = [...(x.Mul(ninf).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
             weight2 = Math.abs((x.Dot(x)).s / nix2)**.5;
             if (tp==4) {
-              normal = (Element.Mul(attitude,1/weight2).Dot(I3)).Normalized;
+              if (x.Dot(x).s < 0) { weight2 = -weight2; }
+              normal = Element.Dot(Element.Mul(attitude,1/weight2),I3).Normalized;
               var r=normal.Mul(Element.Coeff(3,1)); if (r[0]==-1) r[0]=1; else {r[0]+=1; r=r.Normalized;}
               tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Conjugate)].slice(1,4);
               btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Conjugate)].slice(1,4);
               normal = [...normal.slice(1,4)]; 
             } else {
-              normal = [...((Element.Mul(attitude,1/weight2).Dot(I3)).Normalized).slice(1,4)];
+              normal = [...((Element.Dot(Element.Mul(attitude,1/weight2),I3)).Normalized).slice(1,4)];
             }
           }
           return {tp,pos,normal,tg,btg,weight2}
@@ -538,8 +539,9 @@
                              t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]-d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]-d.btg[i])); }
               if (d.tp==4) {
                 var ne=0,la=0;
+                if (d.weight2<0) { c[0]=1;c[1]=0;c[2]=0; }
                 for (var j=0; j<65; j++) {
-                  ne = d.pos.map((x,i)=>x+Math.cos(j/32*Math.PI)*d.weight2*d.tg[i]+Math.sin(j/32*Math.PI)*d.weight2*d.btg[i]); if (ne&&la) { l.push.apply(l,la); l.push.apply(l,ne); }; la=ne;
+                  ne = d.pos.map((x,i)=>x+Math.cos(j/32*Math.PI)*d.weight2*d.tg[i]+Math.sin(j/32*Math.PI)*d.weight2*d.btg[i]); if (ne&&la&&(d.weight2>0||j%2==0)) { l.push.apply(l,la); l.push.apply(l,ne); }; la=ne;
                 }
               }               
               if (d.tp==5) {
