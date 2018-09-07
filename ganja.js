@@ -499,7 +499,7 @@
             pos = [...(Element.Dot(1/(ninf.Dot(x)).s,x)).slice(1,4)].map(x=>-x);
             tp=1; 
           } else if (!x2zero) {                          // round (point pair,circle,sphere)
-            tp = x.Blade(3).VLength?4:5; 
+            tp = x.Blade(3).VLength?4:x.Blade(2).VLength?6:5; 
             var nix  = ninf.Wedge(x), nix2 = (nix.Mul(nix)).s;
             attitude = ninf.Wedge(no).Dot(nix);
             pos = [...(x.Mul(ninf).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
@@ -511,6 +511,9 @@
               tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Conjugate)].slice(1,4);
               btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Conjugate)].slice(1,4);
               normal = [...normal.slice(1,4)]; 
+            } else if (tp==6) {
+              weight2 = (x.Dot(x).s < 0)?-(weight2):weight2;
+              normal = Element.Mul(attitude.Normalized,weight2).slice(1,4);
             } else {
               normal = [...((Element.Dot(Element.Mul(attitude,1/weight2),I3)).Normalized).slice(1,4)];
             }
@@ -545,6 +548,11 @@
                   ne = d.pos.map((x,i)=>x+Math.cos(j/32*Math.PI)*d.weight2*d.tg[i]+Math.sin(j/32*Math.PI)*d.weight2*d.btg[i]); if (ne&&la&&(d.weight2>0||j%2==0)) { l.push.apply(l,la); l.push.apply(l,ne); }; la=ne;
                 }
               }               
+              if (d.tp==6) {
+                if (d.weight2<0) { c[0]=1;c[1]=0;c[2]=0; }
+                p.push.apply(p,d.pos.map((x,i)=>x-d.normal[i]));
+                p.push.apply(p,d.pos.map((x,i)=>x+d.normal[i]));
+              }
               if (d.tp==5) {
                 if (!sphere) {
                   var pnts = [], tris=[], S=Math.sin, C=Math.cos, pi=Math.PI, W=96, H=48;
