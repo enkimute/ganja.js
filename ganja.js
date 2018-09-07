@@ -506,7 +506,7 @@
             weight2 = Math.abs((x.Dot(x)).s / nix2)**.5;
             if (tp==4) {
               normal = (Element.Mul(attitude,1/weight2).Dot(I3)).Normalized;
-              var r=normal.Mul(Element.Coeff(3,1)); r[0]+=1; r=r.Normalized;
+              var r=normal.Mul(Element.Coeff(3,1)); if (r[0]==-1) r[0]=1; else {r[0]+=1; r=r.Normalized;}
               tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Conjugate)].slice(1,4);
               btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Conjugate)].slice(1,4);
               normal = [...normal.slice(1,4)]; 
