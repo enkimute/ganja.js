@@ -471,10 +471,10 @@
                  precision highp float; uniform vec3 color; in vec4 Pos; in vec2 tex; out vec4 fragColor;
                  uniform sampler2D texm; void main() { vec4 c = texture(texm,tex); if (c.a<0.01) discard; fragColor = vec4(color,c.a);}`);
       // Conformal space needs a bit extra magic to extract euclidean parametric representations.
+        if (tot==5 && options.conformal) var ninf = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
         var interprete = (x)=>{
           if (!(x instanceof Element)) return { tp:0 };
           // tp = { 0:unknown 1:point 2:line, 3:plane, 4:circle, 5:sphere
-          var ninf = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
           var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ninf.Wedge(x), ipnix = ninf.Dot(x), 
               attitude, pos, normal, tg,btg,epsilon = 0.001, I3=Element.Coeff(16,-1);
           var x2zero = Math.abs(X2) < epsilon, ipnixzero = ipnix.VLength < epsilon, opnixzero = opnix.VLength < epsilon;
@@ -482,21 +482,21 @@
           } else if (opnixzero && !ipnixzero) {         // bound flat (lines)
             attitude = no.Wedge(ninf).Dot(x); 
             weight2 = Math.abs(attitude.Dot(attitude).s)**.5;
-            pos = attitude.Dot(x.Inverse);
+            pos = attitude.Dot(x.Reverse); //Inverse);
             pos = [-pos.e15/pos.e45,-pos.e25/pos.e45,-pos.e34/pos.e45];
             if (x.Blade(3).VLength) {
               normal = [attitude.e1/weight2,attitude.e2/weight2,attitude.e3/weight2]; tp=2; 
             } else {
-              normal = (Element.Div(attitude,weight2).Dot(I3)).Normalized;
-              var r=normal.Mul(Element.Coeff(3,1)); r[0]+=1;
-              tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Inverse)].slice(1,4);
-              btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Inverse)].slice(1,4);
+              normal = (Element.Mul(attitude,1/weight2).Dot(I3)).Normalized;
+              var r=normal.Mul(Element.Coeff(3,1)); r[0]+=1; r=r.Normalized;
+              tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Conjugate)].slice(1,4);
+              btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Conjugate)].slice(1,4);
               normal = [...normal.slice(1,4)]; tp=3;
             }
           } else if (!opnixzero && ipnixzero) {         // dual bound flat
           } else if (x2zero) {                          // bound vec,biv,tri (points)
             attitude = ninf.Wedge(no).Dot(ninf.Wedge(x)); 
-            pos = [...(Element.Dot((ninf.Dot(x)).Inverse,x)).slice(1,4)].map(x=>-x);
+            pos = [...(Element.Dot(1/(ninf.Dot(x)).s,x)).slice(1,4)].map(x=>-x);
             tp=1; 
           } else if (!x2zero) {                          // round (point pair,circle,sphere)
             tp = x.Blade(3).VLength?4:5; 
@@ -505,13 +505,13 @@
             pos = [...(x.Mul(ninf).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
             weight2 = Math.abs((x.Dot(x)).s / nix2)**.5;
             if (tp==4) {
-              normal = (Element.Div(attitude,weight2).Dot(I3)).Normalized;
-              var r=normal.Mul(Element.Coeff(3,1)); r[0]+=1;
-              tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Inverse)].slice(1,4);
-              btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Inverse)].slice(1,4);
+              normal = (Element.Mul(attitude,1/weight2).Dot(I3)).Normalized;
+              var r=normal.Mul(Element.Coeff(3,1)); r[0]+=1; r=r.Normalized;
+              tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Conjugate)].slice(1,4);
+              btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Conjugate)].slice(1,4);
               normal = [...normal.slice(1,4)]; 
             } else {
-              normal = [...((Element.Div(attitude,weight2).Dot(I3)).Normalized).slice(1,4)];
+              normal = [...((Element.Mul(attitude,1/weight2).Dot(I3)).Normalized).slice(1,4)];
             }
           }
           return {tp,pos,normal,tg,btg,weight2}
@@ -550,8 +550,7 @@
                     if (j && k) {
                       tris.push.apply(tris, pnts[(j-1)*H+k-1]);tris.push.apply(tris, pnts[(j-1)*H+k]);tris.push.apply(tris, pnts[j*H+k-1]);
                       tris.push.apply(tris, pnts[j*H+k-1]); tris.push.apply(tris, pnts[(j-1)*H+k]); tris.push.apply(tris, pnts[j*H+k]);
-                    }
-                  }
+                  }}
                   sphere = { va : createVA(tris,undefined) }; sphere.va.tcount = tris.length/3;
                 }
                 var oldM = M;
