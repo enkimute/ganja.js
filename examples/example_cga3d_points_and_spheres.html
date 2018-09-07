@@ -41,12 +41,12 @@ Algebra(4,1,()=>{
       var PS = (P&S).Normalized;
    
     return [
-      0xFF0000, a,b,c,d,          // points
-      0x0000FF, C1,C2,C3,C4,      // circles
-      0x008800, L1,L2,            // lines
-      0xCCCCCC, P,                // plane
-      0xFF00FF, PS,               // intersection
-      0xFFAAFF, S                 // sphere
+      0xFF0000, a,"a",b,"b",c,"c",d,"d",           // points
+      0x0000FF, C1,"C1",C2,"C2",C3,"C3",C4,"C4",   // circles
+      0x008800, L1,"L1",L2,"L2",                   // lines
+      0xCCCCCC, P,                                 // plane
+      0xFF00FF, PS,"PS",                           // intersection
+      0xFFAAFF, S,                                 // sphere
     ]
   },{conformal:true,gl:true,animate:true})); 
 

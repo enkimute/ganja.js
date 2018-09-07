@@ -533,6 +533,7 @@
           // CGA
             if (tot==5 && options.conformal) {
               var d = interprete(e);
+              if (d.tp) lastpos=d.pos;
               if (d.tp==1) p.push.apply(p,d.pos);
               if (d.tp==2) { l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]*10)); l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]*10)); }
               if (d.tp==3) { t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]-d.btg[i])); 
@@ -569,6 +570,12 @@
                 if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
               // setup a new color  
                 if (typeof e == "number") { c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
+                if (typeof(e)=='string') {
+                  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); 
+                  draw(program2,gl.TRIANGLES, 
+                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
+                       [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                }
               }
               continue;
             }
