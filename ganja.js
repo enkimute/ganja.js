@@ -164,7 +164,7 @@
     // Addition and subtraction. Subtraction with only one parameter is negation.   
       static Add(a,b,res)   { 
       // Resolve expressions passed in.
-        if(a.call)a=a(); if(b.call)b=b();
+        while(a.call)a=a(); while(b.call)b=b();
       // If only one is an array, add the other element to each of the elements.   
         if ((a instanceof Array)^(b instanceof Array)) return (a instanceof Array)?a.map(x=>Element.Add(x,b)):b.map(x=>Element.Add(a,x)); 
       // If both are equal length arrays, add elements one-by-one  
@@ -179,7 +179,7 @@
       
       static Sub(a,b,res)   {  
       // Resolve expressions passed in.
-        if(a.call)a=a(); b=(b&&b.call)?b():b; 
+        while(a.call)a=a(); while(b&&b.call) b=b(); 
       // If only one is an array, add the other element to each of the elements.   
         if (b&&((a instanceof Array)^(b instanceof Array))) return (a instanceof Array)?a.map(x=>Element.Sub(x,b)):b.map(x=>Element.Sub(a,x)); 
       // If both are equal length arrays, add elements one-by-one  
@@ -195,7 +195,7 @@
     // The geometric product. (or matrix*matrix, matrix*vector, vector*vector product if called with 1D and 2D arrays)
       static Mul(a,b,res)   {
       // Resolve expressions  
-        if(a.call)a=a(); if(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); 
       // Handle matrices and vectors.  
         if ((a instanceof Array)&&(b instanceof Array)) { 
         // vector times vector performs a dot product. (which internally uses the GP on each component)
@@ -217,7 +217,7 @@
     // The inner product. (default is left contraction).  
       static Dot(a,b,res)   {  
       // Expressions
-        if(a.call)a=a(); if(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); 
       // js if numbers, else contraction product.  
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Dot(b,res); 
@@ -226,7 +226,7 @@
     // The outer product. (Grassman product - no use of metric)  
       static Wedge(a,b,res) {  
       // Expressions
-        if(a.call)a=a(); if(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); 
       // js, else generated wedge product.
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Wedge(b,res); 
@@ -235,7 +235,7 @@
     // The regressive product. (Dual of the outer product of the duals). 
       static Vee(a,b,res) {  
       // Expressions
-        if(a.call)a=a(); if(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); 
       // js, else generated vee product. (shortcut for dual of wedge of duals)
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Vee(b,res); 
@@ -244,7 +244,7 @@
     // The sandwich product. Provided for convenience (>>> operator)  
       static sw(a,b) {  
       // Expressions
-        if(a.call)a=a(); if(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); 
       // Map elements in array  
         if (b instanceof Array) return b.map(x=>Element.sw(a,x)); 
       // Call through. no specific generated code for it so just perform the muls.  
@@ -254,7 +254,7 @@
     // Division - scalars or cal through to element method.
       static Div(a,b,res) {  
       // Expressions
-        if(a.call)a=a(); if(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); 
       // js or call through to element divide.  
         if (!(a instanceof Element || b instanceof Element)) return a/b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Div(b,res); 
@@ -263,7 +263,7 @@
     // Pow - needs obvious extensions for natural powers. (exponentiation by squaring)  
       static Pow(a,b,res) {  
       // Expressions
-        if(a.call)a=a(); if(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); 
       // Squaring  
         if (b==2) return this.Mul(a,a,res);
       // No elements, call through to js  
@@ -279,7 +279,7 @@
     // Handles scalars and calls through to element method.  
       static exp(a) {  
       // Expressions.
-        if(a.call)a=a(); 
+        while(a.call)a=a(); 
       // If it has an exp callthrough, use it, else call through to math.  
         if (a.Exp) return a.Exp(); 
         return Math.exp(a); 
@@ -294,10 +294,10 @@
       static Length(a)    { return Element.toEl(a).Length };
       
     // Comparison operators always use length. Handle expressions, then js or length comparison  
-      static lt(a,b)  { if(a.call)a=a(); if(b.call)b=b(); return (a instanceof Element?a.Length:a)<(b instanceof Element?b.Length:b); }
-      static gt(a,b)  { if(a.call)a=a(); if(b.call)b=b(); return (a instanceof Element?a.Length:a)>(b instanceof Element?b.Length:b); }
-      static lte(a,b) { if(a.call)a=a(); if(b.call)b=b(); return (a instanceof Element?a.Length:a)<=(b instanceof Element?b.Length:b); }
-      static gte(a,b) { if(a.call)a=a(); if(b.call)b=b(); return (a instanceof Element?a.Length:a)>=(b instanceof Element?b.Length:b); }
+      static lt(a,b)  { while(a.call)a=a(); while(b.call)b=b(); return (a instanceof Element?a.Length:a)<(b instanceof Element?b.Length:b); }
+      static gt(a,b)  { while(a.call)a=a(); while(b.call)b=b(); return (a instanceof Element?a.Length:a)>(b instanceof Element?b.Length:b); }
+      static lte(a,b) { while(a.call)a=a(); while(b.call)b=b(); return (a instanceof Element?a.Length:a)<=(b instanceof Element?b.Length:b); }
+      static gte(a,b) { while(a.call)a=a(); while(b.call)b=b(); return (a instanceof Element?a.Length:a)>=(b instanceof Element?b.Length:b); }
       
     // Debug output and printing multivectors.  
       static describe() { console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d+\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); }    
@@ -367,7 +367,7 @@
             // Handle projective 2D and 3D elements.  
             }):f.map&&f.map((o,oidx)=>{  if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; } while (o instanceof Function) o=o(); o=(o instanceof Array)?o.map(project):project(o); if (o===undefined) return; 
             // line segments and polygons
-              if (o instanceof Array)  { lx=ly=lr=0; o.forEach((o)=>{o=(o.call)?o():o; lx+=((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]];ly+=o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${((drm[1]==6||drm[1]==14)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${o[0][drm[3]]/o[0][drm[1]]} x2=${((drm[1]==6||drm[1]==14)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${o[1][drm[3]]/o[1][drm[1]]} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
+              if (o instanceof Array)  { lx=ly=lr=0; o.forEach((o)=>{while (o.call) o=o(); lx+=((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]];ly+=o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]]+','+o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${((drm[1]==6||drm[1]==14)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${o[0][drm[3]]/o[0][drm[1]]} x2=${((drm[1]==6||drm[1]==14)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${o[1][drm[3]]/o[1][drm[1]]} stroke-width="0.005" stroke="${color||'#888'}"/>`; }
             // Labels  
               if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="0.1" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},0,0)">&nbsp;${o}&nbsp;</text>`; ly+=0.14; return res2; }
             // Colors  
@@ -430,7 +430,7 @@
               if (va.b) gl.deleteBuffer(va.b); if (va.b2) gl.deleteBuffer(va.b2); if (va.r) gl.deleteVertexArray(va.r);
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
-        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=performance.now()/1000;
+        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.animate?performance.now()/1000:0;
           if (tot==5) return [Math.cos(t),0,Math.sin(t),0,0,1,0,0,-Math.sin(t),0,Math.cos(t),0,0,0,5,1];
           x=x.Normalized; var y=x.Mul(x.Dual),X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=Array(16);
           var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W, yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
@@ -535,7 +535,9 @@
             var e=x[i]; while (e.call) e=e();
           // CGA
             if (tot==5 && options.conformal) {
-              var d = interprete(e);
+              if (e instanceof Array && e.length==2) { e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);l.push.apply(l,x.pos); });  var d = {tp:-1}; }
+              else if (e instanceof Array && e.length==3) { e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);t.push.apply(t,x.pos); });  var d = {tp:-1}; }
+              else var d = interprete(e);
               if (d.tp) lastpos=d.pos;
               if (d.tp==1) p.push.apply(p,d.pos);
               if (d.tp==2) { l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]*10)); l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]*10)); }
