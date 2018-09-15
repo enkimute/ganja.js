@@ -632,7 +632,7 @@
           }; 
           // if we're no longer in the page .. stop doing the work.
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
-          if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); canvas.dispatchEvent(new CustomEvent('input')); }
+          if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); }
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
         canvas.value = f.call?f():f;
