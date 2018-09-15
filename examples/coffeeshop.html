@@ -141,6 +141,11 @@
           bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
           exec: function(editor) { $('RUN').click(); }
       });
+      editor.commands.addCommand({
+          name: "run changes",
+          bindKey: {win: "Shift-Enter", mac: "Shift-Enter"},
+          exec: function(editor) { $('RUN').click(); }
+      });
 
       $('RUN').onclick = function(e) { 
 

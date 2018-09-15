@@ -400,7 +400,7 @@
       static graphGL(f,options) {
       // Create a canvas, webgl2 context and set some default GL options.
         var canvas=document.createElement('canvas'); canvas.width=options.width||600; canvas.height=options.height||600; canvas.style.backgroundColor='#EEE';
-        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,antialias:true,powerPreference:'high-performance'}); 
+        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,antialias:true,preserveDrawingBuffer:options.still||false,powerPreference:'high-performance'}); 
         gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240/255,240/255,240/255,1.0);
       // Compile vertex and fragment shader, return program.  
         var compile=(vs,fs)=>{ 
@@ -632,9 +632,13 @@
           }; 
           // if we're no longer in the page .. stop doing the work.
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
-          if (options&&options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));  
+          if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); canvas.dispatchEvent(new CustomEvent('input')); }
+          if (options&&options.still) { canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
-        return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
+        canvas.value = f;
+        if (options&&options.still) {
+          var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
+        } else return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
       }  
     
     // The inline function is a js to js translator that adds operator overloading and algebraic literals.
