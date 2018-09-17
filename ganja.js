@@ -649,7 +649,7 @@
           canvas.onmousemove=(e)=>{ if (sel==-1) return;
             var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
             var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
-            x.pos[0] += (e.buttons==0)?mx:0; x.pos[1]+=(e.buttons==0)?my:0; x.pos[2]+=(e.buttons==0)?0:my;
+            x.pos[0] += (e.buttons!=2)?mx:0; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons==2)?0:my;
             canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
