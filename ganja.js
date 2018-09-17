@@ -400,8 +400,8 @@
       static graphGL(f,options) {
       // Create a canvas, webgl2 context and set some default GL options.
         var canvas=document.createElement('canvas'); canvas.width=options.width||600; canvas.height=options.height||600; canvas.style.backgroundColor='#EEE';
-        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,antialias:true,preserveDrawingBuffer:options.still||false,powerPreference:'high-performance'}); 
-        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240/255,240/255,240/255,1.0);
+        var gl=canvas.getContext('webgl',{alpha:options.alpha||false,antialias:true,preserveDrawingBuffer:options.still||false,powerPreference:'high-performance'}); 
+        gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240/255,240/255,240/255,1.0); gl.getExtension("OES_standard_derivatives"); gl.va=gl.getExtension("OES_vertex_array_object");
       // Compile vertex and fragment shader, return program.  
         var compile=(vs,fs)=>{ 
           var s=[gl.VERTEX_SHADER,gl.FRAGMENT_SHADER].map((t,i)=>{
@@ -414,7 +414,7 @@
         };
       // Create vertex array and buffers, upload vertices and optionally texture coordinates.  
         var createVA=function(vtx, texc) {
-              var r = gl.createVertexArray(); gl.bindVertexArray(r);
+              var r = gl.va.createVertexArrayOES(); gl.va.bindVertexArrayOES(r);
               var b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); 
               gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vtx), gl.STATIC_DRAW);
               gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(0);
@@ -427,7 +427,7 @@
             },
       // Destroy Vertex array and delete buffers.
             destroyVA=function(va) {
-              if (va.b) gl.deleteBuffer(va.b); if (va.b2) gl.deleteBuffer(va.b2); if (va.r) gl.deleteVertexArray(va.r);
+              if (va.b) gl.deleteBuffer(va.b); if (va.b2) gl.deleteBuffer(va.b2); if (va.r) gl.va.deleteVertexArrayOES(va.r);
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.animate?performance.now()/1000:0;
@@ -443,33 +443,32 @@
           gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
           gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
           if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
-          var v; if (!va) v = createVA(vtx, texc); else gl.bindVertexArray(va.r);
+          var v; if (!va) v = createVA(vtx, texc); else gl.va.bindVertexArrayOES(va.r);
           gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
           if (v) destroyVA(v);
         }
       // Program for the geometry. Derivative based normals. Basic lambert shading.    
-        var program = compile(`#version 300 es
-                 layout (location=0) in vec4 position; out vec4 Pos; uniform mat4 mv; uniform mat4 p; 
+        var program = compile(`attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; 
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; }`,
-                `#version 300 es
-                 precision highp float; uniform vec3 color; uniform vec3 color2; in vec4 Pos; out vec4 fragColor;
+                `#extension GL_OES_standard_derivatives : enable
+                 precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; 
                  void main() { vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,vec3(.0,-0.4,1.0));
-                 fragColor = vec4(max(0.0,l)*color+color2, 1.0);  }`);
+                 gl_FragColor = vec4(max(0.0,l)*color+color2, 1.0);  }`);
       // Create a font texture, lucida console or otherwise monospaced.
         var fw=22, font = Object.assign(document.createElement('canvas'),{width:94*fw,height:32}), 
             ctx = Object.assign(font.getContext('2d'),{font:'bold 32px lucida console, monospace'}),
             ftx = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, ftx);
             for (var i=33; i<127; i++) ctx.fillText(String.fromCharCode(i),(i-33)*fw,26);
-            gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,94*fw,32,0,gl.RGBA,gl.UNSIGNED_BYTE,font);
+            // 2.0 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,94*fw,32,0,gl.RGBA,gl.UNSIGNED_BYTE,font);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, font);
+
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);  
       // Font rendering program. Renders billboarded fonts, transforms offset passed as color2.
-        var program2 = compile(`#version 300 es
-                 layout (location=0) in vec4 position; layout (location=1) in vec2 texc; out vec2 tex; out vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2; 
+        var program2 = compile(`attribute vec4 position; attribute vec2 texc; varying vec2 tex; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2; 
                  void main() { tex=texc; gl_PointSize=6.0; vec4 o=mv*vec4(color2,0.0); Pos=(-1.0/(o.z-5.0))*position+vec4(0.0,0.0,5.0,0.0)+o; gl_Position = p*Pos; }`,
-                `#version 300 es
-                 precision highp float; uniform vec3 color; in vec4 Pos; in vec2 tex; out vec4 fragColor;
-                 uniform sampler2D texm; void main() { vec4 c = texture(texm,tex); if (c.a<0.01) discard; fragColor = vec4(color,c.a);}`);
+                `precision highp float; uniform vec3 color; varying vec4 Pos; varying vec2 tex; 
+                 uniform sampler2D texm; void main() { vec4 c = texture2D(texm,tex); if (c.a<0.01) discard; gl_FragColor = vec4(color,c.a);}`);
       // Conformal space needs a bit extra magic to extract euclidean parametric representations.
         if (tot==5 && options.conformal) var ninf = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
         var interprete = (x)=>{
