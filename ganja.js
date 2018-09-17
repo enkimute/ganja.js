@@ -631,9 +631,30 @@
           }; 
           // if we're no longer in the page .. stop doing the work.
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
-          if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); }
+          canvas.value=x; canvas.dispatchEvent(new CustomEvent('input'));
+          if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); }
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
+        // Basic mouse interactivity. needs more love.
+        var sel=-1; canvas.onmousedown = (e)=>{
+          var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*-4+2)*canvas.height/canvas.width;
+          sel = -1; canvas.value.forEach((x,i)=>{
+            x = interprete(x); if (x.tp==1) {
+              var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...x.pos,1]).map(x=>x.s);
+              pos2 = Element.Mul( [[5,0,0,0],[0,5*(r||2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
+              if ((mx-pos2[0])**2 + (my-pos2[1])**2 < 0.01) sel=i;
+            }
+          });
+          canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
+          canvas.onmousemove=(e)=>{ if (sel==-1) return;
+            var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
+            var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
+            x.pos[0] += (e.buttons==0)?mx:0; x.pos[1]+=(e.buttons==0)?my:0; x.pos[2]+=(e.buttons==0)?0:my;
+            canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
+            if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
+          }
+        }
+        
         canvas.value = f.call?f():f;
         if (options&&options.still) {
           var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
