@@ -636,7 +636,7 @@
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
         // Basic mouse interactivity. needs more love.
-        var sel=-1; canvas.onmousedown = (e)=>{
+        var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{ e.preventDefault(); e.stopPropagation();
           var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*-4+2)*canvas.height/canvas.width;
           sel = -1; canvas.value.forEach((x,i)=>{
             x = interprete(x); if (x.tp==1) {
@@ -649,7 +649,7 @@
           canvas.onmousemove=(e)=>{ if (sel==-1) return;
             var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
             var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
-            x.pos[0] += (e.buttons!=2)?mx:0; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons==2)?0:my;
+            x.pos[0] += (e.buttons!=2)?mx:0; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?0:my;
             canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
