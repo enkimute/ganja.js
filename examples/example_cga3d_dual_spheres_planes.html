@@ -1,0 +1,35 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 4,1 metric for 3D CGA.
+Algebra(4,1,()=>{
+
+// We start by defining a null basis, and upcasting for points
+  var ni = 1e4+1e5, no = .5e5-.5e4, nino = ni^no;
+  var up = (x)=> no + x + .5*x*x*ni;
+
+// Next we'll define 2 points
+  var p1 = up(1e1+.5e2), p2 = up(1e2-.5e3);
+  
+// The distance between two points.
+  var d = (a,b)=>((a<<b).Length*2)**.5;
+
+// The duality operator can be used to produce a sphere from a point.
+  var s = ()=>!(p1 - .3**2*.5*ni);
+
+// Planes also have a direct dual representation. (but start from vector not point)
+  var p = ()=>!(d(p2,no)*ni + (p2^nino*nino).Normalized);
+  
+// You can use the regressive product to calculate intersections..
+  var c = ()=>s&p;
+
+// Graph the items.
+  document.body.appendChild(this.graph([
+      0x00FF0000, p1, "p1", p2, "p2",      // points
+      0x00000000, c,                       // circle
+      0xE0008800, p, "p",                  // plane
+      0xE0FFFFFF, s, "s",                  // sphere
+  ],{conformal:true,gl:true}));
+});
+</SCRIPT></BODY>

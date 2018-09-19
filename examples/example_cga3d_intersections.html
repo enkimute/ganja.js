@@ -1,0 +1,32 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 4,1 metric for 3D CGA.
+Algebra(4,1,()=>{
+
+// We start by defining a null basis, and upcasting for points
+  var ni = 1e4+1e5, no = .5e5-.5e4, nino = ni^no;
+  var up = (x)=> no + x + .5*x*x*ni;
+
+// Next we'll define some objects.
+  var p  = up(0),                          // point
+      S  = ()=>!(p-.5*ni),                 // main dual sphere around point (interactive)
+      S2 = !(up(-1.4e1)-0.125*ni),         // left dual sphere
+      C  = !(up(1.4e1)-.125*ni)&!(1e3),    // right circle
+      L  = up(.9e2)^up(.9e2+1e1)^ni,       // top line
+      P  = !(1e2-.9*ni);                   // bottom dual plane
+
+// The intersections of the big sphere with the other 4 objects.
+  var C1 = ()=>S&P, C2 = ()=>S&L, C3 = ()=>S&S2, C4 = ()=>S&C;
+
+// Graph the items. (hex numbers are html5 colors, two extra first bytes = alpha)
+  document.body.appendChild(this.graph([ 
+      0x00FF0000, p, "s1",             // point 
+      0,C1,0,C2,0,C3,0,C4,             // intersections
+      0xE0008800, P,                   // plane
+      0,L,0,C,                         // line and circle
+      0xE0FFFFFF, S, "s1", S2          // spheres
+  ],{conformal:true,gl:true}));
+});
+</SCRIPT></BODY>

@@ -1,0 +1,29 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 4,1 metric for 3D CGA. 
+Algebra(4,1,()=>{ 
+
+// We start by defining a null basis, and upcasting for points
+  var ni = 1e4+1e5, no = .5e5-.5e4;
+  var up = (x)=> no + x + .5*x*x*ni;
+
+// Next we'll define 4 points
+  var p1 = up(1e1), p2 = up(1e2), p3 = up(-1e3), p4 = up(-1e2);
+
+// The outer product can be used to construct the sphere through
+// any four points. 
+  var s = ()=>p1^p2^p3^p4;
+  
+// The outer product between any three points and infinity is a plane.
+  var p = ()=>p1^p2^p3^ni;
+  
+// Graph the items.  
+  document.body.appendChild(this.graph([
+      0x00FF0000, p1, "p1", p2, "p2", p3, "p3", p4, "p4", // points
+      0xE0008800, p, "p",                                 // plane
+      0xE00000FF, s, "s"                                  // sphere
+  ],{conformal:true,gl:true})); 
+});
+</SCRIPT></BODY>

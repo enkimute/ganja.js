@@ -1,0 +1,31 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 4,1 metric for 3D CGA. 
+Algebra(4,1,()=>{ 
+
+// We start by defining a null basis in which we will work.
+  var ni = 1e4+1e5, no = .5e5-.5e4;
+  
+// To create a conformal point, you upcast :  
+  var up  = (x)=> no + x + .5*x*x*ni;
+
+// We start by creating three points.
+  var p1 = up(1e1), p2 = up(1e2), p3 = up(1e3);
+
+// The outer product can be used to construct the circle through
+// any three points. (as a function, so it updates when you drag)
+  var c = ()=>p1^p2^p3;
+  
+// The outer product between any two points and infinity is a line.
+  var l = ()=>p1^p2^ni;
+  
+// Graph the items.  
+  document.body.appendChild(this.graph([
+      0xFF0000, p1, "p1", p2, "p2", p3, "p3",  // points
+      0x0000FF, c, "c",                        // circle
+      0x008800, l, "l"                         // line
+  ],{conformal:true,gl:true})); 
+});
+</SCRIPT></BODY>
