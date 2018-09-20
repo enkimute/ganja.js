@@ -1,0 +1,40 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 4,1 metric for 3D CGA.
+Algebra(4,1,()=>{
+
+// We start by defining a null basis, and upcasting for points
+  var ni = 1e4+1e5, no = .5e5-.5e4, nino = ni^no,
+      up = (x)=>no+x+.5*x*x*ni,
+      sphere = (P,r)=>!(P-r**2*.5*ni),
+      plane  = (v,h=0)=>!(v-h*ni);
+
+// Project and reject.      
+  var project_point_on_round            = (point,sphere)=>-point^ni<<sphere<<sphere,
+      project_point_on_flat             = (point,plane)=>up(-point<<plane<<plane^nino*nino),
+      plane_through_point_tangent_to_x  = (point,x)=>point^ni<<x*point^ni;
+
+// Next we'll define some objects.
+  var p  = up(.5e2),                         // point
+      S  = sphere(up(-1.4e1),.5),            // left sphere
+      C  = sphere(up(1.4e1),.5)&plane(1e3),  // right circle
+      L  = up(.9e2)^up(.9e2-1e1)^ni,         // top line
+      P  = plane(1e2,.9);                    // bottom plane
+      
+// Graph the items. (hex numbers are html5 colors, two extra first bytes = alpha)
+  document.body.appendChild(this.graph([ 
+      0x00FF0000, p, "p",                                       // point 
+      0x00008800, ()=>project_point_on_round(p,S), "p on S",    // point on sphere
+      0x000000FF, ()=>project_point_on_round(~p,C), "p on C",   // point on circle
+      0x00888800, ()=>project_point_on_flat(p,P),   "p on P",   // point on plane
+      0x00008888, ()=>project_point_on_flat(~p,L),  "p on L",   // point on line
+      0xc0FF0000, ()=>plane_through_point_tangent_to_x(p,S),    // plane through p tangent to S2
+      0xc000FF00, ()=>plane_through_point_tangent_to_x(p,P),    // plane through p tangent to P
+      0,L,0,C,                                                  // line and circle
+      0xE0008800, P,                                            // plane
+      0xE0FFFFFF, S                                             // spheres
+  ],{conformal:true,gl:true}));
+});
+</SCRIPT></BODY>
