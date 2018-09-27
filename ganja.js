@@ -65,16 +65,17 @@
     } else { options={}; p=p|0; r=r|0; q=q|0; };
 
   // Calculate the total number of dimensions.
-    var tot = (options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length))|0;
+    var tot = options.tot = (options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length))|0;
  
   // Unless specified, generate a full set of Clifford basis names. We generate them as an array of strings by starting
   // from numbers in binary representation and changing the set bits into their relative position.  
   // Basis names are ordered first per grade, then lexically (not cyclic!). 
-    var basis=options.basis||[...Array(2**tot)]                                                                               // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
-              .map((x,xi)=>(((1<<30)+xi).toString(2)).slice(-tot||-1)                                                         // => ["000", "001", "010", "011", "100", "101", "110", "111"]  (index of array in base 2)
-              .replace(/./g,(a,ai)=>a=='0'?'':ai+1-(r==0?0:1)))                                                               // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
-              .sort((a,b)=>(a.toString().length==b.toString().length)?(a|0)-(b|0):a.toString().length-b.toString().length)    // => ["", "1", "2", "3", "12", "13", "23", "123"] (sorted numerically)
-              .map(x=>x&&'e'+x||'1');                                                                                         // => ["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"] (converted to commonly used basis names)
+  // For 10 or more dimensions all names will be double digits ! 1e01 instead of 1e1 .. 
+    var basis=options.basis||[...Array(2**tot)]                                                                                 // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
+              .map((x,xi)=>(((1<<30)+xi).toString(2)).slice(-tot||-1)                                                           // => ["000", "001", "010", "011", "100", "101", "110", "111"]  (index of array in base 2)
+              .replace(/./g,(a,ai)=>a=='0'?'':String.fromCharCode(65+ai+1-(r==0?0:1))))                                         // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
+              .sort((a,b)=>(a.toString().length==b.toString().length)?(a>b?1:b>a?-1:0):a.toString().length-b.toString().length) // => ["", "1", "2", "3", "12", "13", "23", "123"] (sorted numerically)
+              .map(x=>x&&'e'+(x.replace(/./g,x=>('0'+(x.charCodeAt(0)-65)).slice(tot>9?-2:-1) ))||'1')                          // => ["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"] (converted to commonly used basis names)
               
   // See if the basis names start from 0 or 1, store grade per component and lowest component per grade.             
     var low=basis.join('').split('').filter(x=>x.match(/\d/)).sort()[0]*1,
@@ -84,11 +85,11 @@
   // String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)      
   // This is the function that implements e1e1 = +1/-1/0 and e1e2=-e2e1. The brm function creates the remap dictionary.
     var simplify = (s,p,q,r)=>{
-          var sign=1,c,l,t=[],f=true;s=[...s.replace(/e/g,'')];l=s.length;
+          var sign=1,c,l,t=[],f=true;s=s.match(tot>9?/(\d\d)/g:/(\d)/g);l=s.length;
           while (f) { f=false;
           // implement Ex*Ex = metric.
             for (var i=0; i<l;) if (s[i]===s[i+1]) { if ((s[i]-low)>=(p+r)) sign*=-1; else if ((s[i]-low)<r) sign=0; i+=2; f=true; } else t.push(s[i++]);
-          // implement Ex*Ey = Ey*Ex while sorting basis vectors.  
+          // implement Ex*Ey = -Ey*Ex while sorting basis vectors.  
             for (var i=0; i<t.length-1; i++) if (t[i]>t[i+1]) { c=t[i];t[i]=t[i+1];t[i+1]=c;sign*=-1;f=true; break;} if (f) { s=t;t=[];l=s.length; }
           }
           var ret=(sign==0)?'0':((sign==1)?'':'-')+(t.length?'e'+t.join(''):'1'); return (brm&&brm[ret])||(brm&&brm['-'+ret]&&'-'+brm['-'+ret])||ret;

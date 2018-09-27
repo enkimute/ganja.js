@@ -22,7 +22,7 @@ Algebra(4,1,()=>{
   var C1 = ()=>S&P, C2 = ()=>S&L, C3 = ()=>S&S2, C4 = ()=>S&C, C5 = ()=>C&P2;
   
 // For line meet plane its a bit more involved.
-  var lp = up(no<<P2&L^nino*nino);
+  var lp = up(nino<<(P2&L^no));
 
 // Graph the items. (hex numbers are html5 colors, two extra first bytes = alpha)
   document.body.appendChild(this.graph([ 
