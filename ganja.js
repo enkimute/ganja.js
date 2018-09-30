@@ -61,7 +61,7 @@
     var fu=arguments[arguments.length-1],options=p; if (options instanceof Object) {
       q = (p.q || (p.metric && p.metric.filter(x=>x==-1).length))| 0;
       r = (p.r || (p.metric && p.metric.filter(x=>x==0).length)) | 0;
-      p = p.p === undefined ? (p.metric && p.metric.filter(x=>x==1).length) : p.p || 0;
+      p = p.p === undefined ? (p.metric && p.metric.filter(x=>x==1).length) || 0 : p.p || 0;
     } else { options={}; p=p|0; r=r|0; q=q|0; };
 
   // Calculate the total number of dimensions.
@@ -73,7 +73,7 @@
   // For 10 or more dimensions all names will be double digits ! 1e01 instead of 1e1 .. 
     var basis=options.basis||[...Array(2**tot)]                                                                                 // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
               .map((x,xi)=>(((1<<30)+xi).toString(2)).slice(-tot||-1)                                                           // => ["000", "001", "010", "011", "100", "101", "110", "111"]  (index of array in base 2)
-              .replace(/./g,(a,ai)=>a=='0'?'':String.fromCharCode(65+ai+1-(r==0?0:1))))                                         // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
+              .replace(/./g,(a,ai)=>a=='0'?'':String.fromCharCode(66+ai-(r!=0))))                                               // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
               .sort((a,b)=>(a.toString().length==b.toString().length)?(a>b?1:b>a?-1:0):a.toString().length-b.toString().length) // => ["", "1", "2", "3", "12", "13", "23", "123"] (sorted numerically)
               .map(x=>x&&'e'+(x.replace(/./g,x=>('0'+(x.charCodeAt(0)-65)).slice(tot>9?-2:-1) ))||'1')                          // => ["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"] (converted to commonly used basis names)
               
@@ -85,7 +85,7 @@
   // String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)      
   // This is the function that implements e1e1 = +1/-1/0 and e1e2=-e2e1. The brm function creates the remap dictionary.
     var simplify = (s,p,q,r)=>{
-          var sign=1,c,l,t=[],f=true;s=s.match(tot>9?/(\d\d)/g:/(\d)/g);l=s.length;
+          var sign=1,c,l,t=[],f=true,ss=s.match(tot>9?/(\d\d)/g:/(\d)/g);if (!ss) return s; s=ss; l=s.length;
           while (f) { f=false;
           // implement Ex*Ex = metric.
             for (var i=0; i<l;) if (s[i]===s[i+1]) { if ((s[i]-low)>=(p+r)) sign*=-1; else if ((s[i]-low)<r) sign=0; i+=2; f=true; } else t.push(s[i++]);
@@ -99,19 +99,16 @@
   // Faster and degenerate-metric-resistant dualization. (a remapping table that maps items into their duals).         
     var drm=basis.map((a,i)=>{ return {a:a,i:i} })
                  .sort((a,b)=>a.a.length>b.a.length?1:a.a.length<b.a.length?-1:(+a.a.slice(1).split('').sort().join(''))-(+b.a.slice(1).split('').sort().join('')) )
-                 .map(x=>x.i)
-                 .reverse()
-    var drms=drm.map((x,i)=>(x==0||i==0)?1:simplify(basis[x]+basis[i])[0]=='-'?-1:1);
+                 .map(x=>x.i).reverse(),
+        drms=drm.map((x,i)=>(x==0||i==0)?1:simplify(basis[x]+basis[i])[0]=='-'?-1:1);
+
+  // Store the full metric (also for bivectors etc ..)         
+    var metric = basis.map((x,xi)=>simplify(x+x,p,q,r)|0);
     
   // Generate multiplication tables for the outer and geometric products.  
     var mulTable   = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),              // for the gp, with metric.
-        mulTable2  = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0))),          // for the op, without metric.
-        mulTableb  = mulTable.map(x=>x.map(y=>y.replace(/^-/,'')));
-        mulTable2b = mulTable2.map(x=>x.map(y=>y.replace(/^-/,'')));
+        mulTable2  = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0)));          // for the op, without metric.
    
-  // Store the full metric (also for bivectors etc .. diagonal of Cayley)         
-    var metric = basis.map((x,xi)=>mulTable[xi][xi]|0);
- 
   // Convert Caeyley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
   // is the left contraction.           
     var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0')), gpo={}, opo={};          // Storage for our product tables.
