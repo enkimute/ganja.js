@@ -102,15 +102,15 @@
                  .map(x=>x.i).reverse(),
         drms=drm.map((x,i)=>(x==0||i==0)?1:simplify(basis[x]+basis[i])[0]=='-'?-1:1);
 
-  // Store the full metric (also for bivectors etc ..)         
+  /// Store the full metric (also for bivectors etc ..)         
     var metric = basis.map((x,xi)=>simplify(x+x,p,q,r)|0);
     
-  // Generate multiplication tables for the outer and geometric products.  
+  /// Generate multiplication tables for the outer and geometric products.  
     var mulTable   = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),              // for the gp, with metric.
         mulTable2  = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0)));          // for the op, without metric.
    
-  // Convert Caeyley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
-  // is the left contraction.           
+  /// Convert Caeyley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
+  /// is the left contraction.           
     var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0')), gpo={}, opo={};          // Storage for our product tables.
     basis.forEach((x,xi)=>basis.forEach((y,yi)=>{
       var n  = mulTable[xi][yi].replace(/^-/,''); if (n==0) n = mulTable2[xi][yi].replace(/^-/,''); if (!gpo[n]) gpo[n]=[]; gpo[n].push([xi,yi]);
@@ -124,13 +124,13 @@
       });
     });
     
-  // Generate a new class for our algebra. It extends the javascript typed arrays (default float32 but can be specified in options).
+  /// Generate a new class for our algebra. It extends the javascript typed arrays (default float32 but can be specified in options).
     var res = class Element extends (options.baseType||Float32Array) {
     
-    // constructor - create a floating point array with the correct number of coefficients.
+    /// constructor - create a floating point array with the correct number of coefficients.
       constructor(a) { super(a||basis.length); return this; }
       
-    // grade selection - return a only the part of the input with the specified grade.  
+    /// grade selection - return a only the part of the input with the specified grade.  
       Blade(grade,res) { var res=res||new Element(); for (var i=0,l=res.length; i<l; i++) if (grades[i]==grade) res[i]=this[i]; else res[i]=0; return res; }
       
     // Right and Left divide - Defined on the elements, shortcuts to multiplying with the inverse.  
@@ -140,12 +140,12 @@
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.  
       Exp  ()      { var r = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<25; x++) { r=r.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return r; }
       
-    // Helper for efficient inverses and a helper to return the grade-1 part of a multivector as a trimmed typed array.   
+    /// Helper for efficient inverses and a helper to return the grade-1 part of a multivector as a trimmed typed array.   
       Map  (a,b  ) { var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*(((a===grades[i])||(b===grades[i]))?-1:1); return res; }
       get Vector ()    { return this.slice(grade_start[1],grade_start[2]); };
       
-    // Factories - Make it easy to generate vectors, bivectors, etc when using the functional API. None of the examples use this but
-    // users that have used other GA libraries will expect these calls. The Coeff() is used internally when translating algebraic literals.
+    /// Factories - Make it easy to generate vectors, bivectors, etc when using the functional API. None of the examples use this but
+    /// users that have used other GA libraries will expect these calls. The Coeff() is used internally when translating algebraic literals.
       static Element()   { var res = new Element(); for (var i=0; i<res.length; i++) res[i]=arguments[i]||0; return res; }
       static Coeff()     { var res = new Element(), i=0; while(i<arguments.length) res[arguments[i++]]=arguments[i++]; return res; }
       static Scalar(x)   { var res = new Element(); res[0]=x; return res; }
@@ -284,7 +284,7 @@
       }
       
     // Dual, Involute, Reverse, Conjugate, Normalize and length, all direct call through. Conjugate handles matrices.
-      static Dual(a)      { if (r) return Element.toEl(a).map((x,i,a)=>a[drm[i]]*drms[i]); return Element.toEl(a).Dual; }; 
+      static Dual(a)      { return Element.toEl(a).Dual; }; 
       static Involute(a)  { return Element.toEl(a).Involute; }; 
       static Reverse(a)   { return Element.toEl(a).Reverse; }; 
       static Conjugate(a) { if (a instanceof Array) return a[0].map((c,ci)=>a.map((r,ri)=>Element.Conjugate(a[ri][ci]))); return Element.toEl(a).Conjugate; }
@@ -428,8 +428,8 @@
               if (va.b) gl.deleteBuffer(va.b); if (va.b2) gl.deleteBuffer(va.b2); if (va.r) gl.va.deleteVertexArrayOES(va.r);
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
-        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.animate?performance.now()/1000:0;
-          if (tot==5) return [Math.cos(t),0,Math.sin(t),0,0,1,0,0,-Math.sin(t),0,Math.cos(t),0,0,0,5,1];
+        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.animate?performance.now()/1000:options.h||0;
+          if (tot==5) return [Math.cos(t),0,Math.sin(t),0,0,1,0,0,-Math.sin(t),0,Math.cos(t),0,0,0,options.z||5,1];
           x=x.Normalized; var y=x.Mul(x.Dual),X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=Array(16);
           var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W, yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
           return [ 1-2*(yy+zz), 2*(xy+zw), 2*(xz-yw), 0, 2*(xy-zw), 1-2*(xx+zz), 2*(yz+xw), 0, 2*(xz+yw), 2*(yz-xw), 1-2*(xx+yy), 0, -2*y.e23, -2*y.e13, 2*y.e12+5, 1];
@@ -529,7 +529,7 @@
           M = mtx(options.camera); lastpos = options.camera.Normalized.Conjugate.Mul(((a=new this()).set(lastpos,11),a)).Mul(options.camera.Normalized).slice(11,14);
         // Loop over all items to render.  
           for (var i=0,ll=x.length;i<ll;i++) { 
-            var e=x[i]; while (e.call) e=e();
+            var e=x[i]; while (e&&e.call) e=e(); if (e==undefined) continue;
           // CGA
             if (tot==5 && options.conformal) {
               if (e instanceof Array && e.length==2) { e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);l.push.apply(l,x.pos); });  var d = {tp:-1}; }
@@ -636,23 +636,26 @@
         // Basic mouse interactivity. needs more love.
         var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{ e.preventDefault(); e.stopPropagation();
           var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*-4+2)*canvas.height/canvas.width;
-          sel = -1; canvas.value.forEach((x,i)=>{
+          sel = -2; canvas.value.forEach((x,i)=>{
             x = interprete(x); if (x.tp==1) {
               var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...x.pos,1]).map(x=>x.s);
               pos2 = Element.Mul( [[5,0,0,0],[0,5*(r||2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
               if ((mx-pos2[0])**2 + (my-pos2[1])**2 < 0.01) sel=i;
             }
           });
+          canvas.onwheel=e=>{options.z += e.deltaY/1000; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
           canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
-          canvas.onmousemove=(e)=>{ if (sel==-1) return;
+          canvas.onmousemove=(e)=>{ 
             var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
             var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
-            x.pos[0] += (e.buttons!=2)?mx:0; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?0:my;
+            if (sel==-2) { options.h =  (options.h||0)+mx; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; }; if (sel < 0) return;
+            x.pos[0] += (e.buttons!=2)?Math.cos(-options.h)*mx:0; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-options.h)*mx:my;
             canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
         }
-        
+        options.h=0;
+        options.z=5;
         canvas.value = f.call?f():f;
         if (options&&options.still) {
           var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
