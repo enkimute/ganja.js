@@ -464,7 +464,7 @@
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);  
       // Font rendering program. Renders billboarded fonts, transforms offset passed as color2.
         var program2 = compile(`attribute vec4 position; attribute vec2 texc; varying vec2 tex; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2; 
-                 void main() { tex=texc; gl_PointSize=6.0; vec4 o=mv*vec4(color2,0.0); Pos=(-1.0/(o.z-5.0))*position+vec4(0.0,0.0,5.0,0.0)+o; gl_Position = p*Pos; }`,
+                 void main() { tex=texc; gl_PointSize=6.0; vec4 o=mv*vec4(color2,0.0); Pos=(-1.0/(o.z-mv[3][2]))*position+vec4(0.0,0.0,mv[3][2],0.0)+o; gl_Position = p*Pos; }`,
                 `precision highp float; uniform vec3 color; varying vec4 Pos; varying vec2 tex; 
                  uniform sampler2D texm; void main() { vec4 c = texture2D(texm,tex); if (c.a<0.01) discard; gl_FragColor = vec4(color,c.a);}`);
       // Conformal space needs a bit extra magic to extract euclidean parametric representations.
@@ -582,7 +582,7 @@
                 if (typeof(e)=='string') {
                   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); 
                   draw(program2,gl.TRIANGLES, 
-                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
+                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return (0.05*options.z)*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
                        [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
                 }
               }
@@ -649,13 +649,12 @@
             var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
             var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
             if (sel==-2) { options.h =  (options.h||0)+mx; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; }; if (sel < 0) return;
-            x.pos[0] += (e.buttons!=2)?Math.cos(-options.h)*mx:0; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-options.h)*mx:my;
+            x.pos[0] += (e.buttons!=2)?Math.cos(-options.h)*mx:Math.sin(options.h)*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-options.h)*mx:Math.cos(options.h)*my;
             canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
         }
-        options.h=0;
-        options.z=5;
+        options.h=0;options.z=5;
         canvas.value = f.call?f():f;
         if (options&&options.still) {
           var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
