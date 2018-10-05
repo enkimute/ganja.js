@@ -643,7 +643,7 @@
               if ((mx-pos2[0])**2 + (my-pos2[1])**2 < 0.01) sel=i;
             }
           });
-          canvas.onwheel=e=>{options.z += e.deltaY/1000; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
+          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/1000; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
           canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
           canvas.onmousemove=(e)=>{ 
             var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
