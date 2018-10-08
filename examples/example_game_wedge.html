@@ -127,7 +127,7 @@ function handle_operation() {
   // upgrade wedge of points or vee of lines to sum.
   if ((ain&&bin&&n.Length==0)||(aout&&bout&&n.Length==0) ) { 
     n=selection[0][0].P.Add(selection[1][0].P).Normalized;
-    if(n.Blade(1).Length>0.01 && n.Blade(2).Length>0.01) return  setTimeout(selectionClear,600);
+    if(n.Grade(1).Length>0.01 && n.Grade(2).Length>0.01) return  setTimeout(selectionClear,600);
     say('add');
   } else if (aout && bout) say('join'); else if (ain  && bin)  say('wedge'); else say('dot');
   return setTimeout(()=>{ moves++; if (!startTime) startTime=performance.now(); level.push(n); build(n); selectionClear(); check(); },600); 
@@ -137,7 +137,7 @@ function handle_operation() {
 function check() {
   if (req.filter(x=>level.slice(origl-1).filter(y=>{ if (!(y instanceof PGA2D)) return false;
     x=x.Normalized; y=y.Normalized;
-    if (x.Blade(1).Length > 0.01 && y.Blade(1).Length > 0.01 && (x.Sub(y).Length<0.01 || x.Add(y).Length<0.01) && Math.abs(Math.abs(x.e0)-Math.abs(y.e0))<0.01) return true;
+    if (x.Grade(1).Length > 0.01 && y.Grade(1).Length > 0.01 && (x.Sub(y).Length<0.01 || x.Add(y).Length<0.01) && Math.abs(Math.abs(x.e0)-Math.abs(y.e0))<0.01) return true;
     else if (Math.abs(x.e12) > 0.01 && Math.abs(y.e12) > 0.01 && x.Vee(y).Length < 0.01) return true;
     return false;
   }).length).length == req.length) setTimeout(nextLevel,2000);
@@ -192,8 +192,8 @@ var color, req=[], curlevel = 0, level, origl,
       if (color==0xff8888&&x instanceof PGA2D) req.push(x);
       if (typeof x == 'string') { say(x);  return $('title').innerHTML=x;}
       if (!(x instanceof PGA2D)) return color=x,undefined;
-      if (x.Blade(2).Length > 0.01) return new point(x,color); 
-      else if (x.Blade(1).Length > 0.01) return new line(x,color); 
+      if (x.Grade(2).Length > 0.01) return new point(x,color); 
+      else if (x.Grade(1).Length > 0.01) return new line(x,color); 
     },
     nextLevel = function() {
       var m = $('main'); while (m && m.firstChild) m.removeChild(m.firstChild);

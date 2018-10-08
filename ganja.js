@@ -78,8 +78,8 @@
               .map(x=>x&&'e'+(x.replace(/./g,x=>('0'+(x.charCodeAt(0)-65)).slice(tot>9?-2:-1) ))||'1')                          // => ["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"] (converted to commonly used basis names)
               
   // See if the basis names start from 0 or 1, store grade per component and lowest component per grade.             
-    var low=basis.join('').split('').filter(x=>x.match(/\d/)).sort()[0]*1,
-        grades=basis.map(x=>x.length-1),
+    var low=basis[1].match(/\d+/g)[0]*1,
+        grades=basis.map(x=>tot>9?(x.length-1)/2:x.length-1),
         grade_start=grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]);
         
   // String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)      
@@ -102,6 +102,8 @@
                  .map(x=>x.i).reverse(),
         drms=drm.map((x,i)=>(x==0||i==0)?1:simplify(basis[x]+basis[i])[0]=='-'?-1:1);
 
+  if (tot < 10 || options.Cayley) {
+ 
   /// Store the full metric (also for bivectors etc ..)         
     var metric = basis.map((x,xi)=>simplify(x+x,p,q,r)|0);
     
@@ -124,14 +126,150 @@
       });
     });
     
-  /// Generate a new class for our algebra. It extends the javascript typed arrays (default float32 but can be specified in options).
-    var res = class Element extends (options.baseType||Float32Array) {
-    
+  /// Flat Algebra Multivector Base Class.
+    var generator = class MultiVector extends (options.baseType||Float32Array) {
     /// constructor - create a floating point array with the correct number of coefficients.
       constructor(a) { super(a||basis.length); return this; }
-      
+ 
     /// grade selection - return a only the part of the input with the specified grade.  
-      Blade(grade,res) { var res=res||new Element(); for (var i=0,l=res.length; i<l; i++) if (grades[i]==grade) res[i]=this[i]; else res[i]=0; return res; }
+      Grade(grade,res) { res=res||new MultiVector(); for (var i=0,l=res.length; i<l; i++) if (grades[i]==grade) res[i]=this[i]; else res[i]=0; return res; }
+      
+    /// grade creation - convert array with just one grade to full multivector.
+      nVector(grade,...args) { this.set(args,grade_start[grade]); return this; }
+    
+    /// Fill in coordinates (accepts sequence of index,value as arguments)
+      Coeff() { for (var i=0,l=arguments.length; i<l; i+=2) this[arguments[i]]=arguments[i+1]; return this; }
+      
+    /// Negates specific grades (passed in as args)
+      Map(res, ...a) { for (var i=0, l=res.length; i<l; i++) res[i] = (~a.indexOf(grades[i]))?-this[i]:this[i]; return res; }
+
+    /// Returns the vector grade only.
+      get Vector ()    { return this.slice(grade_start[1],grade_start[2]); };
+
+      toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1&&q==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
+    }  
+    
+  /// Convert symbolic matrices to code. (skipping zero's on dot and wedge matrices).
+  /// These all do straightforward string fiddling. If the 'mix' option is set they reference basis components using e.g. '.e1' instead of eg '[3]' .. so that
+  /// it will work for elements of subalgebras etc.
+    generator.prototype.Add   = new Function('b,res','res=res||new this.constructor();\n'+basis.map((x,xi)=>'res['+xi+']=b['+xi+']+this['+xi+']').join(';\n').replace(/(b|this)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';\nreturn res')
+    generator.prototype.Sub   = new Function('b,res','res=res||new this.constructor();\n'+basis.map((x,xi)=>'res['+xi+']=this['+xi+']-b['+xi+']').join(';\n').replace(/(b|this)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';\nreturn res')
+    generator.prototype.Mul   = new Function('b,res','res=res||new this.constructor();\n'+gp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a).replace(/\+0/g,'')+';').join('\n')+'\nreturn res;');
+    generator.prototype.Dot   = new Function('b,res','res=res||new this.constructor();\n'+cp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
+    generator.prototype.Wedge = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
+    generator.prototype.Vee   = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+drm[ri]+']='+r.map(x=>x.replace(/\[(.*?)\]/g,function(a,b){return '['+(drm[b|0])+']'})).join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
+
+  /// Add getter and setters for the basis vectors/bivectors etc .. 
+    basis.forEach((b,i)=>{generator.prototype.__defineGetter__(i?b:'s',function(){ return this[i] }); }); 
+    basis.forEach((b,i)=>{generator.prototype.__defineSetter__(i?b:'s',function(x){ this[i]=x; }); });
+    
+  /// Reversion, Involutions, Conjugation for any number of grades, component acces shortcuts.
+    generator.prototype.__defineGetter__('Negative', function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= -this[i]; return res; });
+    generator.prototype.__defineGetter__('Reverse',  function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,1,-1,-1][grades[i]%4]; return res; });
+    generator.prototype.__defineGetter__('Involute', function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,1,-1][grades[i]%4]; return res; });
+    generator.prototype.__defineGetter__('Conjugate',function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; });
+  
+  /// The Dual, Length, non-metric length and normalized getters.  
+    generator.prototype.__defineGetter__('Dual',function(){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[i]); var res = new this.constructor(); res[res.length-1]=1; return res.Mul(this); });
+    generator.prototype.__defineGetter__('Length',  function(){  return Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); }); 
+    generator.prototype.__defineGetter__('VLength',  function(){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]; return Math.sqrt(res); });
+    generator.prototype.__defineGetter__('Normalized', function(){ var res = new this.constructor(),l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) res[i]=this[i]*l; return res; });
+  
+  /// Graded generator for high-dimensional algebras.
+  } else {
+  
+  /// extra graded lookups.
+    var basisg = grade_start.slice(0,grade_start.length-1).map((x,i)=>basis.slice(x,grade_start[i+1]));
+    var bmap   = {}; basisg.forEach((g,gi)=>g.forEach((l,li)=>bmap[l]=[gi,li]));
+    var metric = basisg.map(x=>x.map(y=>simplify(y+y,p,q,r)[0]=='-'?-1:1 ));
+  
+  /// Flat Algebra Multivector Base Class.
+    var generator = class MultiVector extends Array {
+    /// constructor - create a floating point array with the correct number of coefficients.
+      constructor(a) { super(a||tot); return this; }
+ 
+    /// grade selection - return a only the part of the input with the specified grade.  
+      Grade(grade,res) { res=new this.constructor(); res[grade] = this[grade]; return res; }
+      
+    /// grade creation - convert array with just one grade to full multivector.
+      nVector(grade,...args) { this[grade]=args; return this; }
+    
+    /// Fill in coordinates (accepts sequence of index,value as arguments)
+      Coeff() { 
+                for (var i=0,l=arguments.length; i<l; i+=2) { 
+                 var gi = grades[arguments[i]];
+                 if (this[gi]==undefined) this[gi]=[];
+                 this[gi][arguments[i]-grade_start[gi]]=arguments[i+1]; 
+                } 
+                return this; 
+              }
+      
+    /// Negates specific grades (passed in as args)
+      Map(res, ...a) { }
+
+    /// Returns the vector grade only.
+      get Vector ()    { return this[1] };
+      
+    /// multivector addition, subtraction and scalar multiplication.
+      Add(b,r) {
+        r=r||new this.constructor();
+        for (var i=0,l=Math.max(this.length,b.length);i<l;i++) 
+          if (!this[i] || !b[i]) r[i] = (!this[i]) ? b[i]:this[i];
+          else { r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) r[i][j]=(this[i][j]||0)+(b[i][j]||0); }    
+        return r;
+      }
+      Sub(b,r) {
+        r=r||new this.constructor();
+        for (var i=0,l=Math.max(this.length,b.length);i<l;i++) 
+          if (!this[i] || !b[i]) r[i] = (!this[i]) ? (b[i]?b[i].map(x=>-x):undefined):this[i];
+          else { r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) r[i][j]=(this[i][j]||0)-(b[i][j]||0); }    
+        return r;
+      }
+      Scale(s) { return this.map(x=>x&&x.map(y=>y*s)); }      
+      
+    // geometric product.
+      Mul(b,r) {
+        r=r||new this.constructor();
+        for (var i=0; i<this.length; i++) if (this[i]) 
+            for (var j=0;j<b.length; j++) if (b[j]) {
+              var x=this[i], y=b[j];
+              // grade i * grade j - consider generating/caching at this point.
+              for (var a=0; a<x.length; a++) if (x[a])
+               for (var bb=0; bb<y.length; bb++) if (y[bb]) {
+                  if (i==j && a==bb) {
+                     r[0]    = r[0] || [0];
+                     r[0][0] += x[a]*y[bb]*metric[i][a];
+                  } else { // this aint fast.
+                     var rn = simplify(basisg[i][a]+basisg[j][bb]);
+                     if (rn[0]=='-') {
+                       var p = bmap[rn.slice(1)];
+                       if (!r[p[0]]) r[p[0]]=[];
+                       r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb];
+                     } else {
+                       var p = bmap[rn];
+                       if (!r[p[0]]) r[p[0]]=[];
+                       r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb];
+                     }
+                  }  
+               }
+        }  
+        return r;
+      }       
+      toString() { return basisg.map((g,gi)=>g.map((c,ci)=>(!this[gi] || !this[gi][ci])?undefined:((this[gi][ci]==1&&c!=1)?'':this[gi][ci])+(c==1?'':c)).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
+      get s () { if (this[0]) return this[0][0]||0; return 0; }
+    }  
+    
+   // This generator is UNDER DEVELOPMENT - I'm publishing it so I can test on observable.
+  }
+  
+  // Generate a new class for our algebra. It extends the javascript typed arrays (default float32 but can be specified in options).
+    var res = class Element extends generator {
+    
+    // constructor - create a floating point array with the correct number of coefficients.
+      constructor(a) { super(a); return this; }
+      
+    // Grade selection. (implemented by parent class).   
+      Grade(grade,res) { res=res||new Element(); return super.Grade(grade,res); }
       
     // Right and Left divide - Defined on the elements, shortcuts to multiplying with the inverse.  
       Div  (b,res) { return this.Mul(b.Inverse,res); }
@@ -140,19 +278,18 @@
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.  
       Exp  ()      { var r = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<25; x++) { r=r.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return r; }
       
-    /// Helper for efficient inverses and a helper to return the grade-1 part of a multivector as a trimmed typed array.   
-      Map  (a,b  ) { var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*(((a===grades[i])||(b===grades[i]))?-1:1); return res; }
-      get Vector ()    { return this.slice(grade_start[1],grade_start[2]); };
+    // Helper for efficient inverses. (custom involutions - negates grades in arguments). 
+      Map () { var res=new Element(); return super.Map(res,...arguments); }
       
-    /// Factories - Make it easy to generate vectors, bivectors, etc when using the functional API. None of the examples use this but
-    /// users that have used other GA libraries will expect these calls. The Coeff() is used internally when translating algebraic literals.
-      static Element()   { var res = new Element(); for (var i=0; i<res.length; i++) res[i]=arguments[i]||0; return res; }
-      static Coeff()     { var res = new Element(), i=0; while(i<arguments.length) res[arguments[i++]]=arguments[i++]; return res; }
-      static Scalar(x)   { var res = new Element(); res[0]=x; return res; }
-      static Vector()    { var res = new Element(); res.set(arguments,grade_start[1]); return res; }
-      static Bivector()  { var res = new Element(); res.set(arguments,grade_start[2]); return res; }
-      static Trivector() { var res = new Element(); res.set(arguments,grade_start[3]); return res; }
-      static nVector(n)  { var res = new Element(); res.set([].slice.call(arguments,1),grade_start[n]); return res; }
+    // Factories - Make it easy to generate vectors, bivectors, etc when using the functional API. None of the examples use this but
+    // users that have used other GA libraries will expect these calls. The Coeff() is used internally when translating algebraic literals.
+      static Element()   { return new Element([...arguments]); };
+      static Coeff()     { return (new Element()).Coeff(...arguments); }
+      static Scalar(x)   { return (new Element()).Coeff(0,x); }
+      static Vector()    { return (new Element()).nVector(1,...arguments); }
+      static Bivector()  { return (new Element()).nVector(2,...arguments); }
+      static Trivector() { return (new Element()).nVector(3,...arguments); }
+      static nVector(n)  { return (new Element()).nVector(...arguments); }
     
     // Static operators. The parser will always translate operators to these static calls so that scalars, vectors, matrices and other non-multivectors can also be handled.
     // The static operators typically handle functions and matrices, calling through to element methods for multivectors. They are intended to be flexible and allow as many
@@ -162,13 +299,13 @@
     // Addition and subtraction. Subtraction with only one parameter is negation.   
       static Add(a,b,res)   { 
       // Resolve expressions passed in.
-        while(a.call)a=a(); while(b.call)b=b();
+        while(a.call)a=a(); while(b.call)b=b(); if (a.Add && b.Add) return a.Add(b,res);  
+      // If either is a string, the result is a string.  
+        if ((typeof a=='string')||(typeof b=='string')) return a.toString()+b.toString(); 
       // If only one is an array, add the other element to each of the elements.   
         if ((a instanceof Array)^(b instanceof Array)) return (a instanceof Array)?a.map(x=>Element.Add(x,b)):b.map(x=>Element.Add(a,x)); 
       // If both are equal length arrays, add elements one-by-one  
         if ((a instanceof Array)&&(b instanceof Array)&&a.length==b.length) return a.map((x,xi)=>Element.Add(x,b[xi])); 
-      // If either is a string, the result is a string.  
-        if ((typeof a=='string')||(typeof b=='string')) return a.toString()+b.toString(); 
       // If they're both not elements let javascript resolve it.  
         if (!(a instanceof Element || b instanceof Element)) return a+b; 
       // Here we're left with scalars and multivectors, call through to generated code.   
@@ -177,7 +314,7 @@
       
       static Sub(a,b,res)   {  
       // Resolve expressions passed in.
-        while(a.call)a=a(); while(b&&b.call) b=b(); 
+        while(a.call)a=a(); while(b&&b.call) b=b(); if (a.Sub && b && b.Sub) return a.Sub(b,res);
       // If only one is an array, add the other element to each of the elements.   
         if (b&&((a instanceof Array)^(b instanceof Array))) return (a instanceof Array)?a.map(x=>Element.Sub(x,b)):b.map(x=>Element.Sub(a,x)); 
       // If both are equal length arrays, add elements one-by-one  
@@ -193,7 +330,9 @@
     // The geometric product. (or matrix*matrix, matrix*vector, vector*vector product if called with 1D and 2D arrays)
       static Mul(a,b,res)   {
       // Resolve expressions  
-        while(a.call)a=a(); while(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); if (a.Mul && b.Mul) return a.Mul(b,res);
+      // scalar mul.
+        if (typeof a == 'number' && b.Scale) return b.Scale(a); if (typeof b=='number' && a.Scale) return a.Scale(b);  
       // Handle matrices and vectors.  
         if ((a instanceof Array)&&(b instanceof Array)) { 
         // vector times vector performs a dot product. (which internally uses the GP on each component)
@@ -215,7 +354,7 @@
     // The inner product. (default is left contraction).  
       static Dot(a,b,res)   {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); //if (a.Dot) return a.Dot(b,res);
       // js if numbers, else contraction product.  
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Dot(b,res); 
@@ -224,7 +363,7 @@
     // The outer product. (Grassman product - no use of metric)  
       static Wedge(a,b,res) {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); if (a.Wedge) return a.Wedge(b,res); 
       // js, else generated wedge product.
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Wedge(b,res); 
@@ -233,7 +372,7 @@
     // The regressive product. (Dual of the outer product of the duals). 
       static Vee(a,b,res) {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); if (a.Vee) return a.Vee(b,res);
       // js, else generated vee product. (shortcut for dual of wedge of duals)
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Vee(b,res); 
@@ -242,7 +381,7 @@
     // The sandwich product. Provided for convenience (>>> operator)  
       static sw(a,b) {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); if (a.sw) return a.sw(b);
       // Map elements in array  
         if (b instanceof Array) return b.map(x=>Element.sw(a,x)); 
       // Call through. no specific generated code for it so just perform the muls.  
@@ -252,7 +391,7 @@
     // Division - scalars or cal through to element method.
       static Div(a,b,res) {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b();
       // js or call through to element divide.  
         if (!(a instanceof Element || b instanceof Element)) return a/b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Div(b,res); 
@@ -261,7 +400,7 @@
     // Pow - needs obvious extensions for natural powers. (exponentiation by squaring)  
       static Pow(a,b,res) {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); 
+        while(a.call)a=a(); while(b.call)b=b(); if (a.Pow) return a.Pow(b,res); 
       // Squaring  
         if (b==2) return this.Mul(a,a,res);
       // No elements, call through to js  
@@ -287,7 +426,7 @@
       static Dual(a)      { return Element.toEl(a).Dual; }; 
       static Involute(a)  { return Element.toEl(a).Involute; }; 
       static Reverse(a)   { return Element.toEl(a).Reverse; }; 
-      static Conjugate(a) { if (a instanceof Array) return a[0].map((c,ci)=>a.map((r,ri)=>Element.Conjugate(a[ri][ci]))); return Element.toEl(a).Conjugate; }
+      static Conjugate(a) { if (a.Conjugate) return a.Conjugate; if (a instanceof Array) return a[0].map((c,ci)=>a.map((r,ri)=>Element.Conjugate(a[ri][ci]))); return Element.toEl(a).Conjugate; }
       static Normalize(a) { return Element.toEl(a).Normalized; }; 
       static Length(a)    { return Element.toEl(a).Length };
       
@@ -299,7 +438,6 @@
       
     // Debug output and printing multivectors.  
       static describe() { console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d+\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); }    
-      toString() { var res=[]; for (var i=0; i<basis.length; i++) if (Math.abs(this[i])>1e-10) res.push(((this[i]==1)&&i?'':((this[i]==-1)&&i)?'-':(this[i].toFixed(10)*1))+(i==0?'':tot==1&&q==1?'i':basis[i].replace('e','e_'))); return res.join('+').replace(/\+-/g,'-')||'0'; }
       
     // The graphing function supports several modes. It can render 1D functions and 2D functions on canvas, and PGA2D, PGA3D and CGA2D functions using SVG.
     // It handles animation and interactivity.
@@ -347,7 +485,7 @@
             // Numbers change the current color.  
               if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
             // All other elements are rendered ..  
-              var b1=o.Blade(1).VLength>0.001,b2=o.Blade(2).VLength>0.001,b3=o.Blade(3).VLength>0.001; 
+              var b1=o.Grade(1).VLength>0.001,b2=o.Grade(2).VLength>0.001,b3=o.Grade(3).VLength>0.001; 
             // Points  
               if (b1 && !b2 && !b3) { lx=o.e1; ly=-o.e2; lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; }
               else if (!b1 && !b2 && b3) { var isLine=Element.Coeff(4,1,3,-1).Dot(o).Length==0; 
@@ -481,7 +619,7 @@
             weight2 = Math.abs(attitude.Dot(attitude).s)**.5;
             pos = attitude.Dot(x.Reverse); //Inverse);
             pos = [-pos.e15/pos.e45,-pos.e25/pos.e45,-pos.e34/pos.e45];
-            if (x.Blade(3).VLength) {
+            if (x.Grade(3).VLength) {
               normal = [attitude.e1/weight2,attitude.e2/weight2,attitude.e3/weight2]; tp=2; 
             } else {
               normal = Element.Dot(Element.Mul(attitude,1/weight2),I3).Normalized;
@@ -496,7 +634,7 @@
             pos = [...(Element.Dot(1/(ninf.Dot(x)).s,x)).slice(1,4)].map(x=>-x);
             tp=1; 
           } else if (!x2zero) {                          // round (point pair,circle,sphere)
-            tp = x.Blade(3).VLength?4:x.Blade(2).VLength?6:5; 
+            tp = x.Grade(3).VLength?4:x.Grade(2).VLength?6:5; 
             var nix  = ninf.Wedge(x), nix2 = (nix.Mul(nix)).s;
             attitude = ninf.Wedge(no).Dot(nix);
             pos = [...(x.Mul(ninf).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
@@ -590,7 +728,7 @@
             }
           // PGA   
           // Convert lines to line segments.  
-            if (e instanceof Element && e.Blade(2).Length) 
+            if (e instanceof Element && e.Grade(2).Length) 
                e=[e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
           // If euclidean point, store as point, store line segments and triangles.
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
@@ -752,31 +890,6 @@
       }
     }
     
-  // Convert symbolic matrices to code. (skipping zero's on dot and wedge matrices).
-  // These all do straightforward string fiddling. If the 'mix' option is set they reference basis components using e.g. '.e1' instead of eg '[3]' .. so that
-  // it will work for elements of subalgebras etc.
-    res.prototype.Add   = new Function('b,res','res=res||new this.constructor();\n'+basis.map((x,xi)=>'res['+xi+']=b['+xi+']+this['+xi+']').join(';\n').replace(/(b|this)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';\nreturn res')
-    res.prototype.Sub   = new Function('b,res','res=res||new this.constructor();\n'+basis.map((x,xi)=>'res['+xi+']=this['+xi+']-b['+xi+']').join(';\n').replace(/(b|this)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';\nreturn res')
-    res.prototype.Mul   = new Function('b,res','res=res||new this.constructor();\n'+gp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a).replace(/\+0/g,'')+';').join('\n')+'\nreturn res;');
-    res.prototype.Dot   = new Function('b,res','res=res||new this.constructor();\n'+cp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
-    res.prototype.Wedge = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
-    res.prototype.Vee   = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+drm[ri]+']='+r.map(x=>x.replace(/\[(.*?)\]/g,function(a,b){return '['+(drm[b|0])+']'})).join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
-
-  // Add getter and setters for the basis vectors/bivectors etc .. 
-    basis.forEach((b,i)=>{res.prototype.__defineGetter__(i?b:'s',function(){ return this[i] }); }); 
-    basis.forEach((b,i)=>{res.prototype.__defineSetter__(i?b:'s',function(x){ this[i]=x; }); });
-    
-  // Reversion, Involutions, Conjugation for any number of grades, component acces shortcuts.
-    res.prototype.__defineGetter__('Negative', function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= -this[i]; return res; });
-    res.prototype.__defineGetter__('Reverse',  function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,1,-1,-1][grades[i]%4]; return res; });
-    res.prototype.__defineGetter__('Involute', function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,1,-1][grades[i]%4]; return res; });
-    res.prototype.__defineGetter__('Conjugate',function(){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; });
-  
-  // The Dual, Length, non-metric length and normalized getters.  
-    res.prototype.__defineGetter__('Dual',function(){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[i]); var res = new this.constructor(); res[res.length-1]=1; return res.Mul(this); });
-    res.prototype.__defineGetter__('Length',  function(){  return Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); }); 
-    res.prototype.__defineGetter__('VLength',  function(){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]; return Math.sqrt(res); });
-    res.prototype.__defineGetter__('Normalized', function(){ var res = new this.constructor(),l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) res[i]=this[i]*l; return res; });
     
   // Matrix-free inverses up to 5D. Should translate this to an inline call for readability.
   // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf  
