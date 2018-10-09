@@ -14,17 +14,17 @@ Algebra(9,6,()=>{
     var ei1=1e04+1e10,   ei2=1e05+1e11,   ei3=1e06+1e12,   ei4=1e07+1e13,   ei5=1e08+1e14,   ei6=1e09+1e15,
         eo1=.5e10-.5e04, eo2=.5e11-.5e05, eo3=.5e12-.5e06, eo4=.5e13-.5e07, eo5=.5e14-.5e08, eo6=.5e15-.5e09;
   
-  // Hexa-orig and inf, Penta-orig and inf, Euclidean, full and inverse pseudo.
+  // Hexa-orig and inf, Penta-orig and inf, PSS, Euclidean PSS and inverse PSS.
     var Ii  = ei1^ei2^ei3^ei4^ei5^ei6,          Io   = eo1^eo2^eo3^eo4^eo5^eo6,
         pIi = (ei1-ei2)^(ei2-ei3)^ei4^ei5^ei6,  pIo  = (eo1-eo2)^(eo2-eo3)^eo4^eo5^eo6,
         PSS = 1e010203040506070809101112131415, PSSe = 1e010203, PSSi = -PSS;
         
-  // Create a quadric conformal point. (written as dot product..)
+  // Create a quadric conformal point. (written as dot product .. faster)
     var pv = [1e01,1e02,1e03,ei1,ei2,ei3,ei4,ei5,ei6,eo1+eo2+eo3],
         p  = (x,y,z)=> [x,y,z,.5*x**2,.5*y**2,.5*z**2,x*y,x*z,y*z,1]*pv;          
 
   // Distance between two qcga points.  
-    var dist = (a,b)=>(-2*(a<<b).s)**.5;
+    var dist = (a,b)=>Math.abs(2*(a<<b).Length)**.5;
 
   // Use the OP Length to visualize the object.    
     var opns = (a,b)=>(a^b).Length;
@@ -33,19 +33,25 @@ Algebra(9,6,()=>{
     var p1=p(0,1,0), p2=p(0,-1,0), p3=p(1,0,0), p4=p(0,0,1);
     
   // wedge them into a quadriconformal sphere (grade 14)
-    var sp = p1^p2^p3^p4^pIi^pIo;
+    var sphere = (p1^p2^p3^p4^pIi^pIo).Normalized;
     
   // Next create a plane by wedging three of them with hexa-inf and penta-ori (grade 14)
-    var pl = p1^p2^p3^Ii^pIo;
+    var plane = (p1^p2^p3^Ii^pIo).Normalized;
     
   // Now meet the sphere and the plane into a circle. (grade 13)
-    var ci = pl&sp;
+    var circle = (plane&sphere).Normalized;
 
-  // Calculate a slice with the sphere and show it
-    document.write('<H3>Quadric Conformal Space</H3><BR><p>We construct a sphere from 4 points, a plane from 3 points, intersect them and render the resulting circle. (via OPNS).</p>')
-    Object.assign(document.body.appendChild(this.graph(
-        (x,y)=>Math.abs(opns(p(x*1.5,y*1.5,0),ci))                             // the function we graph.
-    ,{width:64,height:64})).style,{width:512,height:512})
-        
+  // Calculate a few slices of the volume with the circle 
+    document.write(`<H3>Quadric Conformal Space</H3><BR><p>We construct a sphere from 4 points, a plane from 3 points, 
+                    intersect them and render the resulting circle. (via OPNS). You are seeing 5 slices through the volume.</p><HR>`)
+    for (var i=0; i<5; i++) Object.assign(document.body.appendChild(this.graph( 
+        (x,y)=>5*Math.abs(opns(p(x*1.5,y*1.5,(i/4-.5)*2),circle)) 
+    ,{width:32,height:32})).style,{width:128,height:128,border:'1px solid black'})
+
+  // Now for the sphere        
+    document.write('<p>And the same for a sphere. (same 5 slices)</p><HR>')
+    for (var i=0; i<5; i++) Object.assign(document.body.appendChild(this.graph( 
+        (x,y)=>5*Math.abs(opns(p(x*1.5,y*1.5,(i/4-.5)*2),sphere)) 
+    ,{width:32,height:32})).style,{width:128,height:128,border:'1px solid black'})
 });
 </SCRIPT></BODY>

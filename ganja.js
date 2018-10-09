@@ -269,8 +269,9 @@
       Vee(b,r) { return (this.Dual.Wedge(b.Dual)).Dual; }
       toString() { return basisg.map((g,gi)=>g.map((c,ci)=>(!this[gi] || !this[gi][ci])?undefined:((this[gi][ci]==1&&c!=1)?'':this[gi][ci])+(c==1?'':c)).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
       get s () { if (this[0]) return this[0][0]||0; return 0; }
-      get Length () { var res=0; this.forEach((g,gi)=>g.forEach((e,ei)=> res+=e**2*metric[gi][ei]  )); return res; }
+      get Length () { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2*metric[gi][ei]  )); return Math.sign(res)*Math.abs(res)**.5; }
       get Conjugate () { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,-1,-1,1][gi%4]; })); return r; }
+      get Normalized () { return this.Scale(1/this.Length); }
       get Dual() { var r=new this.constructor(); this.forEach((g,gi)=>{ r[tot-gi]=[]; g.forEach((e,ei)=>r[tot-gi][counts[gi]-1-ei]=e); }); return r; }
     }  
 
