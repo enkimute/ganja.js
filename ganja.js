@@ -352,7 +352,7 @@
       // Handle matrices and vectors.  
         if ((a instanceof Array)&&(b instanceof Array)) { 
         // vector times vector performs a dot product. (which internally uses the GP on each component)
-          if(!(a[0] instanceof Array)&&!(b[0] instanceof Array)) { var r=tot?Element.Scalar(0):0; a.forEach((x,i)=>r=Element.Add(r,Element.Mul(x,b[i]))); return r; } 
+          if((!(a[0] instanceof Array) || (a[0] instanceof Element)) &&(!(b[0] instanceof Array) || (b[0] instanceof Element))) { var r=tot?Element.Scalar(0):0; a.forEach((x,i)=>r=Element.Add(r,Element.Mul(x,b[i]))); return r; } 
         // Array times vector  
           if(!(b[0] instanceof Array)) return a.map((x,i)=>Element.Mul(a[i],b)); 
         // Array times Array  

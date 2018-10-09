@@ -19,9 +19,10 @@ Algebra(9,6,()=>{
         pIi = (ei1-ei2)^(ei2-ei3)^ei4^ei5^ei6,  pIo  = (eo1-eo2)^(eo2-eo3)^eo4^eo5^eo6,
         PSS = 1e010203040506070809101112131415, PSSe = 1e010203, PSSi = -PSS;
         
-  // Create a quadric conformal point.
-    var p = (x,y,z)=>x*1e01 + y*1e02 + z*1e03 + .5*x*x*ei1 + .5*y*y*ei2 + .5*z*z*ei3 + x*y*ei4 + x*z*ei5 + y*z*ei6 + eo1 + eo2 + eo3;          
-    
+  // Create a quadric conformal point. (written as dot product..)
+    var pv = [1e01,1e02,1e03,ei1,ei2,ei3,ei4,ei5,ei6,eo1+eo2+eo3],
+        p  = (x,y,z)=> [x,y,z,.5*x**2,.5*y**2,.5*z**2,x*y,x*z,y*z,1]*pv;          
+
   // Distance between two qcga points.  
     var dist = (a,b)=>(-2*(a<<b).s)**.5;
 
