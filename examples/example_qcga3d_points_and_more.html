@@ -14,26 +14,30 @@ Algebra(9,6,()=>{
     var ei1=1e04+1e10,   ei2=1e05+1e11,   ei3=1e06+1e12,   ei4=1e07+1e13,   ei5=1e08+1e14,   ei6=1e09+1e15,
         eo1=.5e10-.5e04, eo2=.5e11-.5e05, eo3=.5e12-.5e06, eo4=.5e13-.5e07, eo5=.5e14-.5e08, eo6=.5e15-.5e09;
         
+  // Penta-orig and inf
+    var pIi = (ei1-ei2)^(ei2-ei3)^ei4^ei5^ei6,
+        pIo = (eo1-eo2)^(eo2-eo3)^eo4^eo5^eo6;      
+        
   // Create a quadric conformal point.
     var p = (x,y,z)=>x*1e01 + y*1e02 + z*1e03 + .5*x*x*ei1 + .5*y*y*ei2 + .5*z*z*ei3 + x*y*ei4 + x*z*ei5 + y*z*ei6 + eo1 + eo2 + eo3;          
     
   // Distance between two qcga points.  
-    var dist = (a,b)=>(-2*a.Mul(b)[0][0])**.5;
-    
-  // Create two points 
-    var p1 = p(0,0,0), p2 = p(1,1,0);
+    var dist = (a,b)=>Math.abs(2*((a.Mul(b).Grade(0)).Length))**.5;
 
-  // Output the distance from p1 to p1 and p1 to p2
-    document.write(`<h3>Quadric Conformal Space</h3>
-      p1 : ${p1.Vector.slice(0,3)}<BR>
-      p2 : ${p2.Vector.slice(0,3)}<HR>
-      p1 to p1 : ${dist(p1,p1)}<BR>
-      p1 to p2 :${dist(p1,p2)}<HR>`);
+  // Use the size of the OP to visualize the object.    
+    var opns = (a,b)=>(a^b).Length;
     
-  // Graph the distance as a test.
+  // Create four points. 
+    var p1=p(0,1,0), p2=p(0,-1,0), p3=p(1,0,0), p4=p(0,0,1);
+    
+  // wedge them into a quadriconformal sphere ..
+    var sp = p1^p2^p3^p4^pIi^pIo;  
+    
+  // Calculate a slice with the sphere and show it
+    document.write('<H3>Quadric Conformal Space</H3><BR><p>We construct a circle from 4 points and visualize it by slicing it (and probing the OPNS).</p>')
     Object.assign(document.body.appendChild(this.graph(
-        (x,y)=>1-dist(p(x,y,0),p1)                             // the function we graph.
-    ,{width:32,height:32})).style,{width:256,height:256})
+        (x,y)=>Math.abs(opns(p(x*1.5,y*1.5,0),sp))**.5                             // the function we graph.
+    ,{width:64,height:64})).style,{width:512,height:512})
         
 });
 </SCRIPT></BODY>
