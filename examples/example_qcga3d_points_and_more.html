@@ -13,10 +13,11 @@ Algebra(9,6,()=>{
   // Defining the null basis - bit cumbersome .. 
     var ei1=1e04+1e10,   ei2=1e05+1e11,   ei3=1e06+1e12,   ei4=1e07+1e13,   ei5=1e08+1e14,   ei6=1e09+1e15,
         eo1=.5e10-.5e04, eo2=.5e11-.5e05, eo3=.5e12-.5e06, eo4=.5e13-.5e07, eo5=.5e14-.5e08, eo6=.5e15-.5e09;
-        
-  // Penta-orig and inf
-    var pIi = (ei1-ei2)^(ei2-ei3)^ei4^ei5^ei6,
-        pIo = (eo1-eo2)^(eo2-eo3)^eo4^eo5^eo6;      
+  
+  // Hexa-orig and inf, Penta-orig and inf, Euclidean, full and inverse pseudo.
+    var Ii  = ei1^ei2^ei3^ei4^ei5^ei6,          Io   = eo1^eo2^eo3^eo4^eo5^eo6,
+        pIi = (ei1-ei2)^(ei2-ei3)^ei4^ei5^ei6,  pIo  = (eo1-eo2)^(eo2-eo3)^eo4^eo5^eo6,
+        PSS = 1e010203040506070809101112131415, PSSe = 1e010203, PSSi = -PSS;
         
   // Create a quadric conformal point.
     var p = (x,y,z)=>x*1e01 + y*1e02 + z*1e03 + .5*x*x*ei1 + .5*y*y*ei2 + .5*z*z*ei3 + x*y*ei4 + x*z*ei5 + y*z*ei6 + eo1 + eo2 + eo3;          
@@ -24,19 +25,25 @@ Algebra(9,6,()=>{
   // Distance between two qcga points.  
     var dist = (a,b)=>(-2*(a<<b).s)**.5;
 
-  // Use the size of the OP to visualize the object.    
+  // Use the OP Length to visualize the object.    
     var opns = (a,b)=>(a^b).Length;
     
   // Create four points. 
     var p1=p(0,1,0), p2=p(0,-1,0), p3=p(1,0,0), p4=p(0,0,1);
     
-  // wedge them into a quadriconformal sphere ..
-    var sp = p1^p2^p3^p4^pIi^pIo;  
+  // wedge them into a quadriconformal sphere (grade 14)
+    var sp = p1^p2^p3^p4^pIi^pIo;
     
+  // Next create a plane by wedging three of them with hexa-inf and penta-ori (grade 14)
+    var pl = p1^p2^p3^Ii^pIo;
+    
+  // Now meet the sphere and the plane into a circle. (grade 13)
+    var ci = pl&sp;
+
   // Calculate a slice with the sphere and show it
-    document.write('<H3>Quadric Conformal Space</H3><BR><p>We construct a sphere from 4 points and visualize it by slicing it (and probing the OPNS).</p>')
+    document.write('<H3>Quadric Conformal Space</H3><BR><p>We construct a sphere from 4 points, a plane from 3 points, intersect them and render the resulting circle. (via OPNS).</p>')
     Object.assign(document.body.appendChild(this.graph(
-        (x,y)=>Math.abs(opns(p(x*1.5,y*1.5,0),sp))                             // the function we graph.
+        (x,y)=>Math.abs(opns(p(x*1.5,y*1.5,0),ci))                             // the function we graph.
     ,{width:64,height:64})).style,{width:512,height:512})
         
 });

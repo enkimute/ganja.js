@@ -96,13 +96,13 @@
         },
         brm=(x=>{ var ret={}; for (var i in basis) ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i]; return ret; })(basis);
         
+
+  if (tot < 10 || options.Cayley) {
   // Faster and degenerate-metric-resistant dualization. (a remapping table that maps items into their duals).         
     var drm=basis.map((a,i)=>{ return {a:a,i:i} })
                  .sort((a,b)=>a.a.length>b.a.length?1:a.a.length<b.a.length?-1:(+a.a.slice(1).split('').sort().join(''))-(+b.a.slice(1).split('').sort().join('')) )
                  .map(x=>x.i).reverse(),
         drms=drm.map((x,i)=>(x==0||i==0)?1:simplify(basis[x]+basis[i])[0]=='-'?-1:1);
-
-  if (tot < 10 || options.Cayley) {
  
   /// Store the full metric (also for bivectors etc ..)         
     var metric = basis.map((x,xi)=>simplify(x+x,p,q,r)|0);
@@ -182,7 +182,8 @@
     var basisg = grade_start.slice(0,grade_start.length-1).map((x,i)=>basis.slice(x,grade_start[i+1]));
     var bmap   = {}; basisg.forEach((g,gi)=>g.forEach((l,li)=>bmap[l]=[gi,li]));
     var metric = basisg.map(x=>x.map(y=>simplify(y+y,p,q,r)[0]=='-'?-1:1 ));
-  
+    var counts = grade_start.map((x,i,a)=>i==a.length-1?0:a[i+1]-x).slice(0,tot+1);
+    
   /// Flat Algebra Multivector Base Class.
     var generator = class MultiVector extends Array {
     /// constructor - create a floating point array with the correct number of coefficients.
@@ -265,11 +266,12 @@
         }
         return r;
       }    
-      
+      Vee(b,r) { return (this.Dual.Wedge(b.Dual)).Dual; }
       toString() { return basisg.map((g,gi)=>g.map((c,ci)=>(!this[gi] || !this[gi][ci])?undefined:((this[gi][ci]==1&&c!=1)?'':this[gi][ci])+(c==1?'':c)).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
       get s () { if (this[0]) return this[0][0]||0; return 0; }
       get Length () { var res=0; this.forEach((g,gi)=>g.forEach((e,ei)=> res+=e**2*metric[gi][ei]  )); return res; }
       get Conjugate () { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,-1,-1,1][gi%4]; })); return r; }
+      get Dual() { var r=new this.constructor(); this.forEach((g,gi)=>{ r[tot-gi]=[]; g.forEach((e,ei)=>r[tot-gi][counts[gi]-1-ei]=e); }); return r; }
     }  
 
     
