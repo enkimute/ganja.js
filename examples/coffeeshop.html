@@ -31,6 +31,8 @@
     .cga2d.SELECTED { background-color:#fea; color:#806040; }
     .cga3d          { background-color:#af8; color:#684; }
     .cga3d.SELECTED { background-color:#efa; color:#608040; }
+    .qcga3d          { background-color:#a8f; color:#684; }
+    .qcga3d.SELECTED { background-color:#eaf; color:#608040; }
     .game          { background-color:#fcf; color:#868; }
     .game.SELECTED { background-color:#fef; color:#806080; }
     .quaternion          { background-color:#cfc; color:#686; }
@@ -48,6 +50,7 @@
     #HEADER.pga3d > .TAB.pga3d { display:block; }
     #HEADER.cga2d > .TAB.cga2d { display:block; }
     #HEADER.cga3d > .TAB.cga3d { display:block; }
+    #HEADER.qcga3d > .TAB.qcga3d { display:block; }
     #RUN { box-sizing:border-box; position:absolute; top:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
     #RUN:hover { border : 2px solid #886; top:9px; left:9px}
     .error { position:absolute; background:rgba(200,100,100,0.5); z-index:20 }
@@ -68,6 +71,7 @@
     <SPAN CLASS="pga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga3d'); ">PGA 3D</SPAN>
     <SPAN CLASS="cga2d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('cga2d'); ">CGA 2D</SPAN>
     <SPAN CLASS="cga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('cga3d'); ">CGA 3D</SPAN>
+    <SPAN CLASS="qcga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('qcga3d'); ">QCGA 3D</SPAN>
     <SPAN CLASS="game" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('game'); ">Games</SPAN>
     <BR>
     <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">^=Wedge</SPAN>
@@ -77,7 +81,7 @@
     <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">&lt;&lt;=Dot</SPAN>
     <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">&gt;&gt;&gt;=Sandwich</SPAN>
   </DIV>
-  <DIV ID="HEADER" CLASS="complex dual quaternion timespace pga2d pga3d cga2d cga3d game">
+  <DIV ID="HEADER" CLASS="complex dual quaternion timespace pga2d pga3d cga2d cga3d qcga3d game">
   </DIV>
   <DIV ID="MAIN">
     <DIV ID="RUN">&#x25B6; Run Changes <SPAN STYLE="opacity:0.5; float:right; margin-left:30px">Shift+Enter</SPAN></DIV>
@@ -93,6 +97,7 @@
                     "pga3d_points_and_lines","pga3d_distances_and_angles","pga3d_rotors_and_translators","pga3d_icosahedron","pga3d_sampling","pga3d_slicing","pga3d_differentiation","pga3d_skinning","pga3d_physics_planets","pga3d_origami","pga3d_physics_symmetric_top","pga3d_physics_free_top","pga3d_objects",
                     "cga2d_points_and_circles","cga2d_project_and_reject","cga2d_rotors_and_translators","cga2d_euler_line",
                     "cga3d_points_circles_lines","cga3d_points_spheres_planes","cga3d_dual_spheres_planes","cga3d_intersections","cga3d_project_reject",
+                    "qcga3d_points_and_more",
                     "game_wedge"];
     
     var $ = document.getElementById.bind(document);

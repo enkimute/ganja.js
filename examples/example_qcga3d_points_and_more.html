@@ -22,7 +22,7 @@ Algebra(9,6,()=>{
     var p = (x,y,z)=>x*1e01 + y*1e02 + z*1e03 + .5*x*x*ei1 + .5*y*y*ei2 + .5*z*z*ei3 + x*y*ei4 + x*z*ei5 + y*z*ei6 + eo1 + eo2 + eo3;          
     
   // Distance between two qcga points.  
-    var dist = (a,b)=>Math.abs(2*((a.Mul(b).Grade(0)).Length))**.5;
+    var dist = (a,b)=>(-2*(a<<b).s)**.5;
 
   // Use the size of the OP to visualize the object.    
     var opns = (a,b)=>(a^b).Length;
@@ -34,9 +34,9 @@ Algebra(9,6,()=>{
     var sp = p1^p2^p3^p4^pIi^pIo;  
     
   // Calculate a slice with the sphere and show it
-    document.write('<H3>Quadric Conformal Space</H3><BR><p>We construct a circle from 4 points and visualize it by slicing it (and probing the OPNS).</p>')
+    document.write('<H3>Quadric Conformal Space</H3><BR><p>We construct a sphere from 4 points and visualize it by slicing it (and probing the OPNS).</p>')
     Object.assign(document.body.appendChild(this.graph(
-        (x,y)=>Math.abs(opns(p(x*1.5,y*1.5,0),sp))**.5                             // the function we graph.
+        (x,y)=>Math.abs(opns(p(x*1.5,y*1.5,0),sp))                             // the function we graph.
     ,{width:64,height:64})).style,{width:512,height:512})
         
 });

@@ -230,55 +230,42 @@
     // geometric product.
       Mul(b,r) {
         r=r||new this.constructor();
-        for (var i=0; i<this.length; i++) if (this[i]) 
-            for (var j=0;j<b.length; j++) if (b[j]) {
-              var x=this[i], y=b[j];
-              // grade i * grade j - consider generating/caching at this point.
-              for (var a=0; a<x.length; a++) if (x[a])
-               for (var bb=0; bb<y.length; bb++) if (y[bb]) {
-                  if (i==j && a==bb) {
-                     r[0]    = r[0] || [0];
-                     r[0][0] += x[a]*y[bb]*metric[i][a];
-                  } else { // this aint fast.
-                     var rn = simplify(basisg[i][a]+basisg[j][bb]);
-                     if (rn[0]=='-') {
-                       var p = bmap[rn.slice(1)];
-                       if (!r[p[0]]) r[p[0]]=[];
-                       r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb];
-                     } else {
-                       var p = bmap[rn];
-                       if (!r[p[0]]) r[p[0]]=[];
-                       r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb];
-                     }
-                  }  
-               }
-        }  
+        for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
+          if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
+          else { // this aint fast.
+             var rn = simplify(basisg[i][a]+basisg[j][bb]);
+             if (rn[0]=='-') { var p = bmap[rn.slice(1)]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb]; } 
+                        else { var p = bmap[rn]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb]; }
+          }  
+        }
         return r;
-      }       
+      }    
+    // outer product.     
       Wedge(b,r) {
         r=r||new this.constructor();
-        for (var i=0; i<this.length; i++) if (this[i]) 
-            for (var j=0;j<b.length; j++) if (b[j]) {
-              var x=this[i], y=b[j];
-              // grade i * grade j - consider generating/caching at this point.
-              for (var a=0; a<x.length; a++) if (x[a])
-               for (var bb=0; bb<y.length; bb++) if (y[bb]) {
-                  if (i!=j || a!=bb) {
-                     var rn = simplify(basisg[i][a]+basisg[j][bb],tot,0,0);
-                     if (rn[0]=='-' && rn.length == (basisg[i][a]+basisg[j][bb]).length ) {
-                       var p = bmap[rn.slice(1)];
-                       if (!r[p[0]]) r[p[0]]=[];
-                       r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb];
-                     } else if (rn.length == (basisg[i][a]+basisg[j][bb]).length-1) {
-                       var p = bmap[rn];
-                       if (!r[p[0]]) r[p[0]]=[];
-                       r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb];
-                     }
-                  }  
-               }
-        }  
+        for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
+          if (i!=j || a!=bb) {
+             var n = basisg[i][a]+basisg[j][bb], rn = simplify(n,tot,0,0);
+             if (rn[0]=='-' && n.length==rn.length) { var p = bmap[rn.slice(1)]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb]; } 
+                    else if (n.length-1==rn.length) { var p = bmap[rn]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb]; }
+          }  
+        }
         return r;
       }       
+    // Left contraction.
+      Dot(b,r) {
+        r=r||new this.constructor();
+        for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
+          if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
+          else { // this aint fast.
+             var n1=basisg[i][a], n2=basisg[j][bb], rn = simplify(n1+n2);
+             if (rn[0]=='-' && rn.length-1==n2.length-n1.length) { var p = bmap[rn.slice(1)]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb]; } 
+                      else if (rn.length-1==n2.length-n1.length) { var p = bmap[rn]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb]; }
+          }  
+        }
+        return r;
+      }    
+      
       toString() { return basisg.map((g,gi)=>g.map((c,ci)=>(!this[gi] || !this[gi][ci])?undefined:((this[gi][ci]==1&&c!=1)?'':this[gi][ci])+(c==1?'':c)).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
       get s () { if (this[0]) return this[0][0]||0; return 0; }
       get Length () { var res=0; this.forEach((g,gi)=>g.forEach((e,ei)=> res+=e**2*metric[gi][ei]  )); return res; }
