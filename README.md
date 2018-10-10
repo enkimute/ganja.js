@@ -344,17 +344,17 @@ CGA3D Spheres<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_points_spheres_planes"  TARGET="_blank" TITLE="CGA3D points, spheres, planes">
 <IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_spheres.jpg"></A>
 </TD><TD ALIGN=CENTER>
-CGA3D Spheres<BR>
+CGA3D Dual Spheres<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_dual_spheres_planes"   TARGET="_blank" TITLE="CGA3D dual spheres and planes">
 <IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_dual.jpg"></A>
 </TD></TR><TR><TD ALIGN=CENTER>
-CGA3D Spheres<BR>
+CGA3D Intersections<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_intersections"         TARGET="_blank" TITLE="CGA3D intersections">
 <IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_intersections.jpg"></A>
 </TD><TD ALIGN=CENTER>
-CGA3D Spheres<BR>
+CGA3D Project Reject<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_project_reject"        TARGET="_blank" TITLE="CGA3D project reject">
-<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_project_reject"></A>
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_project_reject.jpg"></A>
 </TD></TR><TR><TD ALIGN=CENTER>
 PGA2D Origami<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_origami"                TARGET="_blank" TITLE="PGA2D Origami">
