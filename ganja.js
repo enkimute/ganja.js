@@ -97,7 +97,7 @@
         brm=(x=>{ var ret={}; for (var i in basis) ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i]; return ret; })(basis);
         
 
-  if (tot < 10 || options.Cayley) {
+  if (!options.graded && tot < 6 || options.Cayley) {
   // Faster and degenerate-metric-resistant dualization. (a remapping table that maps items into their duals).         
     var drm=basis.map((a,i)=>{ return {a:a,i:i} })
                  .sort((a,b)=>a.a.length>b.a.length?1:a.a.length<b.a.length?-1:(+a.a.slice(1).split('').sort().join(''))-(+b.a.slice(1).split('').sort().join('')) )
