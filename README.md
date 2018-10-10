@@ -109,7 +109,7 @@ Here are some examples :
 var Hyper   = Algebra(1);       // Hyperbolic numbers. 
 var Complex = Algebra(0,1);     // Complex numbers.
 var Dual    = Algebra(0,0,1);   // Dual numbers.
-var H = Algebra(0,2);           // Quaternions.
+var H       = Algebra(0,2);     // Quaternions.
 
 // Clifford
 var Cl2 = Algebra(2);           // Clifford algebra for 2D vector space.
@@ -223,11 +223,11 @@ examples of how to use the inline syntax.
 ### The graph function.
 
 Your Algebra also exposes a static **_graph_** function that allows you to
-easily graph 1D or 2D functions as well as 2D and 3D PGA elements.
+easily graph 1D or 2D functions as well as 2D and 3D PGA and CGA elements.
 
-canvas output is available for 1D and 2D functions.
-SVG output is available for 2D PGA, 3D PGA and 2D CGA.
-webGL output is available for 3D PGA and 3D CGA.
+* canvas output is available for 1D and 2D functions.
+* SVG output is available for 2D PGA, 3D PGA and 2D CGA.
+* webGL output is available for 3D PGA and 3D CGA.
 
 ```javascript
 canvas = Algebra(0).graph(x=>Math.sin(x*5));                   // Graph a 1D function in R
