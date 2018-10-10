@@ -125,6 +125,12 @@ var PGA2D = Algebra(2,0,1);     // Projective Euclidean 2D plane. (dual)
 var PGA3D = Algebra(3,0,1);     // Projective Euclidean 3D space. (dual)
 var CGA2D = Algebra(3,1);       // conformal 2D space. 
 var CGA3D = Algebra(4,1);       // Conformal 3D space. 
+
+// High-Dimensional GA
+var DCGA3D = Algebra(6,2);      // Double Conformal 3D Space.
+var TCGA3D = Algebra(9,3);      // Tripple Conformal 3D Space.
+var DCGSTA = Algebra(4,8);      // Double Conformal Geometric Space Time Algebra.
+var QCGA   = Algebra(9,6);      // Quadric Conformal Geometric Algebra.  
 ```
 
 You can now use these classes to generate algebraic elements. Those elements will have all of the
