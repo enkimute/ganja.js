@@ -216,14 +216,14 @@
         r=r||new this.constructor();
         for (var i=0,l=Math.max(this.length,b.length);i<l;i++) 
           if (!this[i] || !b[i]) r[i] = (!this[i]) ? b[i]:this[i];
-          else { r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) r[i][j]=(this[i][j]||0)+(b[i][j]||0); }    
+          else { if (r[i]==undefined) r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) r[i][j]=(this[i][j]||0)+(b[i][j]||0); }    
         return r;
       }
       Sub(b,r) {
         r=r||new this.constructor();
         for (var i=0,l=Math.max(this.length,b.length);i<l;i++) 
           if (!this[i] || !b[i]) r[i] = (!this[i]) ? (b[i]?b[i].map(x=>-x):undefined):this[i];
-          else { r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) r[i][j]=(this[i][j]||0)-(b[i][j]||0); }    
+          else { if (r[i]==undefined) r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) r[i][j]=(this[i][j]||0)-(b[i][j]||0); }    
         return r;
       }
       Scale(s) { return this.map(x=>x&&x.map(y=>y*s)); }      
@@ -272,7 +272,7 @@
       get Length () { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2*metric[gi][ei]  )); return Math.sign(res)*Math.abs(res)**.5; }
       get Conjugate () { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,-1,-1,1][gi%4]; })); return r; }
       get Normalized () { return this.Scale(1/this.Length); }
-      get Dual() { var r=new this.constructor(); this.forEach((g,gi)=>{ r[tot-gi]=[]; g.forEach((e,ei)=>r[tot-gi][counts[gi]-1-ei]=e); }); return r; }
+      get Dual() { var r=new this.constructor(); this.forEach((g,gi)=>{ if (!g) return; r[tot-gi]=[]; g.forEach((e,ei)=>r[tot-gi][counts[gi]-1-ei]=e); }); return r; }
     }  
 
     
@@ -353,7 +353,7 @@
       // Handle matrices and vectors.  
         if ((a instanceof Array)&&(b instanceof Array)) { 
         // vector times vector performs a dot product. (which internally uses the GP on each component)
-          if((!(a[0] instanceof Array) || (a[0] instanceof Element)) &&(!(b[0] instanceof Array) || (b[0] instanceof Element))) { var r=tot?Element.Scalar(0):0; a.forEach((x,i)=>r=Element.Add(r,Element.Mul(x,b[i]))); return r; } 
+          if((!(a[0] instanceof Array) || (a[0] instanceof Element)) &&(!(b[0] instanceof Array) || (b[0] instanceof Element))) { var r=tot?Element.Scalar(0):0; a.forEach((x,i)=>r=Element.Add(r,Element.Mul(x,b[i]),r)); return r; } 
         // Array times vector  
           if(!(b[0] instanceof Array)) return a.map((x,i)=>Element.Mul(a[i],b)); 
         // Array times Array  
