@@ -2,8 +2,10 @@
   <SCRIPT SRC="../ganja.js"></SCRIPT>
 </HEAD>
 <BODY><SCRIPT>
-// Create a Clifford Algebra with 6,3 metric for 3D CCGA. 
+// Create a Clifford Algebra with 6,3 metric for 3D CCGA. ("colored" CGA) 
 Algebra(6,3,()=>{ 
+  
+  // https://link.springer.com/article/10.1007/s00006-014-0442-8
   
   document.write('Colored Conformal CGA<BR><BR>');
   
@@ -14,7 +16,7 @@ Algebra(6,3,()=>{
   
   // Show an element by sampling the IP space. 
   var ip = (a,b)=>8*Math.abs((b<<a).s),
-      show = (e)=>Object.assign(document.body.appendChild(this.graph((x,y)=>ip(point(x*1.5,y*1.5,0),e),{width:64,height:64})).style,{width:128,height:128,border:'1px solid black'})
+      show = (e)=>Object.assign(document.body.appendChild(this.graph((x,y)=>ip(point(x*1.5,y*1.5,0),e),{width:64,height:64})).style,{width:200,height:200,border:'1px solid black'})
 
   // Some primitives
   var pointv = [1e1,1e2,1e3,eix,eiy,eiz,eo],
