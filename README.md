@@ -17,7 +17,7 @@ and expressions by using reflection, a built-in tokenizer and a simple AST trans
 rewrite functions containing algebraic constructs to their procedural counterparts.)
 
 (**Practically**, ganja.js enables real math syntax inside javascript, with element, vector and matrix
-operations over reals, complex numbers, dual numbers, quaternions, or any other Clifford Algebra.)
+operations over **reals**, **complex numbers**, **dual numbers**, **hyperbolic numbers**, **vectors**, **spacetime events**, **quaternions**, **dual quaternions**, **biquaternions** or **any other Clifford Algebra**.)
 
 (**Seriously**, look at the [examples](https://enkimute.github.io/ganja.js/examples/coffeeshop.html), 
 run some quick numbers using the [GAlculator](https://enkimute.github.io/ganja.js/examples/galculator.html)
@@ -41,13 +41,13 @@ inline syntax and graphing makes math in the browser feel like .. math.
 
 * Operator overloading
 * Algebraic constants
-* Supports any metric (positive,negative,zero)
-* smallish (13.4kb on the wire)
+* Supports any metric (positive,negative,zero) and dimensionality (also +10)  
+* smallish (20kb on the wire)
 * matrix-free inverses up to 5D.
-* geometric, inner (contraction), outer (wedge) and vee product
+* geometric, inner (left contraction), outer (wedge) and regressive (vee) product
 * conjugate, Reverse, Involute, Dual (Poincare), Negative
 * 4 API's (inline, asciimath, object oriented, functional)
-* Easy graph function for 1D and 2D functions, Projective 2D, 3D and conformal 2D and 3D elements.
+* Easy graph function for 1D and 2D functions, Projective 2D, 3D and conformal 2D and 3D elements. (SVG/webGL/OPNS)
 * Supports vectors and matrices in all its algebras.
 * There's a [game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) that teaches you how to use ganja.js !
 
@@ -64,7 +64,7 @@ And require it in your script :
 var Algebra=require('ganja.js');
 ```
 
-Or in the browser, just include the ganja.js script. (ganja.js has no dependencies - just 9.0kb on the wire)
+Or in the browser, just include the ganja.js script. (ganja.js has no dependencies - just 20.0kb on the wire)
 
 ```html
 <SCRIPT SRC="https://unpkg.com/ganja.js"></SCRIPT>
@@ -259,8 +259,6 @@ Matrix Form:
  B, A
 ```
 
-
-
 <A NAME="samples"></A>
 ## Getting free ganja samples.
 
@@ -338,9 +336,25 @@ PGA3D Objects<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga3d_objects"                TARGET="_blank" TITLE="PGA3D Objects">
 <IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/pga3d_objects.jpg"></A>
 </TD><TD ALIGN=CENTER>
+CGA3D Circles<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_points_circles_lines"   TARGET="_blank" TITLE="CGA3D points, cicrles, lines">
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_circles.jpg"></A>
+</TD></TR><TR><TD ALIGN=CENTER>
 CGA3D Spheres<BR>
-<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_points_and_spheres"     TARGET="_blank" TITLE="CGA3D points and spheres">
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_points_spheres_planes"  TARGET="_blank" TITLE="CGA3D points, spheres, planes">
 <IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_spheres.jpg"></A>
+</TD><TD ALIGN=CENTER>
+CGA3D Spheres<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_dual_spheres_planes"   TARGET="_blank" TITLE="CGA3D dual spheres and planes">
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_dual.jpg"></A>
+</TD></TR><TR><TD ALIGN=CENTER>
+CGA3D Spheres<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_intersections"         TARGET="_blank" TITLE="CGA3D intersections">
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_intersections.jpg"></A>
+</TD><TD ALIGN=CENTER>
+CGA3D Spheres<BR>
+<A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_project_reject"        TARGET="_blank" TITLE="CGA3D project reject">
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_project_reject"></A>
 </TD></TR><TR><TD ALIGN=CENTER>
 PGA2D Origami<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_origami"                TARGET="_blank" TITLE="PGA2D Origami">
