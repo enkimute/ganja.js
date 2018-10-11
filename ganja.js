@@ -81,7 +81,7 @@
     var low=basis[1].match(/\d+/g)[0]*1,
         grades=basis.map(x=>tot>9?(x.length-1)/2:x.length-1),
         grade_start=grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]);
-        
+
   // String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)      
   // This is the function that implements e1e1 = +1/-1/0 and e1e2=-e2e1. The brm function creates the remap dictionary.
     var simplify = (s,p,q,r)=>{
@@ -96,7 +96,10 @@
         },
         brm=(x=>{ var ret={}; for (var i in basis) ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i]; return ret; })(basis);
         
-
+  // As an alternative to the string fiddling, one can also bit-fiddle. In this case the basisvectors are represented by integers with 1 bit per generator set.
+    var simplify_bits = (A,B,p2)=>{ var n=p2||(p+q),t=0,ab=A&B,res=A^B; while (n--) t^=(A=A>>1); t&=B; t^=ab>>p; t^=t>>16; t^=t>>8; t^=t>>4; return [1-2*(27030>>(t&15)&1),res]; },
+        bc = (v)=>{ v=v-((v>>1)& 0x55555555); v=(v&0x33333333)+((v>>2)&0x33333333); c=((v+(v>>4)&0xF0F0F0F)*0x1010101)>>24; return c }; 
+  
   if (!options.graded && tot < 6 || options.Cayley) {
   // Faster and degenerate-metric-resistant dualization. (a remapping table that maps items into their duals).         
     var drm=basis.map((a,i)=>{ return {a:a,i:i} })
@@ -180,9 +183,10 @@
   
   /// extra graded lookups.
     var basisg = grade_start.slice(0,grade_start.length-1).map((x,i)=>basis.slice(x,grade_start[i+1]));
-    var bmap   = {}; basisg.forEach((g,gi)=>g.forEach((l,li)=>bmap[l]=[gi,li]));
     var metric = basisg.map(x=>x.map(y=>simplify(y+y,p,q,r)[0]=='-'?-1:1 ));
     var counts = grade_start.map((x,i,a)=>i==a.length-1?0:a[i+1]-x).slice(0,tot+1);
+    var basis_bits = basis.map(x=>x=='1'?0:x.slice(1).match(tot>9?/\d\d/g:/\d/g).reduce((a,b)=>a+(1<<(b-low)),0)),
+        bits_basis = basis_bits.map((x,i)=>basis_bits.indexOf(i));
     
   /// Flat Algebra Multivector Base Class.
     var generator = class MultiVector extends Array {
@@ -206,7 +210,7 @@
               }
       
     /// Negates specific grades (passed in as args)
-      Map(res, ...a) { }
+      Map(res, ...a) {  /* tbc */ }
 
     /// Returns the vector grade only.
       get Vector ()    { return this[1] };
@@ -233,10 +237,9 @@
         r=r||new this.constructor();
         for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
           if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
-          else { // this aint fast.
-             var rn = simplify(basisg[i][a]+basisg[j][bb]);
-             if (rn[0]=='-') { var p = bmap[rn.slice(1)]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb]; } 
-                        else { var p = bmap[rn]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb]; }
+          else { 
+             var rn=simplify_bits(basis_bits[grade_start[i]+a],basis_bits[grade_start[j]+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
+             if (!r[g])r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb];
           }  
         }
         return r;
@@ -245,29 +248,27 @@
       Wedge(b,r) {
         r=r||new this.constructor();
         for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
-          if (i!=j || a!=bb) {
-             var n = basisg[i][a]+basisg[j][bb], rn = simplify(n,tot,0,0);
-             if (rn[0]=='-' && n.length==rn.length) { var p = bmap[rn.slice(1)]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb]; } 
-                    else if (n.length-1==rn.length) { var p = bmap[rn]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb]; }
+          if (i!=j || a!=bb) { 
+             var n1=basis_bits[grade_start[i]+a], n2=basis_bits[grade_start[j]+bb], rn=simplify_bits(n1,n2,tot), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
+             if (g == i+j) { if (!r[g]) r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb]; }
           }  
         }
         return r;
-      }       
+      }    
     // Left contraction.
       Dot(b,r) {
         r=r||new this.constructor();
         for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
           if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
-          else { // this aint fast.
-             var n1=basisg[i][a], n2=basisg[j][bb], rn = simplify(n1+n2);
-             if (rn[0]=='-' && rn.length-1==n2.length-n1.length) { var p = bmap[rn.slice(1)]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) - x[a]*y[bb]; } 
-                      else if (rn.length-1==n2.length-n1.length) { var p = bmap[rn]; if (!r[p[0]]) r[p[0]]=[]; r[p[0]][p[1]] = (r[p[0]][p[1]]||0) + x[a]*y[bb]; }
+          else { 
+             var rn=simplify_bits(basis_bits[grade_start[i]+a],basis_bits[grade_start[j]+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
+             if (g == j-i) { if (!r[g])r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb]; }
           }  
         }
         return r;
       }    
       Vee(b,r) { return (this.Dual.Wedge(b.Dual)).Dual; }
-      toString() { return basisg.map((g,gi)=>g.map((c,ci)=>(!this[gi] || !this[gi][ci])?undefined:((this[gi][ci]==1&&c!=1)?'':this[gi][ci])+(c==1?'':c)).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
+      toString() { return this.map((g,gi)=>g.map((c,ci)=>(!this[gi] || !this[gi][ci])?undefined:((this[gi][ci]==1&&c!=1)?'':this[gi][ci])+(c==1?'':c)).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
       get s () { if (this[0]) return this[0][0]||0; return 0; }
       get Length () { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2*metric[gi][ei]  )); return Math.sign(res)*Math.abs(res)**.5; }
       get Conjugate () { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,-1,-1,1][gi%4]; })); return r; }
