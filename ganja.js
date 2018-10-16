@@ -97,7 +97,7 @@
         brm=(x=>{ var ret={}; for (var i in basis) ret[basis[i]=='1'?'1':simplify(basis[i],p,q,r)] = basis[i]; return ret; })(basis);
         
   // As an alternative to the string fiddling, one can also bit-fiddle. In this case the basisvectors are represented by integers with 1 bit per generator set.
-    var simplify_bits = (A,B,p2)=>{ var n=p2||(p+q),t=0,ab=A&B,res=A^B; while (n--) t^=(A=A>>1); t&=B; t^=ab>>p; t^=t>>16; t^=t>>8; t^=t>>4; return [1-2*(27030>>(t&15)&1),res]; },
+    var simplify_bits = (A,B,p2)=>{ var n=p2||(p+q+r),t=0,ab=A&B,res=A^B; if (ab&((1<<r)-1)) return [0,0]; while (n--) t^=(A=A>>1); t&=B; t^=ab>>(p+r); t^=t>>16; t^=t>>8; t^=t>>4; return [1-2*(27030>>(t&15)&1),res]; },
         bc = (v)=>{ v=v-((v>>1)& 0x55555555); v=(v&0x33333333)+((v>>2)&0x33333333); c=((v+(v>>4)&0xF0F0F0F)*0x1010101)>>24; return c }; 
   
   if (!options.graded && tot < 6 || options.Cayley) {
@@ -235,10 +235,10 @@
     // geometric product.
       Mul(b,r) {
         r=r||new this.constructor();
-        for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
+        for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
           if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
           else { 
-             var rn=simplify_bits(basis_bits[grade_start[i]+a],basis_bits[grade_start[j]+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
+             var rn=simplify_bits(basis_bits[gsx+a],basis_bits[gsy+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
              if (!r[g])r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb];
           }  
         }
@@ -247,9 +247,9 @@
     // outer product.     
       Wedge(b,r) {
         r=r||new this.constructor();
-        for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
+        for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
           if (i!=j || a!=bb) { 
-             var n1=basis_bits[grade_start[i]+a], n2=basis_bits[grade_start[j]+bb], rn=simplify_bits(n1,n2,tot), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
+             var n1=basis_bits[gsx+a], n2=basis_bits[gsy+bb], rn=simplify_bits(n1,n2,tot), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
              if (g == i+j) { if (!r[g]) r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb]; }
           }  
         }
@@ -258,10 +258,10 @@
     // Left contraction.
       Dot(b,r) {
         r=r||new this.constructor();
-        for (var i=0,x; x=this[i],i<this.length; i++) if (x) for (var j=0,y;y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
+        for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
           if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
           else { 
-             var rn=simplify_bits(basis_bits[grade_start[i]+a],basis_bits[grade_start[j]+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
+             var rn=simplify_bits(basis_bits[gsx+a],basis_bits[gsy+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
              if (g == j-i) { if (!r[g])r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb]; }
           }  
         }
