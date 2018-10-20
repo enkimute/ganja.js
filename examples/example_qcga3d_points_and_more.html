@@ -39,7 +39,7 @@ Algebra(9,6,()=>{
     sphere2[14][12]*=.4; sphere2[14][10]*=8; sphere2 = sphere2.Normalized;
     
   // Graph and animate
-    document.body.appendChild(this.graphGL2(()=>{
+    document.body.appendChild(this.graph(()=>{
       var s = 0+sphere, s2 = 0+sphere2;                    // copy originals
       s[14][4]+=0.2*Math.sin(performance.now()/1000);      // animate
       s[14][10]+=0.1+Math.sin(performance.now()/1491);

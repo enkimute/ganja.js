@@ -494,7 +494,7 @@
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.    
         project=(o)=>{ if (!o) return o; while (o.call) o=o(); return (tot==4 && (o.length==16))?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):o};
       // gl escape.
-        if (options.gl) return Element.graphGL(f,options);  
+        if (options.gl) return Element.graphGL(f,options); if (tot>5) return Element.graphGL2(f,options);
       // if we get an array or function without parameters, we render c2d or p2d SVG points/lines/circles/etc
         if (!(f instanceof Function) || f.length===0) { 
         // Our current cursor, color, animation state and 2D mapping.
@@ -607,7 +607,7 @@
             gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
             gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
             if (color3) gl.uniform3fv(gl.getUniformLocation(p, "color3"),new Float32Array(color3));
-            if (b) gl.uniform1fv(gl.getUniformLocation(p, "b"),(new Float32Array(b[13]?105:15)).map((x,i)=>(b[13]||b[14])[i]||0));
+            if (b) gl.uniform1fv(gl.getUniformLocation(p, "b"),(new Float32Array(b[tot-2]?counts[tot-2]:counts[tot-1])).map((x,i)=>(b[tot-2]||b[tot-1])[i]||0));
             if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
             var v; if (!va) v = createVA(vtx); else gl.va.bindVertexArrayOES(va.r);
             gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
@@ -624,7 +624,7 @@
              in vec4 Pos; out vec4 col; 
              float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
                 ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
-                return ${grade==13?"sign(sum)*sqrt(abs(sum))":"res"};
+                return ${grade==tot-2?"sign(sum)*sqrt(abs(sum))":"res"};
              }
              vec3 trace_depth (in vec3 start, vec3 dir, in float tresh) {
                 vec3 orig=start; float lastd = 1000.0; int count=128;
