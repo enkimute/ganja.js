@@ -255,6 +255,27 @@
         }
         return r;
       }    
+    // outer product glsl output.     
+      OPNS_GLSL(b,point_source) {
+        var r='',count=0,curg;
+        for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<counts[i]; a++) for (var bb=0; bb<counts[j]; bb++) {
+          if (i!=j || a!=bb) { 
+             var n1=basis_bits[gsx+a], n2=basis_bits[gsy+bb], rn=simplify_bits(n1,n2,tot), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
+             if (g == i+j) { curg=g; r += `res[${e}]${rn[0]=='1'?"+=":"-="}(${point_source[a]})*b[${bb}]; //${count++}\n`;  }
+          }  
+        }
+        r=r.split('\n').filter(x=>x).sort((a,b)=>((a.match(/\d+/)[0]|0)-(b.match(/\d+/)[0]|0))||((a.match(/\d+$/)[0]|0)-(b.match(/\d+$/)[0]|0))).map(x=>x.replace(/\/\/\d+$/,''));
+        
+        var r2 = 'float sum=0.0; float res=0.0;\n', g=0;
+        r.forEach(x=>{
+          var cg = x.match(/\d+/)[0]|0;
+          if (cg != g) r2 += "sum "+((metric[curg][g]==-1)?"-=":"+=")+" res*res;\nres = 0.0;\n";
+          r2 += x.replace(/\[\d+\]/,'') + '\n';
+          g=cg;
+        });
+        r2+= "sum "+((metric[curg][g]==-1)?"-=":"+=")+" res*res;\n";
+        return r2;
+      }    
     // Left contraction.
       Dot(b,r) {
         r=r||new this.constructor();
@@ -550,7 +571,119 @@
         return context.putImageData(data,0,0),cvs;       
       }
       
-    // webGL2 Graphing function.
+    // webGL2 Graphing function. (for OPNS/IPNS implicit 2D and 1D surfaces in 3D space).
+      static graphGL2(f,options) {
+      // Create canvas, get webGL2 context.
+        var canvas=document.createElement('canvas'); canvas.width=options.width||600; canvas.height=options.height||600; canvas.style.backgroundColor='#EEE';
+        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,antialias:true,powerPreference:'high-performance'}); 
+        gl.clearColor(240/255,240/255,240/255,1.0); gl.enable(gl.DEPTH_TEST);
+      // Compile vertex and fragment shader, return program.
+        var compile=(vs,fs)=>{
+          var s=[gl.VERTEX_SHADER,gl.FRAGMENT_SHADER].map((t,i)=>{
+            var r=gl.createShader(t); gl.shaderSource(r,[vs,fs][i]); gl.compileShader(r);
+            return gl.getShaderParameter(r, gl.COMPILE_STATUS)&&r||console.error(gl.getShaderInfoLog(r));
+          });
+          var p = gl.createProgram(); gl.attachShader(p, s[0]); gl.attachShader(p, s[1]); gl.linkProgram(p);
+          gl.getProgramParameter(p, gl.LINK_STATUS)||console.error(gl.getProgramInfoLog(p));
+          return p;
+        };
+      // Create vertex array and buffers, upload vertices and optionally texture coordinates.
+        var createVA=function(vtx) {
+          var r = gl.createVertexArray(); gl.bindVertexArray(r);
+          var b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b);
+          gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vtx), gl.STATIC_DRAW);
+          gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(0);
+          return {r,b}
+        },
+      // Destroy Vertex array and delete buffers.
+        destroyVA=function(va) {
+          if (va.b) gl.deleteBuffer(va.b); if (va.r) gl.deleteVertexArray(va.r);
+        }
+      // Drawing function  
+        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1];
+        var draw=function(p, tp, vtx, color, color2, ratio, texc, va, b,color3){
+            gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M);
+            gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||1),0,0,0,0,1,2,0,0,-1,0])
+            gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
+            gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
+            if (color3) gl.uniform3fv(gl.getUniformLocation(p, "color3"),new Float32Array(color3));
+            if (b) gl.uniform1fv(gl.getUniformLocation(p, "b"),(new Float32Array(b[13]?105:15)).map((x,i)=>(b[13]||b[14])[i]||0));
+            if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
+            var v; if (!va) v = createVA(vtx); else gl.va.bindVertexArrayOES(va.r);
+            gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
+            if (v) destroyVA(v);
+        }
+      // Compile the OPNS renderer. (sphere tracing)
+        var [program,program2] = [tot-1,tot-2].map(grade=>compile(`#version 300 es
+             in vec4 position; out vec4 Pos; uniform mat4 mv; uniform mat4 p;
+             void main() { Pos=mv*position; gl_Position = p*Pos; }`,
+            `#version 300 es
+             precision highp float;  
+             uniform vec3 color; uniform vec3 color2; 
+             uniform vec3 color3; uniform float b[${counts[grade]}];
+             in vec4 Pos; out vec4 col; 
+             float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
+                ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
+                return ${grade==13?"sign(sum)*sqrt(abs(sum))":"res"};
+             }
+             vec3 trace_depth (in vec3 start, vec3 dir, in float tresh) {
+                vec3 orig=start; float lastd = 1000.0; int count=128;
+                float s =  sign(dist(start[0],start[1],start[2],b));
+                for (int i=0; i<count; i++) {
+                  float d = s*dist(start[0],start[1],start[2],b);
+                  if (d < tresh) return start - lastd*0.25*dir*(tresh-d)/(lastd-d);
+                  lastd = d; start += dir*0.25*d;
+                }
+                return orig;
+             }
+             void main() { 
+               vec3 p = -10.0*color2; 
+               vec3 dir = normalize((Pos[1]/5.0)*color + color2 + vec3(0.0,Pos[0]/5.0,0.0));  p += 5.0*dir;
+               vec3 L = normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
+               vec3 d2 = trace_depth( p , dir, ${grade==tot-2?0.2:0.01} );
+               float dl2 = dot(d2-p,d2-p); const float h=0.1; 
+               if (dl2>0.0) {
+                 vec3 n = normalize(vec3(
+                        dist(d2[0]+h,d2[1],d2[2],b)-dist(d2[0]-h,d2[1],d2[2],b),
+                        dist(d2[0],d2[1]+h,d2[2],b)-dist(d2[0],d2[1]-h,d2[2],b),
+                        dist(d2[0],d2[1],d2[2]+h,b)-dist(d2[0],d2[1],d2[2]-h,b)
+                      ));
+                 gl_FragDepth = dl2/50.0;
+                 col = vec4(max(0.2,dot(n,L))*color3 + pow(max(0.0,dot(n,normalize(L+dir))),100.0),0.0);
+               } else discard; 
+             }`));
+      // canvas update will (re)render the content.            
+        var armed=0;
+        canvas.update = (x)=>{
+        // Start by updating canvas size if needed and viewport.
+          var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width); canvas.height = parseFloat(s.height); }
+          gl.viewport(0,0, canvas.width|0,canvas.height|0); var r=canvas.width/canvas.height;
+        // Defaults, resolve function input  
+          var a,p=[],l=[],t=[],c=[.5,.5,.5],alpha=0,lastpos=[-2,2,0.2]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x();
+        // Loop over all items to render.  
+          for (var i=0,ll=x.length;i<ll;i++) { 
+            var e=x[i]; while (e&&e.call) e=e(); if (e==undefined) continue;
+            if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
+            if (e instanceof Element){
+              var tt = performance.now()/1000; 
+              draw(e[tot-1]?program:program2,gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c);
+            }
+          }
+          // if we're no longer in the page .. stop doing the work.
+          armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
+          canvas.value=x; canvas.dispatchEvent(new CustomEvent('input'));
+          if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); }
+          if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
+        }
+        canvas.value = f.call?f():f;
+        if (options&&options.still) {
+          var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
+        } else return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
+        
+      }
+    
+      
+    // webGL Graphing function. (for parametric defined objects)
       static graphGL(f,options) {
       // Create a canvas, webgl2 context and set some default GL options.
         var canvas=document.createElement('canvas'); canvas.width=options.width||600; canvas.height=options.height||600; canvas.style.backgroundColor='#EEE';
