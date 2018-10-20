@@ -639,8 +639,8 @@
              void main() { 
                vec3 p = -10.0*color2; 
                vec3 dir = normalize((Pos[1]/5.0)*color + color2 + vec3(0.0,Pos[0]/5.0,0.0));  p += 5.0*dir;
-               vec3 L = normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
-               vec3 d2 = trace_depth( p , dir, ${grade==tot-2?0.2:0.01} );
+               vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
+               vec3 d2 = trace_depth( p , dir, ${grade==tot-2?(options.tresh||0.2):0.01} );
                float dl2 = dot(d2-p,d2-p); const float h=0.1; 
                if (dl2>0.0) {
                  vec3 n = normalize(vec3(
@@ -649,7 +649,7 @@
                         dist(d2[0],d2[1],d2[2]+h,b)-dist(d2[0],d2[1],d2[2]-h,b)
                       ));
                  gl_FragDepth = dl2/50.0;
-                 col = vec4(max(0.2,dot(n,L))*color3 + pow(max(0.0,dot(n,normalize(L+dir))),100.0),0.0);
+                 col = vec4(max(0.2,dot(n,normalize(L-d2)))*color3 + pow(max(0.0,dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
                } else discard; 
              }`));
       // canvas update will (re)render the content.            
