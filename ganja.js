@@ -627,7 +627,7 @@
                 return ${grade==tot-2?"sign(sum)*sqrt(abs(sum))":"res"};
              }
              vec3 trace_depth (in vec3 start, vec3 dir, in float tresh) {
-                vec3 orig=start; float lastd = 1000.0; int count=128;
+                vec3 orig=start; float lastd = 1000.0; int count=64;
                 float s =  sign(dist(start[0],start[1],start[2],b));
                 for (int i=0; i<count; i++) {
                   float d = s*dist(start[0],start[1],start[2],b);
