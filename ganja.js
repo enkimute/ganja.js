@@ -494,7 +494,7 @@
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.    
         project=(o)=>{ if (!o) return o; while (o.call) o=o(); return (tot==4 && (o.length==16))?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):o};
       // gl escape.
-        if (options.gl) return Element.graphGL(f,options); if (tot>5) return Element.graphGL2(f,options);
+        if (options.gl) return Element.graphGL(f,options); if (tot>5 && options.up) return Element.graphGL2(f,options);
       // if we get an array or function without parameters, we render c2d or p2d SVG points/lines/circles/etc
         if (!(f instanceof Function) || f.length===0) { 
         // Our current cursor, color, animation state and 2D mapping.
