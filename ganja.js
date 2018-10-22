@@ -183,10 +183,10 @@
   
   /// extra graded lookups.
     var basisg = grade_start.slice(0,grade_start.length-1).map((x,i)=>basis.slice(x,grade_start[i+1]));
-    var metric = basisg.map(x=>x.map(y=>simplify(y+y,p,q,r)[0]=='-'?-1:1 ));
     var counts = grade_start.map((x,i,a)=>i==a.length-1?0:a[i+1]-x).slice(0,tot+1);
     var basis_bits = basis.map(x=>x=='1'?0:x.slice(1).match(tot>9?/\d\d/g:/\d/g).reduce((a,b)=>a+(1<<(b-low)),0)),
         bits_basis = []; basis_bits.forEach((b,i)=>bits_basis[b]=i);    
+    var metric = basisg.map((x,xi)=>x.map((y,yi)=>simplify_bits(basis_bits[grade_start[xi]+yi],basis_bits[grade_start[xi]+yi])[0]));
     
   /// Flat Algebra Multivector Base Class.
     var generator = class MultiVector extends Array {
