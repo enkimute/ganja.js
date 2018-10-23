@@ -228,6 +228,7 @@ easily graph 1D or 2D functions as well as 2D and 3D PGA and CGA elements.
 * canvas output is available for 1D and 2D functions.
 * SVG output is available for 2D PGA, 3D PGA and 2D CGA.
 * webGL output is available for 3D PGA and 3D CGA.
+* webGL2 implicit OPNS rendering is available for all other spaces.
 
 ```javascript
 canvas = Algebra(0).graph(x=>Math.sin(x*5));                   // Graph a 1D function in R

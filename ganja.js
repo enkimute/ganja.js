@@ -53,7 +53,8 @@
   *     [basis:array],                     => array of strings with basis names. (e.g. ['1','e1','e2','e12'])
   *     [Cayley:Cayley],                   => optional custom Cayley table (strings). (e.g. [['1','e1'],['e1','-1']])                            
   *     [mix:boolean],                     => Allows mixing of various algebras. (for space efficiency).
-  *     [baseType:Float32Array]            => optional basetype to use.
+  *     [graded:boolean],                  => Use a graded algebra implementation. (automatic for +6D)
+  *     [baseType:Float32Array]            => optional basetype to use. (only for flat generator)
   *   },[func])                            => optional function for the translator.
  **/  
   return function Algebra(p,q,r) {
@@ -187,6 +188,7 @@
     var basis_bits = basis.map(x=>x=='1'?0:x.slice(1).match(tot>9?/\d\d/g:/\d/g).reduce((a,b)=>a+(1<<(b-low)),0)),
         bits_basis = []; basis_bits.forEach((b,i)=>bits_basis[b]=i);    
     var metric = basisg.map((x,xi)=>x.map((y,yi)=>simplify_bits(basis_bits[grade_start[xi]+yi],basis_bits[grade_start[xi]+yi])[0]));
+    var drms   = basisg.map((x,xi)=>x.map((y,yi)=>simplify_bits(basis_bits[grade_start[xi]+yi],(~basis_bits[grade_start[xi]+yi])&((1<<tot)-1))[0]));
     
   /// Flat Algebra Multivector Base Class.
     var generator = class MultiVector extends Array {
@@ -265,7 +267,6 @@
           }  
         }
         r=r.split('\n').filter(x=>x).sort((a,b)=>((a.match(/\d+/)[0]|0)-(b.match(/\d+/)[0]|0))||((a.match(/\d+$/)[0]|0)-(b.match(/\d+$/)[0]|0))).map(x=>x.replace(/\/\/\d+$/,''));
-        
         var r2 = 'float sum=0.0; float res=0.0;\n', g=0;
         r.forEach(x=>{
           var cg = x.match(/\d+/)[0]|0;
@@ -289,12 +290,12 @@
         return r;
       }    
       Vee(b,r) { return (this.Dual.Wedge(b.Dual)).Dual; }
-      toString() { return this.map((g,gi)=>g.map((c,ci)=>(!this[gi] || !this[gi][ci])?undefined:((this[gi][ci]==1&&c!=1)?'':this[gi][ci])+(c==1?'':c)).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
+      toString() { return [...this].map((g,gi)=>g&&g.map((c,ci)=>!c?undefined:c+basisg[gi][ci]).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
       get s () { if (this[0]) return this[0][0]||0; return 0; }
-      get Length () { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2*metric[gi][ei]  )); return Math.sign(res)*Math.abs(res)**.5; }
+      get Length () { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2*metric[gi][ei])); return Math.abs(res)**.5; }
       get Conjugate () { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,-1,-1,1][gi%4]; })); return r; }
       get Normalized () { return this.Scale(1/this.Length); }
-      get Dual() { var r=new this.constructor(); this.forEach((g,gi)=>{ if (!g) return; r[tot-gi]=[]; g.forEach((e,ei)=>r[tot-gi][counts[gi]-1-ei]=e); }); return r; }
+      get Dual() { var r=new this.constructor(); this.forEach((g,gi)=>{ if (!g) return; r[tot-gi]=[]; g.forEach((e,ei)=>r[tot-gi][counts[gi]-1-ei]=drms[gi][ei]*e); }); return r; }
     }  
 
     
