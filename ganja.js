@@ -79,7 +79,7 @@
               .map(x=>x&&'e'+(x.replace(/./g,x=>('0'+(x.charCodeAt(0)-65)).slice(tot>9?-2:-1) ))||'1')                          // => ["1", "e1", "e2", "e3", "e12", "e13", "e23", "e123"] (converted to commonly used basis names)
               
   // See if the basis names start from 0 or 1, store grade per component and lowest component per grade.             
-    var low=basis[1].match(/\d+/g)[0]*1,
+    var low=basis.length==1?1:basis[1].match(/\d+/g)[0]*1,
         grades=basis.map(x=>tot>9?(x.length-1)/2:x.length-1),
         grade_start=grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]);
 
@@ -628,12 +628,12 @@
                 return ${grade==tot-2?"sign(sum)*sqrt(abs(sum))":"res"};
              }
              vec3 trace_depth (in vec3 start, vec3 dir, in float tresh) {
-                vec3 orig=start; float lastd = 1000.0; int count=64;
+                vec3 orig=start; float lastd = 1000.0; int count=${(options.maxSteps||64)};
                 float s =  sign(dist(start[0],start[1],start[2],b));
                 for (int i=0; i<count; i++) {
                   float d = s*dist(start[0],start[1],start[2],b);
-                  if (d < tresh) return start - lastd*0.25*dir*(tresh-d)/(lastd-d);
-                  lastd = d; start += dir*0.25*d;
+                  if (d < tresh) return start - lastd*${(options.stepSize||0.25)}*dir*(tresh-d)/(lastd-d);
+                  lastd = d; start += dir*${(options.stepSize||0.25)}*d;
                 }
                 return orig;
              }
