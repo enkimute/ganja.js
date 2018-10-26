@@ -55,7 +55,9 @@
     #HEADER.ccga3d > .TAB.ccga3d { display:block; }
     #HEADER.qcga3d > .TAB.qcga3d { display:block; }
     #RUN { box-sizing:border-box; position:absolute; top:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
+    #SAVE { box-sizing:border-box; position:absolute; bottom:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
     #RUN:hover { border : 2px solid #886; top:9px; left:9px}
+    #SAVE:hover { border : 2px solid #886; bottom:9px; left:9px}
     .error { position:absolute; background:rgba(200,100,100,0.5); z-index:20 }
   </STYLE>
   <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></SCRIPT>
@@ -89,6 +91,7 @@
   </DIV>
   <DIV ID="MAIN">
     <DIV ID="RUN">&#x25B6; Run Changes <SPAN STYLE="opacity:0.5; float:right; margin-left:30px">Shift+Enter</SPAN></DIV>
+    <DIV ID="SAVE">Save and share</DIV>
     <IFRAME ID="SAMPLE" BORDER=0 SRC=""></IFRAME>
     <PRE ID="SOURCE"></PRE>
   </DIV>
@@ -109,6 +112,17 @@
     
     if (document.location.hash=='') document.location.hash = 'pga2d_points_and_lines';
     
+    var custom=false;
+    if (document.location.hash && !~examples.indexOf(document.location.hash.slice(1))) {
+      custom = true;
+      fetch("http://jr.enki.ws:3000/"+document.location.hash.slice(1)).then(x=>x.json()).then(data=>{
+        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>\n'+data.data+'\n</'+'SCRIPT></BODY></HTML>';
+        var blob = new Blob([src],{type:"text/html"});
+        var url = URL.createObjectURL(blob);
+        $('SAMPLE').src = url;
+      });
+    }
+    
     examples.forEach((e,i)=>$('HEADER').innerHTML+=
       `<A CLASS="TAB ${e.split('_')[0]} ${document.location.hash.slice(1)==examples[i]?' SELECTED':''}" 
           ONCLICK="[].map.call(document.querySelectorAll('.SELECTED'),a=>a.classList.remove('SELECTED')); 
@@ -124,7 +138,7 @@
     editor.$blockScrolling = Infinity;
     
     var loaded=false;
-    $('SAMPLE').src = 'example_'+(document.location.hash.slice(1).replace(/ /g,'_')||examples[0])+'.html';    
+    if (!custom) $('SAMPLE').src = 'example_'+(document.location.hash.slice(1).replace(/ /g,'_')||examples[0])+'.html';    
     $('SAMPLE').onload = function(){ 
       var $$ = $('SAMPLE').contentDocument.querySelectorAll.bind($('SAMPLE').contentDocument);
       
@@ -146,9 +160,10 @@
           }  
       }
       $('RUN').style.opacity=0;
+      $('SAVE').style.opacity=0;
       var changed=false;
 
-      editor.session.on('change',e=>{ changed=loaded&&true;  if (changed) $('RUN').style.opacity=1; });
+      editor.session.on('change',e=>{ changed=loaded&&true;  if (changed) { $('RUN').style.opacity=1; $('SAVE').style.opacity=1; } });
       editor.commands.addCommand({
           name: "run changes",
           bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
@@ -159,6 +174,17 @@
           bindKey: {win: "Shift-Enter", mac: "Shift-Enter"},
           exec: function(editor) { $('RUN').click(); }
       });
+      
+      $('SAVE').onclick = function(e) {
+         $('SAVE').style.opacity = 0;
+         var data = editor.getValue();
+         var title = "ganja.js example";
+         var packet = {title,data};
+         fetch("http://jr.enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
+         .then(resp=>resp.text())
+         .then(id=>document.location.hash=id)
+      
+      }
 
       $('RUN').onclick = function(e) { 
 
