@@ -115,7 +115,7 @@
     var custom=false;
     if (document.location.hash && !~examples.indexOf(document.location.hash.slice(1))) {
       custom = true;
-      fetch("http://jr.enki.ws:3000/"+document.location.hash.slice(1)).then(x=>x.json()).then(data=>{
+      fetch("https://jr.enki.ws:3000/"+document.location.hash.slice(1)).then(x=>x.json()).then(data=>{
         var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>\n'+data.data+'\n</'+'SCRIPT></BODY></HTML>';
         var blob = new Blob([src],{type:"text/html"});
         var url = URL.createObjectURL(blob);
@@ -180,7 +180,7 @@
          var data = editor.getValue();
          var title = "ganja.js example";
          var packet = {title,data};
-         fetch("http://jr.enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
+         fetch("https://jr.enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
          .then(resp=>resp.text())
          .then(id=>document.location.hash=id)
       
