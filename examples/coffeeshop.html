@@ -115,6 +115,8 @@
     var custom=false;
     if (document.location.hash && !~examples.indexOf(document.location.hash.slice(1))) {
       custom = true;
+      $('HEADER').className = '';
+      document.querySelector('small').innerHTML='Share your stash as <A HREF="'+document.location+'">'+document.location+'</A>';
       fetch("https://enki.ws:3000/"+document.location.hash.slice(1)).then(x=>x.json()).then(data=>{
         var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>\n'+data.data+'\n</'+'SCRIPT></BODY></HTML>';
         var blob = new Blob([src],{type:"text/html"});
@@ -182,7 +184,12 @@
          var packet = {title,data};
          fetch("https://enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
          .then(resp=>resp.text())
-         .then(id=>document.location.hash=id)
+         .then(id=>{
+           document.location.hash=id
+            $('HEADER').className = '';
+            document.querySelector('small').innerHTML='Share your stash as <A HREF="'+document.location+'">'+document.location+'</A>';
+           
+         })
       
       }
 
