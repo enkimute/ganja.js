@@ -289,13 +289,18 @@
         }
         return r;
       }    
-      Vee(b,r) { return (this.Dual.Wedge(b.Dual)).Dual; }
-      toString() { return [...this].map((g,gi)=>g&&g.map((c,ci)=>!c?undefined:c+basisg[gi][ci]).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
-      get s () { if (this[0]) return this[0][0]||0; return 0; }
-      get Length () { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2*metric[gi][ei])); return Math.abs(res)**.5; }
-      get Conjugate () { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,-1,-1,1][gi%4]; })); return r; }
+    // Should be optimized..  
+      Vee(b,r)          { return (this.Dual.Wedge(b.Dual)).Dual; }
+    // Output, lengths, involutions, normalized, dual.  
+      toString()        { return [...this].map((g,gi)=>g&&g.map((c,ci)=>!c?undefined:c+basisg[gi][ci]).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }  
+      get s ()          { if (this[0]) return this[0][0]||0; return 0; }
+      get Length ()     { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2*metric[gi][ei])); return Math.abs(res)**.5; }
+      get VLength ()    { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2)); return Math.abs(res)**.5; }
+      get Reverse ()    { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,1,-1,-1][gi%4]; })); return r; }
+      get Involute ()   { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,-1,1,-1][gi%4]; })); return r; }
+      get Conjugate ()  { var r=new this.constructor(); this.forEach((x,gi)=>x.forEach((e,ei)=>{if(!r[gi])r[gi]=[]; r[gi][ei] = this[gi][ei]*[1,-1,-1,1][gi%4]; })); return r; }
+      get Dual()        { var r=new this.constructor(); this.forEach((g,gi)=>{ if (!g) return; r[tot-gi]=[]; g.forEach((e,ei)=>r[tot-gi][counts[gi]-1-ei]=drms[gi][ei]*e); }); return r; }
       get Normalized () { return this.Scale(1/this.Length); }
-      get Dual() { var r=new this.constructor(); this.forEach((g,gi)=>{ if (!g) return; r[tot-gi]=[]; g.forEach((e,ei)=>r[tot-gi][counts[gi]-1-ei]=drms[gi][ei]*e); }); return r; }
     }  
 
     
@@ -477,7 +482,7 @@
       static gte(a,b) { while(a.call)a=a(); while(b.call)b=b(); return (a instanceof Element?a.Length:a)>=(b instanceof Element?b.Length:b); }
       
     // Debug output and printing multivectors.  
-      static describe() { console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d+\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); }    
+      static describe() { console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d+\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); return {basis,metric,mulTable} }    
       
     // The graphing function supports several modes. It can render 1D functions and 2D functions on canvas, and PGA2D, PGA3D and CGA2D functions using SVG.
     // It handles animation and interactivity.
@@ -602,7 +607,7 @@
         }
       // Drawing function  
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1];
-        var draw=function(p, tp, vtx, color, color2, ratio, texc, va, b,color3){
+        var draw=function(p, tp, vtx, color, color2, ratio, texc, va, b,color3,r){
             gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M);
             gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||1),0,0,0,0,1,2,0,0,-1,0])
             gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
@@ -610,6 +615,7 @@
             if (color3) gl.uniform3fv(gl.getUniformLocation(p, "color3"),new Float32Array(color3));
             if (b) gl.uniform1fv(gl.getUniformLocation(p, "b"),(new Float32Array(b[tot-2]?counts[tot-2]:counts[tot-1])).map((x,i)=>(b[tot-2]||b[tot-1])[i]||0));
             if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
+            if (r) gl.uniform1f(gl.getUniformLocation(p,"ratio"),r);
             var v; if (!va) v = createVA(vtx); else gl.va.bindVertexArrayOES(va.r);
             gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
             if (v) destroyVA(v);
@@ -622,6 +628,7 @@
              precision highp float;  
              uniform vec3 color; uniform vec3 color2; 
              uniform vec3 color3; uniform float b[${counts[grade]}];
+             uniform float ratio;
              in vec4 Pos; out vec4 col; 
              float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
                 ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
@@ -638,8 +645,8 @@
                 return orig;
              }
              void main() { 
-               vec3 p = -10.0*color2; 
-               vec3 dir = normalize((Pos[1]/5.0)*color + color2 + vec3(0.0,Pos[0]/5.0,0.0));  p += 5.0*dir;
+               vec3 p = -10.0*normalize(color2); 
+               vec3 dir = normalize((Pos[1]/5.0*ratio)*color + color2 + vec3(0.0,Pos[0]/5.0,0.0));  p += 5.0*dir;
                vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
                vec3 d2 = trace_depth( p , dir, ${grade==tot-2?(options.tresh||0.2):0.01} );
                float dl2 = dot(d2-p,d2-p); const float h=0.1; 
@@ -666,8 +673,8 @@
             var e=x[i]; while (e&&e.call) e=e(); if (e==undefined) continue;
             if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
             if (e instanceof Element){
-              var tt = performance.now()/1000; 
-              draw(e[tot-1]?program:program2,gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c);
+              var tt = performance.now()/1000; var r = canvas.height/canvas.width;
+              draw(e[tot-1]?program:program2,gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c,r);
             }
           }
           // if we're no longer in the page .. stop doing the work.
