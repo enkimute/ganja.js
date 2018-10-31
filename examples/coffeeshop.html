@@ -113,17 +113,11 @@
     var $ = document.getElementById.bind(document);
     
     
+    // Sizeable pane
     $('sizer').onmousedown = function(e) {
-      e.preventDefault(); e.stopPropagation(); 
-      $('SAMPLE').style.pointerEvents = 'none';
-      window.onmousemove = function(e) {
-        console.log(e.x);
-        $('SAMPLE').style.width = $('SAMPLE').style.minWidth = e.x+"px";
-      };
-      window.onmouseleave = window.onmouseup = function(e) {
-        $('SAMPLE').style.pointerEvents = 'all';
-        window.onmouseleave = window.onmouseup = window.onmousemove = undefined;
-      };
+      e.preventDefault(); e.stopPropagation(); $('SAMPLE').style.pointerEvents = 'none';
+      window.onmousemove = function(e) { $('SAMPLE').style.width = $('SAMPLE').style.minWidth = e.x+"px"; };
+      window.onmouseleave = window.onmouseup = function(e) { $('SAMPLE').style.pointerEvents = 'all'; window.onmouseleave = window.onmouseup = window.onmousemove = undefined; };
     };
     
     if (document.location.hash=='') document.location.hash = 'pga2d_points_and_lines';
