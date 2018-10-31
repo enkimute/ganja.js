@@ -657,7 +657,7 @@
                         dist(d2[0],d2[1],d2[2]+h,b)-dist(d2[0],d2[1],d2[2]-h,b)
                       ));
                  gl_FragDepth = dl2/50.0;
-                 col = vec4(max(0.2,dot(n,normalize(L-d2)))*color3 + pow(max(0.0,dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
+                 col = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
                } else discard; 
              }`);
       // canvas update will (re)render the content.            

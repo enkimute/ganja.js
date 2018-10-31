@@ -1,0 +1,40 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 4,4 metric for "The Mother Algebra" 
+Algebra(4,4,()=>{ 
+  
+  // https://link.springer.com/article/10.1007/s00006-017-0798-7
+  
+  // Witt Basis
+  var w0  = .5e1+.5e5, w1  = .5e2+.5e6, w2  = .5e3+.5e7, w3  = .5e4+.5e8, 
+      wd0 = .5e1-.5e5, wd1 = .5e2-.5e6, wd2 = .5e3-.5e7, wd3 = .5e4-.5e8;
+      
+  // Points in W
+  var vec = (x,y,z)=>x*w1+y*w2+z*w3,
+      pnt = (x,y,z)=>w0+vec(x,y,z);
+      
+  // Planes in W*
+  var plnd = (d,a,b,c)=>d*wd0+a*wd1+b*wd2+c*wd3;
+      
+  // Lines, Planes, Solid sectors in W
+  var lin = (p1,p2)=>p1^p,
+      pln = (p1,p2,p3)=>p1^p2^p3,
+      sct = (p1,p2,p3,p4)=>p1^p2^p3^p4;
+      
+  // Lines and points in W*
+  var lind = (P1,P2)=>P1^P2,
+      pntd = (P1,P2,P3)=>P1^P2^P3;
+       
+  // To Visualize we need a grade 1 point definition in the natural basis.
+  var pnt_opns = [".5",".5*x",".5*y",".5*z",".5",".5*x",".5*y",".5*z"];
+  
+  // Basic visualization test.  
+  document.body.appendChild(this.graph([
+    0x00ff00, 1e1234*pnt(0,0,0),
+    0xff0000, 1e1234*(pnt(-2,0,0)^pnt(1,1,1)),
+  ],{animate:true,tresh:0.15,up:pnt_opns}))
+
+});
+</SCRIPT></BODY>
