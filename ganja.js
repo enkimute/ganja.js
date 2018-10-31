@@ -607,13 +607,13 @@
         }
       // Drawing function  
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1];
-        var draw=function(p, tp, vtx, color, color2, ratio, texc, va, b,color3,r){
+        var draw=function(p, tp, vtx, color, color2, ratio, texc, va, b,color3,r,g){
             gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M);
             gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||1),0,0,0,0,1,2,0,0,-1,0])
             gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
             gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
             if (color3) gl.uniform3fv(gl.getUniformLocation(p, "color3"),new Float32Array(color3));
-            if (b) gl.uniform1fv(gl.getUniformLocation(p, "b"),(new Float32Array(b[tot-2]?counts[tot-2]:counts[tot-1])).map((x,i)=>(b[tot-2]||b[tot-1])[i]||0));
+            if (b) gl.uniform1fv(gl.getUniformLocation(p, "b"),(new Float32Array(counts[g])).map((x,i)=>b[g][i]||0));
             if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
             if (r) gl.uniform1f(gl.getUniformLocation(p,"ratio"),r);
             var v; if (!va) v = createVA(vtx); else gl.va.bindVertexArrayOES(va.r);
@@ -621,7 +621,7 @@
             if (v) destroyVA(v);
         }
       // Compile the OPNS renderer. (sphere tracing)
-        var [program,program2] = [tot-1,tot-2].map(grade=>compile(`#version 300 es
+        var programs = [], genprog = grade=>compile(`#version 300 es
              in vec4 position; out vec4 Pos; uniform mat4 mv; uniform mat4 p;
              void main() { Pos=mv*position; gl_Position = p*Pos; }`,
             `#version 300 es
@@ -632,7 +632,7 @@
              in vec4 Pos; out vec4 col; 
              float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
                 ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
-                return ${grade==tot-2?"sign(sum)*sqrt(abs(sum))":"res"};
+                return ${grade!=tot-1?"sign(sum)*sqrt(abs(sum))":"res"};
              }
              vec3 trace_depth (in vec3 start, vec3 dir, in float tresh) {
                 vec3 orig=start; float lastd = 1000.0; int count=${(options.maxSteps||64)};
@@ -648,7 +648,7 @@
                vec3 p = -10.0*normalize(color2); 
                vec3 dir = normalize((Pos[1]/5.0*ratio)*color + color2 + vec3(0.0,Pos[0]/5.0,0.0));  p += 5.0*dir;
                vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
-               vec3 d2 = trace_depth( p , dir, ${grade==tot-2?(options.tresh||0.2):0.01} );
+               vec3 d2 = trace_depth( p , dir, ${grade!=tot-1?(options.tresh||0.2):0.01} );
                float dl2 = dot(d2-p,d2-p); const float h=0.1; 
                if (dl2>0.0) {
                  vec3 n = normalize(vec3(
@@ -659,7 +659,7 @@
                  gl_FragDepth = dl2/50.0;
                  col = vec4(max(0.2,dot(n,normalize(L-d2)))*color3 + pow(max(0.0,dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
                } else discard; 
-             }`));
+             }`);
       // canvas update will (re)render the content.            
         var armed=0;
         canvas.update = (x)=>{
@@ -674,7 +674,9 @@
             if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
             if (e instanceof Element){
               var tt = performance.now()/1000; var r = canvas.height/canvas.width;
-              draw(e[tot-1]?program:program2,gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c,r);
+              var g=tot-1; while(!e[g]&&g>1) g--;
+              if (!programs[tot-1-g]) programs[tot-1-g] = genprog(g);
+              draw(programs[tot-1-g],gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c,r,g);
             }
           }
           // if we're no longer in the page .. stop doing the work.
