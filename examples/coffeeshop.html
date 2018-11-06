@@ -1,3 +1,7 @@
+<!DOCTYPE html>
+<!-- --------------------------------------- -->
+<!-- Ganja.js playground and sample browser  -->
+<!-- --------------------------------------- -->
 <HEAD>
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-96802693-2"></script>
@@ -6,102 +10,166 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
   </script>
+  
+  <!-- Fonts and Icons -->
   <link rel="shortcut icon" type="image/x-icon" href="https://enkimute.github.io/ganja.js/images/favicon.ico">
   <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Condensed" rel="stylesheet">
-  <STYLE>
-    body    { margin: 0; background-color:#EEE; position:relative; display:flex; flex-direction:column; font-family: 'Encode Sans Condensed', sans-serif; height:100% }
-    #SAMPLE { width:33%; min-width: 512px; border: 0; min-height:80% }
-    #SOURCE { margin:0; flex-grow:1; }
-    #HEADER { position:relative; display:flex; flex-flow:wrap; z-index:10 }
-    #MAIN   { border-top:1px solid black; position : relative; flex-grow:1; display:flex; } 
-    .TAB    { cursor:pointer; white-space:nowrap; background-color:#ccc; color:#666; margin-bottom:-1px;  border:1px solid black; border-bottom:1px solid black; border-top-left-radius:10px; border-top-right-radius:10px; text-decoration:none; padding:5px; margin-right:-1px; }
-    .SELECTED { background-color:#eee; color:#606060; border-bottom:1px solid #eee;}
-    H3      { padding-left : 25px }
-    .legend { position:fixed; top:12px; right:5px; line-height:30px }
-    .legend > span { padding:4px; border:1px solid #AAA; margin:4px; border-radius:5px; margin-bottom:10px; cursor:pointer; }
-    .complex          { background-color:#ccc; color:#666; }
-    .complex.SELECTED { background-color:#eee; color:#606060; }
-    .dual             { background-color:#eec; color:#886; }
-    .dual.SELECTED    { background-color:#ffe; color:#808060; }
-    .pga2d          { background-color:#ccf; color:#668; }
-    .pga2d.SELECTED { background-color:#eef; color:#606080; }
-    .pga3d          { background-color:#cff; color:#688; }
-    .pga3d.SELECTED { background-color:#eff; color:#608080; }
-    .cga2d          { background-color:#fa8; color:#864; }
-    .cga2d.SELECTED { background-color:#fea; color:#806040; }
-    .cga3d          { background-color:#af8; color:#684; }
-    .cga3d.SELECTED { background-color:#efa; color:#608040; }
-    .mga3d          { background-color:#ff8; color:#684; }
-    .mga3d.SELECTED { background-color:#ffa; color:#608040; }
-    .ccga3d          { background-color:#99f; color:#444; }
-    .ccga3d.SELECTED { background-color:#eef; color:#444; }
-    .qcga3d          { background-color:#a8f; color:#444; }
-    .qcga3d.SELECTED { background-color:#eaf; color:#444; }
-    .game          { background-color:#fcf; color:#868; }
-    .game.SELECTED { background-color:#fef; color:#806080; }
-    .quaternion          { background-color:#cfc; color:#686; }
-    .quaternion.SELECTED { background-color:#efe; color:#608060; }
-    .timespace          { background-color:#f88; color:#844; }
-    .timespace.SELECTED { background-color:#fee; color:#804040; }
-    .sizer { width:5px; background-color:#444; cursor:ew-resize;}
-    #HEADER { background-color:#eee; }
-    .TAB { display:none; }
-    #HEADER.complex > .TAB.complex { display:block; }
-    #HEADER.dual > .TAB.dual { display:block; }
-    #HEADER.game > .TAB.game { display:block; }
-    #HEADER.quaternion > .TAB.quaternion { display:block; }
-    #HEADER.timespace > .TAB.timespace { display:block; }
-    #HEADER.pga2d > .TAB.pga2d { display:block; }
-    #HEADER.pga3d > .TAB.pga3d { display:block; }
-    #HEADER.cga2d > .TAB.cga2d { display:block; }
-    #HEADER.cga3d > .TAB.cga3d { display:block; }
-    #HEADER.mga3d > .TAB.mga3d { display:block; }
-    #HEADER.ccga3d > .TAB.ccga3d { display:block; }
-    #HEADER.qcga3d > .TAB.qcga3d { display:block; }
-    #RUN { box-sizing:border-box; position:absolute; top:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
-    #SAVE { box-sizing:border-box; position:absolute; bottom:10px; transition:opacity 0.3s linear; opacity:0; left:10px; z-index:100; padding:5px;  background-color:#ffc; color:#886; border:1px solid #886; border-radius:5px; cursor:pointer; }
-    #RUN:hover { border : 2px solid #886; top:9px; left:9px}
-    #SAVE:hover { border : 2px solid #886; bottom:9px; left:9px}
-    .error { position:absolute; background:rgba(200,100,100,0.5); z-index:20 }
-  </STYLE>
-  <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></SCRIPT>
+  
+  <!-- Local Style -->
+  <style>
+    body           { background: #20262E; color: #FBFBFB; padding:0; margin:0; display:flex; flex-direction:column; min-height:100vh; max-height:100vh; position:relative; overflow:hidden; }
+    h1,h2,h3,h4    { font-size: 100%; font-weight: 600; }
+    body           { font-size: 14px; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"; }
+    .hider         { transition: all 0.5s; overflow:hidden; flex-shrink:0; }
+    .header        { height:45px; flex-grow:0; flex-shrink:0; width:100%; display:flex; flex-direction:row; border-bottom:2px solid #2d333b; padding-left:5px; padding-right:5px; box-sizing:border-box; }
+    .intro         { background: #0084FF; display: flex; flex-shrink:0; padding: 10px; transition:all 0.15s linear; height:100%; position:relative; width:100%; box-sizing:border-box; }
+    .introBlock    { margin-right: 30px; flex-grow:1; }
+    .intro a       { color: #FBFBFB; text-decoration:none; display:block; margin-bottom:5px;}
+    .intro a:hover { color: #FFBBFF; }
+    .introButton   { background: #FFFFFF; color: #20262E; padding: 5px 9px; border-radius:4px; display:inline-block; margin:5px; transition: all 0.15s linear; cursor:pointer; position:relative; user-select:none; box-sizing:border-box; border:2px solid rgba(0,0,0,0); }
+    .introButton:hover { box-shadow: 0 4px 4px rgba(0,0,0,.3); top: -2px;  }
+    .header .introButton:hover { box-shadow: 0 4px 4px rgba(0,0,0,.3); top: 0px; border:2px solid #F08000; }
+    .introButton:active { top:0px; background:#20262E; color:#FFF }
+    .content       { width:100%; height:100%; flex-grow:1; overflow:hidden; display:flex; box-sizing:border-box; max-width:100vw; position:relative;  }
+    .gutter        { background: #2d333b; min-width:4px; min-height:100%; cursor:ew-resize;}
+    .left          { width: 386px; box-sizing:border-box; flex-grow:0; flex-shrink:0; overflow:hidden; overflow-Y:auto; flex-flow:wrap; max-height:100%; }
+    .left::-webkit-scrollbar { width: 4px; height: 8px; border-radius:4px; background-color: #808080; }
+    .left::-webkit-scrollbar-thumb { background: #fbfbfb; }
+    .right         { width: 50vw; display:flex; box-sizing:border-box; flex-grow:0; flex-shrink:0; }
+    .center        { box-sizing:border-box; flex-grow:1; overflow:hidden;   }
+    .source        { margin: 0; flex-grow:1; box-sizing:border-box; width:100%; }
+    .card          { display:block; position:relative; display:inline-block; width:160px; height:120px; text-align:center; cursor:pointer; background-color:#FBFBFB; color:#20262E; border-radius:10px; border:1px solid rgba(0,0,0,0.3); margin:5px; padding:5px;  background-position:center; background-size:cover; background-repeat:no-repeat; margin-bottom:35px; border:2px solid #8090A0; }
+    .card p        { position:absolute; bottom:-40px; color:#fbfbfb; white-space:nowrap; max-width:100%; overflow:hidden; }
+    #sample        { width:100%; height:100%; overflow:hidden; background-color:#FBFBFB; }
+    .sampleGroup   { width:100%; padding:5px; box-sizing:border-box; background-color:#404040; margin-left:0px; cursor:pointer; white-space:no-wrap; }
+    .sampleGroup:hover { background-color:#FBFBFB; color:#404040; }
+    .sampleGroup>span, .properties span { float:right; display:block; color:#a0a0a0; padding-right:5px; }
+    .group         { margin-top:10px; display:none; }
+    .selected      { background-color:#405080; }
+    .properties    { display:flex; flex-direction: column; position:relative; padding:5px; max-width:100%; display:none; } 
+    .properties input, .properties textarea { background-color:#202020; color:#b0b0b0; border:1px solid #505050; padding:2px; max-width:100%; margin-bottom:5px; resize:none; }
+    .dropzone      { height:50px; line-height:50px; text-align:center; background:#202020; color:#707070; margin:5px; border:1px dashed #505050; }
+    .tabs          { flex-grow:0; flex-shrink:0; display:flex; flex-direction:row; width:100%; height:30px; border-bottom:2px solid #2d333b; }
+    .tab           { flex-grow:1; line-height:30px; border-top-right-radius:35px; cursor:pointer; padding-left:10px; border:1px solid #707070; color:#707070; user-select:none; }
+    .tab.active    { background:#405060; color:#fbfbfb; border:1px solid white; cursor:default; }
+    .delete        { position:absolute; top:0px; right:5px; font-size:20px }
+    .delete:hover  { color:red; font-weight:1000; }
+  </style>
+  <!-- ganja -->
   <SCRIPT SRC="../ganja.js"></SCRIPT>
+  <!-- ace editor -->
+  <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js"></SCRIPT>
+  <!-- katex math typesetting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+
 </HEAD>
+<!-------------------------------------------->
 <BODY>
-  <H3>The Coffeeshop<BR>
-  <SMALL>free <A HREF="https://github.com/enkimute/ganja.js" TARGET="_blank">ganja</A> samples!</SMALL>
-  </H3>
-  <DIV CLASS="legend">
-    <SPAN CLASS="complex" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('complex'); ">Complex</SPAN>
-    <SPAN CLASS="Dual" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('dual'); ">Dual</SPAN>
-    <SPAN CLASS="quaternion" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('quaternion'); ">Quaternion</SPAN>
-    <SPAN CLASS="timespace" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('timespace'); ">Timespace</SPAN>
-    <SPAN CLASS="pga2d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga2d'); ">PGA 2D</SPAN>
-    <SPAN CLASS="pga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('pga3d'); ">PGA 3D</SPAN>
-    <SPAN CLASS="cga2d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('cga2d'); ">CGA 2D</SPAN>
-    <SPAN CLASS="cga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('cga3d'); ">CGA 3D</SPAN>
-    <SPAN CLASS="mga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('mga3d'); ">MGA 3D</SPAN>
-    <SPAN CLASS="ccga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('ccga3d'); ">CCGA 3D</SPAN>
-    <SPAN CLASS="qcga3d" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('qcga3d'); ">QCGA 3D</SPAN>
-    <SPAN CLASS="game" ONCLICK="this.classList.toggle('SELECTED'); $('HEADER').classList.toggle('game'); ">Games</SPAN>
-    <BR>
-    <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">^=Wedge</SPAN>
-    <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">&amp;=Vee</SPAN>
-    <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">!=Dual</SPAN>
-    <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">~=Conjugate</SPAN>
-    <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">&lt;&lt;=Dot</SPAN>
-    <span  style="font-size:70%;color:#666;border:0px;padding-right:10px">&gt;&gt;&gt;=Sandwich</SPAN>
+  <DIV CLASS="hider"> 
+    <DIV CLASS="intro">
+        <DIV CLASS="introBlock" STYLE="text-align:center">
+          <H3>The CoffeeShop</H3>
+          <p>Free ganja.js samples!</p>
+          <DIV CLASS="introButton" ONCLICK="closeBar();">&times; Close</DIV>
+        </DIV>
+        <DIV CLASS="introBlock">
+          <H3>Roll your own ganja :<H3>
+          <UL>
+            <LI>Browse the samples below.
+            <LI>Or hit the new button.
+          </UL>
+          <!--
+          <H3>Start with a boilerplate:</H3>
+          <SPAN CLASS="introButton"><SMALL>\(\mathbb R_{2,0,1}\)</SMALL> 2D PGA</SPAN>
+          <SPAN CLASS="introButton"><SMALL>\(\mathbb R_{3,0,1}\)</SMALL> 3D PGA</SPAN><BR>
+          <SPAN CLASS="introButton"><SMALL>\(\mathbb R_{3,1}\)</SMALL> 2D CGA</SPAN>
+          <SPAN CLASS="introButton"><SMALL>\(\mathbb R_{4,1}\)</SMALL> 3D CGA</SPAN>
+          -->
+        </DIV>
+        <DIV CLASS="introBlock">
+          <H3>Links :</H3>
+          <A TARGET="_BLANK" HREF="https://github.com/enkimute/ganja.js">Ganja.js on <b>github.</b></A>
+          <A TARGET="_BLANK" HREF="https://www.npmjs.com/package/ganja.js">Ganja.js on <b>npm.</b></A>
+          <A TARGET="_BLANK" HREF="https://beta.observablehq.com/@enkimute/ganja-js-cheat-sheets">ObservableHQ cheat-sheets.</A>
+        </DIV>
+        <DIV CLASS="introBlock">
+          <H3>Ganja.js is for:</H3>
+          <UL>
+            <LI>Learning and discovering Geometric Algebra
+            <LI>Testing GA Algorithms
+            <LI>Visualizing GA in any Algebra
+            <LI>Realtime GA in your own projects
+          </UL>
+        </DIV>
+    </DIV>
   </DIV>
-  <DIV ID="HEADER" CLASS="complex dual quaternion timespace pga2d pga3d cga2d cga3d mga3d ccga3d qcga3d game">
+  <DIV CLASS="header">
+    <H3 STYLE="flex-grow:1" ID="title">The CoffeeShop</H3>
+    <DIV CLASS="introButton" ID="new"><B>&plus;</B> New</DIV>
+    <!--DIV CLASS="introButton" ID="fork"><B>&fork;</B> Fork</DIV-->
+    <DIV CLASS="introButton" ID="save" STYLE="display:none"><B>&bigstar;</B> Save</DIV>
+    <DIV CLASS="introButton" ID="run"><B>&rtrif;</B> Run</DIV>
   </DIV>
-  <DIV ID="MAIN">
-    <DIV ID="RUN">&#x25B6; Run Changes <SPAN STYLE="opacity:0.5; float:right; margin-left:30px">Shift+Enter</SPAN></DIV>
-    <DIV ID="SAVE">Save and share</DIV>
-    <IFRAME ID="SAMPLE" BORDER=0 SRC=""></IFRAME>
-    <DIV ID="sizer" CLASS="sizer"></DIV>
-    <PRE ID="SOURCE"></PRE>
+  <DIV CLASS="content">
+    <DIV CLASS="left">
+      <DIV CLASS="tabs">
+        <DIV ID="tab1" CLASS="tab">free samples</DIV>
+        <DIV ID="tab2" CLASS="tab">my stash</DIV>
+      </DIV>
+      <DIV CLASS="properties" ID="properties">
+        <P>Stash Info</P>
+        <INPUT ID="titleInput" TYPE="text" PLACEHOLDER="title goes here"></INPUT>
+        <TEXTAREA ID="descriptionInput" ROWS=4 PLACEHOLDER="description goes here"></TEXTAREA>
+        <P>Stash URL <span>click to copy</span></P>
+        <INPUT ID="urlInput" TYPE="text" VALUE="http://"></INPUT>
+        <!--
+        <P>Stash Data <span>js : "data"</span></P>
+        <INPUT TYPE="text" PLACEHOLDER="url to data"></INPUT>
+        <DIV CLASS="dropzone">drop file here</DIV>
+        -->
+        <p>My stash</p>
+        <DIV ID="stash"></DIV>
+      </DIV>
+      <DIV CLASS="sampleGroup complex">Complex   <SPAN>\(\mathbb R_{0,1} \cong \mathbb C\)</SPAN>   </DIV>   
+      <DIV CLASS="sampleGroup dual">Dual      <SPAN>\(\mathbb R_{0,0,1} \cong \mathbb D\)</SPAN> </DIV>      
+      <DIV CLASS="sampleGroup quaternion">Quaternion<SPAN>\(\mathbb R_{0,2} \cong \mathbb H\)</SPAN>   </DIV>
+      <DIV CLASS="sampleGroup timespace">Timespace <SPAN>\(\mathbb R_{1,3} \cong \mathbb M\)</SPAN>   </DIV> 
+      <DIV CLASS="sampleGroup pga2d">2D PGA    <SPAN>\(\mathbb R_{2,0,1}\)</SPAN> </DIV>     
+      <DIV CLASS="sampleGroup pga3d">3D PGA    <SPAN>\(\mathbb R_{3,0,1}\)</SPAN> </DIV>     
+      <DIV CLASS="sampleGroup cga2d">2D CGA    <SPAN>\(\mathbb R_{3,1}\)</SPAN>   </DIV>     
+      <DIV CLASS="sampleGroup cga3d">3D CGA    <SPAN>\(\mathbb R_{4,1}\)</SPAN>   </DIV>     
+      <DIV CLASS="sampleGroup mga3d">3D Mother Algebra<SPAN>\(\mathbb R_{4,4}\)</SPAN></DIV> 
+      <DIV CLASS="sampleGroup ccga3d">3D CCGA   <SPAN>\(\mathbb R_{6,3}\)</SPAN>   </DIV>    
+      <DIV CLASS="sampleGroup qcga3d">3D QCGA   <SPAN>\(\mathbb R_{9,6}\)</SPAN>   </DIV>    
+      <DIV CLASS="sampleGroup game">Game</DIV>                                               
+      <DIV CLASS="group complex"></DIV>
+      <DIV CLASS="group dual"></DIV>
+      <DIV CLASS="group quaternion"></DIV>
+      <DIV CLASS="group timespace"></DIV>
+      <DIV CLASS="group pga2d"></DIV>
+      <DIV CLASS="group pga3d"></DIV>
+      <DIV CLASS="group cga2d"></DIV>
+      <DIV CLASS="group cga3d"></DIV>
+      <DIV CLASS="group mga3d"></DIV>
+      <DIV CLASS="group ccga3d"></DIV>
+      <DIV CLASS="group qcga3d"></DIV>
+      <DIV CLASS="group game"></DIV>
+    </DIV>
+    <DIV CLASS="gutter" ID="lgutter" TITLE="drag to size, double click to collapse"></DIV>
+    <DIV CLASS="center">
+      <IFRAME ID="sample" SRC="" FRAMEBORDER=0></IFRAME>
+    </DIV>
+    <DIV CLASS="gutter" ID="rgutter" TITLE="drag to size, double click to collapse"></DIV>
+    <DIV CLASS="right">
+      <PRE CLASS="source" ID="source"></PRE>
+    </DIV>
   </DIV>
+  
+  
   <SCRIPT>
+  // Data : built-in examples.
     var examples = ["complex_mandelbrot","complex_least_squares",
                     "dual_differentiation","dual_backpropagation",
                     "quaternion_hue","quaternion_mandelbrot",
@@ -114,138 +182,286 @@
                     "ccga3d_points_quadrics",
                     "qcga3d_points_and_more",
                     "game_wedge"];
-    
-    var $ = document.getElementById.bind(document);
-    
-    
-    // Sizeable pane
-    $('sizer').onmousedown = function(e) {
-      e.preventDefault(); e.stopPropagation(); $('SAMPLE').style.pointerEvents = 'none';
-      window.onmousemove = function(e) { $('SAMPLE').style.width = $('SAMPLE').style.minWidth = e.x+"px"; };
-      window.onmouseleave = window.onmouseup = function(e) { $('SAMPLE').style.pointerEvents = 'all'; window.onmouseleave = window.onmouseup = window.onmousemove = undefined; };
-    };
-    
-    if (document.location.hash=='') document.location.hash = 'pga2d_points_and_lines';
-    
-    var custom=false;
-    if (document.location.hash && !~examples.indexOf(document.location.hash.slice(1))) {
-      custom = true;
-      $('HEADER').className = '';
-      document.querySelector('small').innerHTML='Share your stash as <A HREF="'+document.location+'">'+document.location+'</A>';
-      fetch("https://enki.ws:3000/"+document.location.hash.slice(1)).then(x=>x.json()).then(data=>{
-        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>\n'+data.data+'\n</'+'SCRIPT></BODY></HTML>';
-        var blob = new Blob([src],{type:"text/html"});
-        var url = URL.createObjectURL(blob);
-        $('SAMPLE').src = url;
+  
+  
+  // Elements.
+    var els={};
+    [".hider", "#stash", "#tab1", "#tab2", "#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
+  
+  // Ace editor.
+    if (window.ace) {
+    var editor = ace.edit('source');
+      editor.setTheme("ace/theme/chrome");
+      editor.session.setMode("ace/mode/javascript");
+      editor.session.setUseWorker(false);
+      editor.setHighlightActiveLine(false);
+      editor.$blockScrolling = Infinity;
+    } else { // can't load editor.
+      Object.assign(els.right.style,{width:0,maxWidth:0,minWidth:0});
+    }
+
+  // tabs.
+    els.tab1.onclick = (e)=>{ 
+      els.tab1.classList.add('active'); els.tab2.classList.remove('active');  
+      els.properties.style.display = "";
+      [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
+      [...document.querySelectorAll(".sampleGroup")].forEach(x=>{
+        x.style.display="";
+        if (x.classList.contains('selected')) {
+          document.querySelector(".group."+x.classList[1]).style.display="block"
+        }
       });
+    };
+    els.tab2.onclick = (e)=>{ 
+      els.tab2.classList.add('active'); els.tab1.classList.remove('active');  
+      els.properties.style.display = "flex";
+      [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
+      [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
+    };
+
+  // Generate example cards.
+    examples.forEach(e=>{
+      var card = Object.assign(document.createElement('div'),{className:'card'});
+      card.style.backgroundImage="url('../images/"+e+".jpg')";
+      card.innerHTML = '<p>'+e.split('_').slice(1).join(' ')+'</p>';
+      card.onclick = (x)=>{
+        els.sample.src='example_'+e+'.html';
+        document.location.hash = e;
+        els.save.style.display = "none";
+      }  
+      (document.querySelector('.group.'+e.split('_')[0])||els.left).appendChild(card);
+    });
+    
+  // Generate cards for my stash.
+    function updateStash() {
+      var list = JSON.parse(localStorage.ganja||"[]");
+      while (els.stash.firstChild) els.stash.removeChild(els.stash.firstChild);
+      list.forEach(e=>{
+        var card = Object.assign(document.createElement('div'),{className:'card'});
+        card.style.backgroundImage="url('"+e.thumb+"')";
+        card.innerHTML = '<p>'+e.title+'</p>';
+        card.onclick = (x)=>{
+          document.location.hash = e.id;
+          loadStash(false);
+        }  
+        var closer = Object.assign(document.createElement('div'),{className:'delete',innerHTML:'&otimes;'});
+        closer.onclick = function(){
+          var list = JSON.parse(localStorage.ganja||"[]").filter(x=>x.id!=e.id);
+          localStorage.ganja = JSON.stringify(list);
+          updateStash();
+        }
+        card.appendChild(closer);
+        els.stash.appendChild(card);
+      });  
+    }; 
+    updateStash();  
+    
+  // Close the introbar
+    function closeBar() { document.querySelector('.hider').style.height='0px'; postRun(); }  
+    
+  // Setup sample group handlers
+    [...document.querySelectorAll(".sampleGroup")].forEach(s=>{
+      s.onclick = function(){ 
+        [...document.querySelectorAll(".sampleGroup")].forEach(s=>s.classList.remove('selected'));
+        s.classList.toggle('selected');
+        [...document.querySelectorAll(".group")].forEach(s=>{ 
+          if (s.className.split(' ')[1] != this.className.split(' ')[1]) s.style.display='none'; 
+          else s.style.display = s.style.display=='block'?'none':'block';
+        });
+      }
+    });  
+  
+  // Sizeable panes.  
+    els.lgutter.onmousedown = (e)=>{
+      e.preventDefault(); e.stopPropagation(); els.center.style.pointerEvents = 'none'; els.left.style.overflow = 'hidden';
+      window.onmousemove = function(e) { els.left.style.width = els.left.style.minWidth = els.left.style.maxWidth =  Math.max(0,e.x-2)+"px"; postRun(); };
+      window.onmouseleave = window.onmouseup = function(e) { els.left.style.overflow=''; els.center.style.pointerEvents = 'all'; window.onmouseleave = window.onmouseup = window.onmousemove = undefined; };
+    }
+    els.rgutter.onmousedown = (e)=>{
+      e.preventDefault(); e.stopPropagation(); els.center.style.pointerEvents = 'none';
+      window.onmousemove = function(e) { els.right.style.width = els.right.style.minWidth = (window.innerWidth-e.x-2)+"px"; postRun(); };
+      window.onmouseleave = window.onmouseup = function(e) { els.center.style.pointerEvents = 'all'; window.onmouseleave = window.onmouseup = window.onmousemove = undefined; };
+    }
+    els.lgutter.ondblclick = (e)=>{ els.left.style.width = els.left.style.minWidth = els.left.style.maxWidth = els.left.style.width=="0px" ? "":"0px"; postRun(); }
+    els.rgutter.ondblclick = (e)=>{ els.right.style.width = els.right.style.minWidth = els.right.style.maxWidth = els.right.style.width=="0px" ? "":"0px"; postRun(); }
+  
+  // Link run handler.
+    els.run.onclick=(e)=>{
+      els.sample.contentDocument.body.innerHTML='';
+      try { 
+        els.sample.contentWindow.eval( editor.getValue() ); 
+        postRun();
+        window._marker && editor.session.removeMarker(_marker);
+      } catch (e) {
+        var line = e.stack.toString().match(/\, <anonymous>:(\d+)/);
+        if (line && line[1]) {
+          line = line[1]|0;
+          els.sample.contentDocument.body.innerHTML=`<PRE>${e.message+"\n   at line : "+line}</PRE>`;
+        } else {
+          els.sample.contentDocument.body.innerHTML=`<PRE>${e.message+"\n"+e.stack}</PRE>`;
+        }
+      }
+    }  
+
+  // helper to resize loaded content  
+    function postRun() {
+    // See if we have a canvas.  
+      var disp = els.sample.contentDocument.querySelector("svg")||els.sample.contentDocument.querySelector("canvas");
+      if (disp && parseInt(getComputedStyle(disp).width)>=512) { disp.style.width=disp.style.height='100%'; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); }
     }
     
-    examples.forEach((e,i)=>$('HEADER').innerHTML+=
-      `<A CLASS="TAB ${e.split('_')[0]} ${document.location.hash.slice(1)==examples[i]?' SELECTED':''}" 
-          ONCLICK="[].map.call(document.querySelectorAll('.SELECTED'),a=>a.classList.remove('SELECTED')); 
-                   this.classList.add('SELECTED'); document.location.hash='${e}';
-                   loaded=false; $('SAMPLE').src='${'example_'+e+'.html'}';"
-          >${e.split('_').slice(1).join(' ')}</A>`);
-    
-    var editor = ace.edit('SOURCE');
-    editor.setTheme("ace/theme/chrome");
-    editor.session.setMode("ace/mode/javascript");
-    editor.session.setUseWorker(false);
-    editor.setHighlightActiveLine(false);
-    editor.$blockScrolling = Infinity;
-    
-    var loaded=false;
-    if (!custom) $('SAMPLE').src = 'example_'+(document.location.hash.slice(1).replace(/ /g,'_')||examples[0])+'.html';    
-    $('SAMPLE').onload = function(){ 
-      var $$ = $('SAMPLE').contentDocument.querySelectorAll.bind($('SAMPLE').contentDocument);
-      
-      $('SAMPLE').contentDocument.body.style.margin=0;
-      $('SAMPLE').contentDocument.body.style.overflow='hidden';
-      
-      editor.setValue($('SAMPLE').contentDocument.querySelectorAll('script')[1].innerText.split('\n').slice(1).reverse().slice(1).reverse().join('\n'));
-      editor.clearSelection();
-      loaded=true;
-      
-      a=$$('svg');
-      if (a[0]) a[0].style.height='100%';
-      if (a[0]) a[0].style.width='100%';
-      a=$$('canvas'); if (a && a[0] && a[0].width>512) {
-        if (a[0]) a[0].style.height='100%';
-        if (a[0]) a[0].style.width='100%';
-          if (a[0].update && a[0].value) {
-            a[0].update(a[0].value);
-          }  
+  // on iframe load..
+    els.sample.onload = (e)=>{
+    // setup iframe props.
+      els.sample.contentDocument.body.style = "margin:0; padding:0;";
+      postRun();
+    // Grab the source and update the editor.  
+      var scr = [...els.sample.contentDocument.querySelectorAll("script")].pop();
+      if (window.editor) {
+        editor.setValue(scr.innerText.split('\n').slice(1).reverse().slice(1).reverse().join('\n'));
+        editor.clearSelection();
+      // Link shift+enter  
+        editor.commands.addCommand({ name: "run changes", bindKey: {win: "Shift-Enter", mac: "Shift-Enter"}, exec: function(editor) { els.run.click(); } });
+      // Link editor changes.  
+        editor.session.on('change',e=>{ });
       }
-      $('RUN').style.opacity=0;
-      $('SAVE').style.opacity=0;
-      var changed=false;
+    }
+    
+  // Process incoming hash.
+    var hashurl = document.location.hash.slice(1)||"pga2d_points_and_lines";
 
-      editor.session.on('change',e=>{ changed=loaded&&true;  if (changed) { $('RUN').style.opacity=1; $('SAVE').style.opacity=1; } });
-      editor.commands.addCommand({
-          name: "run changes",
-          bindKey: {win: "Ctrl-Enter", mac: "Command-Option-Enter"},
-          exec: function(editor) { $('RUN').click(); }
-      });
-      editor.commands.addCommand({
-          name: "run changes",
-          bindKey: {win: "Shift-Enter", mac: "Shift-Enter"},
-          exec: function(editor) { $('RUN').click(); }
-      });
-      
-      $('SAVE').onclick = function(e) {
-         $('SAVE').style.opacity = 0;
-         var data = editor.getValue();
-         var title = "ganja.js example";
-         var packet = {title,data};
-         fetch("https://enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
-         .then(resp=>resp.text())
-         .then(id=>{
-           document.location.hash=id
-            $('HEADER').className = '';
-            document.querySelector('small').innerHTML='Share your stash as <A HREF="'+document.location+'">'+document.location+'</A>';
-           
-         })
-      
-      }
-
-      $('RUN').onclick = function(e) { 
-
-
-        if (window._marker) editor.session.removeMarker(_marker);
-        e.preventDefault(); e.stopPropagation(); 
-        if (!changed || !loaded) return; changed=false; 
-        $('RUN').style.opacity=0;
-        $('SAMPLE').contentDocument.body.innerHTML='';
-        try { 
-          $('SAMPLE').contentWindow.eval( editor.getValue() ); 
-        } catch (e) { 
-          $('SAMPLE').contentDocument.body.innerHTML='<PRE>'+e.message+'\n'+e.stack+'</PRE>';
-          var m=e.stack.split('\n').filter(x=>x.match('eval'))[0].match(/\d+/g);
-          if (m) {
-            m = m.slice(-2);
-            var line = m[0]|0;
-            var col = m[1]|0;
-            console.log('error at ', line, col);
-            var Range = ace.require('ace/range').Range;
-            window._marker=editor.session.addMarker(new Range(line, 0, line, 1), "error", "fullLine");
-          }
-        }
-        editor.focus();
-        a=$$('svg');
-        if (a[0]) a[0].style.height='100%';
-        if (a[0]) a[0].style.width='100%';
-        a=$$('canvas'); if (a && a[0] && a[0].width>512) {
-          if (a[0]) a[0].style.height='100%';
-          if (a[0]) a[0].style.width='100%';
-          if (a[0].update && a[0].value) { a[0].update(a[0].value); }  
-        }
-      };
-      gtag&&gtag('config', 'UA-96802693-2', {
-        'page_title': 'coffeeshop - '+document.location.hash.slice(1),
-        'page_location': 'https://enkimute.github.io/ganja.js/examples/coffeeshop.html'+document.location.hash,
-        'page_path': '/ganja.js/examples/coffeeshop.html'+document.location.hash
-      });
-      //gtag&&gtag('event','screen_view',{screen_name:document.location.hash.slice(1)});  
+  // Propertie handlers
+    els.titleInput.onkeyup = ()=>document.title = els.title.innerText = els.titleInput.value;
+    
+  // copy url
+    els.urlInput.onclick = function(){
+      console.log('copy ',this.value);
+      this.select();
+      document.execCommand("copy");
+      this.blur();
+    }  
+    els.urlInput.onkeydown = (e)=>{e.preventDefault(); }; // prevent typing in URL field, keep click event working .. DISABLED wont work ..
+  
+  // new stash
+    els.new.onclick = function newStash() {
+    // Clear the editor, set the source to empty.
+      editor&&editor.setValue("");
+      var src = '<HTML><HEAD><TITLE>My Stash</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>\n\n</'+'SCRIPT></BODY></HTML>';
+      var blob = new Blob([src],{type:"text/html"});
+      els.sample.src = URL.createObjectURL(blob);
+    // Remove the samples, show the properties.  
+      els.tab2.click();
+    // If still in intro, close the bar.  
+      closeBar();
+    // Now save an empty version and set the url.
+      var data = "";
+      var title = "untitled";
+      var packet = {title,data};
+      fetch("https://enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
+      .then(resp=>resp.json())
+      .then(resp=>{
+      // Update hash and url input
+        document.location.hash=resp.id;
+        els.urlInput.value=document.location;
+      // Save in localstorage.
+        if (window.localStorage) {
+          localStorage.ganja = JSON.stringify(JSON.parse(localStorage.ganja||'[]').concat([{title,id:resp.id,secret:resp.secret}]));
+        };
+        els.save.style.display="block";
+        updateStash();
+      })
     };
+    
+  // Utility : create thumbnail.
+    function createThumb(complete) {
+    // See if we have an SVG or CANVAS
+      var c = Object.assign(document.createElement('canvas'),{width:160,height:120}), ctx = c.getContext('2d');
+      var disp = els.sample.contentDocument.querySelector("canvas");
+    // if its a canvas, rescale and return base64 of jpg.
+      if (disp) {
+        var img = new Image();
+        img.src = disp.toDataURL('image/jpeg',1.0);
+        img.onload = function() {
+          ctx.drawImage(img,0,0,160,120);
+          return complete(c.toDataURL('image/jpeg',0.8));
+        }
+        return;  
+      }  
+    // else it's an SVG. render to canvas and return base64 of jpg.
+      var disp = els.sample.contentDocument.querySelector("svg");
+      if (!disp) return complete();
+      var copy = disp.cloneNode(true);
+      var data = (new XMLSerializer()).serializeToString(copy);
+      var DOMURL = window.URL || window.webkitURL || window;
+      var img = new Image();
+      var svgBlob = new Blob([data], {type: "image/svg+xml;charset=utf-8"});
+      var url = DOMURL.createObjectURL(svgBlob);
+      img.src = url;
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0,160,120);
+        return complete(c.toDataURL('image/jpeg',0.8));
+      };
+    }  
+    
+  // save stash
+    els.save.onclick = function saveStash() {
+    // create thumbnail, then save ..
+      createThumb((thumb)=>{
+      // save .. 
+        var id = document.location.hash.slice(1);
+        var list = JSON.parse(localStorage.ganja||"[]");
+        var item = list.filter(x=>{ if (x.id==id) { x.thumb=thumb; x.title=els.titleInput.value||"untitled"; x.description=els.descriptionInput.value; return true; } return false; });
+        if (item.length==0) return console.warn("saving disabled - not your stash ?");
+        localStorage.ganja = JSON.stringify(list);
+        updateStash(); 
+        var packet = { data : editor.getValue(), title:els.titleInput.value||"untitled", description:els.descriptionInput.value, secret:list[0].secret, id : id, thumb: thumb };
+        fetch("https://enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
+        .then(resp=>resp.json())
+        .then(resp=>{
+          console.log(JSON.stringify(resp));
+        })
+      });
+    }    
+    
+  // load custom stash
+    function loadStash(closeAll){
+      fetch("https://enki.ws:3000/"+document.location.hash.slice(1)).then(x=>x.json()).then(data=>{
+        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>try{\n'+data.data+'\n} catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
+        var blob = new Blob([src],{type:"text/html"});
+        var url = URL.createObjectURL(blob);
+        els.sample.src = url;
+        els.hider.style.height=0;
+        if (closeAll!==false) els.left.style.with=els.left.style.minWidth=els.left.style.maxWidth=0;
+      // Set properties.
+        els.title.innerText=els.titleInput.value=data.title;
+        els.descriptionInput.value=data.description||"";
+        els.urlInput.value=document.location;
+      // Remove the samples, show the properties.  
+        els.properties.style.display = "flex";
+        [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
+        [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
+      // If still in intro, close the bar.  
+        closeBar();
+      // If its ours, we can save it..
+        var id = document.location.hash.slice(1), mine = JSON.parse(localStorage.ganja||"[]").filter(x=>x.id==id).length;
+        if (mine) els.save.style.display="block";
+        els.tab2.click();
+      });
+    
+    }  
+    
+  // Premade examples.   
+    if (~examples.indexOf(hashurl)) {
+      els.sample.src = 'example_'+hashurl+'.html';
+      var group = document.querySelector('.sampleGroup.'+hashurl.split('_')[0]);
+      console.log(group);
+      group.click();
+      els.tab1.click();
+    }
+    
+  // User shared.
+    else loadStash();
+    
+      
   </SCRIPT>
 </BODY>

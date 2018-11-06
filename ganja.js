@@ -482,7 +482,7 @@
       static gte(a,b) { while(a.call)a=a(); while(b.call)b=b(); return (a instanceof Element?a.Length:a)>=(b instanceof Element?b.Length:b); }
       
     // Debug output and printing multivectors.  
-      static describe() { console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d+\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); return {basis,metric,mulTable} }    
+      static describe(x) { if (x===true) console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d+\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); return {basis:basisg||basis,metric,mulTable} }    
       
     // The graphing function supports several modes. It can render 1D functions and 2D functions on canvas, and PGA2D, PGA3D and CGA2D functions using SVG.
     // It handles animation and interactivity.
@@ -564,7 +564,7 @@
             return svg.removeChild(svg.firstChild); 
           };
         // Create the initial svg and install the mousehandlers.  
-          res=build(f); res.value=f;
+          res=build(f); res.value=f; res.options=options;
           res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return;var x=(e.clientX-res.getBoundingClientRect().left)/(res.getBoundingClientRect().width/4||128)-2,y=((e.clientY-res.getBoundingClientRect().top)/(res.getBoundingClientRect().height/4||128)-2)*(res.getBoundingClientRect().height/res.getBoundingClientRect().width||1); if (options.conformal) {f[res.sel][1]=x; f[res.sel][2]=-y; var l=x*x+y*y; f[res.sel][3]=0.5-l*0.5; f[res.sel][4]=0.5+l*0.5; } else {f[res.sel][drm[2]]=(drm[1]==6)?-x:x; f[res.sel][drm[3]]=y; f[res.sel][drm[1]]=1;} if (!anim) res.innerHTML=build(f).innerHTML; res.dispatchEvent(new CustomEvent('input')) }; 
           return res;
         }  
@@ -581,7 +581,7 @@
       static graphGL2(f,options) {
       // Create canvas, get webGL2 context.
         var canvas=document.createElement('canvas'); canvas.width=options.width||600; canvas.height=options.height||600; canvas.style.backgroundColor='#EEE';
-        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,antialias:true,powerPreference:'high-performance'}); 
+        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'}); 
         gl.clearColor(240/255,240/255,240/255,1.0); gl.enable(gl.DEPTH_TEST);
       // Compile vertex and fragment shader, return program.
         var compile=(vs,fs)=>{
@@ -685,7 +685,7 @@
           if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); }
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
-        canvas.value = f.call?f():f;
+        canvas.value = f.call?f():f; canvas.options = options;
         if (options&&options.still) {
           var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
         } else return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
@@ -697,7 +697,7 @@
       static graphGL(f,options) {
       // Create a canvas, webgl2 context and set some default GL options.
         var canvas=document.createElement('canvas'); canvas.width=options.width||600; canvas.height=options.height||600; canvas.style.backgroundColor='#EEE';
-        var gl=canvas.getContext('webgl',{alpha:options.alpha||false,antialias:true,preserveDrawingBuffer:options.still||false,powerPreference:'high-performance'}); 
+        var gl=canvas.getContext('webgl',{alpha:options.alpha||false,antialias:true,preserveDrawingBuffer:options.still||true,powerPreference:'high-performance'}); 
         gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240/255,240/255,240/255,1.0); gl.getExtension("OES_standard_derivatives"); gl.va=gl.getExtension("OES_vertex_array_object");
       // Compile vertex and fragment shader, return program.  
         var compile=(vs,fs)=>{ 
@@ -928,7 +928,7 @@
           }; 
           // if we're no longer in the page .. stop doing the work.
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
-          canvas.value=x; canvas.dispatchEvent(new CustomEvent('input'));
+          canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.options=options;
           if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); }
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
@@ -954,7 +954,7 @@
           }
         }
         options.h=0;options.z=5;
-        canvas.value = f.call?f():f;
+        canvas.value = f.call?f():f; canvas.options=options;
         if (options&&options.still) {
           var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
         } else return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
