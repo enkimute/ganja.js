@@ -290,8 +290,7 @@
       els.sample.contentDocument.body.innerHTML='';
       try { 
         els.sample.contentWindow.eval( editor.getValue() ); 
-        postRun();
-        window._marker && editor.session.removeMarker(_marker);
+        setTimeout(()=>postRun(),1); // for fox.
       } catch (e) {
         var line = e.stack.toString().match(/\, <anonymous>:(\d+)/);
         if (line && line[1]) {
