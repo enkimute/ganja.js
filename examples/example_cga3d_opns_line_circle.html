@@ -25,7 +25,7 @@ Algebra({p:4,q:1,graded:true},()=>{
 
   // Now we will use the OPNS visualizer to show how the shape of the
   // object evolves as we interpolate from one to the other.
-    document.body.appendChild(this.graphGL2(()=>{
+    document.body.appendChild(this.graph(()=>{
        // factor between 0 and 1     
        var t = Math.min(1,Math.max(0,0.5 + 0.75*Math.sin(performance.now()/700)));
        // interpolate
