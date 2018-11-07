@@ -31,16 +31,18 @@
     .introButton:hover { box-shadow: 0 4px 4px rgba(0,0,0,.3); top: -2px;  }
     .header .introButton:hover { box-shadow: 0 4px 4px rgba(0,0,0,.3); top: 0px; border:2px solid #F08000; }
     .introButton:active { top:0px; background:#20262E; color:#FFF }
+    .introButton.active { animation: ani .5s infinite; }
     .content       { width:100%; height:100%; flex-grow:1; overflow:hidden; display:flex; box-sizing:border-box; max-width:100vw; position:relative;  }
     .gutter        { background: #2d333b; min-width:4px; min-height:100%; cursor:ew-resize;}
-    .left          { width: 433px; box-sizing:border-box; flex-grow:0; flex-shrink:0; overflow:hidden; flex-flow:wrap; max-height:100%; position:relative; }
+    .left          { width: 433px; box-sizing:border-box; flex-grow:0; flex-shrink:0; overflow:hidden; flex-flow:wrap; max-height:100%; position:relative; user-select:none; }
     .leftc         { width: 100%; box-sizing:border-box; flex-grow:0; flex-shrink:0; overflow:hidden; overflow-Y:auto; flex-flow:wrap; max-height:calc(100% - 35px); }
     .leftc::-webkit-scrollbar { width: 4px; height: 8px; border-radius:4px; background-color: #808080; }
     .leftc::-webkit-scrollbar-thumb { background: #fbfbfb; }
     .right         { width: 45vw; display:flex; box-sizing:border-box; flex-grow:0; flex-shrink:0; }
     .center        { box-sizing:border-box; flex-grow:1; overflow:hidden;   }
     .source        { margin: 0; flex-grow:1; box-sizing:border-box; width:100%; }
-    .card          { display:block; position:relative; display:inline-block; width:120px; height:80px; text-align:center; cursor:pointer; background-color:#FBFBFB; color:#20262E; border-radius:10px; border:1px solid rgba(0,0,0,0.3); margin:5px; padding:3px;  background-position:center; background-size:cover; background-repeat:no-repeat; margin-bottom:35px; border:2px solid #8090A0; }
+    .card          { display:block; position:relative; display:inline-block; width:120px; height:80px; text-align:center; cursor:pointer; background-color:#FBFBFB; color:#20262E; border-radius:10px; border:1px solid rgba(0,0,0,0.3); margin:5px; padding:3px;  background-position:center; background-size:cover; background-repeat:no-repeat; margin-bottom:35px; border:2px solid #8090A0; opacity:0.9; }
+    .card:hover    { border:2px solid blue; opacity:1; }
     .card p        { position:absolute; bottom:-40px; color:#fbfbfb; white-space:nowrap; max-width:100%; overflow:hidden; }
     #sample        { width:100%; height:100%; overflow:hidden; background-color:#FBFBFB; }
     .sampleGroup   { width:100%; padding:5px; box-sizing:border-box; background-color:#404040; margin-left:0px; cursor:pointer; white-space:no-wrap; }
@@ -62,6 +64,11 @@
     }
     @media only screen and (max-device-width: 1200px) {
       .left { width : 150px; }
+    }
+    @keyframes ani {
+      0%   { background:#FFFFFF }
+      50%  { background:#FFCCCC }
+      100% { background:#FFFFFF }
     }
   </style>
   <!-- ganja -->
@@ -87,6 +94,7 @@
           <H3>Roll your own ganja :<H3>
           <UL>
             <LI>Browse the samples below.
+            <LI>Edit them, save and share.
             <LI>Or hit the new button.
           </UL>
           <!--
@@ -118,7 +126,7 @@
     <H3 STYLE="flex-grow:1" ID="title">The CoffeeShop</H3>
     <DIV CLASS="introButton" ID="new"><B>&plus;</B> New</DIV>
     <!--DIV CLASS="introButton" ID="fork"><B>&fork;</B> Fork</DIV-->
-    <DIV CLASS="introButton" ID="save" STYLE="display:none"><B>&bigstar;</B> Save</DIV>
+    <DIV CLASS="introButton" ID="save"><B>&bigstar;</B> Save</DIV>
     <DIV CLASS="introButton" ID="run"><B>&rtrif;</B> Run</DIV>
   </DIV>
   <DIV CLASS="content">
@@ -226,10 +234,10 @@
       card.onclick = (x)=>{
         els.sample.src='example_'+e+'.html';
         document.location.hash = e;
-        els.save.style.display = "none";
         els.title.innerText = "The CoffeeShop";
         els.titleInput.value = els.descriptionInput.value = "";
         els.urlInput.value = document.location;
+        els.save.classList.remove('active');
       }  
       (document.querySelector('.group.'+e.split('_')[0])||els.left).appendChild(card);
       return card;
@@ -255,6 +263,7 @@
         }
         card.appendChild(closer);
         els.stash.appendChild(card);
+        els.save.classList.remove('active');
       });  
     }; 
     updateStash();  
@@ -325,7 +334,8 @@
       // Link shift+enter  
         editor.commands.addCommand({ name: "run changes", bindKey: {win: "Shift-Enter", mac: "Shift-Enter"}, exec: function(editor) { els.run.click(); } });
       // Link editor changes.  
-        editor.session.on('change',e=>{ });
+        editor.session.on('change',e=>{ els.save.style.display="block"; els.save.classList.add("active"); });
+        els.save.classList.remove('active');
       }
     }
     
@@ -371,6 +381,7 @@
           localStorage.ganja = JSON.stringify(JSON.parse(localStorage.ganja||'[]').concat([{title,id:resp.id,secret:resp.secret}]));
         };
         els.save.style.display="block";
+        els.save.classList.remove('active');
         updateStash();
       })
     };
@@ -408,20 +419,29 @@
     
   // save stash
     els.save.onclick = function saveStash() {
+      els.save.classList.remove('active');
     // create thumbnail, then save ..
       createThumb((thumb)=>{
       // save .. 
         var id = document.location.hash.slice(1);
         var list = JSON.parse(localStorage.ganja||"[]");
         var item = list.filter(x=>{ if (x.id==id) { x.thumb=thumb; x.title=els.titleInput.value||"untitled"; x.description=els.descriptionInput.value; return true; } return false; });
-        if (item.length==0) return console.warn("saving disabled - not your stash ?");
+        //if (item.length==0) return console.warn("saving disabled - not your stash ?");
         localStorage.ganja = JSON.stringify(list);
         updateStash(); 
-        var packet = { data : editor.getValue(), title:els.titleInput.value||"untitled", description:els.descriptionInput.value, secret:list[0].secret, id : id, thumb: thumb };
+        var packet = { data : editor.getValue(), title:els.titleInput.value||"untitled", description:els.descriptionInput.value, secret:list[0]&&list[0].secret, id : id, thumb: thumb };
         fetch("https://enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
         .then(resp=>resp.json())
         .then(resp=>{
           console.log(JSON.stringify(resp));
+          if (item.length==0) { // we didn't have it .. so we forked it .. 
+            var n = { id : resp.id, secret : resp.secret, thumb : thumb,  title:els.titleInput.value||"untitled", description:els.descriptionInput.value };
+            list.push(n);
+            localStorage.ganja = JSON.stringify(list);
+            updateStash();
+            document.location.hash = resp.id; 
+            els.tab2.click();
+          }
         })
       });
     }    
@@ -444,7 +464,7 @@
         [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
         [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
       // If still in intro, close the bar.  
-        closeBar();
+        if (closeAll!==false) closeBar();
       // If its ours, we can save it..
         var id = document.location.hash.slice(1), mine = JSON.parse(localStorage.ganja||"[]").filter(x=>x.id==id).length;
         if (mine) els.save.style.display="block";
