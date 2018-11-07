@@ -1,0 +1,41 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// the OPNS visualizer can be directly visualize the Outer Product
+// Null Space of GA objects.
+
+// We demonstrate in CGA. The OPNS visualizer only works for the graded
+// algebra generator, so we have to specify that when we create our algebra :
+Algebra({p:4,q:1,graded:true},()=>{
+  
+  // As usual, we start by defining a null basis, and upcasting for points
+  var ni = 1e4+1e5, no = .5e5-.5e4, nino = ni^no;
+  var up = (x)=> no + x + .5*x*x*ni;
+ 
+  // for OPNS viz we also need an "up" version that uses only basis blades :
+  var upviz = ["x","y","z",".5*(x*x+y*y+z*z)-.5",".5*(x*x+y*y+z*z)+.5"];
+  
+  // Next we create some points
+    var p1 = up(1e3-1e1), p2 = up(-1e3-1e1), p3 = up(1e2-1e1),
+        p4 = up(1e1),     p5 = up(1e2),      p6 = up(-1e2),
+        p7 = up(1.5e2+1e1);
+        
+  // We'll display a point, point-pair, line, circle and sphere.
+     var pp     = (p5^p6).Normalized,
+         line   = (p2^p3^ni).Normalized,
+         circle = (p4^p2^p3).Normalized,
+         sphere = (1e12345*(p7-.5*ni)).Normalized;
+     
+  // Now we will use the OPNS visualizer to show how the shape of the
+  // object evolves as we interpolate from one to the other.
+    document.body.appendChild(this.graph([
+        0xFF0000, p1,     // red point.
+        0x00FF00, pp,     // green point-pair.
+        0x0000FF, line,   // blue line
+        0xFF00FF, circle, // pink circle
+        0xFFFFFF, sphere  // white sphere
+    ],{up:upviz, animate:1}))
+    
+})
+</SCRIPT></BODY>
