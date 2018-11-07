@@ -21,8 +21,9 @@
     h1,h2,h3,h4    { font-size: 100%; font-weight: 600; }
     body           { font-size: 14px; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"; }
     .hider         { transition: all 0.5s; overflow:hidden; flex-shrink:0; }
-    .header        { height:45px; flex-grow:0; flex-shrink:0; width:100%; display:flex; flex-direction:row; border-bottom:2px solid #2d333b; padding-left:5px; padding-right:5px; box-sizing:border-box; }
-    .intro         { background: #0084FF; display: flex; flex-shrink:0; padding: 10px; transition:all 0.15s linear; height:100%; position:relative; width:100%; box-sizing:border-box; }
+    .header        { height:45px; flex-grow:0; flex-shrink:0; width:100%; display:flex; flex-direction:row; border-bottom:0px solid #2d333b; padding-left:5px; padding-right:5px; box-sizing:border-box; }
+    .intro         { background: #0084FF; display: flex; flex-shrink:0; padding: 10px; transition:all 0.15s linear; height:100%; position:relative; width:100%; box-sizing:border-box; font-size:110%; }
+    .intro h1      { font-size:120%; }
     .introBlock    { margin-right: 30px; flex-grow:1; }
     .intro a       { color: #FBFBFB; text-decoration:none; display:block; margin-bottom:5px;}
     .intro a:hover { color: #FFBBFF; }
@@ -32,28 +33,36 @@
     .introButton:active { top:0px; background:#20262E; color:#FFF }
     .content       { width:100%; height:100%; flex-grow:1; overflow:hidden; display:flex; box-sizing:border-box; max-width:100vw; position:relative;  }
     .gutter        { background: #2d333b; min-width:4px; min-height:100%; cursor:ew-resize;}
-    .left          { width: 386px; box-sizing:border-box; flex-grow:0; flex-shrink:0; overflow:hidden; overflow-Y:auto; flex-flow:wrap; max-height:100%; }
-    .left::-webkit-scrollbar { width: 4px; height: 8px; border-radius:4px; background-color: #808080; }
-    .left::-webkit-scrollbar-thumb { background: #fbfbfb; }
-    .right         { width: 50vw; display:flex; box-sizing:border-box; flex-grow:0; flex-shrink:0; }
+    .left          { width: 433px; box-sizing:border-box; flex-grow:0; flex-shrink:0; overflow:hidden; flex-flow:wrap; max-height:100%; position:relative; }
+    .leftc         { width: 100%; box-sizing:border-box; flex-grow:0; flex-shrink:0; overflow:hidden; overflow-Y:auto; flex-flow:wrap; max-height:calc(100% - 35px); }
+    .leftc::-webkit-scrollbar { width: 4px; height: 8px; border-radius:4px; background-color: #808080; }
+    .leftc::-webkit-scrollbar-thumb { background: #fbfbfb; }
+    .right         { width: 45vw; display:flex; box-sizing:border-box; flex-grow:0; flex-shrink:0; }
     .center        { box-sizing:border-box; flex-grow:1; overflow:hidden;   }
     .source        { margin: 0; flex-grow:1; box-sizing:border-box; width:100%; }
-    .card          { display:block; position:relative; display:inline-block; width:160px; height:120px; text-align:center; cursor:pointer; background-color:#FBFBFB; color:#20262E; border-radius:10px; border:1px solid rgba(0,0,0,0.3); margin:5px; padding:5px;  background-position:center; background-size:cover; background-repeat:no-repeat; margin-bottom:35px; border:2px solid #8090A0; }
+    .card          { display:block; position:relative; display:inline-block; width:120px; height:80px; text-align:center; cursor:pointer; background-color:#FBFBFB; color:#20262E; border-radius:10px; border:1px solid rgba(0,0,0,0.3); margin:5px; padding:3px;  background-position:center; background-size:cover; background-repeat:no-repeat; margin-bottom:35px; border:2px solid #8090A0; }
     .card p        { position:absolute; bottom:-40px; color:#fbfbfb; white-space:nowrap; max-width:100%; overflow:hidden; }
     #sample        { width:100%; height:100%; overflow:hidden; background-color:#FBFBFB; }
     .sampleGroup   { width:100%; padding:5px; box-sizing:border-box; background-color:#404040; margin-left:0px; cursor:pointer; white-space:no-wrap; }
     .sampleGroup:hover { background-color:#FBFBFB; color:#404040; }
     .sampleGroup>span, .properties span { float:right; display:block; color:#a0a0a0; padding-right:5px; }
-    .group         { margin-top:10px; display:none; }
+    .group         { margin-top:10px; }
     .selected      { background-color:#405080; }
     .properties    { display:flex; flex-direction: column; position:relative; padding:5px; max-width:100%; display:none; } 
     .properties input, .properties textarea { background-color:#202020; color:#b0b0b0; border:1px solid #505050; padding:2px; max-width:100%; margin-bottom:5px; resize:none; }
     .dropzone      { height:50px; line-height:50px; text-align:center; background:#202020; color:#707070; margin:5px; border:1px dashed #505050; }
     .tabs          { flex-grow:0; flex-shrink:0; display:flex; flex-direction:row; width:100%; height:30px; border-bottom:2px solid #2d333b; }
-    .tab           { flex-grow:1; line-height:30px; border-top-right-radius:35px; cursor:pointer; padding-left:10px; border:1px solid #707070; color:#707070; user-select:none; }
+    .tab           { flex-grow:0; line-height:30px; border-top-right-radius:35px; cursor:pointer; padding-left:10px; border:1px solid #707070; color:#707070; background:#202020; user-select:none; padding-right:20px; }
     .tab.active    { background:#405060; color:#fbfbfb; border:1px solid white; cursor:default; }
     .delete        { position:absolute; top:0px; right:5px; font-size:20px }
     .delete:hover  { color:red; font-weight:1000; }
+    @media only screen and (max-device-width: 600px) {
+      .left { width : 150px; }
+      .right { width : 1px; }
+    }
+    @media only screen and (max-device-width: 1200px) {
+      .left { width : 150px; }
+    }
   </style>
   <!-- ganja -->
   <SCRIPT SRC="../ganja.js"></SCRIPT>
@@ -70,7 +79,7 @@
   <DIV CLASS="hider"> 
     <DIV CLASS="intro">
         <DIV CLASS="introBlock" STYLE="text-align:center">
-          <H3>The CoffeeShop</H3>
+          <H1>The CoffeeShop</H1>
           <p>Free ganja.js samples!</p>
           <DIV CLASS="introButton" ONCLICK="closeBar();">&times; Close</DIV>
         </DIV>
@@ -118,44 +127,34 @@
         <DIV ID="tab1" CLASS="tab">free samples</DIV>
         <DIV ID="tab2" CLASS="tab">my stash</DIV>
       </DIV>
-      <DIV CLASS="properties" ID="properties">
-        <P>Stash Info</P>
-        <INPUT ID="titleInput" TYPE="text" PLACEHOLDER="title goes here"></INPUT>
-        <TEXTAREA ID="descriptionInput" ROWS=4 PLACEHOLDER="description goes here"></TEXTAREA>
-        <P>Stash URL <span>click to copy</span></P>
-        <INPUT ID="urlInput" TYPE="text" VALUE="http://"></INPUT>
-        <!--
-        <P>Stash Data <span>js : "data"</span></P>
-        <INPUT TYPE="text" PLACEHOLDER="url to data"></INPUT>
-        <DIV CLASS="dropzone">drop file here</DIV>
-        -->
-        <p>My stash</p>
-        <DIV ID="stash"></DIV>
-      </DIV>
-      <DIV CLASS="sampleGroup complex">Complex   <SPAN>\(\mathbb R_{0,1} \cong \mathbb C\)</SPAN>   </DIV>   
-      <DIV CLASS="sampleGroup dual">Dual      <SPAN>\(\mathbb R_{0,0,1} \cong \mathbb D\)</SPAN> </DIV>      
-      <DIV CLASS="sampleGroup quaternion">Quaternion<SPAN>\(\mathbb R_{0,2} \cong \mathbb H\)</SPAN>   </DIV>
-      <DIV CLASS="sampleGroup timespace">Timespace <SPAN>\(\mathbb R_{1,3} \cong \mathbb M\)</SPAN>   </DIV> 
-      <DIV CLASS="sampleGroup pga2d">2D PGA    <SPAN>\(\mathbb R_{2,0,1}\)</SPAN> </DIV>     
-      <DIV CLASS="sampleGroup pga3d">3D PGA    <SPAN>\(\mathbb R_{3,0,1}\)</SPAN> </DIV>     
-      <DIV CLASS="sampleGroup cga2d">2D CGA    <SPAN>\(\mathbb R_{3,1}\)</SPAN>   </DIV>     
-      <DIV CLASS="sampleGroup cga3d">3D CGA    <SPAN>\(\mathbb R_{4,1}\)</SPAN>   </DIV>     
-      <DIV CLASS="sampleGroup mga3d">3D Mother Algebra<SPAN>\(\mathbb R_{4,4}\)</SPAN></DIV> 
-      <DIV CLASS="sampleGroup ccga3d">3D CCGA   <SPAN>\(\mathbb R_{6,3}\)</SPAN>   </DIV>    
-      <DIV CLASS="sampleGroup qcga3d">3D QCGA   <SPAN>\(\mathbb R_{9,6}\)</SPAN>   </DIV>    
-      <DIV CLASS="sampleGroup game">Game</DIV>                                               
-      <DIV CLASS="group complex"></DIV>
-      <DIV CLASS="group dual"></DIV>
-      <DIV CLASS="group quaternion"></DIV>
-      <DIV CLASS="group timespace"></DIV>
-      <DIV CLASS="group pga2d"></DIV>
-      <DIV CLASS="group pga3d"></DIV>
-      <DIV CLASS="group cga2d"></DIV>
-      <DIV CLASS="group cga3d"></DIV>
-      <DIV CLASS="group mga3d"></DIV>
-      <DIV CLASS="group ccga3d"></DIV>
-      <DIV CLASS="group qcga3d"></DIV>
-      <DIV CLASS="group game"></DIV>
+      <DIV CLASS="leftc">
+        <DIV CLASS="properties" ID="properties">
+          <P>Stash Info</P>
+          <INPUT ID="titleInput" TYPE="text" PLACEHOLDER="title goes here"></INPUT>
+          <TEXTAREA ID="descriptionInput" ROWS=4 PLACEHOLDER="description goes here"></TEXTAREA>
+          <P>Stash URL <span>click to copy</span></P>
+          <INPUT ID="urlInput" TYPE="text" VALUE="http://"></INPUT>
+          <!--
+          <P>Stash Data <span>js : "data"</span></P>
+          <INPUT TYPE="text" PLACEHOLDER="url to data"></INPUT>
+          <DIV CLASS="dropzone">drop file here</DIV>
+          -->
+          <p>My stash</p>
+          <DIV ID="stash"></DIV>
+        </DIV>
+        <DIV CLASS="sampleGroup complex">Complex   <SPAN>\(\mathbb R_{0,1} \cong \mathbb C\)</SPAN>   </DIV>     <DIV CLASS="group complex"></DIV>
+        <DIV CLASS="sampleGroup dual">Dual      <SPAN>\(\mathbb R_{0,0,1} \cong \mathbb D\)</SPAN> </DIV>        <DIV CLASS="group dual"></DIV>
+        <DIV CLASS="sampleGroup quaternion">Quaternion<SPAN>\(\mathbb R_{0,2} \cong \mathbb H\)</SPAN>   </DIV>  <DIV CLASS="group quaternion"></DIV>
+        <DIV CLASS="sampleGroup timespace">Timespace <SPAN>\(\mathbb R_{1,3} \cong \mathbb M\)</SPAN>   </DIV>   <DIV CLASS="group timespace"></DIV>
+        <DIV CLASS="sampleGroup pga2d">2D PGA    <SPAN>\(\mathbb R_{2,0,1}\)</SPAN> </DIV>                       <DIV CLASS="group pga2d"></DIV>
+        <DIV CLASS="sampleGroup pga3d">3D PGA    <SPAN>\(\mathbb R_{3,0,1}\)</SPAN> </DIV>                       <DIV CLASS="group pga3d"></DIV>
+        <DIV CLASS="sampleGroup cga2d">2D CGA    <SPAN>\(\mathbb R_{3,1}\)</SPAN>   </DIV>                       <DIV CLASS="group cga2d"></DIV>
+        <DIV CLASS="sampleGroup cga3d">3D CGA    <SPAN>\(\mathbb R_{4,1}\)</SPAN>   </DIV>                       <DIV CLASS="group cga3d"></DIV>
+        <DIV CLASS="sampleGroup mga3d">3D Mother Algebra<SPAN>\(\mathbb R_{4,4}\)</SPAN></DIV>                   <DIV CLASS="group mga3d"></DIV>
+        <DIV CLASS="sampleGroup ccga3d">3D CCGA   <SPAN>\(\mathbb R_{6,3}\)</SPAN>   </DIV>                      <DIV CLASS="group ccga3d"></DIV>
+        <DIV CLASS="sampleGroup qcga3d">3D QCGA   <SPAN>\(\mathbb R_{9,6}\)</SPAN>   </DIV>                      <DIV CLASS="group qcga3d"></DIV>
+        <DIV CLASS="sampleGroup game">Game</DIV>                                                                 <DIV CLASS="group game"></DIV>
+      </DIV>  
     </DIV>
     <DIV CLASS="gutter" ID="lgutter" TITLE="drag to size, double click to collapse"></DIV>
     <DIV CLASS="center">
@@ -204,7 +203,7 @@
     els.tab1.onclick = (e)=>{ 
       els.tab1.classList.add('active'); els.tab2.classList.remove('active');  
       els.properties.style.display = "";
-      [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
+      [...document.querySelectorAll(".group")].forEach(x=>x.style.display="block");
       [...document.querySelectorAll(".sampleGroup")].forEach(x=>{
         x.style.display="";
         if (x.classList.contains('selected')) {
@@ -220,7 +219,7 @@
     };
 
   // Generate example cards.
-    examples.forEach(e=>{
+    var excards = examples.map(e=>{
       var card = Object.assign(document.createElement('div'),{className:'card'});
       card.style.backgroundImage="url('../images/"+e+".jpg')";
       card.innerHTML = '<p>'+e.split('_').slice(1).join(' ')+'</p>';
@@ -228,8 +227,12 @@
         els.sample.src='example_'+e+'.html';
         document.location.hash = e;
         els.save.style.display = "none";
+        els.title.innerText = "The CoffeeShop";
+        els.titleInput.value = els.descriptionInput.value = "";
+        els.urlInput.value = document.location;
       }  
       (document.querySelector('.group.'+e.split('_')[0])||els.left).appendChild(card);
+      return card;
     });
     
   // Generate cards for my stash.
@@ -266,7 +269,7 @@
         s.classList.toggle('selected');
         [...document.querySelectorAll(".group")].forEach(s=>{ 
           if (s.className.split(' ')[1] != this.className.split(' ')[1]) s.style.display='none'; 
-          else s.style.display = s.style.display=='block'?'none':'block';
+          else s.style.display = 'block'; 
         });
       }
     });  
@@ -328,6 +331,7 @@
     
   // Process incoming hash.
     var hashurl = document.location.hash.slice(1)||"pga2d_points_and_lines";
+    document.location.hash = hashurl;
 
   // Propertie handlers
     els.titleInput.onkeyup = ()=>document.title = els.title.innerText = els.titleInput.value;
@@ -452,9 +456,6 @@
   // Premade examples.   
     if (~examples.indexOf(hashurl)) {
       els.sample.src = 'example_'+hashurl+'.html';
-      var group = document.querySelector('.sampleGroup.'+hashurl.split('_')[0]);
-      console.log(group);
-      group.click();
       els.tab1.click();
     }
     

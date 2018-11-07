@@ -289,7 +289,7 @@ Automatic Differentiation<BR>
 </TD><TD ALIGN=CENTER>
 Convolutional Neural Network AND port<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#dual_backpropagation"         TARGET="_blank" TITLE="Convolutional Neural Network">
-<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/dual_backprop.jpg"></A>
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/dual_backpropagation.jpg"></A>
 </TD></TR><TR><TD ALIGN=CENTER>
 Quaternion color rotations<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#quaternion_hue"               TARGET="_blank" TITLE="Quaternion Hue Rotations">
@@ -345,15 +345,15 @@ PGA3D Objects<BR>
 </TD><TD ALIGN=CENTER>
 CGA3D Circles<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_points_circles_lines"   TARGET="_blank" TITLE="CGA3D points, cicrles, lines">
-<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_circles.jpg"></A>
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_points_circles_lines.jpg"></A>
 </TD></TR><TR><TD ALIGN=CENTER>
 CGA3D Spheres<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_points_spheres_planes"  TARGET="_blank" TITLE="CGA3D points, spheres, planes">
-<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_spheres.jpg"></A>
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_points_spheres_planes.jpg"></A>
 </TD><TD ALIGN=CENTER>
 CGA3D Dual Spheres<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_dual_spheres_planes"   TARGET="_blank" TITLE="CGA3D dual spheres and planes">
-<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_dual.jpg"></A>
+<IMG SRC="https://raw.githubusercontent.com/enkimute/ganja.js/HEAD/images/cga3d_dual_spheres_planes.jpg"></A>
 </TD></TR><TR><TD ALIGN=CENTER>
 CGA3D Intersections<BR>
 <A HREF="https://enkimute.github.io/ganja.js/examples/coffeeshop.html#cga3d_intersections"         TARGET="_blank" TITLE="CGA3D intersections">
