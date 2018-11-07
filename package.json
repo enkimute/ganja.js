@@ -1,6 +1,6 @@
 {
   "name": "ganja.js",
-  "version": "1.0.89",
+  "version": "1.0.90",
   "description": "Geometric Algebra for javascript with operator overloading and algebraic literals",
   "main": "ganja.js",
   "directories": {

@@ -10,7 +10,7 @@
 Algebra({p:4,q:1,graded:true},()=>{
   
   // As usual, we start by defining a null basis, and upcasting for points
-  var ni = 1e4+1e5, no = .5e5-.5e4, nino = ni^no;
+  var ni = 1e4+1e5, no = .5e5-.5e4;
   var up = (x)=> no + x + .5*x*x*ni;
  
   // for OPNS viz we also need an "up" version that uses only basis blades :
