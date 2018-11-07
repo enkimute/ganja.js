@@ -18,8 +18,7 @@ Algebra({p:4,q:1,graded:true},()=>{
   var upviz = ["x","y","z",".5*(x*x+y*y+z*z)-.5",".5*(x*x+y*y+z*z)+.5"];
   
   // Next we create some points
-    var p1 = up(1e3-1e1), p2 = up(-1e3-1e1), p3 = up(1e2-1e1),
-        q1 = up(1e1+1e2), q2 = up(1e1-1e2);
+    var p1 = up(1e3-1e1), p2 = up(-1e3-1e1), p3 = up(1e2-1e1);
         
   // We create a circle and a line.
     var c1 = (p1^p2^p3).Normalized, c2 = (p3^p2^ni).Normalized;
