@@ -50,14 +50,23 @@
     .sampleGroup>span, .properties span { float:right; display:block; color:#a0a0a0; padding-right:5px; }
     .group         { margin-top:10px; }
     .selected      { background-color:#405080; }
-    .properties    { display:flex; flex-direction: column; position:relative; padding:5px; max-width:100%; display:none; } 
+    .properties    { flex-direction: column; position:relative; padding:5px; max-width:100%; display:none; } 
     .properties input, .properties textarea { background-color:#202020; color:#b0b0b0; border:1px solid #505050; padding:2px; max-width:100%; margin-bottom:5px; resize:none; }
+    .inspect       { display:none; flex-direction: column; position:relative; padding:5px; max-width:100%; }
+    .help          { display:none; flex-direction: column; position:relative; padding:5px; max-width:100%; }
     .dropzone      { height:50px; line-height:50px; text-align:center; background:#202020; color:#707070; margin:5px; border:1px dashed #505050; }
+    #stash         { position:relative; width:calc(100% + 5px);  }
     .tabs          { flex-grow:0; flex-shrink:0; display:flex; flex-direction:row; width:100%; height:30px; border-bottom:2px solid #2d333b; }
     .tab           { flex-grow:0; line-height:30px; border-top-right-radius:35px; cursor:pointer; padding-left:10px; border:1px solid #707070; color:#707070; background:#202020; user-select:none; padding-right:20px; }
     .tab.active    { background:#405060; color:#fbfbfb; border:1px solid white; cursor:default; }
+    .rtab          { flex-grow:0; line-height:30px; border-top-left-radius:35px; cursor:pointer; padding-left:20px; border:1px solid #707070; color:#707070; background:#202020; user-select:none; padding-right:10px; }
+    .rtab.active   { background:#405060; color:#fbfbfb; border:1px solid white; cursor:default; }
     .delete        { position:absolute; top:0px; right:5px; font-size:20px }
     .delete:hover  { color:red; font-weight:1000; }
+    .inspect table { border:1px solid rgba(255,255,255,0.1); }
+    .inspect th    { background:#cacaca; color:#20262e; }
+    .inspect tr    { background:#30363e; }
+    .inspect td    { border:0px; }
     @media only screen and (max-device-width: 600px) {
       .left { width : 150px; }
       .right { width : 1px; }
@@ -125,7 +134,6 @@
   <DIV CLASS="header">
     <H3 STYLE="flex-grow:1" ID="title">The CoffeeShop</H3>
     <DIV CLASS="introButton" ID="new"><B>&plus;</B> New</DIV>
-    <!--DIV CLASS="introButton" ID="fork"><B>&fork;</B> Fork</DIV-->
     <DIV CLASS="introButton" ID="save"><B>&bigstar;</B> Save</DIV>
     <DIV CLASS="introButton" ID="run"><B>&rtrif;</B> Run</DIV>
   </DIV>
@@ -134,6 +142,9 @@
       <DIV CLASS="tabs">
         <DIV ID="tab1" CLASS="tab">free samples</DIV>
         <DIV ID="tab2" CLASS="tab">my stash</DIV>
+        <DIV ID="tab3" CLASS="tab">inspect stash</DIV>
+        <DIV STYLE="flex-grow:1"></DIV>
+        <DIV ID="tab4" CLASS="rtab">?</DIV>
       </DIV>
       <DIV CLASS="leftc">
         <DIV CLASS="properties" ID="properties">
@@ -162,6 +173,18 @@
         <DIV CLASS="sampleGroup ccga3d">3D CCGA   <SPAN>\(\mathbb R_{6,3}\)</SPAN>   </DIV>                      <DIV CLASS="group ccga3d"></DIV>
         <DIV CLASS="sampleGroup qcga3d">3D QCGA   <SPAN>\(\mathbb R_{9,6}\)</SPAN>   </DIV>                      <DIV CLASS="group qcga3d"></DIV>
         <DIV CLASS="sampleGroup game">Game</DIV>                                                                 <DIV CLASS="group game"></DIV>
+        <DIV CLASS="inspect">
+          <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
+            <THEAD>
+              <TR><TH WIDTH="30px">#<TH WIDTH="30px">Grade<TH>Name<TH WIDTH="80%">Value
+            </THEAD>
+            <TBODY ID="inspectTable">
+            </TBODY>
+          </TABLE>
+        </DIV>
+        <DIV CLASS="help">
+          <P>Help</P>
+        </DIV>
       </DIV>  
     </DIV>
     <DIV CLASS="gutter" ID="lgutter" TITLE="drag to size, double click to collapse"></DIV>
@@ -193,7 +216,7 @@
   
   // Elements.
     var els={};
-    [".hider", "#stash", "#tab1", "#tab2", "#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
+    [".hider", "#inspectTable", ".inspect",".help","#stash", "#tab1", "#tab2", "#tab3", "#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
   
   // Ace editor.
     if (window.ace) {
@@ -207,10 +230,27 @@
       Object.assign(els.right.style,{width:0,maxWidth:0,minWidth:0});
     }
 
+  // inspect
+    function inspect(skip) {
+       var disp = els.sample.contentDocument.querySelector("svg")||els.sample.contentDocument.querySelector("canvas");
+       if (!disp || !disp.value) { els.inspectTable.innerHTML=''; return; }
+       els.inspectTable.innerHTML = disp.value.map((x,i,a)=>{ 
+         while (x.call) x=x(); if (!(x.buffer instanceof els.sample.contentWindow.ArrayBuffer)) return "";
+         var name = typeof a[i+1] == "string" ? a[i+1]:"";
+         var grade = Math.log2(x.length);
+         while (grade && x.Grade(grade).VLength==0) grade--;
+         return `<TR><TD>${i}<TD>${grade}<TD>${name}<TD>${x.toString().replace(/\.(\d\d)\d*/g,'.$1').replace(/1.00e/g,"e").replace(/e_(\d+)/g,'e<sub>$1</sub>')}`;
+       }).join('');
+       if (skip!==true) disp.addEventListener("input",()=>{
+         inspect(true);
+       })
+    }
+
   // tabs.
     els.tab1.onclick = (e)=>{ 
-      els.tab1.classList.add('active'); els.tab2.classList.remove('active');  
+      els.tab1.classList.add('active'); els.tab2.classList.remove('active'); els.tab3.classList.remove('active');  
       els.properties.style.display = "";
+      els.inspect.style.display = "none";
       [...document.querySelectorAll(".group")].forEach(x=>x.style.display="block");
       [...document.querySelectorAll(".sampleGroup")].forEach(x=>{
         x.style.display="";
@@ -220,10 +260,19 @@
       });
     };
     els.tab2.onclick = (e)=>{ 
-      els.tab2.classList.add('active'); els.tab1.classList.remove('active');  
+      els.tab2.classList.add('active'); els.tab1.classList.remove('active'); els.tab3.classList.remove('active');
       els.properties.style.display = "flex";
+      els.inspect.style.display = "none";
       [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
       [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
+    };
+    els.tab3.onclick = (e)=>{ 
+      els.tab3.classList.add('active'); els.tab1.classList.remove('active');  els.tab2.classList.remove('active');  
+      els.properties.style.display = "none";
+      els.inspect.style.display = "flex";
+      [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
+      [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
+      inspect();
     };
 
   // Generate example cards.
