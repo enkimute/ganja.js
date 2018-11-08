@@ -68,7 +68,7 @@
     .help tr,    .inspect tr    { background:#30363e; }
     .help tr:hover, .inspect tr:hover { background:#40464e; }
     .help td, .inspect td    { border:0px; padding-right:4px; white-space:nowrap; overflow:hidden; }
-    .help td { text-align:center }
+    .help td { text-align:center; padding-top:5px; }
     @media only screen and (max-device-width: 600px) {
       .left { width : 150px; }
       .right { width : 1px; }
@@ -185,6 +185,7 @@
           </TABLE>
         </DIV>
         <DIV CLASS="help">
+          <p>Ganja.js supports operator overloading and algebraic literals.</p>
           <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
             <THEAD>
               <TR><TH>Operator<TH>Javascript<TH>Name
@@ -206,6 +207,43 @@
             <TBODY>
             </TBODY>
           </TABLE>
+          <p>Ganja.js supports vectors and matrices with multivector elements.</p>
+          <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
+            <THEAD>
+              <TR><TH>Operator<TH>Javascript<TH>Name
+            </THEAD>
+            <TBODY>
+              <TR><TD STYLE="padding:5px">\(\bold v = 
+              \begin{bmatrix} 
+                e_1 & 0 
+              \end{bmatrix}
+              \)<TD>v = [1e1,0];<TD>Vector
+              <TR><TD STYLE="padding:5px">\(\bold A = 
+              \begin{bmatrix} 
+                1 & 0 \\
+                0 & e_{12}
+              \end{bmatrix}
+              \)<TD>A = [[1,0],[0,1e12]];<TD>Matrix
+              <TR><TD>\(\bold v \cdot \bold w\)<TD>v*w<TD>Vector-Vector dot product.
+              <TR><TD>\(A \bold v\)<TD>A*v<TD>Matrix-Vector product.
+              <TR><TD>\(AB\)<TD>A*B<TD>Matrix-Matrix product.
+              <TR><TD>\(A^{HT}\)<TD>~A<TD>Conjugate-Transpose Matrix
+            </TBODY>
+          </TABLE>
+          <p>Ganja.js can graph 2D and 3D PGA and CGA elements.</p>
+          <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
+            <THEAD>
+              <TR><TH>Element<TH>Description
+            </THEAD>
+            <TBODY>
+              <TR><TD>multivector<TD>point, pair, line, circle, sphere, plane
+              <TR><TD>number<TD>Sets color. (e.g. #80FF0000 - transparent red)
+              <TR><TD>string<TD>Label for the last drawn item
+              <TR><TD>[point,point]<TD>Line segment between two points
+              <TR><TD>[point,point,...,point]<TD>(convex) polygon
+            </TBODY>
+          </TABLE>
+          
         </DIV>
       </DIV>  
     </DIV>
