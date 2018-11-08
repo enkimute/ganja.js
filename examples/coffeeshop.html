@@ -63,10 +63,12 @@
     .rtab.active   { background:#405060; color:#fbfbfb; border:1px solid white; cursor:default; }
     .delete        { position:absolute; top:0px; right:5px; font-size:20px }
     .delete:hover  { color:red; font-weight:1000; }
-    .inspect table { border:1px solid rgba(255,255,255,0.1); }
-    .inspect th    { background:#cacaca; color:#20262e; }
-    .inspect tr    { background:#30363e; }
-    .inspect td    { border:0px; }
+    .help table, .inspect table { border:1px solid rgba(255,255,255,0.1); }
+    .help th,    .inspect th    { background:#cacaca; color:#20262e; }
+    .help tr,    .inspect tr    { background:#30363e; }
+    .help tr:hover, .inspect tr:hover { background:#40464e; }
+    .help td, .inspect td    { border:0px; padding-right:4px; white-space:nowrap; overflow:hidden; }
+    .help td { text-align:center }
     @media only screen and (max-device-width: 600px) {
       .left { width : 150px; }
       .right { width : 1px; }
@@ -183,7 +185,26 @@
           </TABLE>
         </DIV>
         <DIV CLASS="help">
-          <P>Help</P>
+          <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
+            <THEAD>
+              <TR><TH>Operator<TH>Javascript<TH>Name
+            </THEAD>
+              <TR><TD>\(a*b\)<TD>a*b<TD>Geometric Product
+              <TR><TD>\(a\wedge b\)<TD>a^b<TD>Outer Product
+              <TR><TD>\(a\vee b\)<TD>a&b<TD>Left Contraction
+              <TR><TD>\(a*b*\tilde a\)<TD>a>>>b<TD>Sandwich Product
+              <TR><TD>\(\tilde a\)<TD>~a<TD>Conjugate
+              <TR><TD>\(\bar a\)<TD>!a<TD>Dual
+              <TR><TD>\(\bar{\bar a}\)<TD>a.Reverse<TD>Reverse
+              <TR><TD>\(a^{-1}\)<TD>a**-1<TD>Inverse
+              <TR><TD>\(e^a\)<TD>Math.E**a<TD>Exponentiation
+              <TR><TD>\(a_{\langle b \rangle}\)<TD>a.Grade(b)<TD>Grade Extraction
+              <TR><TD>\(a+b\)<TD>a+b<TD>Multivector Addition
+              <TR><TD>\(a-b\)<TD>a-b<TD>Multivector Subtraction
+              <TR><TD>\(4.2e_{12}\)<TD>4.2e12<TD>Blade Literals
+            <TBODY>
+            </TBODY>
+          </TABLE>
         </DIV>
       </DIV>  
     </DIV>
@@ -216,7 +237,7 @@
   
   // Elements.
     var els={};
-    [".hider", "#inspectTable", ".inspect",".help","#stash", "#tab1", "#tab2", "#tab3", "#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
+    [".hider", "#inspectTable", ".inspect",".help","#stash", "#tab1", "#tab2", "#tab3", "#tab4","#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
   
   // Ace editor.
     if (window.ace) {
@@ -234,12 +255,13 @@
     function inspect(skip) {
        var disp = els.sample.contentDocument.querySelector("svg")||els.sample.contentDocument.querySelector("canvas");
        if (!disp || !disp.value) { els.inspectTable.innerHTML=''; return; }
+       var count=1;
        els.inspectTable.innerHTML = disp.value.map((x,i,a)=>{ 
-         while (x.call) x=x(); if (!(x.buffer instanceof els.sample.contentWindow.ArrayBuffer)) return "";
+         while (x && x.call) x=x(); if (!x || !(x.buffer instanceof els.sample.contentWindow.ArrayBuffer)) return "";
          var name = typeof a[i+1] == "string" ? a[i+1]:"";
          var grade = Math.log2(x.length);
          while (grade && x.Grade(grade).VLength==0) grade--;
-         return `<TR><TD>${i}<TD>${grade}<TD>${name}<TD>${x.toString().replace(/\.(\d\d)\d*/g,'.$1').replace(/1.00e/g,"e").replace(/e_(\d+)/g,'e<sub>$1</sub>')}`;
+         return `<TR><TD>${count++}<TD>${grade}<TD>${name}<TD>${x.toString().replace(/\.(\d\d)\d*/g,'.$1').replace(/1.00e/g,"e").replace(/e_(\d+)/g,'e<sub>$1</sub>')}`;
        }).join('');
        if (skip!==true) disp.addEventListener("input",()=>{
          inspect(true);
@@ -248,9 +270,10 @@
 
   // tabs.
     els.tab1.onclick = (e)=>{ 
-      els.tab1.classList.add('active'); els.tab2.classList.remove('active'); els.tab3.classList.remove('active');  
+      els.tab1.classList.add('active'); els.tab2.classList.remove('active'); els.tab4.classList.remove('active'); els.tab3.classList.remove('active');  
       els.properties.style.display = "";
       els.inspect.style.display = "none";
+      els.help.style.display = "none";
       [...document.querySelectorAll(".group")].forEach(x=>x.style.display="block");
       [...document.querySelectorAll(".sampleGroup")].forEach(x=>{
         x.style.display="";
@@ -260,16 +283,27 @@
       });
     };
     els.tab2.onclick = (e)=>{ 
-      els.tab2.classList.add('active'); els.tab1.classList.remove('active'); els.tab3.classList.remove('active');
+      els.tab2.classList.add('active'); els.tab1.classList.remove('active'); els.tab4.classList.remove('active'); els.tab3.classList.remove('active');
       els.properties.style.display = "flex";
       els.inspect.style.display = "none";
+      els.help.style.display = "none";
       [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
       [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
     };
     els.tab3.onclick = (e)=>{ 
-      els.tab3.classList.add('active'); els.tab1.classList.remove('active');  els.tab2.classList.remove('active');  
+      els.tab3.classList.add('active'); els.tab1.classList.remove('active');  els.tab2.classList.remove('active');  els.tab4.classList.remove('active'); 
       els.properties.style.display = "none";
       els.inspect.style.display = "flex";
+      els.help.style.display = "none";
+      [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
+      [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
+      inspect();
+    };
+    els.tab4.onclick = (e)=>{ 
+      els.tab4.classList.add('active'); els.tab1.classList.remove('active');  els.tab2.classList.remove('active');  els.tab3.classList.remove('active'); 
+      els.properties.style.display = "none";
+      els.inspect.style.display = "none";
+      els.help.style.display = "flex";
       [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
       [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
       inspect();
