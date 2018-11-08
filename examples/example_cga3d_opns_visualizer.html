@@ -29,13 +29,16 @@ Algebra({p:4,q:1,graded:true},()=>{
      
   // Now we will use the OPNS visualizer to show how the shape of the
   // object evolves as we interpolate from one to the other.
+
+  // We apply an extra small thresh hold to get nice and fine visualizations.
+  // Feel free to change the thresh number below
     document.body.appendChild(this.graph([
         0xFF0000, p1,     // red point.
         0x00FF00, pp,     // green point-pair.
         0x0000FF, line,   // blue line
         0xFF00FF, circle, // pink circle
         0xFFFFFF, sphere  // white sphere
-    ],{up:upviz, animate:1}))
+    ],{up:upviz, thresh:0.05, animate:1}))
     
 })
 </SCRIPT></BODY>

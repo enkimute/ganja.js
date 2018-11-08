@@ -634,12 +634,12 @@
                 ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
                 return ${grade!=tot-1?"sign(sum)*sqrt(abs(sum))":"res"};
              }
-             vec3 trace_depth (in vec3 start, vec3 dir, in float tresh) {
+             vec3 trace_depth (in vec3 start, vec3 dir, in float thresh) {
                 vec3 orig=start; float lastd = 1000.0; int count=${(options.maxSteps||64)};
                 float s =  sign(dist(start[0],start[1],start[2],b));
                 for (int i=0; i<count; i++) {
                   float d = s*dist(start[0],start[1],start[2],b);
-                  if (d < tresh) return start - lastd*${(options.stepSize||0.25)}*dir*(tresh-d)/(lastd-d);
+                  if (d < thresh) return start - lastd*${(options.stepSize||0.25)}*dir*(thresh-d)/(lastd-d);
                   lastd = d; start += dir*${(options.stepSize||0.25)}*d;
                 }
                 return orig;
@@ -648,7 +648,7 @@
                vec3 p = -10.0*normalize(color2); 
                vec3 dir = normalize((Pos[1]/5.0*ratio)*color + color2 + vec3(0.0,Pos[0]/5.0,0.0));  p += 5.0*dir;
                vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
-               vec3 d2 = trace_depth( p , dir, ${grade!=tot-1?(options.tresh||0.2):0.01} );
+               vec3 d2 = trace_depth( p , dir, ${grade!=tot-1?(options.thresh||0.2):0.01} );
                float dl2 = dot(d2-p,d2-p); const float h=0.1; 
                if (dl2>0.0) {
                  vec3 n = normalize(vec3(
