@@ -673,7 +673,7 @@
             var e=x[i]; while (e&&e.call) e=e(); if (e==undefined) continue;
             if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
             if (e instanceof Element){
-              var tt = options.animate?-performance.now()/1000:0; tt+=Math.PI/2; var r = canvas.height/canvas.width;
+              var tt = options.animate?-performance.now()/1000:-options.h||0; tt+=Math.PI/2; var r = canvas.height/canvas.width;
               var g=tot-1; while(!e[g]&&g>1) g--;
               if (!programs[tot-1-g]) programs[tot-1-g] = genprog(g);
               draw(programs[tot-1-g],gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c,r,g);
@@ -685,6 +685,18 @@
           if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); }
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
+        // Basic mouse interactivity. needs more love.
+        var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{ e.preventDefault(); e.stopPropagation(); sel=-2;
+          var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*-4+2)*canvas.height/canvas.width;
+          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/1000; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
+          canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
+          canvas.onmousemove=(e)=>{ 
+            var rc = canvas.getBoundingClientRect(); 
+            var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
+            if (sel==-2) { options.h =  (options.h||0)+mx; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; }; if (sel < 0) return;
+          }
+        }
+        options.h=0;options.z=5;
         canvas.value = f.call?f():f; canvas.options = options;
         if (options&&options.still) {
           var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
