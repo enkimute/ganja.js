@@ -645,8 +645,8 @@
                 return orig;
              }
              void main() { 
-               vec3 p = -10.0*normalize(color2); 
-               vec3 dir = normalize((Pos[1]/5.0*ratio)*color + color2 + vec3(0.0,Pos[0]/5.0,0.0));  p += 5.0*dir;
+               vec3 p = -5.0*normalize(color2); 
+               vec3 dir = normalize((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0));  p += 1.0*dir;
                vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
                vec3 d2 = trace_depth( p , dir, ${grade!=tot-1?(options.thresh||0.2):0.01} );
                float dl2 = dot(d2-p,d2-p); const float h=0.1; 
@@ -673,7 +673,7 @@
             var e=x[i]; while (e&&e.call) e=e(); if (e==undefined) continue;
             if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
             if (e instanceof Element){
-              var tt = performance.now()/1000; var r = canvas.height/canvas.width;
+              var tt = options.animate?-performance.now()/1000:0; tt+=Math.PI/2; var r = canvas.height/canvas.width;
               var g=tot-1; while(!e[g]&&g>1) g--;
               if (!programs[tot-1-g]) programs[tot-1-g] = genprog(g);
               draw(programs[tot-1-g],gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c,r,g);
