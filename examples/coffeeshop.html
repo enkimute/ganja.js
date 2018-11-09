@@ -551,7 +551,7 @@
         //if (item.length==0) return console.warn("saving disabled - not your stash ?");
         localStorage.ganja = JSON.stringify(list);
         updateStash(); 
-        var packet = { data : editor.getValue(), title:els.titleInput.value||"untitled", description:els.descriptionInput.value, secret:list[0]&&list[0].secret, id : id, thumb: thumb };
+        var packet = { data : editor.getValue(), title:els.titleInput.value||"untitled", description:els.descriptionInput.value, secret:item[0]&&item[0].secret, id : id, thumb: thumb };
         fetch("https://enki.ws:3000",{method:'post',body:JSON.stringify(packet)})
         .then(resp=>resp.json())
         .then(resp=>{
