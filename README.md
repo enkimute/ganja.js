@@ -426,7 +426,7 @@ ganja.js is also the engine behind the GAlculator - try it [online](https://enki
 
 Or - get some hands on experience with euclidian plane PGA by playing the [wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html).
 
-<A HREF="https://enkimute.github.io/ganja.js/examples/example_game_wedge.html" TARGET="_blank"><IMG SRC="images/wedge.png"></A>
+<A HREF="https://enkimute.github.io/ganja.js/examples/example_game_wedge.html" TARGET="_blank"><IMG SRC="images/game_wedge.jpg"></A>
 
 
 <A NAME="custom"></A>

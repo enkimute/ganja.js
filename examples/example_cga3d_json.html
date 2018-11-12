@@ -22,7 +22,7 @@
   <p>Drop a JSON file on this page to visualize. Dropped files are monitored for changes (visualization will update if you overwrite the file).</p>
   <p>View this example <A TARGET="blank" HREF="example_cga3d_json.html">as standalone page here.</A></P>
   <DIV ID="dropzone">
-    <SPAN>Drop JSON here.</SPAN>
+    <SPAN>Drop JSON or file with JSON here.</SPAN>
   </DIV>
   <BR><BR>
   <p>The JSON file should contain a javascript array of elements to render. Several elements are supported, the sample below demonstrates :</p>
@@ -71,10 +71,16 @@ Algebra(4,1,()=>{
     var dropZone = document.querySelector('#dropzone');
     dropZone.ondragover  = e=>{ e.stopPropagation(); e.preventDefault(); e.dataTransfer.dropEffect='link'; dropZone.style.background="#40464e"; }
     dropZone.ondragleave = e=>{ e.stopPropagation(); e.preventDefault(); dropZone.style.background=""; }
-    dropZone.ondrop = e=>{ e.stopPropagation(); e.preventDefault(); dropZone.style.background=""; [...e.dataTransfer.files].forEach(f=>{ 
-      var lastTime = 0, name = f.name, path = URL.createObjectURL(f);
-      setInterval(()=>{ if (f.lastModified !== lastTime) show(path); lastTime = f.lastModified; },500);
-    })}
+    dropZone.ondrop = e=>{ 
+      e.stopPropagation(); e.preventDefault(); dropZone.style.background=""; 
+      [...e.dataTransfer.items].filter(x=>x.type=="text/plain").forEach(x=>x.getAsString(x=>{
+        var y=new Blob([x],{type : 'text/json'}); show(URL.createObjectURL(y));
+      }));
+      [...e.dataTransfer.files].forEach(f=>{ 
+        var lastTime = 0, name = f.name, path = URL.createObjectURL(f);
+        setInterval(()=>{ if (f.lastModified !== lastTime) show(path); lastTime = f.lastModified; },500);
+      })
+    }
 
 });
 

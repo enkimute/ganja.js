@@ -439,7 +439,8 @@
   
   // Link run handler.
     els.run.onclick=(e)=>{
-      els.sample.contentDocument.body.innerHTML='';
+      var f = els.sample.contentDocument.body.firstChild; while (!(f instanceof els.sample.contentWindow.HTMLScriptElement)) f = f.nextElementSibling; f = f.nextElementSibling;
+      if (f) while (true) { var g=f.nextSibling; els.sample.contentDocument.body.removeChild(f); if (!g) break; f=g; }
       try { 
         els.sample.contentWindow.eval( editor.getValue() ); 
         setTimeout(()=>postRun(),1); // for fox.
