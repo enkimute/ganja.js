@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+  <!-- katex math typesetting -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.js" integrity="sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/contrib/auto-render.min.js" integrity="sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+  <STYLE>
+     body      { background: #20262E; color: #fbfbfb; margin:0; overflow:hidden; height:100%; width:100%; }
+     H1, p     { text-align:center; width:100%;overflow:hidden; padding:0; margin:0; margin-bottom:20px; }    
+     a         { color:#ccccfb }
+     a:visited { color:#cccccc }
+     #backdrop { position:fixed; top:0; left:0; width:100%; height:100%; overflow:hidden; z-index:-10; }
+     #dropzone { max-width:400px; width:400px; margin:auto; border: 3px dotted #fbfbfb; padding:40px; height:100px; display:flex; align-items:center;  }
+     #dropzone > span { width: 100%; text-align:center; }
+     pre       { margin:auto; width: 600px; overflow:hidden; margin:40px auto; padding:5px; border: 1px solid rgba(255,255,255,0.3); background:#30363e; }
+  </STYLE>
+</HEAD>
+<BODY>
+<DIV ID="backdrop">
+  <H1>\(\mathbb R_{4,1}\) Conformal Geometric Algebra JSON visualizer.</H1>
+  <p>Drop a JSON file on this page to visualize. Dropped files are monitored for changes (visualization will update if you overwrite the file).</p>
+  <p>View this example <A TARGET="blank" HREF="example_cga3d_json.html">as standalone page here.</A></P>
+  <DIV ID="dropzone">
+    <SPAN>Drop JSON here.</SPAN>
+  </DIV>
+  <BR><BR>
+  <p>The JSON file should contain a javascript array of elements to render. Several elements are supported, the sample below demonstrates :</p>
+  <p>Numbers are colors (hex), strings are labels, and arrays are CGA elements.</p>
+  <PRE>
+[
+  16711680,
+  [0,-1,0,1,0.5,1.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "p1",
+  [0,-1,0,-1,0.5,1.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "p2",
+  [0,-1,1,0,0.5,1.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  "p3",
+  16711935,
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0.5,1.5,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0.5,1.5,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.5,1.5,0,0,0,0,0,0,0,0],
+  255,
+  [0,1,0,1,0.5,1.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,1,0,-1,0.5,1.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,1,1,0,0.5,1.5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+]
+  </PRE>
+</DIV>
+<SCRIPT>
+Algebra(4,1,()=>{
+
+  // When we get a file, we load and display.
+    var canvas, h=0, p=0, show = path=>{
+      fetch(path).then(x=>x.json()).then(data=>{
+      // remove potential old graph.
+         if (canvas) { h=canvas.options.h; p=canvas.options.p; document.body.removeChild(canvas); }
+      // convert arrays of 32 floats back to CGA elements.     
+         data = data.map(x=>x.length==32?new Element(x):x);
+      // add the graph to the page.
+         canvas = this.graph(data,{gl:true,conformal:true});
+         canvas.options.h = h; canvas.options.p = p;
+      // make it big.
+         canvas.style.width = '100vw';
+         canvas.style.height = '100vh';
+         document.body.appendChild(canvas);
+      })
+    }
+  
+  // Drag/Drop Handlers.
+    var dropZone = document.querySelector('#dropzone');
+    dropZone.ondragover  = e=>{ e.stopPropagation(); e.preventDefault(); e.dataTransfer.dropEffect='link'; dropZone.style.background="#40464e"; }
+    dropZone.ondragleave = e=>{ e.stopPropagation(); e.preventDefault(); dropZone.style.background=""; }
+    dropZone.ondrop = e=>{ e.stopPropagation(); e.preventDefault(); dropZone.style.background=""; [...e.dataTransfer.files].forEach(f=>{ 
+      var lastTime = 0, name = f.name, path = URL.createObjectURL(f);
+      setInterval(()=>{ if (f.lastModified !== lastTime) show(path); lastTime = f.lastModified; },500);
+    })}
+
+});
+
+</SCRIPT>
+</BODY>
