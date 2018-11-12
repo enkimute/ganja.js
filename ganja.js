@@ -688,7 +688,7 @@
         // Basic mouse interactivity. needs more love.
         var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{ e.preventDefault(); e.stopPropagation(); sel=-2;
           var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*-4+2)*canvas.height/canvas.width;
-          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/1000; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
+          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
           canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
           canvas.onmousemove=(e)=>{ 
             var rc = canvas.getBoundingClientRect(); 
@@ -955,7 +955,7 @@
               if ((mx-pos2[0])**2 + (my-pos2[1])**2 < 0.01) sel=i;
             }
           });
-          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/1000; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
+          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
           canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
           canvas.onmousemove=(e)=>{ 
             var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
