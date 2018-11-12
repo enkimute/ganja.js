@@ -588,8 +588,12 @@
     
   // load custom stash
     function loadStash(closeAll){
-      fetch("https://enki.ws:3000/"+document.location.hash.slice(1)).then(x=>x.json()).then(data=>{
-        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>try{\n'+data.data+'\n} catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
+      var stashURL = document.location.hash.slice(1).split('&');
+      fetch("https://enki.ws:3000/"+stashURL[0]).then(x=>x.json()).then(data=>{
+        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE><STYLE>body {width:100%; height:100%; margin:0; }</STYLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>try{\n'+data.data+'\n} catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
+      // if full-screen, overload everything .. 
+        if (stashURL.find(x=>x.match(/fullscreen/i))) return document.clear(),document.write(src),document.close();
+      // else put it in the iframe.  
         var blob = new Blob([src],{type:"text/html"});
         var url = URL.createObjectURL(blob);
         els.sample.src = url;
