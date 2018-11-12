@@ -53,6 +53,8 @@
     .properties    { flex-direction: column; position:relative; padding:5px; max-width:100%; display:none; } 
     .properties input, .properties textarea { background-color:#202020; color:#b0b0b0; border:1px solid #505050; padding:2px; max-width:100%; margin-bottom:5px; resize:none; }
     .inspect       { display:none; flex-direction: column; position:relative; padding:5px; max-width:100%; }
+    .inspect #copyJSON { padding-top:10px; padding-bottom:10px; margin-bottom:10px; margin-top:10px; }
+    .inspect #editJSON { position:fixed; top:-100px; left:-100px; width:100px; height:20px; overflow:hidden; }
     .help          { display:none; flex-direction: column; position:relative; padding:5px; max-width:100%; }
     .dropzone      { height:50px; line-height:50px; text-align:center; background:#202020; color:#707070; margin:5px; border:1px dashed #505050; }
     #stash         { position:relative; width:calc(100% + 5px);  }
@@ -176,6 +178,8 @@
         <DIV CLASS="sampleGroup qcga3d">3D QCGA   <SPAN>\(\mathbb R_{9,6}\)</SPAN>   </DIV>                      <DIV CLASS="group qcga3d"></DIV>
         <DIV CLASS="sampleGroup game">Game</DIV>                                                                 <DIV CLASS="group game"></DIV>
         <DIV CLASS="inspect">
+          <INPUT TYPE="edit" ID="editJSON"></INPUT>
+          <INPUT TYPE="button" ID="copyJSON" VALUE="Copy JSON to clipboard."</INPUT>
           <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
             <THEAD>
               <TR><TH WIDTH="30px">#<TH WIDTH="30px">Grade<TH>Name<TH WIDTH="80%">Value
@@ -275,7 +279,7 @@
   
   // Elements.
     var els={};
-    [".hider", "#inspectTable", ".inspect",".help","#stash", "#tab1", "#tab2", "#tab3", "#tab4","#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
+    [".hider", "#inspectTable", "#editJSON", "#copyJSON", ".inspect",".help","#stash", "#tab1", "#tab2", "#tab3", "#tab4","#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
   
   // Ace editor.
     if (window.ace) {
@@ -287,6 +291,21 @@
       editor.$blockScrolling = Infinity;
     } else { // can't load editor.
       Object.assign(els.right.style,{width:0,maxWidth:0,minWidth:0});
+    }
+
+  // copy JSON to clipboard.
+    els.copyJSON.onclick = e=>{
+    // see if we have a canvas.
+      var disp = els.sample.contentDocument.querySelector("svg")||els.sample.contentDocument.querySelector("canvas");
+      if (!disp || !disp.value) return;
+    // upgrade the toJSON of the elements we have.
+      disp.value.some(v=>{
+        if (v.Wedge) v.constructor.prototype.toJSON = function(){ return [...this]; };
+        return v.Wedge !== undefined;
+      });
+    // next copy the value.  
+      els.editJSON.value = JSON.stringify(disp.value);
+      els.editJSON.focus(); els.editJSON.select(); document.execCommand("copy"); els.editJSON.blur();
     }
 
   // inspect
