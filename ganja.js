@@ -740,8 +740,8 @@
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.animate?performance.now()/1000:options.h||0, t2=options.p||0;
-          var ct = Math.cos(t), st= Math.sin(t), ct2 = Math.cos(t2), st2 = Math.sin(t2);
-          if (tot==5) return [ct,-st2*st,ct2*st,0,0,ct2*1,st2*1,0,-st,-st2*ct,ct2*ct,0,0,0,options.z||5,1]
+          var ct = Math.cos(t), st= Math.sin(t), ct2 = Math.cos(t2), st2 = Math.sin(t2), x=options.posx||0, y=options.posy||0, z=options.posz||0, zoom=options.z||5;
+          if (tot==5) return [ct,st*-st2,st*ct2,0,0,ct2,st2,0,-st,ct*-st2,ct*ct2,0,x*ct+z*-st,y*ct2+(x*st+z*ct)*-st2,y*st2+x*st+z*ct*ct2+zoom,1];
           x=x.Normalized; var y=x.Mul(x.Dual),X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=Array(16);
           var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W, yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
           return [ 1-2*(yy+zz), 2*(xy+zw), 2*(xz-yw), 0, 2*(xy-zw), 1-2*(xx+zz), 2*(yz+xw), 0, 2*(xz+yw), 2*(yz-xw), 1-2*(xx+yy), 0, -2*y.e23, -2*y.e13, 2*y.e12+5, 1];
@@ -776,7 +776,7 @@
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);  
       // Font rendering program. Renders billboarded fonts, transforms offset passed as color2.
         var program2 = compile(`attribute vec4 position; attribute vec2 texc; varying vec2 tex; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2; 
-                 void main() { tex=texc; gl_PointSize=6.0; vec4 o=mv*vec4(color2,0.0); Pos=(-1.0/(o.z-mv[3][2]))*position+vec4(0.0,0.0,mv[3][2],0.0)+o; gl_Position = p*Pos; }`,
+                 void main() { tex=texc; gl_PointSize=6.0; vec4 o=mv*vec4(color2,0.0); Pos=(-1.0/(o.z-mv[3][2]))*position+vec4(mv[3][0],mv[3][1],mv[3][2],0.0)+o; gl_Position = p*Pos; }`,
                 `precision highp float; uniform vec3 color; varying vec4 Pos; varying vec2 tex; 
                  uniform sampler2D texm; void main() { vec4 c = texture2D(texm,tex); if (c.a<0.01) discard; gl_FragColor = vec4(color,c.a);}`);
       // Conformal space needs a bit extra magic to extract euclidean parametric representations.
@@ -955,9 +955,9 @@
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
         // Basic mouse interactivity. needs more love.
-        var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{ e.preventDefault(); e.stopPropagation();
+        var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{e.preventDefault(); e.stopPropagation();  if (e.detail===0) return; 
           var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*-4+2)*canvas.height/canvas.width;
-          sel = -2; canvas.value.forEach((x,i)=>{
+          sel = (e.button==2)?-3:-2; canvas.value.forEach((x,i)=>{
             x = interprete(x); if (x.tp==1) {
               var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...x.pos,1]).map(x=>x.s);
               pos2 = Element.Mul( [[5,0,0,0],[0,5*(r||2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
@@ -969,7 +969,9 @@
           canvas.onmousemove=(e)=>{ 
             var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
             var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
-            if (sel==-2) { options.h =  (options.h||0)+mx; options.p = Math.max(-Math.PI/2,Math.min(Math.PI/2, (options.p||0)+my)); if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; }; if (sel < 0) return;
+            if (sel==-2) { options.h =  (options.h||0)+mx; options.p = Math.max(-Math.PI/2,Math.min(Math.PI/2, (options.p||0)+my)); if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; }; 
+            if (sel==-3) { var ct = Math.cos(options.h||0), st= Math.sin(options.h||0), ct2 = Math.cos(options.p||0), st2 = Math.sin(options.p||0);
+              options.posx = (options.posx||0)+mx*ct+my*st; options.posz = (options.posz||0)+mx*-st+my*ct*ct2; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));return; }; if (sel < 0) return;
             x.pos[0] += (e.buttons!=2)?Math.cos(-options.h)*mx:Math.sin(options.h)*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-options.h)*mx:Math.cos(options.h)*my;
             canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
