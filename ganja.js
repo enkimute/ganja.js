@@ -966,6 +966,11 @@
           });
           canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
           canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
+          var tx,ty; canvas.ontouchstart = (e)=>{e.preventDefault();  canvas.focus(); var x = e.changedTouches[0].pageX, y = e.changedTouches[0].pageY; tx=x; ty=y; }
+          canvas.ontouchmove = function (e) { e.preventDefault();
+             var x = e.changedTouches[0].pageX, y = e.changedTouches[0].pageY, mx = (x-(tx||x))/1000, my = -(y-(ty||y))/1000; tx=x; ty=y; 
+             options.h = (options.h||0)+mx; options.p = Math.max(-Math.PI/2,Math.min(Math.PI/2, (options.p||0)+my)); if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return;  
+          };
           canvas.onmousemove=(e)=>{ 
             var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
             var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
