@@ -839,6 +839,15 @@
           var a,p=[],l=[],t=[],c=[.5,.5,.5],alpha=0,lastpos=[-2,2,0.2]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x();
         // Create default camera matrix and initial lastposition (contra-compensated for camera)  
           M = mtx(options.camera); lastpos = options.camera.Normalized.Conjugate.Mul(((a=new this()).set(lastpos,11),a)).Mul(options.camera.Normalized).slice(11,14);
+        // Grid.
+          if (options.grid) {
+            if (!options.gridLines) { options.gridLines=[[],[],[]]; for (var i=-5; i<=5; i++) {
+                options.gridLines[0].push(i,0,5, i,0,-5, 5,0,i, -5,0,i); options.gridLines[1].push(i,5,0, i,-5,0, 5,i,0, -5,i,0); options.gridLines[2].push(0,i,5, 0,i,-5, 0,5,i, 0,-5,i);
+            }}
+            gl.depthMask(false);
+              draw(program,gl.LINES,options.gridLines[0],[0,0,0],[.6,1,.6],r); draw(program,gl.LINES,options.gridLines[1],[0,0,0],[1,.8,.8],r); draw(program,gl.LINES,options.gridLines[2],[0,0,0],[.8,.8,1],r);
+            gl.depthMask(true);
+          }
         // Loop over all items to render.  
           for (var i=0,ll=x.length;i<ll;i++) { 
             var e=x[i]; while (e&&e.call) e=e(); if (e==undefined) continue;
