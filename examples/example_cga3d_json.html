@@ -58,7 +58,7 @@ Algebra(4,1,()=>{
       // convert arrays of 32 floats back to CGA elements.     
          data = data.map(x=>x.length==32?new Element(x):x);
       // add the graph to the page.
-         canvas = this.graph(data,{gl:true,conformal:true});
+         canvas = this.graph(data,{gl:true,conformal:true,grid:true});
          canvas.options.h = h; canvas.options.p = p;
       // make it big.
          canvas.style.width = '100vw';
