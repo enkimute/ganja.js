@@ -17,7 +17,7 @@
   
   <!-- Local Style -->
   <style>
-    body           { background: #20262E; color: #FBFBFB; padding:0; margin:0; display:flex; flex-direction:column; min-height:100vh; max-height:100vh; position:relative; overflow:hidden; }
+    body           { background: #20262E; color: #FBFBFB; padding:0; margin:0; display:none; flex-direction:column; min-height:100vh; max-height:100vh; position:relative; overflow:hidden; }
     h1,h2,h3,h4    { font-size: 100%; font-weight: 600; }
     body           { font-size: 14px; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"; }
     .hider         { transition: all 0.5s; overflow:hidden; flex-shrink:0; }
@@ -439,7 +439,7 @@
   
   // Link run handler.
     els.run.onclick=(e)=>{
-      var f = els.sample.contentDocument.body.firstChild; while (!(f instanceof els.sample.contentWindow.HTMLScriptElement)) f = f.nextElementSibling; f = f.nextElementSibling;
+      var f = els.sample.contentDocument.body.firstChild; while (f && !(f instanceof els.sample.contentWindow.HTMLScriptElement)) f = f.nextElementSibling; f = f&&f.nextElementSibling;
       if (f) while (true) { var g=f.nextSibling; els.sample.contentDocument.body.removeChild(f); if (!g) break; f=g; }
       try { 
         els.sample.contentWindow.eval( editor.getValue() ); 
@@ -448,9 +448,9 @@
         var line = e.stack.toString().match(/\, <anonymous>:(\d+)/);
         if (line && line[1]) {
           line = line[1]|0;
-          els.sample.contentDocument.body.innerHTML=`<PRE>${e.message+"\n   at line : "+line}</PRE>`;
+          els.sample.contentDocument.body.innerHTML+=`<PRE>${e.message+"\n   at line : "+line}</PRE>`;
         } else {
-          els.sample.contentDocument.body.innerHTML=`<PRE>${e.message+"\n"+e.stack}</PRE>`;
+          els.sample.contentDocument.body.innerHTML+=`<PRE>${e.message+"\n"+e.stack}</PRE>`;
         }
       }
     }  
@@ -458,8 +458,8 @@
   // helper to resize loaded content  
     function postRun() {
     // See if we have a canvas.  
-      var disp = els.sample.contentDocument.querySelector("svg")||els.sample.contentDocument.querySelector("canvas");
-      if (disp && parseInt(getComputedStyle(disp).width)>=512) { disp.style.width=disp.style.height='100%'; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); }
+      var doc = els.sample.contentDocument||document, disp = doc.querySelector("svg")||doc.querySelector("canvas");
+      if (disp && disp.value) { disp.style.width=disp.style.height='100%'; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); }
     }
     
   // on iframe load..
@@ -591,7 +591,8 @@
     function loadStash(closeAll){
       var stashURL = document.location.hash.slice(1).split('&');
       fetch("https://enki.ws:3000/"+stashURL[0]).then(x=>x.json()).then(data=>{
-        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE><STYLE>body {width:100%; height:100%; margin:0; }</STYLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>try{\n'+data.data+'\n} catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
+        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE><STYLE>body {width:100%; height:100%; margin:0; }</STYLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>try{\n'+data.data+'\n; postRun(); } catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
+        document.body.style.display='flex';
       // if full-screen, overload everything .. 
         if (stashURL.find(x=>x.match(/fullscreen/i))) return document.clear(),document.write(src),document.close();
       // else put it in the iframe.  
@@ -622,6 +623,7 @@
     if (~examples.indexOf(hashurl)) {
       els.sample.src = 'example_'+hashurl+'.html';
       els.tab1.click();
+      document.body.style.display='flex';
     }
     
   // User shared.
