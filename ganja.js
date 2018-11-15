@@ -581,6 +581,7 @@
       static graphGL2(f,options) {
       // Create canvas, get webGL2 context.
         var canvas=document.createElement('canvas'); canvas.style.width=options.width||''; canvas.style.height=options.height||''; canvas.style.backgroundColor='#EEE';
+        if (options.width && options.width.match(/px/i)) canvas.width = parseFloat(options.width); if (options.height && options.height.match(/px/i)) canvas.height = parseFloat(options.height);
         var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'}); 
         gl.clearColor(240/255,240/255,240/255,1.0); gl.enable(gl.DEPTH_TEST);
       // Compile vertex and fragment shader, return program.
@@ -681,7 +682,7 @@
           }
           // if we're no longer in the page .. stop doing the work.
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
-          canvas.value=x; canvas.dispatchEvent(new CustomEvent('input'));
+          canvas.value=x; if (options&&!options.animate) canvas.dispatchEvent(new CustomEvent('input'));
           if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); }
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
@@ -709,6 +710,7 @@
       static graphGL(f,options) {
       // Create a canvas, webgl2 context and set some default GL options.
         var canvas=document.createElement('canvas'); canvas.style.width=options.width||''; canvas.style.height=options.height||''; canvas.style.backgroundColor='#EEE';
+        if (options.width && options.width.match(/px/i)) canvas.width = parseFloat(options.width); if (options.height && options.height.match(/px/i)) canvas.height = parseFloat(options.height);
         var gl=canvas.getContext('webgl',{alpha:options.alpha||false,antialias:true,preserveDrawingBuffer:options.still||true,powerPreference:'high-performance'}); 
         gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); if (!options.alpha) gl.clearColor(240/255,240/255,240/255,1.0); gl.getExtension("OES_standard_derivatives"); gl.va=gl.getExtension("OES_vertex_array_object");
       // Compile vertex and fragment shader, return program.  
@@ -950,7 +952,7 @@
           }; 
           // if we're no longer in the page .. stop doing the work.
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
-          canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.options=options;
+          canvas.value=x; if (options&&!options.animate) canvas.dispatchEvent(new CustomEvent('input')); canvas.options=options;
           if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); }
           if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
         }
