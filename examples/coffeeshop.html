@@ -58,6 +58,13 @@
     .inspect       { display:none; flex-direction: column; position:relative; padding:5px; max-width:100%; }
     .inspect #copyJSON { padding-top:10px; padding-bottom:10px; margin-bottom:10px; margin-top:10px; }
     .inspect #editJSON { position:fixed; top:-100px; left:-100px; width:100px; height:20px; overflow:hidden; }
+    #inspectTable2 td  { font-size:80%; background-color:#20262e; text-align:center; padding-top:4px; padding-bottom:4px; }
+    #inspectTable2 td.odd { background-color:#40464e; }
+    #inspectTable2 td.min { background-color:#60262e; } 
+    #inspectTable2 td.zer { background-color:#00602e; } 
+    #inspectTable2 td.plu { background-color:#202660; } 
+    #inspectTable2 small { float:right; color:#909090; }
+    #inspectTable2 input { width:100%; background:#505050; border:1px solid rgba(255,255,255,0.4); color:#CCC; font-weight:100; font-size:130%; }
     .help          { display:none; flex-direction: column; position:relative; padding:5px; max-width:100%; }
     .dropzone      { height:50px; line-height:50px; text-align:center; background:#202020; color:#707070; margin:5px; border:1px dashed #505050; }
     #stash         { position:relative; width:calc(100% + 5px);  }
@@ -190,6 +197,13 @@
             <TBODY ID="inspectTable">
             </TBODY>
           </TABLE>
+          <P>Basis and Metric</P>
+          <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0>
+            <THEAD>
+            </THEAD>
+            <TBODY ID="inspectTable2">
+            </TBODY>
+          </TABLE>
         </DIV>
         <DIV CLASS="help">
           <p>Ganja.js supports operator overloading and algebraic literals.</p>
@@ -282,7 +296,7 @@
   
   // Elements.
     var els={};
-    [".hider", "#inspectTable", "#editJSON", "#copyJSON", ".inspect",".help","#stash", "#tab1", "#tab2", "#tab3", "#tab4","#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
+    [".hider", "#inspectTable", "#inspectTable2", "#editJSON", "#copyJSON", ".inspect",".help","#stash", "#tab1", "#tab2", "#tab3", "#tab4","#run", "#title", "#titleInput", "#descriptionInput", "#urlInput", "#new","#fork","#save", "#properties", "#sample", ".left",".center",".right","#lgutter","#rgutter"].forEach(x=>els[x.replace(/[.#]/g,'')]=document.querySelector(x));
   
   // Ace editor.
     if (window.ace) {
@@ -315,17 +329,33 @@
     function inspect(skip) {
        var disp = els.sample.contentDocument.querySelector("svg")||els.sample.contentDocument.querySelector("canvas");
        if (!disp || !disp.value) { els.inspectTable.innerHTML=''; return; }
-       var count=1;
+       var count=1, el;
        els.inspectTable.innerHTML = disp.value.map((x,i,a)=>{ 
          while (x && x.call) x=x(); if (!x || !(x.buffer instanceof els.sample.contentWindow.ArrayBuffer)) return "";
          var name = typeof a[i+1] == "string" ? a[i+1]:"";
-         var grade = Math.log2(x.length);
+         var grade = Math.log2(x.length); if (grade) el=x.constructor;
          while (grade && x.Grade(grade).VLength==0) grade--;
-         return `<TR><TD>${count++}<TD>${grade}<TD>${name}<TD>${x.toString().replace(/\.(\d\d)\d*/g,'.$1').replace(/1.00e/g,"e").replace(/e_(\d+)/g,'e<sub>$1</sub>')}`;
+         return `<TR ID="inspect_${i}"><TD>${count++}<TD>${grade}<TD>${name}<TD>${x.toString().replace(/\.(\d\d)\d*/g,'.$1').replace(/1.00e/g,"e").replace(/e_(\d+)/g,'e<sub>$1</sub>')}`;
        }).join('');
-       if (skip!==true) disp.addEventListener("input",()=>{
-         inspect(true);
-       })
+       if (skip!==true) disp.addEventListener("input",()=>{inspect(true);})
+       var info = el && el.describe();
+       els.inspectTable2.innerHTML=!info?"":[...Array(Math.log2(info.basis.length)+2)].map((x,g)=>
+         `<TR>${info.metric.map((x,i)=> info.basis[i].length!=g?"": "<TD CLASS='"+["min","zer","plu"][x+1]+"'>"+ (i==0?1:"e<SUB>"+info.basis[i].replace("e","")+"</SUB>") +"<SMALL>"+(x==1?"+1":x)+"</SMALL>").join('')}`
+       ).join('');
+       [...els.inspectTable.querySelectorAll("tr")].forEach(e=>e.onclick=function(){
+         var elid = this.id.match(/\d+$/g)[0]|0, xx = disp.value[elid]; while(xx.call)xx=xx();
+         els.inspectTable2.innerHTML=!info?"":[...Array(Math.log2(info.basis.length)+2)].map((x,g)=>
+           `<TR>${info.metric.map((x,i)=> info.basis[i].length!=g?"": "<TD CLASS='"+["min","zer","plu"][x+1]+"'>"+ (i==0?1:"e<SUB>"+info.basis[i].replace("e","")+"</SUB>") +"<SMALL>"+(x==1?"+1":x)+"</SMALL>").join('')}`+
+           `<TR>${info.metric.map((x,i)=> info.basis[i].length!=g?"": "<TD cLASS='input'><INPUT ID='in_"+i+"' TYPE='text' vALUE='"+(xx[i]||"")+"'>").join('')}`
+         ).join('');
+         [...els.inspectTable2.querySelectorAll("input")].forEach(e=>e.onkeyup=function(){
+           var xx = disp.value[elid]; if (xx.call) return this.style.background="red";
+           var idx = this.id.match(/\d+$/g)[0];
+           xx[idx] = 1*this.value;
+           if (!disp.options.animate && disp.update) disp.update(disp.value);
+         });
+         
+       });
     }
 
   // tabs.
@@ -334,6 +364,7 @@
       els.properties.style.display = "";
       els.inspect.style.display = "none";
       els.help.style.display = "none";
+
       [...document.querySelectorAll(".group")].forEach(x=>x.style.display="block");
       [...document.querySelectorAll(".sampleGroup")].forEach(x=>{
         x.style.display="";
