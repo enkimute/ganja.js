@@ -1012,73 +1012,42 @@
       // Translate algebraic literals. (scientific e-notation to "this.Coeff"
         tok=tok.map(t=>(t[0]==2)?[2,'Element.Coeff('+basis.indexOf('e'+(t[1].split(/e_|e|i/)[1]||1))+','+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
       // We support two syntaxes, standard js or if you pass in a text, asciimath.       
-        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2],['.','.',3]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['>>>','sw',0,1],['^','Wedge'],['&','Vee'],['<<','Dot']],[['*','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
+        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['>>>','sw',0,0],['^','Wedge'],['&','Vee'],['<<','Dot']],[['*','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
                                                 :[[['pi','Math.PI'],['sin','Math.sin']],[['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual']],[['^','Pow',0,1]],[['^^','Wedge'],['*','Dot']],[['**','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]];
       // For asciimath, some fixed translations apply (like pi->Math.PI) etc ..                                          
         tok=tok.map(t=>(t[0]!=5)?t:[].concat.apply([],syntax).filter(x=>x[0]==t[1]).length?[5,[].concat.apply([],syntax).filter(x=>x[0]==t[1])[0][1]]:t); 
       // Now the token-stream is translated recursively.    
-        function translate(tokens) { 
-           var resi=[], isTok=(x,t)=>{while(x>0 && resi[x][0]==0)x--; return resi[x][0]==t}; 
-           for (var i=0,t; i<tokens.length; i++)
-           // recurse round brackets
-             if ((t=tokens[i])[1] == '(') { var open=1,sub=[],pre=[]; while(resi.length && (resi[resi.length-1][0]==5 || resi[resi.length-1][1]=='.')) pre.unshift(resi.pop()[1]);  while (open) { t = tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; if (open) sub.push(t); }; resi.push([[2,pre.join('')+'(']].concat(translate(sub)).concat([[2,')']])); }
-           // recurse square brackets  
-             else if ((t=tokens[i])[1] == '[') { var open=1,sub=[],pre=[]; while(resi.length && (isTok(resi.length-1,5) || isTok(resi.length-1,2) || resi[resi.length-1][1]=='.')) pre.unshift(resi.pop()[1]);  while (open) { t = tokens[++i]; if (t[1] == '[') open++; else if (t[1] == ']') open--; if (open) sub.push(t); }; resi.push([[2,pre.join('')+'[']].concat(translate(sub)).concat([[2,']']])); }
-           // Unary operators.  
-             else if (~'~!'.indexOf(t[1])) { resi.push(t); var sub=[], open=0; while (~'~!-'.indexOf(t[1]) || open) { t=tokens[++i]; if (t[1] == '(') open++; else if (t[1] == ')') open--; sub.push(t); }; resi.push([[2,'']].concat(translate(sub))); }
-             else if (t[1]=='-'&&resi.length&&(isTok(resi.length-1,4) || resi[resi.length-1][1]=='return'|| (resi[resi.length-1][0]==0 && resi[resi.length-2][1]=='return'))) { resi.push([[2,'']].concat(translate([t,tokens[++i]])))  }
-             else resi.push(t);  
-           // glue array indexing and function calls. (hacky)  
-           for (var c=[],last=0,i=0; i<resi.length; i++) if (resi[i][0][0]!=2 || !/[\[\(]/.test(resi[i][0][1][0])) { last=0; c.push(resi[i]); } else if (last) last.push(resi[i]); else if (resi[i+1] && resi[i+1][0][0]==2 && /[\[\(]/.test(resi[i+1][0][1][0])) c.push(last=[resi[i]]); else c.push(resi[i]); resi=c;
-           // Now go over all operators in the syntax, in order of precedence.
-           syntax.forEach((syntaxd,k)=>{ var ops=syntaxd.map(x=>x[0]);
-            // For operators of equal precedence, go either right to left or left to right.   
-            syntaxd.forEach( (op)=>{ tokens=resi;resi=[]; // now translate ops ..
-            // right-to-left, loop over all tokens.
-              if (op[3]) { 
-                for (var i=tokens.length-1;  i >= 0; i--) { 
-                // if we find our token
-                  if (tokens[i][1] == op[0]) {
-                  // eat whitespace around operators.
-                    while(resi.length&&resi[resi.length-1][1].match&&resi[resi.length-1][1].match(/^\s+$/)) resi.pop();
-                  // Find token to the right.  
-                    if (!op[2]) var after=tokens[i-1]; while (after[1].match&&after[1].match(/^\s+$/)) after = tokens[--i-1];
-                  // Find token to the left and concat.  
-                    if (op[2]||!resi.length||resi[resi.length-1][0]==4) resi[resi.length]=[[1,'Element.'+op[1]+'('],resi[resi.length-1],[1,')']]; else resi[resi.length-1]=[[1,'Element.'+op[1]+'('],after,[1,','],resi[resi.length-1],[1,')']];
-                  // Skip the token itself.  
-                    i -= 1; 
-                  // if not found, hold for next precedence loop.  
-                  } else resi.push(tokens[i]); 
-                }
-                resi=resi.reverse(); // because of rtl
-            // left to right, loop over all tokens.     
-              } else { 
-                for (var i=0; i<tokens.length; i++) { 
-                // if we find our operator.
-                  if (ops.indexOf(tokens[i][1]) != -1) { 
-                  // Get operator
-                    op = syntaxd.filter(x=>x[0]==tokens[i][1])[0];
-                  // kill spaces around operator.  
-                    if (op[2]!=1) while(resi.length&&resi[resi.length-1][1].match&&resi[resi.length-1][1].match(/^\s+$/)) resi.pop();
-                  // Collect second argument.
-                    if (op[2]!=2) { var after=tokens[i+1]; while (after[1].match&&after[1].match(/^\s+$/)) after = tokens[++i+1]; }
-                  // Concat dot operator as complete identifier.  
-                    if (op[2]==3) resi[resi.length-1]=[resi[resi.length-1],[1,'.'],after];
-                  // Support for properties on literals etc..  
-                    else if (op[2]==2) resi[resi.length-1]=[[1,'Element.'+op[1]+'('],resi[resi.length-1],[1,')']];
-                  // Translate current operator.  
-                    else if (op[2]||!resi.length||resi[resi.length-1][0]==4) resi[resi.length]=[[1,'Element.'+op[1]+'('],after,[1,')']]; else resi[resi.length-1]=[[1,'Element.'+op[1]+'('],resi[resi.length-1],[1,','],after,[1,')']];
-                  // Skip operator.  
-                    if (op[2]!=2) i += 1; 
-                  // Not found, keep for next precedence loop.  
-                  } else resi.push(tokens[i]); 
-                }
-              }
-           });}); 
-           return resi;
-        }
+        function translate(tokens) {
+           // helpers, scanning, glueing, find matching brackets. 
+           var left = (x=ti-1,skip=[0])=>{ while(x>=0&&~skip.indexOf(tokens[x][0])) x--; return x; },
+               right= (x=ti+1,skip=[0])=>{ while(x<tokens.length&&~skip.indexOf(tokens[x][0])) x++; return x; },
+               glue = (x,y,tp=5,sub)=>{tokens.splice(x,y-x+1,[tp,...(sub||tokens.slice(x,y+1))])},
+               match = (O="(",C=")")=>{var o=1,x=ti+1; while(o){if(tokens[x][1]==O)o++;if(tokens[x][1]==C)o--; x++;}; return x-1;};
+           // grouping     
+           for (var ti=0,t,si;t=tokens[ti];ti++) if (t[1]=="(") glue(ti,si=match(),6,[[4,"("],...translate(tokens.slice(ti+1,si)),[4,")"]]); 
+           // [] . call and new
+           for (var ti=0,t,si; t=tokens[ti];ti++) {
+             if (t[1]=="[") { glue(ti,si=match("[","]"),6,[[4,"["],...translate(tokens.slice(ti+1,si)),[4,"]"]]); if (ti)ti--;}
+             else if (t[1]==".") { glue(left(),right()); ti--; }
+             else if (t[0]==6 && ti && left()>=0 && tokens[left()][0]>=5 && tokens[left()][1]!="return") { glue(left(),ti--) }
+             else if (t[1]=='new') { glue(ti,right()) };
+           }
+           // ++ and --
+           for (var ti=0,t; t=tokens[ti];ti++) if (t[1]=="++" || t[1]=="--") glue(left(),ti);  
+           // unary - and + are handled seperately from syntax ..
+           for (var ti=0,t,si; t=tokens[ti];ti++) 
+             if (t[1]=="-" && (left()<0 || (tokens[left()]||[4])[0]==4)) glue(ti,right(),5,["Element.Sub(",tokens[right()],")"]);
+             else if (t[1]=="+" && (tokens[left()]||[0])[0]==4) glue(ti,ti+1);
+           // now process all overloaded operators .. 
+           for (var si=0,s; s=syntax[si]; si++) for (var ti=s[0][3]?tokens.length-1:0,t; t=tokens[ti];s[0][3]?ti--:ti++) for (var opi=0,op; op=s[opi]; opi++) if (t[1]==op[0]) {
+                    if (op[2]==2) { var arg=tokens[left()]; glue(ti-1,ti,5,["Element."+op[1],"(",arg,")"]); }
+               else if (op[2])    { var arg=tokens[right()]; glue(ti, ti+1, 5, ["Element."+op[1],"(",arg,")"]); }
+                             else { var l=left(),r=right(),a1=tokens[l],a2=tokens[r]; glue(l,r,5,["Element."+op[1],"(",a1,",",a2,")"]); ti--; }
+           }
+           return tokens;
+        }        
       // Glue all back together and return as bound function.  
-        return eval('('+(function f(t){return t.map(t=>t[0]instanceof Array?f(t):t[1]).join('');})(translate(tok))+')');
+        return eval( ('('+(function f(t){return t.map(t=>t instanceof Array?f(t):typeof t == "string"?t:"").join('');})(translate(tok))+')') );
       }
     }
     
