@@ -1012,36 +1012,42 @@
       // Translate algebraic literals. (scientific e-notation to "this.Coeff"
         tok=tok.map(t=>(t[0]==2)?[2,'Element.Coeff('+basis.indexOf('e'+(t[1].split(/e_|e|i/)[1]||1))+','+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
       // We support two syntaxes, standard js or if you pass in a text, asciimath.       
-        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['>>>','sw',0,1]],[['^','Wedge'],['&','Vee'],['<<','Dot']],[['*','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
+        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['^','Wedge'],['&','Vee'],['<<','Dot']],[['*','Mul'],['/','Div']],[['>>>','sw',0,1]],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
                                                 :[[['pi','Math.PI'],['sin','Math.sin']],[['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual']],[['^','Pow',0,1]],[['^^','Wedge'],['*','Dot']],[['**','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]];
       // For asciimath, some fixed translations apply (like pi->Math.PI) etc ..                                          
         tok=tok.map(t=>(t[0]!=5)?t:[].concat.apply([],syntax).filter(x=>x[0]==t[1]).length?[5,[].concat.apply([],syntax).filter(x=>x[0]==t[1])[0][1]]:t); 
       // Now the token-stream is translated recursively.    
         function translate(tokens) {
-           // helpers, scanning, glueing, find matching brackets. 
+           // helpers : first token to the left of x that is not of a type in the skip list.
            var left = (x=ti-1,skip=[0])=>{ while(x>=0&&~skip.indexOf(tokens[x][0])) x--; return x; },
+           // first token to the right of x that is not of a type in the skip list.
                right= (x=ti+1,skip=[0])=>{ while(x<tokens.length&&~skip.indexOf(tokens[x][0])) x++; return x; },
+           // glue from x to y as new type, optionally replace the substring with sub.    
                glue = (x,y,tp=5,sub)=>{tokens.splice(x,y-x+1,[tp,...(sub||tokens.slice(x,y+1))])},
+           // match O-C pairs. returns the 'matching bracket' position    
                match = (O="(",C=")")=>{var o=1,x=ti+1; while(o){if(tokens[x][1]==O)o++;if(tokens[x][1]==C)o--; x++;}; return x-1;};
-           // grouping     
+           // grouping (resolving brackets).    
            for (var ti=0,t,si;t=tokens[ti];ti++) if (t[1]=="(") glue(ti,si=match(),6,[[4,"("],...translate(tokens.slice(ti+1,si)),[4,")"]]); 
-           // [] . call and new
+           // [] dot call and new
            for (var ti=0,t,si; t=tokens[ti];ti++) {
-             if (t[1]=="[") { glue(ti,si=match("[","]"),6,[[4,"["],...translate(tokens.slice(ti+1,si)),[4,"]"]]); if (ti)ti--;}
-             else if (t[1]==".") { glue(left(),right()); ti--; }
-             else if (t[0]==6 && ti && left()>=0 && tokens[left()][0]>=5 && tokens[left()][1]!="return") { glue(left(),ti--) }
-             else if (t[1]=='new') { glue(ti,right()) };
+             if (t[1]=="[") { glue(ti,si=match("[","]"),6,[[4,"["],...translate(tokens.slice(ti+1,si)),[4,"]"]]); if (ti)ti--;}    // matching []
+             else if (t[1]==".") { glue(left(),right()); ti--; }                                                                   // dot operator
+             else if (t[0]==6 && ti && left()>=0 && tokens[left()][0]>=5 && tokens[left()][1]!="return") { glue(left(),ti--) }     // collate ( and [
+             else if (t[1]=='new') { glue(ti,right()) };                                                                           // collate new keyword
            }
            // ++ and --
            for (var ti=0,t; t=tokens[ti];ti++) if (t[1]=="++" || t[1]=="--") glue(left(),ti);  
            // unary - and + are handled seperately from syntax ..
            for (var ti=0,t,si; t=tokens[ti];ti++) 
-             if (t[1]=="-" && (left()<0 || (tokens[left()]||[4])[0]==4)) glue(ti,right(),5,["Element.Sub(",tokens[right()],")"]);
-             else if (t[1]=="+" && (tokens[left()]||[0])[0]==4) glue(ti,ti+1);
-           // now process all overloaded operators .. 
+             if (t[1]=="-" && (left()<0 || (tokens[left()]||[4])[0]==4)) glue(ti,right(),5,["Element.Sub(",tokens[right()],")"]);   // unary minus works on all types.
+             else if (t[1]=="+" && (tokens[left()]||[0])[0]==4) glue(ti,ti+1);                                                      // unary plus is glued, only on scalars.
+           // now process all operators in the syntax list .. 
            for (var si=0,s; s=syntax[si]; si++) for (var ti=s[0][3]?tokens.length-1:0,t; t=tokens[ti];s[0][3]?ti--:ti++) for (var opi=0,op; op=s[opi]; opi++) if (t[1]==op[0]) {
-                    if (op[2]==2) { var arg=tokens[left()]; glue(ti-1,ti,5,["Element."+op[1],"(",arg,")"]); }
-               else if (op[2])    { var arg=tokens[right()]; glue(ti, ti+1, 5, ["Element."+op[1],"(",arg,")"]); }
+             // exception case .. ".Normalized" and ".Length" properties are re-routed (so they work on scalars etc ..)
+                    if (op[2]==2) { var arg=tokens[left()]; glue(ti-1,ti,5,["Element."+op[1],"(",arg,")"]); }                                    
+             // unary operators (all are to the left)      
+               else if (op[2])    { var arg=tokens[right()]; glue(ti, right(), 5, ["Element."+op[1],"(",arg,")"]); }
+             // binary operators  
                              else { var l=left(),r=right(),a1=tokens[l],a2=tokens[r]; glue(l,r,5,["Element."+op[1],"(",a1,",",a2,")"]); ti--; }
            }
            return tokens;
