@@ -852,7 +852,7 @@
               normal = [...((Element.LDot(Element.Mul(attitude,1/weight2),I3)).Normalized).slice(1,4)];
             }
           }
-          return {tp,pos,normal,tg,btg,weight2}
+          return {tp,pos:pos.map(x=>x*(options.scale||1)),normal,tg,btg,weight2:weight2*(options.scale||1)}
         };                 
       // canvas update will (re)render the content.            
         var armed=0,sphere;
