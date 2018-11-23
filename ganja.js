@@ -117,7 +117,7 @@
    
   /// Convert Caeyley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
   /// is the left contraction.           
-    var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0')), gpo={}, opo={};          // Storage for our product tables.
+    var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), cps=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0')), gpo={}, opo={};          // Storage for our product tables.
     basis.forEach((x,xi)=>basis.forEach((y,yi)=>{
       var n  = mulTable[xi][yi].replace(/^-/,''); if (n==0) n = mulTable2[xi][yi].replace(/^-/,''); if (!gpo[n]) gpo[n]=[]; gpo[n].push([xi,yi]);
       var n2 = mulTable2[xi][yi].replace(/^-/,''); if (!opo[n2]) opo[n2]=[]; opo[n2].push([xi,yi]);
@@ -127,6 +127,7 @@
       gpo[o].forEach(([xi,yi])=>{
         gp[oi][xi]=(mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';
         cp[oi][xi]=(grades[oi]==grades[yi]-grades[xi])?gp[oi][xi]:'0'; 
+        cps[oi][xi]=(grades[oi]==Math.abs(grades[yi]-grades[xi]))?gp[oi][xi]:'0'; 
       });
     });
     
@@ -159,7 +160,8 @@
     generator.prototype.Add   = new Function('b,res','res=res||new this.constructor();\n'+basis.map((x,xi)=>'res['+xi+']=b['+xi+']+this['+xi+']').join(';\n').replace(/(b|this)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';\nreturn res')
     generator.prototype.Sub   = new Function('b,res','res=res||new this.constructor();\n'+basis.map((x,xi)=>'res['+xi+']=this['+xi+']-b['+xi+']').join(';\n').replace(/(b|this)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';\nreturn res')
     generator.prototype.Mul   = new Function('b,res','res=res||new this.constructor();\n'+gp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a).replace(/\+0/g,'')+';').join('\n')+'\nreturn res;');
-    generator.prototype.Dot   = new Function('b,res','res=res||new this.constructor();\n'+cp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
+    generator.prototype.LDot  = new Function('b,res','res=res||new this.constructor();\n'+cp.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
+    generator.prototype.Dot   = new Function('b,res','res=res||new this.constructor();\n'+cps.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
     generator.prototype.Wedge = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+ri+']='+r.join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
     generator.prototype.Vee   = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+drm[ri]+']='+r.map(x=>x.replace(/\[(.*?)\]/g,function(a,b){return '['+(drm[b|0])+']'})).join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
 
@@ -278,13 +280,25 @@
         return r2;
       }    
     // Left contraction.
-      Dot(b,r) {
+      LDot(b,r) {
         r=r||new this.constructor();
         for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
           if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
           else { 
              var rn=simplify_bits(basis_bits[gsx+a],basis_bits[gsy+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
              if (g == j-i) { if (!r[g])r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb]; }
+          }  
+        }
+        return r;
+      }    
+    // Symmetric contraction.
+      LDot(b,r) {
+        r=r||new this.constructor();
+        for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
+          if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
+          else { 
+             var rn=simplify_bits(basis_bits[gsx+a],basis_bits[gsy+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
+             if (g == Math.abs(j-i)) { if (!r[g])r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb]; }
           }  
         }
         return r;
@@ -397,11 +411,20 @@
       }  
       
     // The inner product. (default is left contraction).  
-      static Dot(a,b,res)   {  
+      static LDot(a,b,res)   {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); //if (a.Dot) return a.Dot(b,res);
+        while(a.call)a=a(); while(b.call)b=b(); //if (a.LDot) return a.LDot(b,res);
       // js if numbers, else contraction product.  
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
+        a=Element.toEl(a);b=Element.toEl(b); return a.LDot(b,res); 
+      }  
+ 
+    // The symmetric inner product. (default is left contraction).  
+      static Dot(a,b,res)   {  
+      // Expressions
+        while(a.call)a=a(); while(b.call)b=b(); //if (a.LDot) return a.LDot(b,res);
+      // js if numbers, else contraction product.  
+        if (!(a instanceof Element || b instanceof Element)) return a|b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Dot(b,res); 
       }  
       
@@ -533,14 +556,14 @@
               var b1=o.Grade(1).VLength>0.001,b2=o.Grade(2).VLength>0.001,b3=o.Grade(3).VLength>0.001; 
             // Points  
               if (b1 && !b2 && !b3) { lx=o.e1; ly=-o.e2; lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`; }
-              else if (!b1 && !b2 && b3) { var isLine=Element.Coeff(4,1,3,-1).Dot(o).Length==0; 
+              else if (!b1 && !b2 && b3) { var isLine=Element.Coeff(4,1,3,-1).LDot(o).Length==0; 
               // Lines.
-                if (isLine) { var loc=((Element.Coeff(4,-.5).Add(Element.Coeff(3,-.5))).Dot(o)).Div(o), att=(Element.Coeff(4,1,3,-1)).Dot(o); lx=-loc.e1; ly=loc.e2; lr=Math.atan2(att[8],att[7])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;};
+                if (isLine) { var loc=((Element.Coeff(4,-.5).Add(Element.Coeff(3,-.5))).LDot(o)).Div(o), att=(Element.Coeff(4,1,3,-1)).LDot(o); lx=-loc.e1; ly=loc.e2; lr=Math.atan2(att[8],att[7])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="0.005" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;};
               // Circles.  
-                var loc=o.Div((Element.Coeff(4,1,3,-1)).Dot(o)); lx=-loc.e1; ly=loc.e2; var r=-o.Mul(o.Conjugate).s/(Element.Pow((Element.Coeff(4,1,3,-1)).Dot(o),2).s); r=r**0.5; return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`;   
+                var loc=o.Div((Element.Coeff(4,1,3,-1)).LDot(o)); lx=-loc.e1; ly=loc.e2; var r=-o.Mul(o.Conjugate).s/(Element.Pow((Element.Coeff(4,1,3,-1)).LDot(o),2).s); r=r**0.5; return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`;   
               } else if (!b1 && b2 &&!b3) { 
               // Point Pairs.
-                lr=0; var ei=Element.Coeff(4,1,3,-1),eo=Element.Coeff(4,.5,3,.5), nix=o.Wedge(ei), sqr=o.Dot(o).s/nix.Dot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).Dot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.Dot(Element.Sub(ei))); 
+                lr=0; var ei=Element.Coeff(4,1,3,-1),eo=Element.Coeff(4,.5,3,.5), nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei))); 
                 lx=pos.e1; ly=-pos.e2; if (sqr<0) return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`;
                 lx=pos.e1+attitude.e1; ly=-pos.e2-attitude.e2; var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`;
                 lx=pos.e1-attitude.e1; ly=-pos.e2+attitude.e2; return res2+`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="0.03" fill="${color||'green'}"/>`;
@@ -786,19 +809,19 @@
         var interprete = (x)=>{
           if (!(x instanceof Element)) return { tp:0 };
           // tp = { 0:unknown 1:point 2:line, 3:plane, 4:circle, 5:sphere
-          var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ninf.Wedge(x), ipnix = ninf.Dot(x), 
+          var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ninf.Wedge(x), ipnix = ninf.LDot(x), 
               attitude, pos, normal, tg,btg,epsilon = 0.001, I3=Element.Coeff(16,-1);
           var x2zero = Math.abs(X2) < epsilon, ipnixzero = ipnix.VLength < epsilon, opnixzero = opnix.VLength < epsilon;
           if (opnixzero && ipnixzero) {                 // free flat
           } else if (opnixzero && !ipnixzero) {         // bound flat (lines)
-            attitude = no.Wedge(ninf).Dot(x); 
-            weight2 = Math.abs(attitude.Dot(attitude).s)**.5;
-            pos = attitude.Dot(x.Reverse); //Inverse);
+            attitude = no.Wedge(ninf).LDot(x); 
+            weight2 = Math.abs(attitude.LDot(attitude).s)**.5;
+            pos = attitude.LDot(x.Reverse); //Inverse);
             pos = [-pos.e15/pos.e45,-pos.e25/pos.e45,-pos.e34/pos.e45];
             if (x.Grade(3).VLength) {
               normal = [attitude.e1/weight2,attitude.e2/weight2,attitude.e3/weight2]; tp=2; 
             } else {
-              normal = Element.Dot(Element.Mul(attitude,1/weight2),I3).Normalized;
+              normal = Element.LDot(Element.Mul(attitude,1/weight2),I3).Normalized;
               var r=normal.Mul(Element.Coeff(3,1)); if (r[0]==-1) r[0]=1; else {r[0]+=1; r=r.Normalized;}
               tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Conjugate)].slice(1,4);
               btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Conjugate)].slice(1,4);
@@ -806,27 +829,27 @@
             }
           } else if (!opnixzero && ipnixzero) {         // dual bound flat
           } else if (x2zero) {                          // bound vec,biv,tri (points)
-            attitude = ninf.Wedge(no).Dot(ninf.Wedge(x)); 
-            pos = [...(Element.Dot(1/(ninf.Dot(x)).s,x)).slice(1,4)].map(x=>-x);
+            attitude = ninf.Wedge(no).LDot(ninf.Wedge(x)); 
+            pos = [...(Element.LDot(1/(ninf.LDot(x)).s,x)).slice(1,4)].map(x=>-x);
             tp=1; 
           } else if (!x2zero) {                          // round (point pair,circle,sphere)
             tp = x.Grade(3).VLength?4:x.Grade(2).VLength?6:5; 
             var nix  = ninf.Wedge(x), nix2 = (nix.Mul(nix)).s;
-            attitude = ninf.Wedge(no).Dot(nix);
+            attitude = ninf.Wedge(no).LDot(nix);
             pos = [...(x.Mul(ninf).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
-            weight2 = Math.abs((x.Dot(x)).s / nix2)**.5;
+            weight2 = Math.abs((x.LDot(x)).s / nix2)**.5;
             if (tp==4) {
-              if (x.Dot(x).s < 0) { weight2 = -weight2; }
-              normal = Element.Dot(Element.Mul(attitude,1/weight2),I3).Normalized;
+              if (x.LDot(x).s < 0) { weight2 = -weight2; }
+              normal = Element.LDot(Element.Mul(attitude,1/weight2),I3).Normalized;
               var r=normal.Mul(Element.Coeff(3,1)); if (r[0]==-1) r[0]=1; else {r[0]+=1; r=r.Normalized;}
               tg = [...r.Mul(Element.Coeff(1,1)).Mul(r.Conjugate)].slice(1,4);
               btg = [...r.Mul(Element.Coeff(2,1)).Mul(r.Conjugate)].slice(1,4);
               normal = [...normal.slice(1,4)]; 
             } else if (tp==6) {
-              weight2 = (x.Dot(x).s < 0)?-(weight2):weight2;
+              weight2 = (x.LDot(x).s < 0)?-(weight2):weight2;
               normal = Element.Mul(attitude.Normalized,weight2).slice(1,4);
             } else {
-              normal = [...((Element.Dot(Element.Mul(attitude,1/weight2),I3)).Normalized).slice(1,4)];
+              normal = [...((Element.LDot(Element.Mul(attitude,1/weight2),I3)).Normalized).slice(1,4)];
             }
           }
           return {tp,pos,normal,tg,btg,weight2}
@@ -914,7 +937,7 @@
           // PGA   
           // Convert lines to line segments.  
             if (e instanceof Element && e.Grade(2).Length) 
-               e=[e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.Dot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
+               e=[e.LDot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.LDot(Element.Coeff(14,1)).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
           // If euclidean point, store as point, store line segments and triangles.
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
             if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()])); 
@@ -1012,8 +1035,8 @@
       // Translate algebraic literals. (scientific e-notation to "this.Coeff"
         tok=tok.map(t=>(t[0]==2)?[2,'Element.Coeff('+basis.indexOf('e'+(t[1].split(/e_|e|i/)[1]||1))+','+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
       // We support two syntaxes, standard js or if you pass in a text, asciimath.       
-        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['^','Wedge'],['&','Vee'],['<<','Dot']],[['*','Mul'],['/','Div']],[['>>>','sw',0,1]],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
-                                                :[[['pi','Math.PI'],['sin','Math.sin']],[['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual']],[['^','Pow',0,1]],[['^^','Wedge'],['*','Dot']],[['**','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]];
+        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['^','Wedge'],['&','Vee'],['|','Dot'],['<<','LDot']],[['*','Mul'],['/','Div']],[['>>>','sw',0,1]],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
+                                                :[[['pi','Math.PI'],['sin','Math.sin']],[['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual']],[['^','Pow',0,1]],[['^^','Wedge'],['*','LDot']],[['**','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]];
       // For asciimath, some fixed translations apply (like pi->Math.PI) etc ..                                          
         tok=tok.map(t=>(t[0]!=5)?t:[].concat.apply([],syntax).filter(x=>x[0]==t[1]).length?[5,[].concat.apply([],syntax).filter(x=>x[0]==t[1])[0][1]]:t); 
       // Now the token-stream is translated recursively.    
