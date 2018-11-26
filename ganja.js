@@ -712,7 +712,7 @@
         // Basic mouse interactivity. needs more love.
         var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{ e.preventDefault(); e.stopPropagation(); sel=-2;
           var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*-4+2)*canvas.height/canvas.width;
-          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
+          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z = (options.z||5)+e.deltaY/100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
           canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
           canvas.onmousemove=(e)=>{ 
             var rc = canvas.getBoundingClientRect(); 
@@ -720,7 +720,6 @@
             if (sel==-2) { options.h =  (options.h||0)+mx; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; }; if (sel < 0) return;
           }
         }
-        options.h=0;options.z=5;
         canvas.value = f.call?f():f; canvas.options = options;
         if (options&&options.still) {
           var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
@@ -928,7 +927,7 @@
                 if (typeof(e)=='string') {
                   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); 
                   draw(program2,gl.TRIANGLES, 
-                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return (0.05*options.z)*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
+                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return (0.05*(options.z||5))*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
                        [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
                 }
               }
@@ -989,7 +988,7 @@
               if ((mx-pos2[0])**2 + (my-pos2[1])**2 < 0.01) sel=i;
             }
           });
-          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z += e.deltaY/100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
+          canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z = (options.z||5)+e.deltaY/100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
           canvas.onmouseup=e=>sel=-1; canvas.onmouseleave=e=>sel=-1;
           var tx,ty; canvas.ontouchstart = (e)=>{e.preventDefault();  canvas.focus(); var x = e.changedTouches[0].pageX, y = e.changedTouches[0].pageY; tx=x; ty=y; }
           canvas.ontouchmove = function (e) { e.preventDefault();
@@ -1007,7 +1006,6 @@
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
         }
-        options.h=0;options.z=5;
         canvas.value = f.call?f():f; canvas.options=options;
         if (options&&options.still) {
           var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
