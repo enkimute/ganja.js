@@ -922,6 +922,22 @@
                 if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
                 if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
                 if (alpha) gl.disable(gl.BLEND);
+                // we could also be an object with cached vertex array of triangles ..   
+                  if (e instanceof Object && e.data) {
+                    // Create the vertex array and store it for re-use.
+                    if (!e.va) {
+                      var et=[],et2=[],lc=0,pc=0; e.data.forEach(e=>{ 
+                        var d = interprete(e); 
+                        if (d.tp==1) { pc++; et.push(...d.pos);  }
+                        if (d.tp==2) { lc++; et2.push(...d.pos.map((x,i)=>x-d.normal[i]*10),...d.pos.map((x,i)=>x+d.normal[i]*10)); }
+                      });
+                      e.va = createVA(et,undefined); e.va.tcount = pc;
+                      e.va2 = createVA(et2,undefined); e.va2.tcount = lc*2;
+                    }
+                    // render the vertex array.
+                    if (e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
+                    if (e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
+                  }
               // setup a new color  
                 if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
                 if (typeof(e)=='string') {
