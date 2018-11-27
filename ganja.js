@@ -851,7 +851,7 @@
               normal = [...((Element.LDot(Element.Mul(attitude,1/weight2),I3)).Normalized).slice(1,4)];
             }
           }
-          return {tp,pos:pos.map(x=>x*(options.scale||1)),normal,tg,btg,weight2:weight2*(options.scale||1)}
+          return {tp,pos:pos?pos.map(x=>x*(options.scale||1)):[0,0,0],normal,tg,btg,weight2:weight2*(options.scale||1)}
         };                 
       // canvas update will (re)render the content.            
         var armed=0,sphere;
@@ -1017,7 +1017,7 @@
             if (sel==-2) { options.h =  (options.h||0)+mx; options.p = Math.max(-Math.PI/2,Math.min(Math.PI/2, (options.p||0)+my)); if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; }; 
             if (sel==-3) { var ct = Math.cos(options.h||0), st= Math.sin(options.h||0), ct2 = Math.cos(options.p||0), st2 = Math.sin(options.p||0);
               if (e.shiftKey) { options.posy = (options.posy||0)+my; } else { options.posx = (options.posx||0)+mx*ct+my*st; options.posz = (options.posz||0)+mx*-st+my*ct*ct2; } if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));return; }; if (sel < 0) return;
-            x.pos[0] += (e.buttons!=2)?Math.cos(-options.h)*mx:Math.sin(options.h)*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-options.h)*mx:Math.cos(options.h)*my;
+            x.pos[0] += (e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my;
             canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
