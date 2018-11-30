@@ -462,7 +462,9 @@
         while(a.call)a=a(); while(b.call)b=b();
       // js or call through to element divide.  
         if (!(a instanceof Element || b instanceof Element)) return a/b; 
-        a=Element.toEl(a);b=Element.toEl(b); return a.Div(b,res); 
+        a=Element.toEl(a);
+        if (1/b) return a.Mul(1/b,res);
+        b=Element.toEl(b); return a.Div(b,res); 
       }  
       
     // Pow - needs obvious extensions for natural powers. (exponentiation by squaring)  
