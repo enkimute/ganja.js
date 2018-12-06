@@ -608,8 +608,8 @@
       // Create canvas, get webGL2 context.
         var canvas=document.createElement('canvas'); canvas.style.width=options.width||''; canvas.style.height=options.height||''; canvas.style.backgroundColor='#EEE';
         if (options.width && options.width.match && options.width.match(/px/i)) canvas.width = parseFloat(options.width); if (options.height && options.height.match && options.height.match(/px/i)) canvas.height = parseFloat(options.height);
-        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'}); 
-        gl.clearColor(240/255,240/255,240/255,1.0); gl.enable(gl.DEPTH_TEST);
+        var gl=canvas.getContext('webgl',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'}); 
+        gl.clearColor(240/255,240/255,240/255,1.0); gl.enable(gl.DEPTH_TEST); gl.getExtension("EXT_frag_depth"); gl.va = gl.getExtension('OES_vertex_array_object');
       // Compile vertex and fragment shader, return program.
         var compile=(vs,fs)=>{
           var s=[gl.VERTEX_SHADER,gl.FRAGMENT_SHADER].map((t,i)=>{
@@ -622,7 +622,7 @@
         };
       // Create vertex array and buffers, upload vertices and optionally texture coordinates.
         var createVA=function(vtx) {
-          var r = gl.createVertexArray(); gl.bindVertexArray(r);
+          var r = gl.va.createVertexArrayOES(); gl.va.bindVertexArrayOES(r);
           var b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b);
           gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vtx), gl.STATIC_DRAW);
           gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(0);
@@ -630,7 +630,7 @@
         },
       // Destroy Vertex array and delete buffers.
         destroyVA=function(va) {
-          if (va.b) gl.deleteBuffer(va.b); if (va.r) gl.deleteVertexArray(va.r);
+          if (va.b) gl.deleteBuffer(va.b); if (va.r) gl.va.deleteVertexArrayOES(va.r);
         }
       // Drawing function  
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1];
@@ -643,26 +643,26 @@
             if (b) gl.uniform1fv(gl.getUniformLocation(p, "b"),(new Float32Array(counts[g])).map((x,i)=>b[g][i]||0));
             if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
             if (r) gl.uniform1f(gl.getUniformLocation(p,"ratio"),r);
-            var v; if (!va) v = createVA(vtx); else gl.va.bindVertexArrayOES(va.r);
+            var v; if (!va) v = createVA(vtx); else gl.va.bindVertexArrayOESOES(va.r);
             gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
             if (v) destroyVA(v);
         }
       // Compile the OPNS renderer. (sphere tracing)
-        var programs = [], genprog = grade=>compile(`#version 300 es
-             in vec4 position; out vec4 Pos; uniform mat4 mv; uniform mat4 p;
+        var programs = [], genprog = grade=>compile(`
+             attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
              void main() { Pos=mv*position; gl_Position = p*Pos; }`,
-            `#version 300 es
+            `#extension GL_EXT_frag_depth : enable
              precision highp float;  
              uniform vec3 color; uniform vec3 color2; 
              uniform vec3 color3; uniform float b[${counts[grade]}];
              uniform float ratio;
-             in vec4 Pos; out vec4 col; 
+             varying vec4 Pos; 
              float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
                 ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
                 return ${grade!=tot-1?"sign(sum)*sqrt(abs(sum))":"res"};
              }
              vec3 trace_depth (in vec3 start, vec3 dir, in float thresh) {
-                vec3 orig=start; float lastd = 1000.0; int count=${(options.maxSteps||64)};
+                vec3 orig=start; float lastd = 1000.0; const int count=${(options.maxSteps||64)};
                 float s =  sign(dist(start[0],start[1],start[2],b));
                 for (int i=0; i<count; i++) {
                   float d = s*dist(start[0],start[1],start[2],b);
@@ -683,8 +683,8 @@
                         dist(d2[0],d2[1]+h,d2[2],b)-dist(d2[0],d2[1]-h,d2[2],b),
                         dist(d2[0],d2[1],d2[2]+h,b)-dist(d2[0],d2[1],d2[2]-h,b)
                       ));
-                 gl_FragDepth = dl2/50.0;
-                 col = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
+                 gl_FragDepthEXT = dl2/50.0;
+                 gl_FragColor = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
                } else discard; 
              }`);
       // canvas update will (re)render the content.            
@@ -857,7 +857,7 @@
           return {tp,pos:pos?pos.map(x=>x*(options.scale||1)):[0,0,0],normal,tg,btg,weight2:weight2*(options.scale||1)}
         };                 
       // canvas update will (re)render the content.            
-        var armed=0,sphere,e14 = element.Coeff(14,1);
+        var armed=0,sphere,e14 = Element.Coeff(14,1);
         canvas.update = (x)=>{
         // Start by updating canvas size if needed and viewport.
           var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width); canvas.height = parseFloat(s.height); }
