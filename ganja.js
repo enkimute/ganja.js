@@ -608,8 +608,10 @@
       // Create canvas, get webGL2 context.
         var canvas=document.createElement('canvas'); canvas.style.width=options.width||''; canvas.style.height=options.height||''; canvas.style.backgroundColor='#EEE';
         if (options.width && options.width.match && options.width.match(/px/i)) canvas.width = parseFloat(options.width); if (options.height && options.height.match && options.height.match(/px/i)) canvas.height = parseFloat(options.height);
-        var gl=canvas.getContext('webgl',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'}); 
-        gl.clearColor(240/255,240/255,240/255,1.0); gl.enable(gl.DEPTH_TEST); gl.getExtension("EXT_frag_depth"); gl.va = gl.getExtension('OES_vertex_array_object');
+        var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'});
+        var gl2=!!gl; if (!gl) gl=canvas.getContext('webgl',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'});
+        gl.clearColor(240/255,240/255,240/255,1.0); gl.enable(gl.DEPTH_TEST); if (!gl2) { gl.getExtension("EXT_frag_depth"); gl.va = gl.getExtension('OES_vertex_array_object'); }
+        else gl.va = { createVertexArrayOES : gl.createVertexArray.bind(gl), bindVertexArrayOES : gl.bindVertexArray.bind(gl), deleteVertexArrayOES : gl.deleteVertexArray.bind(gl)  }
       // Compile vertex and fragment shader, return program.
         var compile=(vs,fs)=>{
           var s=[gl.VERTEX_SHADER,gl.FRAGMENT_SHADER].map((t,i)=>{
@@ -648,15 +650,15 @@
             if (v) destroyVA(v);
         }
       // Compile the OPNS renderer. (sphere tracing)
-        var programs = [], genprog = grade=>compile(`
-             attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
+        var programs = [], genprog = grade=>compile(`${gl2?"#version 300 es":""}
+             ${gl2?"in":"attribute"} vec4 position; ${gl2?"out":"varying"} vec4 Pos; uniform mat4 mv; uniform mat4 p;
              void main() { Pos=mv*position; gl_Position = p*Pos; }`,
-            `#extension GL_EXT_frag_depth : enable
+            `${!gl2?"#extension GL_EXT_frag_depth : enable":"#version 300 es"}
              precision highp float;  
              uniform vec3 color; uniform vec3 color2; 
              uniform vec3 color3; uniform float b[${counts[grade]}];
-             uniform float ratio;
-             varying vec4 Pos; 
+             uniform float ratio; ${gl2?"out vec4 col;":""}
+             ${gl2?"in":"varying"} vec4 Pos; 
              float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
                 ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
                 return ${grade!=tot-1?"sign(sum)*sqrt(abs(sum))":"res"};
@@ -683,8 +685,8 @@
                         dist(d2[0],d2[1]+h,d2[2],b)-dist(d2[0],d2[1]-h,d2[2],b),
                         dist(d2[0],d2[1],d2[2]+h,b)-dist(d2[0],d2[1],d2[2]-h,b)
                       ));
-                 gl_FragDepthEXT = dl2/50.0;
-                 gl_FragColor = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
+                 ${gl2?"gl_FragDepth":"gl_FragDepthEXT"} = dl2/50.0;
+                 ${gl2?"col":"gl_FragColor"} = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
                } else discard; 
              }`);
       // canvas update will (re)render the content.            
@@ -859,6 +861,8 @@
       // canvas update will (re)render the content.            
         var armed=0,sphere,e14 = Element.Coeff(14,1);
         canvas.update = (x)=>{
+        // restore from still..
+          if (options && !options.still && canvas.im && canvas.im.parentElement) { canvas.im.parentElement.insertBefore(canvas,canvas.im); canvas.im.parentElement.removeChild(canvas.im); }
         // Start by updating canvas size if needed and viewport.
           var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width); canvas.height = parseFloat(s.height); }
           gl.viewport(0,0, canvas.width|0,canvas.height|0); var r=canvas.width/canvas.height;
@@ -999,7 +1003,9 @@
           armed++; if (document.body.contains(canvas)) armed=0; if (armed==2) return;
           canvas.value=x; if (options&&!options.animate) canvas.dispatchEvent(new CustomEvent('input')); canvas.options=options;
           if (options&&options.animate) { requestAnimationFrame(canvas.update.bind(canvas,f,options)); }
-          if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.width=canvas.width; canvas.im.height=canvas.height; canvas.im.src = canvas.toDataURL(); }
+          if (options&&options.still) { canvas.value=x; canvas.dispatchEvent(new CustomEvent('input')); canvas.im.style.width=canvas.style.width; canvas.im.style.height=canvas.style.height; canvas.im.src = canvas.toDataURL(); 
+            var p=canvas.parentElement;  if (p) { p.insertBefore(canvas.im,canvas); p.removeChild(canvas); }
+          }
         }
         // Basic mouse interactivity. needs more love.
         var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{e.preventDefault(); e.stopPropagation();  if (e.detail===0) return; 
@@ -1031,7 +1037,7 @@
         }
         canvas.value = f.call?f():f; canvas.options=options;
         if (options&&options.still) {
-          var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),i;
+          var i=new Image(); canvas.im = i; return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
         } else return requestAnimationFrame(canvas.update.bind(canvas,f,options)),canvas;
       }  
     
