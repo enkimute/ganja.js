@@ -1,0 +1,66 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Given a series of temperature measurements made in a bowl of water that is being
+// heated, fit Newton's law of cooling and determine the temperature of the heater,
+// the starting temperature of the water and "r", proportional to the heat transfer
+// coefficient.
+
+// 3D PGA to model a 3 parameter non-linear function.
+var PGA3D = Algebra(3,0,1);
+    
+// Our model function (Newton law of cooling)
+var f = PGA3D.inline(([Te,T0,r],t)=>Te+(T0-Te)*Math.E**(-r*t));
+
+// Generate random samples of our model with 10% noise.
+var gt = [222,19.8,0.000697], // ground truth
+    samples = [...Array(400)].map((x,i)=>f(gt,i)*(0.95+Math.random()*0.1));
+
+// Levenberg-Marquardt with automatic differentiation and wedge product solve to fit the model to the samples.
+var lm = PGA3D.inline((par,y,func,terr=1E-12,nit=5000,step=10)=>{ 
+    var np=par.length,lambda=1E-4, err=y.reduce((sum,x,i)=>sum+(x-func(par,i))**2,0);
+    for (var it=0; it<nit; it++) {
+    // In PGA, the Hessian and residual combine into a vector of planes.    
+      for (var FG, H=[0,0,0],x=0; x<y.length; x++) {          // Loop over all samples
+        FG = !1e0*!(y[x]-func(par+[1e01,1e02,1e03],x));       // residual and gradient plane for this sample (scal/biv)->vec
+        H  = H+[FG.e1,FG.e2,FG.e3]*FG;                        // accumulation of residual planes in H. (isomorph to RtR in LA language)
+      }
+    // Use this approximation while the error improves  
+      while (it<nit) {
+        for (var i=0; i<np; i++) H[i][2+i]*=(1+lambda);       // Fletcher, use +=lambda for Marquardt
+        var delta  = !(H[0]^H[1]^H[2]);                       // Solve system and dualize to find update vector.
+        var newpar = par.map((x,i)=>x+delta[i+2]/-delta.e0);  // homogenous divide and apply update vector
+        var newerr = y.reduce((sum,x,i)=>sum+(x-func(newpar,i))**2,0), derr=newerr-err; 
+        if (derr>0) { lambda *= step; it++; } else break;
+      }
+    // Revert lambda move and re-evaluate hessian.  
+      for (i=0; i<np; i++) par[i] = newpar[i]; err = newerr; lambda /= step; 
+      if (-derr<terr) break;
+    }
+    par.it=it; return par;    
+})
+
+// Estimate the model parameters
+var est = lm([100,5,0.001],samples,f);
+
+// To visualize the estimate, we generate some data using the estimate, ground truth and initial guess.
+var est_points = [...Array(400)].map((x,i)=>f(est,i));
+var act_points = [...Array(400)].map((x,i)=>f(gt,i));
+var start_points = [...Array(400)].map((x,i)=>f([100,5,0.001],i));
+
+// render
+Algebra(2,0,1).inline((t,s,s2,s3,s4)=>{
+  s = s.map((y,x)=>!(1e0+.008e1*(x-200)-.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
+  s2 = s2.map((y,x)=>!(1e0+.008e1*(x-200)-.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
+  s3 = s3.map((y,x)=>!(1e0+.008e1*(x-200)-.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
+  s4 = s4.map((y,x)=>!(1e0+.008e1*(x-200)-.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
+  document.body.appendChild(this.graph([...t,...s,0x008800,...s3,0xff0000,...s2,0xaaaaaa,...s4],{grid:1}));
+})([
+  "Levenberg Marquardt steps : "+est.it,
+  "heater temperature : "+est[0].toFixed(2)+"&deg;",
+  "water starting temperature : "+est[1].toFixed(2)+"&deg;",
+  "r &cong; heat transfer coefficient = "+est[2].toFixed(7),
+  "black = samples",0xAAAAAA,"grey = initial guess",0xFF0000,"red = final fit",0x008800,"green = ground truth",0x555555,
+],samples,est_points,act_points,start_points);
+</SCRIPT></BODY>
