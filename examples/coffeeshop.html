@@ -443,7 +443,7 @@
     updateStash();  
     
   // Close the introbar
-    function closeBar() { document.querySelector('.hider').style.height='0px'; postRun(); }  
+    function closeBar() { document.querySelector('.hider').style.height='0px'; postRun(); editor&&editor.resize(); }  
     
   // Setup sample group handlers
     [...document.querySelectorAll(".sampleGroup")].forEach(s=>{
