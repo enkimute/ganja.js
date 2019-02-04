@@ -137,7 +137,8 @@
       constructor(a) { super(a||basis.length); return this; }
  
     /// grade selection - return a only the part of the input with the specified grade.  
-      Grade(grade,res) { res=res||new MultiVector(); for (var i=0,l=res.length; i<l; i++) if (grades[i]==grade) res[i]=this[i]; else res[i]=0; return res; }
+      Grade(grade,res) { res=res||new this.constructor(); for (var i=0,l=res.length; i<l; i++) if (grades[i]==grade) res[i]=this[i]; else res[i]=0; return res; }
+      Even(res) { res=res||new this.constructor(); for (var i=0,l=res.length; i<l; i++) if (grades[i]%2==0) res[i]=this[i]; else res[i]=0; return res; }
       
     /// grade creation - convert array with just one grade to full multivector.
       nVector(grade,...args) { this.set(args,grade_start[grade]); return this; }
@@ -681,7 +682,7 @@
                vec3 p = -5.0*normalize(color2); 
                vec3 dir = normalize((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0));  p += 1.0*dir;
                vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
-               vec3 d2 = trace_depth( p , dir, ${grade!=tot-1?(options.thresh||0.2):"0.001"} );
+               vec3 d2 = trace_depth( p , dir, ${grade!=tot-1?(options.thresh||0.2):"0.0075"} );
                float dl2 = dot(d2-p,d2-p); const float h=0.1; 
                if (dl2>0.0) {
                  vec3 n = normalize(vec3(
@@ -818,7 +819,7 @@
           if (!(x instanceof Element)) return { tp:0 };
           // tp = { 0:unknown 1:point 2:line, 3:plane, 4:circle, 5:sphere
           var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ninf.Wedge(x), ipnix = ninf.LDot(x), 
-              attitude, pos, normal, tg,btg,epsilon = 0.001, I3=Element.Coeff(16,-1);
+              attitude, pos, normal, tg,btg,epsilon = 0.001/(options.scale||1), I3=Element.Coeff(16,-1);
           var x2zero = Math.abs(X2) < epsilon, ipnixzero = ipnix.VLength < epsilon, opnixzero = opnix.VLength < epsilon;
           if (opnixzero && ipnixzero) {                 // free flat
           } else if (opnixzero && !ipnixzero) {         // bound flat (lines)
