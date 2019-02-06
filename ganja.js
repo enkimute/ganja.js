@@ -125,9 +125,9 @@
     basis.forEach((o,oi)=>{
       opo[o].forEach(([xi,yi])=>op[oi][xi]=(grades[oi]==grades[xi]+grades[yi])?((mulTable2[xi][yi]=='0')?'0':((mulTable2[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']'):'0');
       gpo[o].forEach(([xi,yi])=>{
-        gp[oi][xi]=(mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']';
-        cp[oi][xi]=(grades[oi]==grades[yi]-grades[xi])?gp[oi][xi]:'0'; 
-        cps[oi][xi]=(grades[oi]==Math.abs(grades[yi]-grades[xi]))?gp[oi][xi]:'0'; 
+        gp[oi][xi]= ((gp[oi][xi]=='0')?'':gp[oi][xi]+'+') + ((mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']');
+        cp[oi][xi]= ((cp[oi][xi]=='0')?'':cp[oi][xi]+'+') + ((grades[oi]==grades[yi]-grades[xi])?gp[oi][xi]:'0'); 
+        cps[oi][xi]=((cps[oi][xi]=='0')?'':cps[oi][xi]+'+') + ((grades[oi]==Math.abs(grades[yi]-grades[xi]))?gp[oi][xi]:'0'); 
       });
     });
     
