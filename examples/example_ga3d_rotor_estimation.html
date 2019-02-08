@@ -1,0 +1,67 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+//** Quite an exotic example. We create a Clifford Algebra over dual vectors (with 3 dual components) **//
+//** and use it to do automatic differentiation and rotor estimation between point clouds.            **//
+//** for info see https://beta.observablehq.com/@enkimute/rotor-estimation-and-ad-in-ga               **//
+
+//** Create an algebra with x dual components (and a scalar) **//
+var Dualgebra = (x)=>Algebra({ 
+      basis  : [...Array(x+1)].map((a,i)=>i?'e0'+i:'1'),  metric : [1,...Array(x)],
+      Cayley : [...Array(x+1)].map((a,i)=>[...Array(x+1)].map((y,j)=>i*j==0?((i+j)?'e0'+(i+j):'1'):'0'))
+    });
+
+//** We'll use one with three dual components, and a clifford algebra over R3 **//
+var D3 = Dualgebra(3), R3 = Algebra(3);
+
+//** helper .. easily convert scalars or arrays of scalars to dual vectors. **//
+var d3 = (a,b,c,d)=>(a instanceof Array)?a.map(x=>d3(x)):(a instanceof D3)?a:new D3([a||0,b||0,c||0,d||0]);
+
+//** We upgrade the operators of R3 we need to work with D3 coefficients. This is where the functions of R3 **//
+//** get translated to work with Dual Vectors for each of their coefficients.                               **//
+var _GP    = D3.inline(R3.prototype.Mul),   GP    = (a,b)=>_GP.call(a,b),
+    _ADD   = D3.inline(R3.prototype.Add),   ADD   = (a,b)=>_ADD.call(a,b),
+    _SUB   = D3.inline(R3.prototype.Sub),   SUB   = (a,b)=>_SUB.call(a,b),
+    _SCALE = D3.inline(R3.prototype.Scale), SCALE = (a,s)=>_SCALE.call(a,s);
+
+//** We implement our own exp function using these operators and Taylor **//
+var EXP = (X)=>{
+  var R=d3([1,...Array(X.length-1)]), M, y=1, i=1;
+  while (i<25) { R=ADD(R, SCALE(M||X, 1/y)); M=GP(M||X,X); y=y*(++i); }
+  return R;  
+};
+
+//** random float between -x and x, vector length, rotate, cost function (avg of squared diffs) **//
+var r    = (x)=>(Math.random()*2-1)*(x||1),
+    VLEN = R=>R[1].Mul(R[1]).Add(R[2].Mul(R[2])).Add(R[3].Mul(R[3])),
+    ROT  = (R,x)=>GP(GP(EXP(SCALE(R,-0.5)),x),EXP(SCALE(R,0.5))),
+    COST = (G,Pa,Pb)=>Pa.reduce((C,Pa,x)=>C.Add(VLEN(SUB(ROT(G,Pa),Pb[x]))),d3()).Scale(1/Pa.length);
+
+//** Now we generate some random points, a rotation bivector, the rotated noisy points and our guess+dBV         **//
+//** For our guess, Each of the coefficients we wish to track (e12,e13,e23) gets a different dual unit added in. **//
+var points_a = [...Array(30)].map(x=>[0,r(),r(),r(),0,0,0,0]),
+    bv       = d3([0,0,0,0,Math.PI/3,Math.PI/7,0,0]),
+    points_b = points_a.map(x=>ADD(ROT(bv,x),[0,r(.01),r(.01),r(.01),0,0,0,0]).map(x=>x[0])),
+    guess    = d3([0,0,0,0,d3(0,1),d3(0,0,1),d3(0,0,0,1),0]);
+
+//** Now we implement Gradient Descent - step in the direction of negative cost **//
+for (var alpha=1,i=0; i<100; i++) {
+  var c = COST(guess,points_a,points_b); if (c[0]<5E-4) break;
+  guess = ADD(guess,[0,0,0,0,-c[1]*alpha,-c[2]*alpha,-c[3]*alpha,0])
+}
+
+//** We are done.. code below is graphing results.. **/
+var points_c = points_a.map(x=>ROT(guess,x));
+document.body.appendChild(Algebra(3,0,1).inline((pa,pb,pc,i)=>{
+  // convert the arrays to 3D PGA points.
+  var conv = x=>x.map(x=>!(x[1][0]*1e1+(-.75+x[2][0])*1e2+x[3][0]*1e3+1e0));
+  // initial camera and items to render.
+  var camera = Math.E**1e23, items=[...conv(pa),0xFF0000,...conv(pb),0x0000FF,...conv(pc)];
+  // graph in gl, animate and wiggle the camera
+  return this.graph(()=>{ 
+    camera.set(Math.E**(-.5e02)*Math.E**(Math.sin(performance.now()/5000)*1e13));
+    return items;
+  },{grid:1,camera,animate:1,gl:1,width:'100%',height:'400px'});
+})(d3(points_a),d3(points_b),points_c,i));
+</SCRIPT></BODY>
