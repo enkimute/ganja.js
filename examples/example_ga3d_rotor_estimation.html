@@ -20,10 +20,8 @@ var d3 = (a,b,c,d)=>(a instanceof Array)?a.map(x=>d3(x)):(a instanceof D3)?a:new
 
 //** We upgrade the operators of R3 we need to work with D3 coefficients. This is where the functions of R3 **//
 //** get translated to work with Dual Vectors for each of their coefficients.                               **//
-var _GP    = D3.inline(R3.prototype.Mul),   GP    = (a,b)=>_GP.call(a,b),
-    _ADD   = D3.inline(R3.prototype.Add),   ADD   = (a,b)=>_ADD.call(a,b),
-    _SUB   = D3.inline(R3.prototype.Sub),   SUB   = (a,b)=>_SUB.call(a,b),
-    _SCALE = D3.inline(R3.prototype.Scale), SCALE = (a,s)=>_SCALE.call(a,s);
+var translate = (x)=>{ var F=D3.inline(R3.prototype[x]); return (a,b)=>F.call(a,b); },
+    [GP,ADD,SUB,SCALE] = ["Mul","Add","Sub","Scale"].map(x=>translate(x));
 
 //** We implement our own exp function using these operators and Taylor **//
 var EXP = (X)=>{
@@ -51,17 +49,18 @@ for (var alpha=1,i=0; i<100; i++) {
   guess = ADD(guess,[0,0,0,0,-c[1]*alpha,-c[2]*alpha,-c[3]*alpha,0])
 }
 
-//** We are done.. code below is graphing results.. **/
-var points_c = points_a.map(x=>ROT(guess,x));
-document.body.appendChild(Algebra(3,0,1).inline((pa,pb,pc,i)=>{
+//** We are done.. code below is graphing results.. **//
+document.body.appendChild(Algebra(3,0,1).inline((pa,pb,i,guess)=>{
   // convert the arrays to 3D PGA points.
-  var conv = x=>x.map(x=>!(x[1][0]*1e1+(-.75+x[2][0])*1e2+x[3][0]*1e3+1e0));
-  // initial camera and items to render.
-  var camera = Math.E**1e23, items=[...conv(pa),0xFF0000,...conv(pb),0x0000FF,...conv(pc)];
+  var conv = x=>x.map(x=>!(x[1][0]*1e1+(x[2][0])*1e2+x[3][0]*1e3+1e0)); [pa,pb] = [conv(pa),conv(pb)];
+  var trail = (bv,x,n=12)=>[...Array(n).keys()].map(i=>Math.E**(bv*(i/(n-1)))>>>x).map((x,i,a)=>[x,a[i-1]||x]).slice(1);
+  var trails = []; pa.forEach(pa=>trails.push(...trail(guess*[-.5e12,-.5e13,-.5e23], pa)));
+  var camera = Math.E**1e23,f=0, items=[...pa,0x88FF0000,...pb,0x880000FF];
   // graph in gl, animate and wiggle the camera
   return this.graph(()=>{ 
-    camera.set(Math.E**(-.5e02)*Math.E**(Math.sin(performance.now()/5000)*1e13));
-    return items;
+    camera.set(Math.E**(Math.sin(performance.now()/5000)*1e13));
+    var anim = Math.E**((Math.sin(performance.now()/234)*0.5+.5)*( guess*[-.5e12,-.5e13,-.5e23] ));
+    return [0xAAAAFF,...trails,0x0000FF,guess*[1e12,1e13,1e23],0,...items,...anim>>>pa] ;
   },{grid:1,camera,animate:1,gl:1,width:'100%',height:'400px'});
-})(d3(points_a),d3(points_b),points_c,i));
+})(d3(points_a),d3(points_b),i,guess.map(x=>x[0]).slice(4,7)));
 </SCRIPT></BODY>
