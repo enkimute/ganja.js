@@ -65,6 +65,13 @@
       p = p.p === undefined ? (p.metric && p.metric.filter(x=>x==1).length) || 0 : p.p || 0;
     } else { options={}; p=p|0; r=r|0; q=q|0; };
 
+  // Support for multi-dual-algebras
+    if (p==0 && q==0 && r>1) { // Create a dual number algebra if r>1 .. consider more explicit syntax
+      options.basis  = [...Array(r+1)].map((a,i)=>i?'e0'+i:'1');  options.metric = [1,...Array(r)]; options.tot=r+1;
+      options.Cayley = [...Array(r+1)].map((a,i)=>[...Array(r+1)].map((y,j)=>i*j==0?((i+j)?'e0'+(i+j):'1'):'0'));
+    }
+  
+
   // Calculate the total number of dimensions.
     var tot = options.tot = (options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length))|0;
  
