@@ -949,17 +949,22 @@
                   if (e instanceof Object && e.data) {
                     // Create the vertex array and store it for re-use.
                     if (!e.va) {
-                      var et=[],et2=[],lc=0,pc=0; e.data.forEach(e=>{ 
-                        var d = interprete(e); 
-                        if (d.tp==1) { pc++; et.push(...d.pos);  }
-                        if (d.tp==2) { lc++; et2.push(...d.pos.map((x,i)=>x-d.normal[i]*10),...d.pos.map((x,i)=>x+d.normal[i]*10)); }
+                      var et=[],et2=[],et3=[],lc=0,pc=0,tc=0; e.data.forEach(e=>{ 
+                        if (e instanceof Array && e.length==3) { tc++; e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);et3.push.apply(et3,x.pos); });  var d = {tp:-1}; }
+                        else {
+                          var d = interprete(e); 
+                          if (d.tp==1) { pc++; et.push(...d.pos);  }
+                          if (d.tp==2) { lc++; et2.push(...d.pos.map((x,i)=>x-d.normal[i]*10),...d.pos.map((x,i)=>x+d.normal[i]*10)); }
+                        }
                       });
                       e.va = createVA(et,undefined); e.va.tcount = pc;
                       e.va2 = createVA(et2,undefined); e.va2.tcount = lc*2;
+                      e.va3 = createVA(et3,undefined); e.va3.tcount = tc*3;
                     }
                     // render the vertex array.
                     if (e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
                     if (e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
+                    if (e.va3.tcount) draw(program,gl.TRIANGLES,undefined,[0,0,0],c,r,undefined,e.va3);
                   }
               // setup a new color  
                 if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
