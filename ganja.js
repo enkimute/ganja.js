@@ -914,11 +914,11 @@
               if (d.tp==6) {
                 if (d.weight2<0) { c[0]=1;c[1]=0;c[2]=0; }
                 if (options.useUnnaturalLineDisplayForPointPairs) {
-                  l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]));
-                  l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]));
+                  l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]*(options.scale||1)));
+                  l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]*(options.scale||1)));
                 } 
-                p.push.apply(p,d.pos.map((x,i)=>x-d.normal[i]));
-                p.push.apply(p,d.pos.map((x,i)=>x+d.normal[i]));
+                p.push.apply(p,d.pos.map((x,i)=>x-d.normal[i]*(options.scale||1)));
+                p.push.apply(p,d.pos.map((x,i)=>x+d.normal[i]*(options.scale||1)));
               }
               if (d.tp==5) {
                 if (!sphere) {
