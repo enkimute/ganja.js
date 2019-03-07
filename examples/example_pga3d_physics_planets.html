@@ -33,7 +33,7 @@ Algebra({p:3,q:0,r:1,baseType:Float64Array},()=>{
 
   // Graph the 3D items
   document.body.appendChild(this.graph(()=>{
-    state = RK4((s)=>s.map((si,i)=>((i%2==0)?s[i+1]:(mass.reduce((F,x,j)=>((i-1)/2==j)?F:F+A(s[i-1],s[j*2],mass[(i-1)/2],x),0)))),state,14400);
+    state = RK4((s)=>s.map((si,i)=>((i%2)==0?s[i+1]:(mass.reduce((F,x,j)=>((i-1)/2==j)?F:F+A(s[i-1],s[j*2],mass[(i-1)/2],x),0)))),state,14400);
     return [].concat.apply(
              [(new Date(start+(count++)*14400000)).toDateString().replace((/.*? /),'')],
              names.map((x,xi)=>[point(state[xi*2].e012*scale,state[xi*2].e013*scale,state[xi*2].e023*scale),0x888888,x,0])
