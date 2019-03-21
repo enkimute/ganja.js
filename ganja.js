@@ -87,7 +87,7 @@
               
   // See if the basis names start from 0 or 1, store grade per component and lowest component per grade.             
     var low=basis.length==1?1:basis[1].match(/\d+/g)[0]*1,
-        grades=basis.map(x=>tot>9?(x.length-1)/2:x.length-1),
+        grades=options.grades||basis.map(x=>tot>9?(x.length-1)/2:x.length-1),
         grade_start=grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]);
 
   // String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)      
@@ -519,6 +519,34 @@
       
     // Debug output and printing multivectors.  
       static describe(x) { if (x===true) console.log(`Basis\n${basis}\nMetric\n${metric.slice(1,1+tot)}\nCayley\n${mulTable.map(x=>(x.map(x=>('           '+x).slice(-2-tot)))).join('\n')}\nMatrix Form:\n`+gp.map(x=>x.map(x=>x.match(/(-*b\[\d+\])/)).map(x=>x&&((x[1].match(/-/)||' ')+String.fromCharCode(65+1*x[1].match(/\d+/)))||' 0')).join('\n')); return {basis:basisg||basis,metric,mulTable} }    
+      
+    // Direct sum of algebras - experimental
+      static sum(B){
+        var A = Element;
+        // Get the multiplication tabe and basis.
+        var T1 = A.describe().mulTable, T2 = B.describe().mulTable;
+        var B1 = A.describe().basis, B2 = B.describe().basis;
+        // Get the maximum index of T1, minimum of T2 and rename T2 if needed.
+        var max_T1 = B1.filter(x=>x.match(/e/)).map(x=>x.match(/\d/g)).flat().map(x=>x|0).sort((a,b)=>b-a)[0];
+        var max_T2 = B2.filter(x=>x.match(/e/)).map(x=>x.match(/\d/g)).flat().map(x=>x|0).sort((a,b)=>b-a)[0];
+        var min_T2 = B2.filter(x=>x.match(/e/)).map(x=>x.match(/\d/g)).flat().map(x=>x|0).sort((a,b)=>a-b)[0];
+        // remapping ..
+        T2 = T2.map(x=>x.map(y=>y.match(/e/)?y.replace(/(\d)/g,(x)=>(x|0)+max_T1):y.replace("1","e"+(1+max_T2+max_T1))));
+        B2 = B2.map((y,i)=>i==0?y.replace("1","e"+(1+max_T2+max_T1)):y.replace(/(\d)/g,(x)=>(x|0)+max_T1));
+        // Build the new basis and multable..
+        var basis = [...B1,...B2];
+        var Cayley = T1.map((x,i)=>[...x,...T2[0].map(x=>"0")]).concat(T2.map((x,i)=>[...T1[0].map(x=>"0"),...x]))
+        // Build the new algebra.
+        var grades = [...B1.map(x=>x=="1"?0:x.length-1),...B2.map((x,i)=>i?x.length-1:0)];
+        var a = Algebra({basis,Cayley,grades,tot:Math.log2(B1.length)+Math.log2(B2.length)})
+        // And patch up ..
+        a.Scalar = function(x) {
+          var res = new a();
+          for (var i=0; i<res.length; i++) res[i] = basis[i] == Cayley[i][i] ? x:0;
+          return res;
+        }
+        return a;
+      }  
       
     // The graphing function supports several modes. It can render 1D functions and 2D functions on canvas, and PGA2D, PGA3D and CGA2D functions using SVG.
     // It handles animation and interactivity.
