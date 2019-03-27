@@ -398,7 +398,9 @@
     // The geometric product. (or matrix*matrix, matrix*vector, vector*vector product if called with 1D and 2D arrays)
       static Mul(a,b,res)   {
       // Resolve expressions  
-        while(a.call)a=a(); while(b.call)b=b(); if (a.Mul && b.Mul) return a.Mul(b,res);
+        while(a.call&&!a.length)a=a(); while(b.call&&!b.length)b=b(); if (a.Mul && b.Mul) return a.Mul(b,res);
+      // still functions -> experimental curry style (dont use this.)
+        if (a.call && b.call) return (ai,bi)=>Element.Mul(a(ai),b(bi));   
       // scalar mul.
         if (typeof a == 'number' && b.Scale) return b.Scale(a); if (typeof b=='number' && a.Scale) return a.Scale(b);  
       // Handle matrices and vectors.  
@@ -441,6 +443,8 @@
       static Wedge(a,b,res) {  
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); if (a.Wedge) return a.Wedge(b,res); 
+      // The outer product of two vectors is a matrix .. internally Mul not Wedge !  
+        if (a instanceof Array && b instanceof Array) return a.map(xa=>b.map(xb=>Element.Mul(xa,xb)));
       // js, else generated wedge product.
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Wedge(b,res); 
@@ -921,7 +925,7 @@
           }
         // Loop over all items to render.  
           for (var i=0,ll=x.length;i<ll;i++) { 
-            var e=x[i]; while (e&&e.call) e=e(); if (e==undefined) continue;
+            var e=x[i]; while (e&&e.call&&e.length==0) e=e(); if (e==undefined) continue;
           // CGA
             if (tot==5 && options.conformal) {
               if (e instanceof Array && e.length==2) { e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);l.push.apply(l,x.pos); });  var d = {tp:-1}; }
@@ -1013,8 +1017,25 @@
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
             if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()])); 
             if (e instanceof Array && e.length==3) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
+          // Render orbits of parametrised motors
+            if ( e.call && e.length==1) { var count=64;
+              for (var xx,o=Element.Coeff(14,1),ii=0; ii<count; ii++) {
+                if (ii>1) l.push(xx[11]/xx[14],-xx[12]/xx[14],-xx[13]/xx[14]); 
+                xx = Element.sw(e(ii/(count-1)),o);
+                l.push(xx[11]/xx[14],-xx[12]/xx[14],-xx[13]/xx[14]); 
+              }
+            }  
+            if ( e.call && e.length==2 && !e.va) { var count=64; 
+              var temp=[],o=Element.Coeff(14,1),et=[];
+              for (ii=0; ii<count; ii++) for (var jj=0; jj<count; jj++) temp.push(Element.sw(e(ii/(count-1),jj/(count-1)),o).slice(11,14));
+              for (ii=0; ii<count; ii++) for (var jj=0; jj<count; jj++) {
+                et.push.apply(et,temp[(ii+0)*count+(jj+0)]); et.push.apply(et,temp[(ii+0)*count+(jj+1)]); et.push.apply(et,temp[(ii+1)*count+(jj+1)]);
+                et.push.apply(et,temp[(ii+0)*count+(jj+0)]); et.push.apply(et,temp[(ii+1)*count+(jj+1)]); et.push.apply(et,temp[(ii+1)*count+(jj+0)]);
+              }
+              e.va = createVA(et,undefined); e.va.tcount = et.length/3;
+            }  
           // we could also be an object with cached vertex array of triangles ..   
-            if (e instanceof Object && e.data) {
+            if (e.va || (e instanceof Object && e.data)) {
               // Create the vertex array and store it for re-use.
               if (!e.va) {
                 var et=[]; e.data.forEach(e=>{if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));});
