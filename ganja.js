@@ -1027,7 +1027,7 @@
             }  
             if ( e.call && e.length==2 && !e.va) { var count=64; 
               var temp=[],o=Element.Coeff(14,1),et=[];
-              for (ii=0; ii<count; ii++) for (var jj=0; jj<count; jj++) temp.push(Element.sw(e(ii/(count-1),jj/(count-1)),o).slice(11,14));
+              for (ii=0; ii<count; ii++) for (var jj=0; jj<count; jj++) temp.push(Element.sw(e(ii/(count-1),jj/(count-1)),o).slice(11,14).map((x,i,a)=>i?-x:x));
               for (ii=0; ii<count; ii++) for (var jj=0; jj<count; jj++) {
                 et.push.apply(et,temp[(ii+0)*count+(jj+0)]); et.push.apply(et,temp[(ii+0)*count+(jj+1)]); et.push.apply(et,temp[(ii+1)*count+(jj+1)]);
                 et.push.apply(et,temp[(ii+0)*count+(jj+0)]); et.push.apply(et,temp[(ii+1)*count+(jj+1)]); et.push.apply(et,temp[(ii+1)*count+(jj+0)]);
