@@ -795,7 +795,7 @@
           return p;
         };
       // Create vertex array and buffers, upload vertices and optionally texture coordinates.  
-        var createVA=function(vtx, texc) {
+        var createVA=function(vtx, texc, idx) {
               var r = gl.va.createVertexArrayOES(); gl.va.bindVertexArrayOES(r);
               var b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); 
               gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vtx), gl.STATIC_DRAW);
@@ -805,11 +805,15 @@
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texc), gl.STATIC_DRAW);
                 gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(1);
               }
-              return {r,b,b2}
+              if (idx) {
+                var b4=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, b4);
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
+              }
+              return {r,b,b2,b4}
             },
       // Destroy Vertex array and delete buffers.
             destroyVA=function(va) {
-              if (va.b) gl.deleteBuffer(va.b); if (va.b2) gl.deleteBuffer(va.b2); if (va.r) gl.va.deleteVertexArrayOES(va.r);
+              [va.b,va.b2,va.b4].forEach(x=>{if(x) gl.deleteBuffer(x)}); if (va.r) gl.va.deleteVertexArrayOES(va.r);
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.animate?performance.now()/1000:options.h||0, t2=options.p||0;
@@ -827,7 +831,11 @@
           gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
           if (texc) gl.uniform1i(gl.getUniformLocation(p, "texc"),0);
           var v; if (!va) v = createVA(vtx, texc); else gl.va.bindVertexArrayOES(va.r);
-          gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
+          if (va && va.b4) {
+            gl.drawElements(tp, va.tcount, gl.UNSIGNED_SHORT, 0);
+          } else {
+            gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
+          }  
           if (v) destroyVA(v);
         }
       // Program for the geometry. Derivative based normals. Basic lambert shading.    
@@ -835,8 +843,10 @@
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; }`,
                 `#extension GL_OES_standard_derivatives : enable
                  precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; 
-                 void main() { vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,vec3(.0,-0.4,1.0));
-                 gl_FragColor = vec4(max(0.0,l)*color+color2, 1.0);  }`);
+                 void main() { vec3 ldir = normalize(Pos.xyz - vec3(1.0,1.0,2.0));
+                 vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
+                 vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));  
+                 gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
       // Create a font texture, lucida console or otherwise monospaced.
         var fw=22, font = Object.assign(document.createElement('canvas'),{width:94*fw,height:32}), 
             ctx = Object.assign(font.getContext('2d'),{font:'bold 32px lucida console, monospace'}),
@@ -1020,19 +1030,16 @@
           // Render orbits of parametrised motors
             if ( e.call && e.length==1) { var count=64;
               for (var xx,o=Element.Coeff(14,1),ii=0; ii<count; ii++) {
-                if (ii>1) l.push(xx[11]/xx[14],-xx[12]/xx[14],-xx[13]/xx[14]); 
+                if (ii>1) l.push(-xx[13]/xx[14],-xx[12]/xx[14],xx[11]/xx[14]); 
                 xx = Element.sw(e(ii/(count-1)),o);
-                l.push(xx[11]/xx[14],-xx[12]/xx[14],-xx[13]/xx[14]); 
+                l.push(-xx[13]/xx[14],-xx[12]/xx[14],xx[11]/xx[14]); 
               }
             }  
-            if ( e.call && e.length==2 && !e.va) { var count=64; 
-              var temp=[],o=Element.Coeff(14,1),et=[];
-              for (ii=0; ii<count; ii++) for (var jj=0; jj<count; jj++) temp.push(Element.sw(e(ii/(count-1),jj/(count-1)),o).slice(11,14).map((x,i,a)=>i?-x:x));
-              for (ii=0; ii<count; ii++) for (var jj=0; jj<count; jj++) {
-                et.push.apply(et,temp[(ii+0)*count+(jj+0)]); et.push.apply(et,temp[(ii+0)*count+(jj+1)]); et.push.apply(et,temp[(ii+1)*count+(jj+1)]);
-                et.push.apply(et,temp[(ii+0)*count+(jj+0)]); et.push.apply(et,temp[(ii+1)*count+(jj+1)]); et.push.apply(et,temp[(ii+1)*count+(jj+0)]);
-              }
-              e.va = createVA(et,undefined); e.va.tcount = et.length/3;
+            if ( e.call && e.length==2 && !e.va) { var countx=e.dx||64,county=e.dy||32; 
+              var temp=[],o=Element.Coeff(14,1),norm=o.Add(Element.Coeff(13,-1)),et=[];
+              for (ii=0; ii<countx; ii++) for (var jj=0; jj<county; jj++) temp.push.apply(temp,Element.sw(e(ii/(countx-1),jj/(county-1)),o).slice(11,14).map((x,i,a)=>i?-x:x).reverse());
+              for (ii=0; ii<countx-1; ii++) for (var jj=0; jj<county; jj++) et.push((ii+0)*county+(jj+0),(ii+0)*county+(jj+1),(ii+1)*county+(jj+1),(ii+0)*county+(jj+0),(ii+1)*county+(jj+1),(ii+1)*county+(jj+0));
+              e.va = createVA(temp,undefined,et.map(x=>x%(countx*county))); e.va.tcount = (countx-1)*county*2*3;
             }  
           // we could also be an object with cached vertex array of triangles ..   
             if (e.va || (e instanceof Object && e.data)) {
