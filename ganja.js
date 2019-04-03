@@ -119,21 +119,17 @@
     var metric = basis.map((x,xi)=>simplify(x+x,p,q,r)|0);
     
   /// Generate multiplication tables for the outer and geometric products.  
-    var mulTable   = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r))),              // for the gp, with metric.
-        mulTable2  = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p+q+r,0,0)));          // for the op, without metric.
-   
-  /// Convert Caeyley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
+    var mulTable   = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r)));
+
+  /// Convert Cayley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
   /// is the left contraction.           
-    var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), cps=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0')), gpo={}, opo={};          // Storage for our product tables.
-    basis.forEach((x,xi)=>basis.forEach((y,yi)=>{
-      var n  = mulTable[xi][yi].replace(/^-/,''); if (n==0) n = mulTable2[xi][yi].replace(/^-/,''); if (!gpo[n]) gpo[n]=[]; gpo[n].push([xi,yi]);
-      var n2 = mulTable2[xi][yi].replace(/^-/,''); if (!opo[n2]) opo[n2]=[]; opo[n2].push([xi,yi]);
-    }));
+    var gp=basis.map(x=>basis.map(x=>'0')), cp=gp.map(x=>gp.map(x=>'0')), cps=gp.map(x=>gp.map(x=>'0')), op=gp.map(x=>gp.map(x=>'0')), gpo={};          // Storage for our product tables.
+    basis.forEach((x,xi)=>basis.forEach((y,yi)=>{ var n = mulTable[xi][yi].replace(/^-/,''); if (!gpo[n]) gpo[n]=[]; gpo[n].push([xi,yi]); }));
     basis.forEach((o,oi)=>{
-      opo[o].forEach(([xi,yi])=>op[oi][xi]=(grades[oi]==grades[xi]+grades[yi])?((mulTable2[xi][yi]=='0')?'0':((mulTable2[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']'):'0');
+      gpo[o].forEach(([xi,yi])=>op[oi][xi]=(grades[oi]==grades[xi]+grades[yi])?((mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']'):'0');
       gpo[o].forEach(([xi,yi])=>{
-        gp[oi][xi]= ((gp[oi][xi]=='0')?'':gp[oi][xi]+'+') + ((mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']');
-        cp[oi][xi]= ((cp[oi][xi]=='0')?'':cp[oi][xi]+'+') + ((grades[oi]==grades[yi]-grades[xi])?gp[oi][xi]:'0'); 
+        gp[oi][xi] =((gp[oi][xi]=='0')?'':gp[oi][xi]+'+')   + ((mulTable[xi][yi]=='0')?'0':((mulTable[xi][yi][0]!='-')?'':'-')+'b['+yi+']*this['+xi+']');
+        cp[oi][xi] =((cp[oi][xi]=='0')?'':cp[oi][xi]+'+')   + ((grades[oi]==grades[yi]-grades[xi])?gp[oi][xi]:'0'); 
         cps[oi][xi]=((cps[oi][xi]=='0')?'':cps[oi][xi]+'+') + ((grades[oi]==Math.abs(grades[yi]-grades[xi]))?gp[oi][xi]:'0'); 
       });
     });
@@ -344,7 +340,14 @@
       LDiv (b,res) { return b.Inverse.Mul(this,res); }
     
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.  
-      Exp  ()      { var r = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<25; x++) { r=r.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return r; }
+      Exp  ()      { 
+        if (r==1 && tot==4) { 
+          var sq = this.Mul(this).s;       if (sq==0) { var res = Element.Scalar(1); return this.Add(res,res); }
+          var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
+          var res = this.Scale( Math.sinh(l)/l ); res[0]=Math.cosh(l); return res;
+        }
+        var res = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<25; x++) { res=res.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return res; 
+      }
       
     // Helper for efficient inverses. (custom involutions - negates grades in arguments). 
       Map () { var res=new Element(); return super.Map(res,...arguments); }
