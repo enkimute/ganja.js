@@ -341,7 +341,7 @@
     
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.  
       Exp  ()      { 
-        if (r==1 && tot==4) { 
+        if (r==1 && tot<=4) { 
           var sq = this.Mul(this).s;       if (sq==0) { var res = Element.Scalar(1); return this.Add(res,res); }
           var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
           var res = this.Scale( Math.sinh(l)/l ); res[0]=Math.cosh(l); return res;
@@ -1053,7 +1053,9 @@
               }
               // render the vertex array.
               if (e.transform) { M=mtx(options.camera.Mul(e.transform)); }
+              if (alpha) { gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-alpha); }
               draw(program,gl.TRIANGLES,t,c,[0,0,0],r,undefined,e.va);
+              if (alpha) gl.disable(gl.BLEND);
               if (e.transform) { M=mtx(options.camera); }
             }
           // if we're a number (color), label or the last item, we output the collected items.  
