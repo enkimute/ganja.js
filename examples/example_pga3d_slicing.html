@@ -23,7 +23,7 @@ Algebra(3,0,1,()=>{
   var  time=0, camera=(1-1e02+1e13-1.2e03+0.9e01).Normalized, cut=-0.57*1.3e0+1e2, mini=camera*(1-1.3e03+3e02-5.5e01)*rotor(1e12,Math.PI/2);
     
   // Read obj
-  obj("bunny.obj",(points,edges,faces)=>{
+  obj("https://enkimute.github.io/ganja.js/examples/bunny.obj",(points,edges,faces)=>{
       // Store the bunny as a rigid body - this optimizes the GL path.
       var bunny={data:faces};
       
