@@ -341,7 +341,7 @@
     
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.  
       Exp  ()      { 
-        if (r==1 && tot<=4) { 
+        if (r==1 && tot<=4 && this[0]==0) { 
           var sq = this.Mul(this).s;       if (sq==0) { var res = Element.Scalar(1); return this.Add(res,res); }
           var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
           var res = this.Scale( Math.sinh(l)/l ); res[0]=Math.cosh(l); return res;
@@ -445,7 +445,7 @@
     // The outer product. (Grassman product - no use of metric)  
       static Wedge(a,b,res) {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); if (a.Wedge) return a.Wedge(b,res); 
+        while(a.call)a=a(); while(b.call)b=b(); if (a.Wedge) return a.Wedge(Element.toEl(b),res); 
       // The outer product of two vectors is a matrix .. internally Mul not Wedge !  
         if (a instanceof Array && b instanceof Array) return a.map(xa=>b.map(xb=>Element.Mul(xa,xb)));
       // js, else generated wedge product.
@@ -456,7 +456,7 @@
     // The regressive product. (Dual of the outer product of the duals). 
       static Vee(a,b,res) {  
       // Expressions
-        while(a.call)a=a(); while(b.call)b=b(); if (a.Vee) return a.Vee(b,res);
+        while(a.call)a=a(); while(b.call)b=b(); if (a.Vee) return a.Vee(Element.toEl(b),res);
       // js, else generated vee product. (shortcut for dual of wedge of duals)
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Vee(b,res); 
