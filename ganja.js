@@ -458,7 +458,7 @@
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); if (a.Vee) return a.Vee(Element.toEl(b),res);
       // js, else generated vee product. (shortcut for dual of wedge of duals)
-        if (!(a instanceof Element || b instanceof Element)) return a*b; 
+        if (!(a instanceof Element || b instanceof Element)) return 0; 
         a=Element.toEl(a);b=Element.toEl(b); return a.Vee(b,res); 
       }  
      
