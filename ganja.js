@@ -229,26 +229,41 @@
         r=r||new this.constructor();
         for (var i=0,l=Math.max(this.length,b.length);i<l;i++) 
           if (!this[i] || !b[i]) r[i] = (!this[i]) ? b[i]:this[i];
-          else { if (r[i]==undefined) r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) r[i][j]=(this[i][j]||0)+(b[i][j]||0); }
+          else { if (r[i]==undefined) r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) 
+          {
+            if (typeof this[i][j]=="string" || typeof r[i][j]=="string" || typeof b[i][j]=="string") {
+             if (!this[i][j]) r[i][j] = ""+b[i][j];
+             else if (!b[i][j]) r[i][j] = ""+this[i][j];
+             else r[i][j]="("+(this[i][j]||"0")+(b[i][j][0]=="-"?"":"+")+(b[i][j]||"0")+")"; 
+            } else r[i][j]=(this[i][j]||0)+(b[i][j]||0); 
+          }}
         return r;
       }
       Sub(b,r) {
         r=r||new this.constructor();
         for (var i=0,l=Math.max(this.length,b.length);i<l;i++) 
-          if (!this[i] || !b[i]) r[i] = (!this[i]) ? (b[i]?b[i].map(x=>-x):undefined):this[i];
-          else { if (r[i]==undefined) r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) r[i][j]=(this[i][j]||0)-(b[i][j]||0); }    
+          if (!this[i] || !b[i]) r[i] = (!this[i]) ? (b[i]?b[i].map(x=>(typeof x=="string")?"-"+x:-x):undefined):this[i];
+          else { if (r[i]==undefined) r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++) 
+            if (typeof this[i][j]=="string" || typeof r[i][j]=="string" || typeof b[i][j]=="string") r[i][j]="("+(this[i][j]||"0")+"-"+(b[i][j]||"0")+")"; 
+            else r[i][j]=(this[i][j]||0)-(b[i][j]||0); 
+          }    
         return r;
       }
-      Scale(s) { return this.map(x=>x&&x.map(y=>y*s)); }      
+      Scale(s) { return this.map(x=>x&&x.map(y=>typeof y=="string"?y+"*"+s:y*s)); }      
       
     // geometric product.
       Mul(b,r) {
         r=r||new this.constructor();
         for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
-          if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
-          else { 
+          if (i==j && a==bb) { r[0] = r[0]||(typeof x[0]=="string" || typeof y[bb]=="string"?[""]:[0]); 
+            if (typeof x[a]=="string" || typeof r[0][0]=="string" || typeof y[bb]=="string") 
+            r[0][0] = (r[0][0]?(r[0][0]+(x[a][0]=="-"?"":"+")):"")+ x[a]+"*"+y[bb]+(metric[i][a]!=1?"*"+metric[i][a]:""); 
+            else r[0][0] += x[a]*y[bb]*metric[i][a]; 
+          } else { 
              var rn=simplify_bits(basis_bits[gsx+a],basis_bits[gsy+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
-             if (!r[g])r[g]=[]; r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb];
+             if (!r[g])r[g]=[]; 
+               if (typeof r[g][e]=="string"||typeof x[a]=="string"||typeof y[bb]=="string") r[g][e] = (r[g][e]?r[g][e]+"+":"") + (rn[0]!=1?rn[0]+"*":"")+ x[a]+(y[bb]!=1?"*"+y[bb]:"");
+               else r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb];
           }  
         }
         return r;
