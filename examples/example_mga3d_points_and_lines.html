@@ -8,18 +8,19 @@ Algebra(4,4,()=>{
   // https://link.springer.com/article/10.1007/s00006-017-0798-7
   
   // Witt Basis
-  var w0  = .5e1+.5e5, w1  = .5e2+.5e6, w2  = .5e3+.5e7, w3  = .5e4+.5e8, 
-      wd0 = .5e1-.5e5, wd1 = .5e2-.5e6, wd2 = .5e3-.5e7, wd3 = .5e4-.5e8;
+  var plus = [1e1,1e2,1e3,1e4], min = [1e5,1e6,1e7,1e8],
+      [w0,w1,w2,w3]     = .5*(plus+min),
+      [wd0,wd1,wd2,wd3] = .5*(plus-min);
       
   // Points in W
-  var vec = (x,y,z)=>x*w1+y*w2+z*w3,
-      pnt = (x,y,z)=>w0+vec(x,y,z);
+  var vec = (...v)=>v*[w1,w2,w3],
+      pnt = (...p)=>p*[w1,w2,w3]+w0;
       
   // Planes in W*
   var plnd = (d,a,b,c)=>d*wd0+a*wd1+b*wd2+c*wd3;
       
   // Lines, Planes, Solid sectors in W
-  var lin = (p1,p2)=>p1^p,
+  var lin = (p1,p2)=>p1^p2,
       pln = (p1,p2,p3)=>p1^p2^p3,
       sct = (p1,p2,p3,p4)=>p1^p2^p3^p4;
       
@@ -28,13 +29,13 @@ Algebra(4,4,()=>{
       pntd = (P1,P2,P3)=>P1^P2^P3;
        
   // To Visualize we need a grade 1 point definition in the natural basis.
-  var pnt_opns = [".5",".5*x",".5*y",".5*z",".5",".5*x",".5*y",".5*z"];
-  
+  var pnt_opns = pnt(Element.Scalar("x"),Element.Scalar("y"),Element.Scalar("z")).Vector;
+
   // Basic visualization test.  
   document.body.appendChild(this.graph([
     0x00ff00, 1e1234*pnt(0,0,0),
     0xff0000, 1e1234*(pnt(-2,0,0)^pnt(1,1,1)),
-  ],{animate:true,thresh:0.15,up:pnt_opns}))
+  ],{animate:true,spin:1,thresh:0.15,up:pnt_opns}))
 
 });
 </SCRIPT></BODY>

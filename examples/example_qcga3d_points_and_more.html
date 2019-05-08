@@ -11,23 +11,19 @@ Algebra(9,6,()=>{
   // by wedging 9 points. 
   
   // Defining the null basis - bit cumbersome .. 
-    var ei1=1e04+1e10,   ei2=1e05+1e11,   ei3=1e06+1e12,   ei4=1e07+1e13,   ei5=1e08+1e14,   ei6=1e09+1e15,
-        eo1=.5e10-.5e04, eo2=.5e11-.5e05, eo3=.5e12-.5e06, eo4=.5e13-.5e07, eo5=.5e14-.5e08, eo6=.5e15-.5e09;
-  
+    var plus=[1e04,1e05,1e06,1e07,1e08,1e09], min = [1e10,1e11,1e12,1e13,1e14,1e15],
+        [ei1,ei2,ei3,ei4,ei5,ei6] = plus+min, [eo1,eo2,eo3,eo4,eo5,eo6] = 0.5*(min-plus);
+
   // Hexa-orig and inf, Penta-orig and inf, PSS, Euclidean PSS and inverse PSS.
-    var Ii  = ei1^ei2^ei3^ei4^ei5^ei6,          Io   = eo1^eo2^eo3^eo4^eo5^eo6,
-        pIi = (ei1-ei2)^(ei2-ei3)^ei4^ei5^ei6,  pIo  = (eo1-eo2)^(eo2-eo3)^eo4^eo5^eo6,
+    var pIi = (ei1-ei2)^(ei2-ei3)^ei4^ei5^ei6,  pIo  = (eo1-eo2)^(eo2-eo3)^eo4^eo5^eo6,
         PSS = 1e010203040506070809101112131415, PSSe = 1e010203, PSSi = -PSS;
         
   // Create a quadric conformal point. (written as dot product .. faster)
     var pv = [1e01,1e02,1e03,ei1,ei2,ei3,ei4,ei5,ei6,eo1+eo2+eo3],
         p  = (x,y,z)=> [x,y,z,.5*x**2,.5*y**2,.5*z**2,x*y,x*z,y*z,1]*pv;          
-  // for the viz, we need the same in pure basis blades. (all coeffs as func of x,y,z)
-    var pviz = ["x","y","z",".5*x*x-.5",".5*y*y-.5",".5*z*z-.5","x*y","x*z","y*z",
-                            ".5*x*x+.5",".5*y*y+.5",".5*z*z+.5","x*y","x*z","y*z"]
   
-  // Use the OP Length to visualize the object.    
-    var opns = (a,b)=>(a^b).Length;
+  // for the viz, we need the same in pure basis blades. (all coeffs as func of x,y,z)
+    var pviz = p(Element.Scalar("x"),Element.Scalar("y"),Element.Scalar("z")).Vector;
 
   // Create some points. 
     var p1=p(0,1,0), p2=p(0,-1,0), p3=p(1,0,0), p4=p(0,0,1);
@@ -47,6 +43,6 @@ Algebra(9,6,()=>{
       s2[14][13]+=Math.sin(performance.now()/1300);
       var c = (s&s2).Normalized;                           // intersect
       return [0x8800ff,s,0xff8800,c]                       // render
-    },{animate:true,up:pviz}))
+    },{animate:true,spin:.3,up:pviz}))
 });
 </SCRIPT></BODY>

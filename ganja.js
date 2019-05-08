@@ -764,7 +764,7 @@
             var e=x[i]; while (e&&e.call) e=e(); if (e==undefined) continue;
             if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
             if (e instanceof Element){
-              var tt = options.animate?-performance.now()/1000:-options.h||0; tt+=Math.PI/2; var r = canvas.height/canvas.width;
+              var tt = options.spin?-performance.now()*options.spin/1000:-options.h||0; tt+=Math.PI/2; var r = canvas.height/canvas.width;
               var g=tot-1; while(!e[g]&&g>1) g--;
               if (!programs[tot-1-g]) programs[tot-1-g] = genprog(g);
               draw(programs[tot-1-g],gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c,r,g);

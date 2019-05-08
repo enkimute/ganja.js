@@ -13,8 +13,10 @@ Algebra({p:4,q:1,graded:true},()=>{
   var ni = 1e4+1e5, no = .5e5-.5e4;
   var up = (x)=> no + x + .5*x*x*ni;
  
-  // for OPNS viz we also need an "up" version that uses only basis blades :
-  var upviz = ["x","y","z",".5*(x*x+y*y+z*z)-.5",".5*(x*x+y*y+z*z)+.5"];
+  // for OPNS viz we also need an "up" version that uses only basis blades,
+  // we use the symbolic evaluator to make it for us ..
+  // this returns : ["x","y","z",".5*(x*x+y*y+z*z)-.5",".5*(x*x+y*y+z*z)+.5"] 
+  var upviz = up(Element.Vector("x","y","z")).Vector;
   
   // Next we create some points
     var p1 = up(1e3-1e1), p2 = up(-1e3-1e1), p3 = up(1e2-1e1),
@@ -38,7 +40,7 @@ Algebra({p:4,q:1,graded:true},()=>{
         0x0000FF, line,   // blue line
         0xFF00FF, circle, // pink circle
         0xFFFFFF, sphere  // white sphere
-    ],{up:upviz, thresh:0.05, animate:1}))
+    ],{up:upviz, spin:1, thresh:0.05, animate:1}))
     
 })
 </SCRIPT></BODY>

@@ -8,8 +8,8 @@ Algebra(6,3,()=>{
   // https://link.springer.com/article/10.1007/s00006-014-0442-8
   
   // Null Basis
-  var eix = 1e4+1e7,   eiy = 1e5+1e8,   eiz = 1e6+1e9;
-  var eox = .5e7-.5e4, eoy = .5e8-.5e5, eoz = .5e9-.5e6;
+  var plus = [1e4,1e5,1e6], min = [1e7,1e8,1e9];
+  var [eix,eiy,eiz] = plus+min, [eox,eoy,eoz] = .5*(min-plus);
   var ei = (eix+eiy+eiz)*(1/3), eo = eox+eoy+eoz, pss = 1e123456789;
   
   // Some primitives
@@ -20,8 +20,8 @@ Algebra(6,3,()=>{
       plane = (x,y,z,d)=>x*1e1+y*1e2+z*1e3+d*ei;
       
   // for viz
-  var upviz = ["x","y","z",".5*x*x-.5",".5*y*y-.5",".5*z*z-.5",".5*x*x+.5",".5*y*y+.5",".5*z*z+.5"];    
-
+  var upviz = point(Element.Scalar("x"),Element.Scalar("y"),Element.Scalar("z")).Vector;
+  
   // Create an ellipsoid, plane and their intersection.
   var E = ellipsoid(0,0,0,2,3,2),
       P = plane(0.9,0.3,0.0,0.0),
@@ -31,7 +31,7 @@ Algebra(6,3,()=>{
   document.body.appendChild(this.graph([
     0xff8800, pss*E,
     0x0088ff, pss*e
-  ],{up:upviz, animate:true}));    
+  ],{up:upviz, spin:1, animate:true}));    
       
 
 });
