@@ -253,19 +253,21 @@
       
     // geometric product.
       Mul(b,r) {
-        r=r||new this.constructor();
+        r=r||new this.constructor(); var gotstring=false;
         for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
           if (i==j && a==bb) { r[0] = r[0]||(typeof x[0]=="string" || typeof y[bb]=="string"?[""]:[0]); 
-            if (typeof x[a]=="string" || typeof r[0][0]=="string" || typeof y[bb]=="string") 
-            r[0][0] = (r[0][0]?(r[0][0]+(x[a][0]=="-"?"":"+")):"")+ x[a]+"*"+y[bb]+(metric[i][a]!=1?"*"+metric[i][a]:""); 
-            else r[0][0] += x[a]*y[bb]*metric[i][a]; 
+            if (typeof x[a]=="string" || typeof r[0][0]=="string" || typeof y[bb]=="string") {
+            r[0][0] = (r[0][0]?(r[0][0]+(x[a][0]=="-"?"":"+")):"")+ x[a]+"*"+y[bb]+(metric[i][a]!=1?"*"+metric[i][a]:"");  gotstring=true;
+            } else r[0][0] += x[a]*y[bb]*metric[i][a]; 
           } else { 
              var rn=simplify_bits(basis_bits[gsx+a],basis_bits[gsy+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g]; 
              if (!r[g])r[g]=[]; 
-               if (typeof r[g][e]=="string"||typeof x[a]=="string"||typeof y[bb]=="string") r[g][e] = (r[g][e]?r[g][e]+"+":"") + (rn[0]!=1?rn[0]+"*":"")+ x[a]+(y[bb]!=1?"*"+y[bb]:"");
-               else r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb];
+               if (typeof r[g][e]=="string"||typeof x[a]=="string"||typeof y[bb]=="string") { 
+                 r[g][e] = (r[g][e]?r[g][e]+"+":"") + (rn[0]!=1?rn[0]+"*":"")+ x[a]+(y[bb]!=1?"*"+y[bb]:""); gotstring=true;
+               } else r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb];
           }  
         }
+        if (gotstring) return r.map(g=>g.map(e=>e&&'('+e+')'))
         return r;
       }    
     // outer product.     
