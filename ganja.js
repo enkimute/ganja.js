@@ -294,7 +294,7 @@
         var r2 = 'float sum=0.0; float res=0.0;\n', g=0;
         r.forEach(x=>{
           var cg = x.match(/\d+/)[0]|0;
-          if (cg != g) r2 += "sum "+((metric[curg][g]==-1)?"-=":"+=")+" res*res;\nres = 0.0;\n";
+          if (cg != g) r2 += "sum "+(((metric[curg][g]==-1))?"-=":"+=")+" res*res;\nres = 0.0;\n";
           r2 += x.replace(/\[\d+\]/,'') + '\n';
           g=cg;
         });
@@ -750,9 +750,37 @@
                         dist(d2[0],d2[1],d2[2]+h,b)-dist(d2[0],d2[1],d2[2]-h,b)
                       ));
                  ${gl2?"gl_FragDepth":"gl_FragDepthEXT"} = dl2/50.0;
-                 ${gl2?"col":"gl_FragColor"} = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),0.0);
+                 ${gl2?"col":"gl_FragColor"} = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),1.0);
                } else discard; 
-             }`);
+             }`),genprog2D = grade=>compile(`${gl2?"#version 300 es":""}
+             ${gl2?"in":"attribute"} vec4 position; ${gl2?"out":"varying"} vec4 Pos; uniform mat4 mv; uniform mat4 p;
+             void main() { Pos=mv*position; gl_Position = p*Pos; }`,
+            `${!gl2?"#extension GL_EXT_frag_depth : enable":"#version 300 es"}
+             precision highp float;  
+             uniform vec3 color; uniform vec3 color2; 
+             uniform vec3 color3; uniform float b[${counts[grade]}];
+             uniform float ratio; ${gl2?"out vec4 col;":""}
+             ${gl2?"in":"varying"} vec4 Pos; 
+             float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
+                ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
+                return ${grade!=tot-1?"sqrt(abs(sum))":"res"};
+             }
+             float trace_depth (in vec3 start, vec3 dir, in float thresh) {
+                vec3 orig=start; float lastd = 1000.0; const int count=${(options.maxSteps||64)};
+                float s = dist(start[0]*5.0,start[1]*5.0,start[2]*5.0,b);
+                s=s*s;
+                return 1.0-s*150.0;
+             }
+             void main() { 
+               vec3 p = -5.0*normalize(color2); 
+               vec3 dir = normalize((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0));  p += 1.0*dir;
+               vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
+               float d2 = trace_depth( p , dir, ${grade!=tot-1?(options.thresh||0.2):"0.0075"} );
+               if (d2>0.0) {
+                 ${gl2?"gl_FragDepth":"gl_FragDepthEXT"} = d2/50.0;
+                 ${gl2?"col":"gl_FragColor"} = vec4(d2*color3,d2);
+               } else discard;  
+             }`)
       // canvas update will (re)render the content.            
         var armed=0;
         canvas.update = (x)=>{
@@ -768,8 +796,10 @@
             if (e instanceof Element){
               var tt = options.spin?-performance.now()*options.spin/1000:-options.h||0; tt+=Math.PI/2; var r = canvas.height/canvas.width;
               var g=tot-1; while(!e[g]&&g>1) g--;
-              if (!programs[tot-1-g]) programs[tot-1-g] = genprog(g);
+              if (!programs[tot-1-g]) programs[tot-1-g] = (options.up.find(x=>x.match&&x.match("z")))?genprog(g):genprog2D(g);
+              gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
               draw(programs[tot-1-g],gl.TRIANGLES,[-2,-2,0,-2,2,0,2,-2,0,-2,2,0,2,-2,0,2,2,0],[Math.cos(tt),0,-Math.sin(tt)],[Math.sin(tt),0,Math.cos(tt)],undefined,undefined,undefined,e,c,r,g);
+              gl.disable(gl.BLEND);
             }
           }
           // if we're no longer in the page .. stop doing the work.
