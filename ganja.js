@@ -1070,13 +1070,18 @@
               continue;
             }
           // PGA   
+          // Convert planes to polygons.
+            if (e instanceof Element && e.Grade(1).Length) {
+              var m = Element.Add(1, Element.Mul(e.Normalized, Element.Coeff(3,1))).Normalized, e0 = e.Normalized.e0;
+              e=Element.sw(m,[[-1,-1],[-1,1],[1,1],[-1,-1],[1,1],[1,-1]].map(([x,z])=>Element.Trivector(x,e0,z,1)));
+            }
           // Convert lines to line segments.  
             if (e instanceof Element && e.Grade(2).Length) 
                e=[e.LDot(e14).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.LDot(e14).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
           // If euclidean point, store as point, store line segments and triangles.
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
             if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()])); 
-            if (e instanceof Array && e.length==3) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
+            if (e instanceof Array && e.length%3==0) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
           // Render orbits of parametrised motors
             if ( e.call && e.length==1) { var count=64;
               for (var xx,o=Element.Coeff(14,1),ii=0; ii<count; ii++) {
