@@ -445,6 +445,9 @@
       static LDot(a,b,res)   {  
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); //if (a.LDot) return a.LDot(b,res);
+      // Map elements in array  
+        if (b instanceof Array && !(a instanceof Array)) return b.map(x=>Element.LDot(a,x)); 
+        if (a instanceof Array && !(b instanceof Array)) return a.map(x=>Element.LDot(x,b)); 
       // js if numbers, else contraction product.  
         if (!(a instanceof Element || b instanceof Element)) return a*b; 
         a=Element.toEl(a);b=Element.toEl(b); return a.LDot(b,res); 
@@ -1072,7 +1075,7 @@
           // PGA   
           // Convert planes to polygons.
             if (e instanceof Element && e.Grade(1).Length) {
-              var m = Element.Add(1, Element.Mul(e.Normalized, Element.Coeff(3,1))).Normalized, e0 = e.Normalized.e0;
+              var m = Element.Add(1, Element.Mul(e.Normalized, Element.Coeff(3,1))).Normalized, e0 = 0;
               e=Element.sw(m,[[-1,-1],[-1,1],[1,1],[-1,-1],[1,1],[1,-1]].map(([x,z])=>Element.Trivector(x,e0,z,1)));
             }
           // Convert lines to line segments.  
