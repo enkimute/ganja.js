@@ -1121,7 +1121,7 @@
                 } else {
                   var et=[]; e.data.forEach(e=>{if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));});
                 }
-                e.va = createVA(et,undefined,e.idx,e.color?new Float32Array(e.color):undefined); e.va.tcount = e.idx.length?e.idx.length:e.data.length*3;
+                e.va = createVA(et,undefined,e.idx,e.color?new Float32Array(e.color):undefined); e.va.tcount = (e.idx && e.idx.length)?e.idx.length:e.data.length*3;
               }
               // render the vertex array.
               if (e.transform) { M=mtx(options.camera.Mul(e.transform)); }
