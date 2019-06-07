@@ -848,7 +848,7 @@
           return p;
         };
       // Create vertex array and buffers, upload vertices and optionally texture coordinates.  
-        var createVA=function(vtx, texc, idx) {
+        var createVA=function(vtx, texc, idx, clr) {
               var r = gl.va.createVertexArrayOES(); gl.va.bindVertexArrayOES(r);
               var b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); 
               gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vtx), gl.STATIC_DRAW);
@@ -858,15 +858,20 @@
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texc), gl.STATIC_DRAW);
                 gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(1);
               }
+              if (clr){
+                var b3=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b3);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(clr), gl.STATIC_DRAW);
+                gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(1);
+              }
               if (idx) {
                 var b4=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, b4);
                 gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
               }
-              return {r,b,b2,b4}
+              return {r,b,b2,b4,b3}
             },
       // Destroy Vertex array and delete buffers.
             destroyVA=function(va) {
-              [va.b,va.b2,va.b4].forEach(x=>{if(x) gl.deleteBuffer(x)}); if (va.r) gl.va.deleteVertexArrayOES(va.r);
+              [va.b,va.b2,va.b4,va.b3].forEach(x=>{if(x) gl.deleteBuffer(x)}); if (va.r) gl.va.deleteVertexArrayOES(va.r);
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.animate?performance.now()/1000:options.h||0, t2=options.p||0;
@@ -900,6 +905,14 @@
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));  
                  gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+        var programcol = compile(`attribute vec4 position; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; 
+                 void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; Col=col; }`,
+                `#extension GL_OES_standard_derivatives : enable
+                 precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; varying vec3 Col; 
+                 void main() { vec3 ldir = normalize(Pos.xyz - vec3(1.0,1.0,2.0));
+                 vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
+                 vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));  
+                 gl_FragColor = vec4(max(0.3,l)*Col+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
       // Create a font texture, lucida console or otherwise monospaced.
         var fw=22, font = Object.assign(document.createElement('canvas'),{width:94*fw,height:32}), 
             ctx = Object.assign(font.getContext('2d'),{font:'bold 32px lucida console, monospace'}),
@@ -1103,13 +1116,17 @@
             if (e.va || (e instanceof Object && e.data)) {
               // Create the vertex array and store it for re-use.
               if (!e.va) {
-                var et=[]; e.data.forEach(e=>{if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));});
-                e.va = createVA(et,undefined); e.va.tcount = e.data.length*3;
+                if (e.idx) {
+                  var et = e.data.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]).flat();
+                } else {
+                  var et=[]; e.data.forEach(e=>{if (e instanceof Array && e.length==3) et=et.concat.apply(et,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));});
+                }
+                e.va = createVA(et,undefined,e.idx,e.color?new Float32Array(e.color):undefined); e.va.tcount = e.idx.length?e.idx.length:e.data.length*3;
               }
               // render the vertex array.
               if (e.transform) { M=mtx(options.camera.Mul(e.transform)); }
               if (alpha) { gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-alpha); }
-              draw(program,gl.TRIANGLES,t,c,[0,0,0],r,undefined,e.va);
+              draw(e.color?programcol:program,gl.TRIANGLES,t,c,[0,0,0],r,undefined,e.va);
               if (alpha) gl.disable(gl.BLEND);
               if (e.transform) { M=mtx(options.camera); }
             }
