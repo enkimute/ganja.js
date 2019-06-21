@@ -874,7 +874,7 @@
               [va.b,va.b2,va.b4,va.b3].forEach(x=>{if(x) gl.deleteBuffer(x)}); if (va.r) gl.va.deleteVertexArrayOES(va.r);
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)      
-        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.animate?performance.now()/1000:options.h||0, t2=options.p||0;
+        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.spin?performance.now()*options.spin/1000:options.h||0, t2=options.p||0;
           var ct = Math.cos(t), st= Math.sin(t), ct2 = Math.cos(t2), st2 = Math.sin(t2), xx=options.posx||0, y=options.posy||0, z=options.posz||0, zoom=options.z||5;
           if (tot==5) return [ct,st*-st2,st*ct2,0,0,ct2,st2,0,-st,ct*-st2,ct*ct2,0,xx*ct+z*-st,y*ct2+(xx*st+z*ct)*-st2,y*st2+xx*st+z*ct*ct2+zoom,1];
           x=x.Normalized; var y=x.Mul(x.Dual),X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=Array(16);
