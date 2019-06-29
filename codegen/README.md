@@ -20,6 +20,7 @@ With those installed, simply run the makefile.
 
 The cpp, csharp, rust and python folder contain the pregenerated files for the following algebras :
 
+| sig   | filename     | name                         |
 |-------|--------------|------------------------------|
 | 0,1   | c            | complex numbers              |
 | 1,0   | hyperbolic   | hyperbolic numbers           |
@@ -35,7 +36,6 @@ The cpp, csharp, rust and python folder contain the pregenerated files for the f
 
 ## templates
 
-|----------|---------------------|
 | language | author              |
 |----------|---------------------|
 | c++      | Steven De Keninck   |
