@@ -32,7 +32,6 @@ The cpp, csharp, rust and python folder contain the pregenerated files for the f
 | 3,1   | spacetime    | Spacetime                    | 
 | 4,1   | cga          | Conformal Geometric Algebra  |
 | 3,0,1 | pga3d        | Projective Geometric Algebra |
-|-------|--------------|------------------------------|
 
 ## templates
 
@@ -42,7 +41,6 @@ The cpp, csharp, rust and python folder contain the pregenerated files for the f
 | c#       | Frank Verheyen      |
 | rust     | Utensil Song        |
 | python   | Steven De Keninck   |
-|----------|---------------------|       
 
 ## New templates
 
