@@ -20,7 +20,7 @@ var lang = [
 //***********************************************//
 
 // We use ganja.js to do our heavy lifting.
-Algebra = require('./ganja.js');
+Algebra = require('../ganja.js');
 
 // To write output files.
 fs = require('fs');
