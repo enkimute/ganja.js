@@ -1,13 +1,14 @@
 {
   "name": "ganja.js",
-  "version": "1.0.146",
+  "version": "1.0.147",
   "description": "Geometric Algebra for javascript with operator overloading and algebraic literals",
   "main": "ganja.js",
   "directories": {
-    "example": "examples"
+    "example": "examples",
+    "codegen": "algebra generator for c++, c#, rust, python"
   },
   "scripts": {
-    "test": "Algebra(0,1,()=>(3+2e1)*(1+4e1));"
+    "test": "Algebra(0,1,()=>1e1*1e1==-1);"
   },
   "repository": {
     "type": "git",
@@ -16,7 +17,7 @@
   "keywords": [
     "Geometric Algebra",
     "Math",
-    "operator Overloading",
+    "Operator Overloading",
     "Clifford Algebra"
   ],
   "author": "enki",

@@ -1,1 +1,5 @@
+*.cpp linguist-language=C++
+*.cs linguist-language=C#
+*.rs linguist-language=Rust
+*.py linguist-language=Python
 * linguist-language=Javascript
