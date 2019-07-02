@@ -2,4 +2,4 @@
 *.cs linguist-language=C#
 *.rs linguist-language=Rust
 *.py linguist-language=Python
-* linguist-language=Javascript
+*.js linguist-language=Javascript
