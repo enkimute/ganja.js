@@ -26,8 +26,13 @@ or play [the wedge game](https://enkimute.github.io/ganja.js/examples/example_ga
 ## New !
 
 ganja.js now has a nodejs based templated source generator that allows the creation of arbitrary algebras
-for C++, C#, python and rust. The generated code provides in a flat multivector format and operator overloading.
+for **C++**, **C#**, **python** and **rust**. The generated code provides in a flat multivector format and operator overloading.
 Check the 'codegen' folder for the source, several algebras are available in pregenerated versions.
+
+* [**C++ pre-generated sources**](https://github.com/enkimute/ganja.js/tree/master/codegen/cpp)
+* [**C# pre-generated sources**](https://github.com/enkimute/ganja.js/tree/master/codegen/csharp)
+* [**rust pre-generated sources**](https://github.com/enkimute/ganja.js/tree/master/codegen/rust)
+* [**python pre-generated sources**](https://github.com/enkimute/ganja.js/tree/master/codegen/python)
 
 ## Contents
 
