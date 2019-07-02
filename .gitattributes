@@ -1,5 +1,5 @@
-*.cpp linguist-language=C++
-*.cs linguist-language=C#
-*.rs linguist-language=Rust
-*.py linguist-language=Python
+codegen/cpp/*.cpp linguist-language=C++
+codegen/csharp/*.cs linguist-language=C#
+codegen/rust/*.rs linguist-language=Rust
+codegen/python/*.py linguist-language=Python
 *.js linguist-language=Javascript
