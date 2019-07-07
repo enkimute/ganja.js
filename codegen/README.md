@@ -14,7 +14,21 @@ To be able to compile for all languages, you need :
 * python
 * rust (nightly) (run "rustup default nightly" in the project folder)
 
-With those installed, simply run the makefile.
+With those installed, simply run `make`.
+
+If you wish to generate and compile for only some of these languages or algebras, run something like
+
+```bash
+make GEN_LANG="csharp cpp python rust" c hyperbolic dual r2 r3 mink quat r111 spacetime cga pga3d
+```
+
+with languages or algebras you don't need removed from the command parameters.
+
+For example, if you only want pga3d for rust, just run:
+
+```bash
+make GEN_LANG="rust" pga3d
+```
 
 ## Pregenerated sources
 
