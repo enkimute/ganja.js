@@ -9,10 +9,10 @@
 // Templates are loaded here ..
 //***********************************************//
 var lang = [
-      { output: "pga.cs",  template: require('./cs.template.js') },
-      { output: "pga.cpp", template: require('./cpp.template.js') },
-      { output: "pga.py",  template: require('./py.template.js') },
-      { output: "pga.rs",  template: require('./rs.template.js') }
+      { name: 'csharp', ext: "cs",  template: require('./cs.template.js') },
+      { name: 'cpp', ext: "cpp", template: require('./cpp.template.js') },
+      { name: 'python', ext: "py",  template: require('./py.template.js') },
+      { name: 'rust', ext: "rs",  template: require('./rs.template.js') }
     ];
 
 //***********************************************//
@@ -24,6 +24,7 @@ Algebra = require('../ganja.js');
 
 // To write output files.
 fs = require('fs');
+path = require('path');
 
 // The basis used in the Siggraph course notes.
 var basis = "1,e0,e1,e2,e3,e01,e02,e03,e12,e31,e23,e021,e013,e032,e123,e0123".split(",");
@@ -115,9 +116,13 @@ var unops = [
       { name:"Conjugate", desc:"Clifford Conjugation" },
       { name:"Involute",  desc:"Main involution" }
     ];
-    
+
+var should_generate_lang = (lang) => {
+  return !process.env.GEN_LANG || (process.env.GEN_LANG && process.env.GEN_LANG.includes(lang.name));
+};
+
 // now loop over templates and generate output ..
-lang.forEach(lang=>{    
+lang.filter(should_generate_lang).forEach(lang => {
   // Generate the code for the binary operators.
   var binops_code = binops.map(b=>lang.template.binary(
                       name, b.symbol, b.name,'a','b','res',
@@ -142,12 +147,17 @@ lang.forEach(lang=>{
                    ));
 
   // Output the target source code to stdout
-  fs.writeFileSync(lang.output.replace("pga",name.toLowerCase()),[lang.template.preamble(basis,name),
+  if (!fs.existsSync(lang.name)) {
+    fs.mkdirSync(lang.name);
+  }
+  
+  var file_name = path.join(lang.name, `${name.toLowerCase()}.${lang.ext}`);
+  fs.writeFileSync(file_name,[lang.template.preamble(basis,name),
                ...unops_code,
                ...binops_code,
                lang.template.postamble(basis,name,lang.template[name]&&lang.template[name](basis,name)||lang.template.GENERIC&&lang.template.GENERIC(basis,name)||{preamble:'',amble:''})
               ].join("\n\n"));
 });              
-  console.log('['+name.toUpperCase()+'] Generated '+lang.map(x=>x.template.desc).join(', '));
+  console.log('['+name.toUpperCase()+'] Generated '+lang.filter(should_generate_lang).map(x=>x.template.desc).join(', '));
 
 
