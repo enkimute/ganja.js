@@ -3,3 +3,4 @@ codegen/csharp/*.cs linguist-language=C#
 codegen/rust/*.rs linguist-language=Rust
 codegen/python/*.py linguist-language=Python
 *.js linguist-language=Javascript
+*.html linguist-language=Javascript
