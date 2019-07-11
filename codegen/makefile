@@ -15,7 +15,6 @@ GEN_LANG = "csharp cpp python rust"
 	@echo "PYTHON" $* > out3
 	@echo "RUST" $* > out4
 	@echo "LANG"
-	@echo $(GEN_LANG)
 	@if [[ $(GEN_LANG) == *"cpp"* ]]; then g++ -o cpp/$*_cpp cpp/$*.cpp -std=c++11; ./cpp/$*_cpp >> out1; fi
 	@if [[ $(GEN_LANG) == *"csharp"* ]]; then mcs -out:csharp/$*_cs.exe csharp/$*.cs;  mono ./csharp/$*_cs.exe >> out2; fi
 	@if [[ $(GEN_LANG) == *"python"* ]]; then python ./python/$*.py >> out3; fi
