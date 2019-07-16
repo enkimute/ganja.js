@@ -20,7 +20,7 @@ const PI: float_t = 3.14159265358979323846;
 const basis: &'static [&'static str] = &[ ${basis.map(x=>'"'+x+'"').join(',')} ];
 const basis_count: usize = basis.len();
 
-#[derive(Default,Debug,Clone,Copy,PartialEq)]
+#[derive(Default,Debug,Clone,PartialEq)]
 struct ${classname} {
     mvec: [float_t; basis_count]
 }
@@ -215,7 +215,7 @@ ${body}`;
 // rust Template for our unary operators
 var unary = (classname, symbol, name, name_a, name_ret, code, classname_a = classname, desc) => {
   let body = `impl ${classname} {
-    pub fn ${name}(self: Self) -> ${classname} {
+    pub fn ${name}(self: & Self) -> ${classname} {
         let mut ${name_ret} = ${classname}::zero();
         let ${name_a} = self;
         ${code.replace(/^ */g, '').replace(/\n */g, '\n        ')}
@@ -226,7 +226,7 @@ var unary = (classname, symbol, name, name_a, name_ret, code, classname_a = clas
   if (symbol == `!`) {
     body = `${body}
 
-impl ${{ "!": "Not" }[symbol] || name} for ${classname} {
+impl ${{ "!": "Not" }[symbol] || name} for & ${classname} {
     type Output = ${classname};
 
     fn ${{ "!": "not" }[symbol] || name}(self: Self) -> ${classname} {
@@ -254,7 +254,7 @@ preamble:`
   }
 `,
 amble:`
-    let px = ${classname}::up(1.0,2.0,3.0);
+    let px = &${classname}::up(1.0,2.0,3.0);
     let line = px ^ ${classname}::eo() ^ ${classname}::ei();
     let sphere = (${classname}::eo() - ${classname}::ei()).Dual();
     println!("a point       : {}", px);
@@ -278,11 +278,11 @@ amble:`
 var PGA3D = (basis,classname)=>({
 preamble:`
     // A rotor (Euclidean line) and translator (Ideal line)
-    pub fn rotor(angle: float_t, line: Self) -> Self {
+    pub fn rotor(angle: float_t, line: & Self) -> Self {
         (angle / 2.0).cos() + (angle / 2.0).sin() * line.normalized()
     }
 
-    pub fn translator(dist: float_t, line: Self) -> Self {
+    pub fn translator(dist: float_t, line: & Self) -> Self {
         1.0 + dist / 2.0 * line
     }
 
@@ -313,18 +313,18 @@ preamble:`
     // for our toy problem (generate points on the surface of a torus)
     // we start with a function that generates motors.
     // circle(t) with t going from 0 to 1.
-    pub fn circle(t: float_t, radius: float_t, line: Self) -> Self {
-        Self::rotor(t * 2.0 * PI, line) * Self::translator(radius, e1 * e0)
+    pub fn circle(t: float_t, radius: float_t, line: & Self) -> Self {
+        Self::rotor(t * 2.0 * PI, line) * Self::translator(radius, &(e1 * e0))
     }
 
     // a torus is now the product of two circles.
-    pub fn torus(s: float_t, t: float_t, r1: float_t, l1: Self, r2: float_t, l2: Self) -> Self {
+    pub fn torus(s: float_t, t: float_t, r1: float_t, l1: & Self, r2: float_t, l2: & Self) -> Self {
         Self::circle(s, r2, l2) * Self::circle(t, r1, l1)
     }
 
     // and to sample its points we simply sandwich the origin ..
     pub fn point_on_torus(s: float_t, t: float_t) -> Self {
-        let to: Self = Self::torus(s, t, 0.25, Self::e12(), 0.6, Self::e31());
+        let to = &Self::torus(s, t, 0.25, &Self::e12(), 0.6, &Self::e31());
 
         to * Self::e123() * to.Reverse()
     }
@@ -332,20 +332,20 @@ preamble:`
 `,
 amble:`
     // Elements of the even subalgebra (scalar + bivector + pss) of unit length are motors
-    let rot = ${classname}::rotor(PI / 2.0, e1 * e2);
+    let rot = &${classname}::rotor(PI / 2.0, &(e1 * e2));
 
     // The outer product ^ is the MEET. Here we intersect the yz (x=0) and xz (y=0) planes.
-    let ax_z = e1 ^ e2;
+    let ax_z = &(e1 ^ e2);
     
     // line and plane meet in point. We intersect the line along the z-axis (x=0,y=0) with the xy (z=0) plane.
-    let orig = ax_z ^ e3;
+    let orig = &(ax_z ^ e3);
     
     // We can also easily create points and join them into a line using the regressive (vee, &) product.
-    let px = ${classname}::point(1.0, 0.0, 0.0);
-    let line = orig & px;
+    let px = &${classname}::point(1.0, 0.0, 0.0);
+    let line = &(orig & px);
     
     // Lets also create the plane with equation 2x + z - 3 = 0
-    let p = ${classname}::plane(2.0, 0.0, 1.0, -3.0);
+    let p = &${classname}::plane(2.0, 0.0, 1.0, -3.0);
     
     // rotations work on all elements
     let rotated_plane = rot * p * rot.Reverse();
@@ -353,7 +353,7 @@ amble:`
     let rotated_point = rot * px * rot.Reverse();
     
     // See the 3D PGA Cheat sheet for a huge collection of useful formulas
-    let point_on_plane = (p | px) * p;
+    let point_on_plane = &((p | px) * p);
 
     // Some output
     println!("a point       : {}", px);
@@ -370,17 +370,17 @@ amble:`
 // rust Template for the postamble
 var postamble = (basis,classname,example) =>
   `impl ${classname} {
-    pub fn norm(self: Self) -> float_t {
+    pub fn norm(self: & Self) -> float_t {
         let scalar_part = (self * self.Conjugate())[0];
 
         scalar_part.abs().sqrt()
     }
 
-    pub fn inorm(self: Self) -> float_t {
+    pub fn inorm(self: & Self) -> float_t {
         self.Dual().norm()
     }
 
-    pub fn normalized(self: Self) -> Self {
+    pub fn normalized(self: & Self) -> Self {
         self * (1.0 / self.norm())
     }
     
