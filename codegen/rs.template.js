@@ -73,7 +73,76 @@ impl fmt::Display for ${classname} {
         }).collect::<Vec<String>>().join(" + ");
         if n==0 { write!(f,"0") } else { write!(f, "{}", ret) }
     }
-}`;
+}
+
+macro_rules! define_binary_op(
+    (
+        // Operator, operator method, and scalar bounds.
+        $Op: ident, $op: ident;
+        // Argument identifiers and types + output.
+        $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
+        // Operator actual implementation.
+        $action: expr;
+        // Lifetime.
+        $($lives: tt),*
+    ) => {
+       impl<$($lives ,)* $Op<$Rhs> for $Lhs {
+           type Output = $Result;
+
+           #[inline]
+           fn $op($lhs, $rhs: $Rhs) -> Self::Output {
+               $action
+           }
+       }
+    }
+);
+
+macro_rules! define_binary_op_all(
+    (
+        // Operator, operator method, and scalar bounds.
+        $Op: ident, $op: ident;
+        // Argument identifiers and types + output.
+        $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
+        // Operator actual implementation.
+        $action: expr;
+        // Operators actual implementations.
+        [val val] => $action_val_val: expr;
+        [ref val] => $action_ref_val: expr;
+        [val ref] => $action_val_ref: expr;
+        [ref ref] => $action_ref_ref: expr;
+    ) => {
+        define_binary_op!(
+            $Op, $op;
+            $lhs: $Lhs, $rhs: $Rhs, Output = $Result;
+            $action_val_val;
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: &'a $Lhs, $rhs: $Rhs, Output = $Result;
+            $action_ref_val;
+            'a
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: $Lhs, $rhs: &'b $Rhs, Output = $Result;
+            $action_val_ref;
+            'b
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: &'a $Lhs, $rhs: &'b $Rhs, Output = $Result;
+            $action_ref_ref;
+            'a, 'b
+        );
+    }
+);
+
+// TODO define_unary_op
+
+`;
 
 // rust Template for our binary operators
 
