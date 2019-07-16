@@ -86,7 +86,7 @@ macro_rules! define_binary_op(
         // Lifetime.
         $($lives: tt),*
     ) => {
-       impl<$($lives ,)* $Op<$Rhs> for $Lhs {
+       impl<$($lives ,)*> $Op<$Rhs> for $Lhs {
            type Output = $Result;
 
            #[inline]
@@ -103,8 +103,6 @@ macro_rules! define_binary_op_all(
         $Op: ident, $op: ident;
         // Argument identifiers and types + output.
         $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
-        // Operator actual implementation.
-        $action: expr;
         // Operators actual implementations.
         [val val] => $action_val_val: expr;
         [ref val] => $action_ref_val: expr;
@@ -153,38 +151,56 @@ var binary = (classname, symbol, name, name_a, name_b, name_ret, code, classname
   if (symbol) {
 
     if (name.match(/^s/)) {
-      body = `impl ${{ "+": "Add", "*": "Mul" }[symbol] || name}<${classname}> for float_t {
-    type Output = ${classname};
-
-    fn ${{ "+": "add", "*": "mul" }[symbol] || name}(self: float_t, b: ${classname}) -> ${classname} {
+body = `
+define_binary_op_all!(
+    ${{ "+": "Add", "*": "Mul" }[symbol] || name},
+    ${{ "+": "add", "*": "mul" }[symbol] || name};
+    self: float_t, b: ${classname}, Output = ${classname};
+    [val val] => &self ${symbol} &b;
+    [ref val] =>  self ${symbol} &b;
+    [val ref] => &self ${symbol}  b;
+    [ref ref] => {
         let mut ${name_ret} = ${classname}::zero();
         let ${name_a} = self;
         ${code.replace(/^ */g, '').replace(/\n */g, '\n        ')}
         ${name_ret}
-    }
-}`;
+    };
+);
+`;
     } else if (name.match(/s$/)) {
-      body = `impl ${{ "+": "Add", "*": "Mul" }[symbol] || name}<float_t> for ${classname} {
-    type Output = ${classname};
-
-    fn ${{ "+": "add", "*": "mul" }[symbol] || name}(self: ${classname}, b: float_t) -> ${classname} {
+    body = `
+define_binary_op_all!(
+    ${{ "+": "Add", "*": "Mul" }[symbol] || name},
+    ${{ "+": "add", "*": "mul" }[symbol] || name};
+    self: ${classname}, b: float_t, Output = ${classname};
+    [val val] => &self ${symbol} &b;
+    [ref val] =>  self ${symbol} &b;
+    [val ref] => &self ${symbol}  b;
+    [ref ref] => {
         let mut ${name_ret} = ${classname}::zero();
         let ${name_a} = self;
         ${code.replace(/^ */g, '').replace(/\n */g, '\n        ')}
         ${name_ret}
-    }
-    }`;
+    };
+);
+`;
     } else {
-      body = `impl ${{ "+": "Add", "*": "Mul", "^": "BitXor", "&": "BitAnd", "|": "BitOr" }[symbol] || name} for ${classname} {
-    type Output = ${classname};
-
-    fn ${{ "+": "add", "-": "sub", "*": "mul", "^": "bitxor", "&": "bitand", "|": "bitor" }[symbol] || name}(self: ${classname}, b: ${classname}) -> ${classname} {
+      body = `
+define_binary_op_all!(
+    ${{ "+": "Add", "*": "Mul", "^": "BitXor", "&": "BitAnd", "|": "BitOr" }[symbol] || name},
+    ${{ "+": "add", "-": "sub", "*": "mul", "^": "bitxor", "&": "bitand", "|": "bitor" }[symbol] || name};
+    self: ${classname}, b: ${classname}, Output = ${classname};
+    [val val] => &self ${symbol} &b;
+    [ref val] =>  self ${symbol} &b;
+    [val ref] => &self ${symbol}  b;
+    [ref ref] => {
         let mut ${name_ret} = ${classname}::zero();
         let ${name_a} = self;
         ${code.replace(/^ */g, '').replace(/\n */g, '\n		')}
         ${name_ret}
-    }
-}`;
+    };
+);
+`;
     }
   } else {
     // no binary named function yet
