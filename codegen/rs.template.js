@@ -22,25 +22,25 @@ const basis_count: usize = basis.len();
 
 #[derive(Default,Debug,Clone,PartialEq)]
 struct ${classname} {
-    mvec: [float_t; basis_count]
+    mvec: Vec<float_t>
 }
 
 impl ${classname} {
-    pub const fn zero() -> Self {
+    pub fn zero() -> Self {
         Self {
-            mvec: [0.0; basis_count]
+            mvec: vec![0.0; basis_count]
         }
     }
 
-    pub const fn new(f: float_t, idx: usize) -> Self {
+    pub fn new(f: float_t, idx: usize) -> Self {
         let mut ret = Self::zero();
         ret.mvec[idx] = f;
         ret
     }
-}
 
-// basis vectors are available as global constants.
-${basis.slice(1).map((x,i)=>`const ${x}: ${classname} = ${classname}::new(1.0, ${i+1});`).join('\n')}
+    // basis vectors are available as methods
+    ${basis.slice(1).map((x,i)=>`pub fn ${x}() -> Self { ${classname}::new(1.0, ${i+1}) }`).join('\n')}
+}
 
 impl Index<usize> for ${classname} {
     type Output = float_t;
@@ -246,11 +246,11 @@ ${body}`;
 // rust template for CGA
 var CGA = (basis,classname)=>({
 preamble:`
-  pub fn eo() -> Self { e4 + e5 }
-  pub fn ei() -> Self { (e5 - e4)*0.5 }
+  pub fn eo() -> Self { Self::e4() + Self::e5() }
+  pub fn ei() -> Self { (Self::e5() - Self::e4())*0.5 }
   
   pub fn up(x: float_t, y: float_t, z: float_t) -> Self {
-    x*e1 + y*e2 + z*e3 + 0.5*(x*x+y*y+z*z)*Self::ei() + Self::eo()
+    x * Self::e1() + y * Self::e2() + z * Self::e3() + 0.5 * (x * x + y * y + z * z) * Self::ei() + Self::eo()
   }
 `,
 amble:`
@@ -268,9 +268,9 @@ amble:`
 var GENERIC = (basis,classname)=>({
 preamble:``,
 amble:`
-  println!("${basis[1]}*${basis[1]}         : {}", ${basis[1]} * ${basis[1]});
-  println!("pss           : {}", ${basis[basis.length-1]});
-  println!("pss*pss       : {}", ${basis[basis.length-1]}*${basis[basis.length-1]});
+  println!("${basis[1]}*${basis[1]}         : {}", ${classname}::${basis[1]}() * ${classname}::${basis[1]}());
+  println!("pss           : {}", ${classname}::${basis[basis.length-1]}());
+  println!("pss*pss       : {}", ${classname}::${basis[basis.length-1]}() * ${classname}::${basis[basis.length-1]}());
 `
 })
 
@@ -287,23 +287,9 @@ preamble:`
     }
 
     // A plane is defined using its homogenous equation ax + by + cz + d = 0
-    pub fn plane(a: float_t, b: float_t, c:float_t, d:float_t) -> Self {
-        a * e1 + b * e2 + c * e3 + d * e0
+    pub fn plane(a: float_t, b: float_t, c: float_t, d: float_t) -> Self {
+        a * Self::e1() + b * Self::e2() + c * Self::e3() + d * Self::e0()
     }
-
-    // PGA lines are bivectors.
-    pub fn e01() -> Self { e0^e1 } 
-    pub fn e02() -> Self { e0^e2 }
-    pub fn e03() -> Self { e0^e3 }
-    pub fn e12() -> Self { e1^e2 } 
-    pub fn e31() -> Self { e3^e1 }
-    pub fn e23() -> Self { e2^e3 }
-
-    // PGA points are trivectors.
-    pub fn e123() -> Self { e1^e2^e3 }
-    pub fn e032() -> Self { e0^e3^e2 }
-    pub fn e013() -> Self { e0^e1^e3 }
-    pub fn e021() -> Self { e0^e2^e1 }
 
     // A point is just a homogeneous point, euclidean coordinates plus the origin
     pub fn point(x: float_t, y: float_t, z:float_t) -> Self {
@@ -314,7 +300,7 @@ preamble:`
     // we start with a function that generates motors.
     // circle(t) with t going from 0 to 1.
     pub fn circle(t: float_t, radius: float_t, line: & Self) -> Self {
-        Self::rotor(t * 2.0 * PI, line) * Self::translator(radius, &(e1 * e0))
+        Self::rotor(t * 2.0 * PI, line) * Self::translator(radius, &(Self::e1() * Self::e0()))
     }
 
     // a torus is now the product of two circles.
@@ -332,13 +318,13 @@ preamble:`
 `,
 amble:`
     // Elements of the even subalgebra (scalar + bivector + pss) of unit length are motors
-    let rot = &${classname}::rotor(PI / 2.0, &(e1 * e2));
+    let rot = &${classname}::rotor(PI / 2.0, &(${classname}::e1() * ${classname}::e2()));
 
     // The outer product ^ is the MEET. Here we intersect the yz (x=0) and xz (y=0) planes.
-    let ax_z = &(e1 ^ e2);
+    let ax_z = &(${classname}::e1() ^ ${classname}::e2());
     
     // line and plane meet in point. We intersect the line along the z-axis (x=0,y=0) with the xy (z=0) plane.
-    let orig = &(ax_z ^ e3);
+    let orig = &(ax_z ^ ${classname}::e3());
     
     // We can also easily create points and join them into a line using the regressive (vee, &) product.
     let px = &${classname}::point(1.0, 0.0, 0.0);
