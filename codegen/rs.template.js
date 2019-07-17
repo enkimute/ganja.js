@@ -39,7 +39,7 @@ impl ${classname} {
     }
 
     // basis vectors are available as methods
-    ${basis.slice(1).map((x,i)=>`pub fn ${x}() -> Self { ${classname}::new(1.0, ${i+1}) }`).join('\n')}
+${basis.slice(1).map((x,i)=>`    pub fn ${x}() -> Self { ${classname}::new(1.0, ${i+1}) }`).join('\n')}
 }
 
 impl Index<usize> for ${classname} {
