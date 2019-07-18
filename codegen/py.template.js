@@ -10,57 +10,57 @@ __author__ = \'Enki\'
 import math
 
 class ${classname}:
-	def __init__(self, value=0, index=0):
-		"""Initiate a new ${classname}.
-		 
-		Optional, the component \`\`index\`\` can be set with \`\`value\`\`.
-		"""
-		self.mvec = [0]*${basis.length}
-		self._base = [${basis.map(x=>'"'+x+'"').join(',')}]
-		if (value != 0):
-			self.mvec[index] = value
+    def __init__(self, value=0, index=0):
+        """Initiate a new ${classname}.
+         
+        Optional, the component index can be set with value.
+        """
+        self.mvec = [0] * ${basis.length}
+        self._base = [${basis.map(x=>'"'+x+'"').join(', ')}]
+        if (value != 0):
+            self.mvec[index] = value
         
-	def __str__(self):
-		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
-		if (res == ''):
-			return "0"
-		return res
+    def __str__(self):
+        res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        if (res == ''):
+            return "0"
+        return res
 
-	def __getitem__(self, key):
-		return self.mvec[key]
+    def __getitem__(self, key):
+        return self.mvec[key]
 
-	def __setitem__(self, key, value):
-		self.mvec[key] = value
-		
-	def __len__(self):
-		return len(self.mvec)`
+    def __setitem__(self, key, value):
+        self.mvec[key] = value
+        
+    def __len__(self):
+        return len(self.mvec)`
 
 // python Template for our binary operators
 
 var binary = (classname, symbol, name, name_a, name_b, name_ret, code, classname_a=classname, classname_b=classname, desc)=>
-`	def ${name.match("s")?name:({"+":"__add__","-":"__sub__","*":"__mul__","^":"__xor__","&":"__and__","|":"__or__"}[symbol]||name)}(${name_a},${name_b}):${(name in {Mul:1,Add:1,Sub:1})?`
-		"""${classname}.${name}
-		
-		${desc}
-		"""
-		if type(b) in (int, float):
-			 return a.${name.toLowerCase()}s(b)`:``}
-		${name_ret} = ${classname}()
-		${code.replace(/;/g,'').replace(/^ */g,'').replace(/\n */g,'\n		')}
-		return ${name_ret}
-${(name in {Mul:1,Add:1,Sub:1})?`	__r${name.toLowerCase()}__=__${name.toLowerCase()}__`:``}`;
+`    def ${name.match("s")?name:({"+":"__add__","-":"__sub__","*":"__mul__","^":"__xor__","&":"__and__","|":"__or__"}[symbol]||name)}(${name_a},${name_b}):${(name in {Mul:1,Add:1,Sub:1})?`
+        """${classname}.${name}
+        
+        ${desc}
+        """
+        if type(b) in (int, float):
+            return a.${name.toLowerCase()}s(b)`:``}
+        ${name_ret} = ${classname}()
+        ${code.replace(/;/g,'').replace(/^ */g,'').replace(/\n */g,'\n        ')}
+        return ${name_ret}
+${(name in {Mul:1,Add:1,Sub:1})?`    __r${name.toLowerCase()}__=__${name.toLowerCase()}__`:``}`;
 
 // python Template for our unary operators
 
 var unary = (classname, symbol, name, name_a, name_ret, code, classname_a=classname,desc)=>
-`	def ${({"~":"__invert__"}[symbol]||name)}(${name_a}):
-		"""${classname}.${name}
-		
-		${desc}
-		"""
-		${name_ret} = ${classname}()
-		${code.replace(/;/g,'').replace(/^ */g,'').replace(/\n */g,'\n		')}
-		return ${name_ret}`;
+`    def ${({"~":"__invert__"}[symbol]||name)}(${name_a}):
+        """${classname}.${name}
+        
+        ${desc}
+        """
+        ${name_ret} = ${classname}()
+        ${code.replace(/;/g,'').replace(/^ */g,'').replace(/\n */g,'\n        ')}
+        return ${name_ret}`;
 
 // python template for CGA example
 var CGA = (basis,classname)=>({
@@ -90,7 +90,6 @@ if __name__ == '__main__':
     print("a point       :", str(PX))
     print("a line        :", str(LINE))
     print("a sphere      :", str(SPHERE))
-
 `
 });
 
@@ -100,11 +99,11 @@ preamble:`
 `,
 amble:`
 ${basis.slice(1).map((x,i)=>`${x} = ${classname}(1.0, ${i+1})`).join('\n')}
+
 if __name__ == '__main__':
     print("${basis[1]}*${basis[1]}         :", str(${basis[1]}*${basis[1]}))
     print("pss           :", str(${basis[basis.length-1]}))
     print("pss*pss       :", str(${basis[basis.length-1]}*${basis[basis.length-1]}))
-
 `
 })
 
@@ -182,29 +181,28 @@ if __name__ == '__main__':
     POINT_ON_PLANE = (P | PX) * P
 
     # output some numbers.
-    print("a point       :",str(PX))
-    print("a line        :",str(LINE))
-    print("a plane       :",str(P))
-    print("a rotor       :",str(ROT))
-    print("rotated line  :",str(ROTATED_LINE))
-    print("rotated point :",str(ROTATED_POINT))
-    print("rotated plane :",str(ROTATED_PLANE))
-    print("point on plane:",str(POINT_ON_PLANE.normalized()))
-    print("point on torus:",str(POINT_ON_TORUS(0.0, 0.0)))
-
+    print("a point       :", str(PX))
+    print("a line        :", str(LINE))
+    print("a plane       :", str(P))
+    print("a rotor       :", str(ROT))
+    print("rotated line  :", str(ROTATED_LINE))
+    print("rotated point :", str(ROTATED_POINT))
+    print("rotated plane :", str(ROTATED_PLANE))
+    print("point on plane:", str(POINT_ON_PLANE.normalized()))
+    print("point on torus:", str(POINT_ON_TORUS(0.0, 0.0)))
 `
 })
 
 // python Template for the postamble
 var postamble = (basis,classname,example)=>
-`	def norm(a):
-		return math.sqrt(math.fabs((a * a.Conjugate())[0]))
-
-	def inorm(a):
-		return a.Dual().norm()
-		
-	def normalized(a):
-		return a * (1 / a.norm())
+`    def norm(a):
+        return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+        
+    def inorm(a):
+        return a.Dual().norm()
+        
+    def normalized(a):
+        return a * (1 / a.norm())
 ${example.amble}
 `;
 

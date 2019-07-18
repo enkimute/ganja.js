@@ -8,202 +8,202 @@ __author__ = 'Enki'
 import math
 
 class QUAT:
-	def __init__(self, value=0, index=0):
-		"""Initiate a new QUAT.
-		 
-		Optional, the component ``index`` can be set with ``value``.
-		"""
-		self.mvec = [0]*4
-		self._base = ["1","e1","e2","e12"]
-		if (value != 0):
-			self.mvec[index] = value
+    def __init__(self, value=0, index=0):
+        """Initiate a new QUAT.
+         
+        Optional, the component index can be set with value.
+        """
+        self.mvec = [0] * 4
+        self._base = ["1", "e1", "e2", "e12"]
+        if (value != 0):
+            self.mvec[index] = value
         
-	def __str__(self):
-		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
-		if (res == ''):
-			return "0"
-		return res
+    def __str__(self):
+        res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        if (res == ''):
+            return "0"
+        return res
 
-	def __getitem__(self, key):
-		return self.mvec[key]
+    def __getitem__(self, key):
+        return self.mvec[key]
 
-	def __setitem__(self, key, value):
-		self.mvec[key] = value
-		
-	def __len__(self):
-		return len(self.mvec)
+    def __setitem__(self, key, value):
+        self.mvec[key] = value
+        
+    def __len__(self):
+        return len(self.mvec)
 
-	def __invert__(a):
-		"""QUAT.Reverse
-		
-		Reverse the order of the basis blades.
-		"""
-		res = QUAT()
-		res[0]=a[0]
-		res[1]=a[1]
-		res[2]=a[2]
-		res[3]=-a[3]
-		return res
+    def __invert__(a):
+        """QUAT.Reverse
+        
+        Reverse the order of the basis blades.
+        """
+        res = QUAT()
+        res[0]=a[0]
+        res[1]=a[1]
+        res[2]=a[2]
+        res[3]=-a[3]
+        return res
 
-	def Dual(a):
-		"""QUAT.Dual
-		
-		Poincare duality operator.
-		"""
-		res = QUAT()
-		res[0]=-a[3]
-		res[1]=-a[2]
-		res[2]=a[1]
-		res[3]=a[0]
-		return res
+    def Dual(a):
+        """QUAT.Dual
+        
+        Poincare duality operator.
+        """
+        res = QUAT()
+        res[0]=-a[3]
+        res[1]=-a[2]
+        res[2]=a[1]
+        res[3]=a[0]
+        return res
 
-	def Conjugate(a):
-		"""QUAT.Conjugate
-		
-		Clifford Conjugation
-		"""
-		res = QUAT()
-		res[0]=a[0]
-		res[1]=-a[1]
-		res[2]=-a[2]
-		res[3]=-a[3]
-		return res
+    def Conjugate(a):
+        """QUAT.Conjugate
+        
+        Clifford Conjugation
+        """
+        res = QUAT()
+        res[0]=a[0]
+        res[1]=-a[1]
+        res[2]=-a[2]
+        res[3]=-a[3]
+        return res
 
-	def Involute(a):
-		"""QUAT.Involute
-		
-		Main involution
-		"""
-		res = QUAT()
-		res[0]=a[0]
-		res[1]=-a[1]
-		res[2]=-a[2]
-		res[3]=a[3]
-		return res
+    def Involute(a):
+        """QUAT.Involute
+        
+        Main involution
+        """
+        res = QUAT()
+        res[0]=a[0]
+        res[1]=-a[1]
+        res[2]=-a[2]
+        res[3]=a[3]
+        return res
 
-	def __mul__(a,b):
-		"""QUAT.Mul
-		
-		The geometric product.
-		"""
-		if type(b) in (int, float):
-			 return a.muls(b)
-		res = QUAT()
-		res[0]=b[0]*a[0]-b[1]*a[1]-b[2]*a[2]-b[3]*a[3]
-		res[1]=b[1]*a[0]+b[0]*a[1]+b[3]*a[2]-b[2]*a[3]
-		res[2]=b[2]*a[0]-b[3]*a[1]+b[0]*a[2]+b[1]*a[3]
-		res[3]=b[3]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[3]
-		return res
-	__rmul__=__mul__
+    def __mul__(a,b):
+        """QUAT.Mul
+        
+        The geometric product.
+        """
+        if type(b) in (int, float):
+            return a.muls(b)
+        res = QUAT()
+        res[0]=b[0]*a[0]-b[1]*a[1]-b[2]*a[2]-b[3]*a[3]
+        res[1]=b[1]*a[0]+b[0]*a[1]+b[3]*a[2]-b[2]*a[3]
+        res[2]=b[2]*a[0]-b[3]*a[1]+b[0]*a[2]+b[1]*a[3]
+        res[3]=b[3]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[3]
+        return res
+    __rmul__=__mul__
 
-	def __xor__(a,b):
-		res = QUAT()
-		res[0]=b[0]*a[0]
-		res[1]=b[1]*a[0]+b[0]*a[1]
-		res[2]=b[2]*a[0]+b[0]*a[2]
-		res[3]=b[3]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[3]
-		return res
-
-
-	def __and__(a,b):
-		res = QUAT()
-		res[3]=b[3]*a[3]
-		res[2]=b[2]*a[3]+b[3]*a[2]
-		res[1]=b[1]*a[3]+b[3]*a[1]
-		res[0]=b[0]*a[3]+b[1]*a[2]-b[2]*a[1]+b[3]*a[0]
-		return res
+    def __xor__(a,b):
+        res = QUAT()
+        res[0]=b[0]*a[0]
+        res[1]=b[1]*a[0]+b[0]*a[1]
+        res[2]=b[2]*a[0]+b[0]*a[2]
+        res[3]=b[3]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[3]
+        return res
 
 
-	def __or__(a,b):
-		res = QUAT()
-		res[0]=b[0]*a[0]-b[1]*a[1]-b[2]*a[2]-b[3]*a[3]
-		res[1]=b[1]*a[0]+b[0]*a[1]+b[3]*a[2]-b[2]*a[3]
-		res[2]=b[2]*a[0]-b[3]*a[1]+b[0]*a[2]+b[1]*a[3]
-		res[3]=b[3]*a[0]+b[0]*a[3]
-		return res
+    def __and__(a,b):
+        res = QUAT()
+        res[3]=b[3]*a[3]
+        res[2]=b[2]*a[3]+b[3]*a[2]
+        res[1]=b[1]*a[3]+b[3]*a[1]
+        res[0]=b[0]*a[3]+b[1]*a[2]-b[2]*a[1]+b[3]*a[0]
+        return res
 
 
-	def __add__(a,b):
-		"""QUAT.Add
-		
-		Multivector addition
-		"""
-		if type(b) in (int, float):
-			 return a.adds(b)
-		res = QUAT()
-		res[0] = a[0]+b[0]
-		res[1] = a[1]+b[1]
-		res[2] = a[2]+b[2]
-		res[3] = a[3]+b[3]
-		return res
-	__radd__=__add__
-
-	def __sub__(a,b):
-		"""QUAT.Sub
-		
-		Multivector subtraction
-		"""
-		if type(b) in (int, float):
-			 return a.subs(b)
-		res = QUAT()
-		res[0] = a[0]-b[0]
-		res[1] = a[1]-b[1]
-		res[2] = a[2]-b[2]
-		res[3] = a[3]-b[3]
-		return res
-	__rsub__=__sub__
-
-	def smul(a,b):
-		res = QUAT()
-		res[0] = a*b[0]
-		res[1] = a*b[1]
-		res[2] = a*b[2]
-		res[3] = a*b[3]
-		return res
+    def __or__(a,b):
+        res = QUAT()
+        res[0]=b[0]*a[0]-b[1]*a[1]-b[2]*a[2]-b[3]*a[3]
+        res[1]=b[1]*a[0]+b[0]*a[1]+b[3]*a[2]-b[2]*a[3]
+        res[2]=b[2]*a[0]-b[3]*a[1]+b[0]*a[2]+b[1]*a[3]
+        res[3]=b[3]*a[0]+b[0]*a[3]
+        return res
 
 
-	def muls(a,b):
-		res = QUAT()
-		res[0] = a[0]*b
-		res[1] = a[1]*b
-		res[2] = a[2]*b
-		res[3] = a[3]*b
-		return res
+    def __add__(a,b):
+        """QUAT.Add
+        
+        Multivector addition
+        """
+        if type(b) in (int, float):
+            return a.adds(b)
+        res = QUAT()
+        res[0] = a[0]+b[0]
+        res[1] = a[1]+b[1]
+        res[2] = a[2]+b[2]
+        res[3] = a[3]+b[3]
+        return res
+    __radd__=__add__
+
+    def __sub__(a,b):
+        """QUAT.Sub
+        
+        Multivector subtraction
+        """
+        if type(b) in (int, float):
+            return a.subs(b)
+        res = QUAT()
+        res[0] = a[0]-b[0]
+        res[1] = a[1]-b[1]
+        res[2] = a[2]-b[2]
+        res[3] = a[3]-b[3]
+        return res
+    __rsub__=__sub__
+
+    def smul(a,b):
+        res = QUAT()
+        res[0] = a*b[0]
+        res[1] = a*b[1]
+        res[2] = a*b[2]
+        res[3] = a*b[3]
+        return res
 
 
-	def sadd(a,b):
-		res = QUAT()
-		res[0] = a+b[0]
-		res[1] = b[1]
-		res[2] = b[2]
-		res[3] = b[3]
-		return res
+    def muls(a,b):
+        res = QUAT()
+        res[0] = a[0]*b
+        res[1] = a[1]*b
+        res[2] = a[2]*b
+        res[3] = a[3]*b
+        return res
 
 
-	def adds(a,b):
-		res = QUAT()
-		res[0] = a[0]+b
-		res[1] = a[1]
-		res[2] = a[2]
-		res[3] = a[3]
-		return res
+    def sadd(a,b):
+        res = QUAT()
+        res[0] = a+b[0]
+        res[1] = b[1]
+        res[2] = b[2]
+        res[3] = b[3]
+        return res
 
 
-	def norm(a):
-		return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+    def adds(a,b):
+        res = QUAT()
+        res[0] = a[0]+b
+        res[1] = a[1]
+        res[2] = a[2]
+        res[3] = a[3]
+        return res
 
-	def inorm(a):
-		return a.Dual().norm()
-		
-	def normalized(a):
-		return a * (1 / a.norm())
+
+    def norm(a):
+        return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+        
+    def inorm(a):
+        return a.Dual().norm()
+        
+    def normalized(a):
+        return a * (1 / a.norm())
 
 e1 = QUAT(1.0, 1)
 e2 = QUAT(1.0, 2)
 e12 = QUAT(1.0, 3)
+
 if __name__ == '__main__':
     print("e1*e1         :", str(e1*e1))
     print("pss           :", str(e12))
     print("pss*pss       :", str(e12*e12))
-
 

@@ -8,363 +8,363 @@ __author__ = 'Enki'
 import math
 
 class PGA3D:
-	def __init__(self, value=0, index=0):
-		"""Initiate a new PGA3D.
-		 
-		Optional, the component ``index`` can be set with ``value``.
-		"""
-		self.mvec = [0]*16
-		self._base = ["1","e0","e1","e2","e3","e01","e02","e03","e12","e31","e23","e021","e013","e032","e123","e0123"]
-		if (value != 0):
-			self.mvec[index] = value
+    def __init__(self, value=0, index=0):
+        """Initiate a new PGA3D.
+         
+        Optional, the component index can be set with value.
+        """
+        self.mvec = [0] * 16
+        self._base = ["1", "e0", "e1", "e2", "e3", "e01", "e02", "e03", "e12", "e31", "e23", "e021", "e013", "e032", "e123", "e0123"]
+        if (value != 0):
+            self.mvec[index] = value
         
-	def __str__(self):
-		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
-		if (res == ''):
-			return "0"
-		return res
+    def __str__(self):
+        res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        if (res == ''):
+            return "0"
+        return res
 
-	def __getitem__(self, key):
-		return self.mvec[key]
+    def __getitem__(self, key):
+        return self.mvec[key]
 
-	def __setitem__(self, key, value):
-		self.mvec[key] = value
-		
-	def __len__(self):
-		return len(self.mvec)
+    def __setitem__(self, key, value):
+        self.mvec[key] = value
+        
+    def __len__(self):
+        return len(self.mvec)
 
-	def __invert__(a):
-		"""PGA3D.Reverse
-		
-		Reverse the order of the basis blades.
-		"""
-		res = PGA3D()
-		res[0]=a[0]
-		res[1]=a[1]
-		res[2]=a[2]
-		res[3]=a[3]
-		res[4]=a[4]
-		res[5]=-a[5]
-		res[6]=-a[6]
-		res[7]=-a[7]
-		res[8]=-a[8]
-		res[9]=-a[9]
-		res[10]=-a[10]
-		res[11]=-a[11]
-		res[12]=-a[12]
-		res[13]=-a[13]
-		res[14]=-a[14]
-		res[15]=a[15]
-		return res
+    def __invert__(a):
+        """PGA3D.Reverse
+        
+        Reverse the order of the basis blades.
+        """
+        res = PGA3D()
+        res[0]=a[0]
+        res[1]=a[1]
+        res[2]=a[2]
+        res[3]=a[3]
+        res[4]=a[4]
+        res[5]=-a[5]
+        res[6]=-a[6]
+        res[7]=-a[7]
+        res[8]=-a[8]
+        res[9]=-a[9]
+        res[10]=-a[10]
+        res[11]=-a[11]
+        res[12]=-a[12]
+        res[13]=-a[13]
+        res[14]=-a[14]
+        res[15]=a[15]
+        return res
 
-	def Dual(a):
-		"""PGA3D.Dual
-		
-		Poincare duality operator.
-		"""
-		res = PGA3D()
-		res[0]=a[15]
-		res[1]=a[14]
-		res[2]=a[13]
-		res[3]=a[12]
-		res[4]=a[11]
-		res[5]=a[10]
-		res[6]=a[9]
-		res[7]=a[8]
-		res[8]=a[7]
-		res[9]=a[6]
-		res[10]=a[5]
-		res[11]=a[4]
-		res[12]=a[3]
-		res[13]=a[2]
-		res[14]=a[1]
-		res[15]=a[0]
-		return res
+    def Dual(a):
+        """PGA3D.Dual
+        
+        Poincare duality operator.
+        """
+        res = PGA3D()
+        res[0]=a[15]
+        res[1]=a[14]
+        res[2]=a[13]
+        res[3]=a[12]
+        res[4]=a[11]
+        res[5]=a[10]
+        res[6]=a[9]
+        res[7]=a[8]
+        res[8]=a[7]
+        res[9]=a[6]
+        res[10]=a[5]
+        res[11]=a[4]
+        res[12]=a[3]
+        res[13]=a[2]
+        res[14]=a[1]
+        res[15]=a[0]
+        return res
 
-	def Conjugate(a):
-		"""PGA3D.Conjugate
-		
-		Clifford Conjugation
-		"""
-		res = PGA3D()
-		res[0]=a[0]
-		res[1]=-a[1]
-		res[2]=-a[2]
-		res[3]=-a[3]
-		res[4]=-a[4]
-		res[5]=-a[5]
-		res[6]=-a[6]
-		res[7]=-a[7]
-		res[8]=-a[8]
-		res[9]=-a[9]
-		res[10]=-a[10]
-		res[11]=a[11]
-		res[12]=a[12]
-		res[13]=a[13]
-		res[14]=a[14]
-		res[15]=a[15]
-		return res
+    def Conjugate(a):
+        """PGA3D.Conjugate
+        
+        Clifford Conjugation
+        """
+        res = PGA3D()
+        res[0]=a[0]
+        res[1]=-a[1]
+        res[2]=-a[2]
+        res[3]=-a[3]
+        res[4]=-a[4]
+        res[5]=-a[5]
+        res[6]=-a[6]
+        res[7]=-a[7]
+        res[8]=-a[8]
+        res[9]=-a[9]
+        res[10]=-a[10]
+        res[11]=a[11]
+        res[12]=a[12]
+        res[13]=a[13]
+        res[14]=a[14]
+        res[15]=a[15]
+        return res
 
-	def Involute(a):
-		"""PGA3D.Involute
-		
-		Main involution
-		"""
-		res = PGA3D()
-		res[0]=a[0]
-		res[1]=-a[1]
-		res[2]=-a[2]
-		res[3]=-a[3]
-		res[4]=-a[4]
-		res[5]=a[5]
-		res[6]=a[6]
-		res[7]=a[7]
-		res[8]=a[8]
-		res[9]=a[9]
-		res[10]=a[10]
-		res[11]=-a[11]
-		res[12]=-a[12]
-		res[13]=-a[13]
-		res[14]=-a[14]
-		res[15]=a[15]
-		return res
+    def Involute(a):
+        """PGA3D.Involute
+        
+        Main involution
+        """
+        res = PGA3D()
+        res[0]=a[0]
+        res[1]=-a[1]
+        res[2]=-a[2]
+        res[3]=-a[3]
+        res[4]=-a[4]
+        res[5]=a[5]
+        res[6]=a[6]
+        res[7]=a[7]
+        res[8]=a[8]
+        res[9]=a[9]
+        res[10]=a[10]
+        res[11]=-a[11]
+        res[12]=-a[12]
+        res[13]=-a[13]
+        res[14]=-a[14]
+        res[15]=a[15]
+        return res
 
-	def __mul__(a,b):
-		"""PGA3D.Mul
-		
-		The geometric product.
-		"""
-		if type(b) in (int, float):
-			 return a.muls(b)
-		res = PGA3D()
-		res[0]=b[0]*a[0]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[8]*a[8]-b[9]*a[9]-b[10]*a[10]-b[14]*a[14]
-		res[1]=b[1]*a[0]+b[0]*a[1]-b[5]*a[2]-b[6]*a[3]-b[7]*a[4]+b[2]*a[5]+b[3]*a[6]+b[4]*a[7]+b[11]*a[8]+b[12]*a[9]+b[13]*a[10]+b[8]*a[11]+b[9]*a[12]+b[10]*a[13]+b[15]*a[14]-b[14]*a[15]
-		res[2]=b[2]*a[0]+b[0]*a[2]-b[8]*a[3]+b[9]*a[4]+b[3]*a[8]-b[4]*a[9]-b[14]*a[10]-b[10]*a[14]
-		res[3]=b[3]*a[0]+b[8]*a[2]+b[0]*a[3]-b[10]*a[4]-b[2]*a[8]-b[14]*a[9]+b[4]*a[10]-b[9]*a[14]
-		res[4]=b[4]*a[0]-b[9]*a[2]+b[10]*a[3]+b[0]*a[4]-b[14]*a[8]+b[2]*a[9]-b[3]*a[10]-b[8]*a[14]
-		res[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]-b[11]*a[3]+b[12]*a[4]+b[0]*a[5]-b[8]*a[6]+b[9]*a[7]+b[6]*a[8]-b[7]*a[9]-b[15]*a[10]-b[3]*a[11]+b[4]*a[12]+b[14]*a[13]-b[13]*a[14]-b[10]*a[15]
-		res[6]=b[6]*a[0]+b[3]*a[1]+b[11]*a[2]-b[1]*a[3]-b[13]*a[4]+b[8]*a[5]+b[0]*a[6]-b[10]*a[7]-b[5]*a[8]-b[15]*a[9]+b[7]*a[10]+b[2]*a[11]+b[14]*a[12]-b[4]*a[13]-b[12]*a[14]-b[9]*a[15]
-		res[7]=b[7]*a[0]+b[4]*a[1]-b[12]*a[2]+b[13]*a[3]-b[1]*a[4]-b[9]*a[5]+b[10]*a[6]+b[0]*a[7]-b[15]*a[8]+b[5]*a[9]-b[6]*a[10]+b[14]*a[11]-b[2]*a[12]+b[3]*a[13]-b[11]*a[14]-b[8]*a[15]
-		res[8]=b[8]*a[0]+b[3]*a[2]-b[2]*a[3]+b[14]*a[4]+b[0]*a[8]+b[10]*a[9]-b[9]*a[10]+b[4]*a[14]
-		res[9]=b[9]*a[0]-b[4]*a[2]+b[14]*a[3]+b[2]*a[4]-b[10]*a[8]+b[0]*a[9]+b[8]*a[10]+b[3]*a[14]
-		res[10]=b[10]*a[0]+b[14]*a[2]+b[4]*a[3]-b[3]*a[4]+b[9]*a[8]-b[8]*a[9]+b[0]*a[10]+b[2]*a[14]
-		res[11]=b[11]*a[0]-b[8]*a[1]+b[6]*a[2]-b[5]*a[3]+b[15]*a[4]-b[3]*a[5]+b[2]*a[6]-b[14]*a[7]-b[1]*a[8]+b[13]*a[9]-b[12]*a[10]+b[0]*a[11]+b[10]*a[12]-b[9]*a[13]+b[7]*a[14]-b[4]*a[15]
-		res[12]=b[12]*a[0]-b[9]*a[1]-b[7]*a[2]+b[15]*a[3]+b[5]*a[4]+b[4]*a[5]-b[14]*a[6]-b[2]*a[7]-b[13]*a[8]-b[1]*a[9]+b[11]*a[10]-b[10]*a[11]+b[0]*a[12]+b[8]*a[13]+b[6]*a[14]-b[3]*a[15]
-		res[13]=b[13]*a[0]-b[10]*a[1]+b[15]*a[2]+b[7]*a[3]-b[6]*a[4]-b[14]*a[5]-b[4]*a[6]+b[3]*a[7]+b[12]*a[8]-b[11]*a[9]-b[1]*a[10]+b[9]*a[11]-b[8]*a[12]+b[0]*a[13]+b[5]*a[14]-b[2]*a[15]
-		res[14]=b[14]*a[0]+b[10]*a[2]+b[9]*a[3]+b[8]*a[4]+b[4]*a[8]+b[3]*a[9]+b[2]*a[10]+b[0]*a[14]
-		res[15]=b[15]*a[0]+b[14]*a[1]+b[13]*a[2]+b[12]*a[3]+b[11]*a[4]+b[10]*a[5]+b[9]*a[6]+b[8]*a[7]+b[7]*a[8]+b[6]*a[9]+b[5]*a[10]-b[4]*a[11]-b[3]*a[12]-b[2]*a[13]-b[1]*a[14]+b[0]*a[15]
-		return res
-	__rmul__=__mul__
+    def __mul__(a,b):
+        """PGA3D.Mul
+        
+        The geometric product.
+        """
+        if type(b) in (int, float):
+            return a.muls(b)
+        res = PGA3D()
+        res[0]=b[0]*a[0]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[8]*a[8]-b[9]*a[9]-b[10]*a[10]-b[14]*a[14]
+        res[1]=b[1]*a[0]+b[0]*a[1]-b[5]*a[2]-b[6]*a[3]-b[7]*a[4]+b[2]*a[5]+b[3]*a[6]+b[4]*a[7]+b[11]*a[8]+b[12]*a[9]+b[13]*a[10]+b[8]*a[11]+b[9]*a[12]+b[10]*a[13]+b[15]*a[14]-b[14]*a[15]
+        res[2]=b[2]*a[0]+b[0]*a[2]-b[8]*a[3]+b[9]*a[4]+b[3]*a[8]-b[4]*a[9]-b[14]*a[10]-b[10]*a[14]
+        res[3]=b[3]*a[0]+b[8]*a[2]+b[0]*a[3]-b[10]*a[4]-b[2]*a[8]-b[14]*a[9]+b[4]*a[10]-b[9]*a[14]
+        res[4]=b[4]*a[0]-b[9]*a[2]+b[10]*a[3]+b[0]*a[4]-b[14]*a[8]+b[2]*a[9]-b[3]*a[10]-b[8]*a[14]
+        res[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]-b[11]*a[3]+b[12]*a[4]+b[0]*a[5]-b[8]*a[6]+b[9]*a[7]+b[6]*a[8]-b[7]*a[9]-b[15]*a[10]-b[3]*a[11]+b[4]*a[12]+b[14]*a[13]-b[13]*a[14]-b[10]*a[15]
+        res[6]=b[6]*a[0]+b[3]*a[1]+b[11]*a[2]-b[1]*a[3]-b[13]*a[4]+b[8]*a[5]+b[0]*a[6]-b[10]*a[7]-b[5]*a[8]-b[15]*a[9]+b[7]*a[10]+b[2]*a[11]+b[14]*a[12]-b[4]*a[13]-b[12]*a[14]-b[9]*a[15]
+        res[7]=b[7]*a[0]+b[4]*a[1]-b[12]*a[2]+b[13]*a[3]-b[1]*a[4]-b[9]*a[5]+b[10]*a[6]+b[0]*a[7]-b[15]*a[8]+b[5]*a[9]-b[6]*a[10]+b[14]*a[11]-b[2]*a[12]+b[3]*a[13]-b[11]*a[14]-b[8]*a[15]
+        res[8]=b[8]*a[0]+b[3]*a[2]-b[2]*a[3]+b[14]*a[4]+b[0]*a[8]+b[10]*a[9]-b[9]*a[10]+b[4]*a[14]
+        res[9]=b[9]*a[0]-b[4]*a[2]+b[14]*a[3]+b[2]*a[4]-b[10]*a[8]+b[0]*a[9]+b[8]*a[10]+b[3]*a[14]
+        res[10]=b[10]*a[0]+b[14]*a[2]+b[4]*a[3]-b[3]*a[4]+b[9]*a[8]-b[8]*a[9]+b[0]*a[10]+b[2]*a[14]
+        res[11]=b[11]*a[0]-b[8]*a[1]+b[6]*a[2]-b[5]*a[3]+b[15]*a[4]-b[3]*a[5]+b[2]*a[6]-b[14]*a[7]-b[1]*a[8]+b[13]*a[9]-b[12]*a[10]+b[0]*a[11]+b[10]*a[12]-b[9]*a[13]+b[7]*a[14]-b[4]*a[15]
+        res[12]=b[12]*a[0]-b[9]*a[1]-b[7]*a[2]+b[15]*a[3]+b[5]*a[4]+b[4]*a[5]-b[14]*a[6]-b[2]*a[7]-b[13]*a[8]-b[1]*a[9]+b[11]*a[10]-b[10]*a[11]+b[0]*a[12]+b[8]*a[13]+b[6]*a[14]-b[3]*a[15]
+        res[13]=b[13]*a[0]-b[10]*a[1]+b[15]*a[2]+b[7]*a[3]-b[6]*a[4]-b[14]*a[5]-b[4]*a[6]+b[3]*a[7]+b[12]*a[8]-b[11]*a[9]-b[1]*a[10]+b[9]*a[11]-b[8]*a[12]+b[0]*a[13]+b[5]*a[14]-b[2]*a[15]
+        res[14]=b[14]*a[0]+b[10]*a[2]+b[9]*a[3]+b[8]*a[4]+b[4]*a[8]+b[3]*a[9]+b[2]*a[10]+b[0]*a[14]
+        res[15]=b[15]*a[0]+b[14]*a[1]+b[13]*a[2]+b[12]*a[3]+b[11]*a[4]+b[10]*a[5]+b[9]*a[6]+b[8]*a[7]+b[7]*a[8]+b[6]*a[9]+b[5]*a[10]-b[4]*a[11]-b[3]*a[12]-b[2]*a[13]-b[1]*a[14]+b[0]*a[15]
+        return res
+    __rmul__=__mul__
 
-	def __xor__(a,b):
-		res = PGA3D()
-		res[0]=b[0]*a[0]
-		res[1]=b[1]*a[0]+b[0]*a[1]
-		res[2]=b[2]*a[0]+b[0]*a[2]
-		res[3]=b[3]*a[0]+b[0]*a[3]
-		res[4]=b[4]*a[0]+b[0]*a[4]
-		res[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[5]
-		res[6]=b[6]*a[0]+b[3]*a[1]-b[1]*a[3]+b[0]*a[6]
-		res[7]=b[7]*a[0]+b[4]*a[1]-b[1]*a[4]+b[0]*a[7]
-		res[8]=b[8]*a[0]+b[3]*a[2]-b[2]*a[3]+b[0]*a[8]
-		res[9]=b[9]*a[0]-b[4]*a[2]+b[2]*a[4]+b[0]*a[9]
-		res[10]=b[10]*a[0]+b[4]*a[3]-b[3]*a[4]+b[0]*a[10]
-		res[11]=b[11]*a[0]-b[8]*a[1]+b[6]*a[2]-b[5]*a[3]-b[3]*a[5]+b[2]*a[6]-b[1]*a[8]+b[0]*a[11]
-		res[12]=b[12]*a[0]-b[9]*a[1]-b[7]*a[2]+b[5]*a[4]+b[4]*a[5]-b[2]*a[7]-b[1]*a[9]+b[0]*a[12]
-		res[13]=b[13]*a[0]-b[10]*a[1]+b[7]*a[3]-b[6]*a[4]-b[4]*a[6]+b[3]*a[7]-b[1]*a[10]+b[0]*a[13]
-		res[14]=b[14]*a[0]+b[10]*a[2]+b[9]*a[3]+b[8]*a[4]+b[4]*a[8]+b[3]*a[9]+b[2]*a[10]+b[0]*a[14]
-		res[15]=b[15]*a[0]+b[14]*a[1]+b[13]*a[2]+b[12]*a[3]+b[11]*a[4]+b[10]*a[5]+b[9]*a[6]+b[8]*a[7]+b[7]*a[8]+b[6]*a[9]+b[5]*a[10]-b[4]*a[11]-b[3]*a[12]-b[2]*a[13]-b[1]*a[14]+b[0]*a[15]
-		return res
-
-
-	def __and__(a,b):
-		res = PGA3D()
-		res[15]=b[15]*a[15]
-		res[14]=b[14]*a[15]+b[15]*a[14]
-		res[13]=b[13]*a[15]+b[15]*a[13]
-		res[12]=b[12]*a[15]+b[15]*a[12]
-		res[11]=b[11]*a[15]+b[15]*a[11]
-		res[10]=b[10]*a[15]+b[13]*a[14]-b[14]*a[13]+b[15]*a[10]
-		res[9]=b[9]*a[15]+b[12]*a[14]-b[14]*a[12]+b[15]*a[9]
-		res[8]=b[8]*a[15]+b[11]*a[14]-b[14]*a[11]+b[15]*a[8]
-		res[7]=b[7]*a[15]+b[12]*a[13]-b[13]*a[12]+b[15]*a[7]
-		res[6]=b[6]*a[15]-b[11]*a[13]+b[13]*a[11]+b[15]*a[6]
-		res[5]=b[5]*a[15]+b[11]*a[12]-b[12]*a[11]+b[15]*a[5]
-		res[4]=b[4]*a[15]-b[7]*a[14]+b[9]*a[13]-b[10]*a[12]-b[12]*a[10]+b[13]*a[9]-b[14]*a[7]+b[15]*a[4]
-		res[3]=b[3]*a[15]-b[6]*a[14]-b[8]*a[13]+b[10]*a[11]+b[11]*a[10]-b[13]*a[8]-b[14]*a[6]+b[15]*a[3]
-		res[2]=b[2]*a[15]-b[5]*a[14]+b[8]*a[12]-b[9]*a[11]-b[11]*a[9]+b[12]*a[8]-b[14]*a[5]+b[15]*a[2]
-		res[1]=b[1]*a[15]+b[5]*a[13]+b[6]*a[12]+b[7]*a[11]+b[11]*a[7]+b[12]*a[6]+b[13]*a[5]+b[15]*a[1]
-		res[0]=b[0]*a[15]+b[1]*a[14]+b[2]*a[13]+b[3]*a[12]+b[4]*a[11]+b[5]*a[10]+b[6]*a[9]+b[7]*a[8]+b[8]*a[7]+b[9]*a[6]+b[10]*a[5]-b[11]*a[4]-b[12]*a[3]-b[13]*a[2]-b[14]*a[1]+b[15]*a[0]
-		return res
+    def __xor__(a,b):
+        res = PGA3D()
+        res[0]=b[0]*a[0]
+        res[1]=b[1]*a[0]+b[0]*a[1]
+        res[2]=b[2]*a[0]+b[0]*a[2]
+        res[3]=b[3]*a[0]+b[0]*a[3]
+        res[4]=b[4]*a[0]+b[0]*a[4]
+        res[5]=b[5]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[5]
+        res[6]=b[6]*a[0]+b[3]*a[1]-b[1]*a[3]+b[0]*a[6]
+        res[7]=b[7]*a[0]+b[4]*a[1]-b[1]*a[4]+b[0]*a[7]
+        res[8]=b[8]*a[0]+b[3]*a[2]-b[2]*a[3]+b[0]*a[8]
+        res[9]=b[9]*a[0]-b[4]*a[2]+b[2]*a[4]+b[0]*a[9]
+        res[10]=b[10]*a[0]+b[4]*a[3]-b[3]*a[4]+b[0]*a[10]
+        res[11]=b[11]*a[0]-b[8]*a[1]+b[6]*a[2]-b[5]*a[3]-b[3]*a[5]+b[2]*a[6]-b[1]*a[8]+b[0]*a[11]
+        res[12]=b[12]*a[0]-b[9]*a[1]-b[7]*a[2]+b[5]*a[4]+b[4]*a[5]-b[2]*a[7]-b[1]*a[9]+b[0]*a[12]
+        res[13]=b[13]*a[0]-b[10]*a[1]+b[7]*a[3]-b[6]*a[4]-b[4]*a[6]+b[3]*a[7]-b[1]*a[10]+b[0]*a[13]
+        res[14]=b[14]*a[0]+b[10]*a[2]+b[9]*a[3]+b[8]*a[4]+b[4]*a[8]+b[3]*a[9]+b[2]*a[10]+b[0]*a[14]
+        res[15]=b[15]*a[0]+b[14]*a[1]+b[13]*a[2]+b[12]*a[3]+b[11]*a[4]+b[10]*a[5]+b[9]*a[6]+b[8]*a[7]+b[7]*a[8]+b[6]*a[9]+b[5]*a[10]-b[4]*a[11]-b[3]*a[12]-b[2]*a[13]-b[1]*a[14]+b[0]*a[15]
+        return res
 
 
-	def __or__(a,b):
-		res = PGA3D()
-		res[0]=b[0]*a[0]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[8]*a[8]-b[9]*a[9]-b[10]*a[10]-b[14]*a[14]
-		res[1]=b[1]*a[0]+b[0]*a[1]-b[5]*a[2]-b[6]*a[3]-b[7]*a[4]+b[2]*a[5]+b[3]*a[6]+b[4]*a[7]+b[11]*a[8]+b[12]*a[9]+b[13]*a[10]+b[8]*a[11]+b[9]*a[12]+b[10]*a[13]+b[15]*a[14]-b[14]*a[15]
-		res[2]=b[2]*a[0]+b[0]*a[2]-b[8]*a[3]+b[9]*a[4]+b[3]*a[8]-b[4]*a[9]-b[14]*a[10]-b[10]*a[14]
-		res[3]=b[3]*a[0]+b[8]*a[2]+b[0]*a[3]-b[10]*a[4]-b[2]*a[8]-b[14]*a[9]+b[4]*a[10]-b[9]*a[14]
-		res[4]=b[4]*a[0]-b[9]*a[2]+b[10]*a[3]+b[0]*a[4]-b[14]*a[8]+b[2]*a[9]-b[3]*a[10]-b[8]*a[14]
-		res[5]=b[5]*a[0]-b[11]*a[3]+b[12]*a[4]+b[0]*a[5]-b[15]*a[10]-b[3]*a[11]+b[4]*a[12]-b[10]*a[15]
-		res[6]=b[6]*a[0]+b[11]*a[2]-b[13]*a[4]+b[0]*a[6]-b[15]*a[9]+b[2]*a[11]-b[4]*a[13]-b[9]*a[15]
-		res[7]=b[7]*a[0]-b[12]*a[2]+b[13]*a[3]+b[0]*a[7]-b[15]*a[8]-b[2]*a[12]+b[3]*a[13]-b[8]*a[15]
-		res[8]=b[8]*a[0]+b[14]*a[4]+b[0]*a[8]+b[4]*a[14]
-		res[9]=b[9]*a[0]+b[14]*a[3]+b[0]*a[9]+b[3]*a[14]
-		res[10]=b[10]*a[0]+b[14]*a[2]+b[0]*a[10]+b[2]*a[14]
-		res[11]=b[11]*a[0]+b[15]*a[4]+b[0]*a[11]-b[4]*a[15]
-		res[12]=b[12]*a[0]+b[15]*a[3]+b[0]*a[12]-b[3]*a[15]
-		res[13]=b[13]*a[0]+b[15]*a[2]+b[0]*a[13]-b[2]*a[15]
-		res[14]=b[14]*a[0]+b[0]*a[14]
-		res[15]=b[15]*a[0]+b[0]*a[15]
-		return res
+    def __and__(a,b):
+        res = PGA3D()
+        res[15]=b[15]*a[15]
+        res[14]=b[14]*a[15]+b[15]*a[14]
+        res[13]=b[13]*a[15]+b[15]*a[13]
+        res[12]=b[12]*a[15]+b[15]*a[12]
+        res[11]=b[11]*a[15]+b[15]*a[11]
+        res[10]=b[10]*a[15]+b[13]*a[14]-b[14]*a[13]+b[15]*a[10]
+        res[9]=b[9]*a[15]+b[12]*a[14]-b[14]*a[12]+b[15]*a[9]
+        res[8]=b[8]*a[15]+b[11]*a[14]-b[14]*a[11]+b[15]*a[8]
+        res[7]=b[7]*a[15]+b[12]*a[13]-b[13]*a[12]+b[15]*a[7]
+        res[6]=b[6]*a[15]-b[11]*a[13]+b[13]*a[11]+b[15]*a[6]
+        res[5]=b[5]*a[15]+b[11]*a[12]-b[12]*a[11]+b[15]*a[5]
+        res[4]=b[4]*a[15]-b[7]*a[14]+b[9]*a[13]-b[10]*a[12]-b[12]*a[10]+b[13]*a[9]-b[14]*a[7]+b[15]*a[4]
+        res[3]=b[3]*a[15]-b[6]*a[14]-b[8]*a[13]+b[10]*a[11]+b[11]*a[10]-b[13]*a[8]-b[14]*a[6]+b[15]*a[3]
+        res[2]=b[2]*a[15]-b[5]*a[14]+b[8]*a[12]-b[9]*a[11]-b[11]*a[9]+b[12]*a[8]-b[14]*a[5]+b[15]*a[2]
+        res[1]=b[1]*a[15]+b[5]*a[13]+b[6]*a[12]+b[7]*a[11]+b[11]*a[7]+b[12]*a[6]+b[13]*a[5]+b[15]*a[1]
+        res[0]=b[0]*a[15]+b[1]*a[14]+b[2]*a[13]+b[3]*a[12]+b[4]*a[11]+b[5]*a[10]+b[6]*a[9]+b[7]*a[8]+b[8]*a[7]+b[9]*a[6]+b[10]*a[5]-b[11]*a[4]-b[12]*a[3]-b[13]*a[2]-b[14]*a[1]+b[15]*a[0]
+        return res
 
 
-	def __add__(a,b):
-		"""PGA3D.Add
-		
-		Multivector addition
-		"""
-		if type(b) in (int, float):
-			 return a.adds(b)
-		res = PGA3D()
-		res[0] = a[0]+b[0]
-		res[1] = a[1]+b[1]
-		res[2] = a[2]+b[2]
-		res[3] = a[3]+b[3]
-		res[4] = a[4]+b[4]
-		res[5] = a[5]+b[5]
-		res[6] = a[6]+b[6]
-		res[7] = a[7]+b[7]
-		res[8] = a[8]+b[8]
-		res[9] = a[9]+b[9]
-		res[10] = a[10]+b[10]
-		res[11] = a[11]+b[11]
-		res[12] = a[12]+b[12]
-		res[13] = a[13]+b[13]
-		res[14] = a[14]+b[14]
-		res[15] = a[15]+b[15]
-		return res
-	__radd__=__add__
-
-	def __sub__(a,b):
-		"""PGA3D.Sub
-		
-		Multivector subtraction
-		"""
-		if type(b) in (int, float):
-			 return a.subs(b)
-		res = PGA3D()
-		res[0] = a[0]-b[0]
-		res[1] = a[1]-b[1]
-		res[2] = a[2]-b[2]
-		res[3] = a[3]-b[3]
-		res[4] = a[4]-b[4]
-		res[5] = a[5]-b[5]
-		res[6] = a[6]-b[6]
-		res[7] = a[7]-b[7]
-		res[8] = a[8]-b[8]
-		res[9] = a[9]-b[9]
-		res[10] = a[10]-b[10]
-		res[11] = a[11]-b[11]
-		res[12] = a[12]-b[12]
-		res[13] = a[13]-b[13]
-		res[14] = a[14]-b[14]
-		res[15] = a[15]-b[15]
-		return res
-	__rsub__=__sub__
-
-	def smul(a,b):
-		res = PGA3D()
-		res[0] = a*b[0]
-		res[1] = a*b[1]
-		res[2] = a*b[2]
-		res[3] = a*b[3]
-		res[4] = a*b[4]
-		res[5] = a*b[5]
-		res[6] = a*b[6]
-		res[7] = a*b[7]
-		res[8] = a*b[8]
-		res[9] = a*b[9]
-		res[10] = a*b[10]
-		res[11] = a*b[11]
-		res[12] = a*b[12]
-		res[13] = a*b[13]
-		res[14] = a*b[14]
-		res[15] = a*b[15]
-		return res
+    def __or__(a,b):
+        res = PGA3D()
+        res[0]=b[0]*a[0]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[8]*a[8]-b[9]*a[9]-b[10]*a[10]-b[14]*a[14]
+        res[1]=b[1]*a[0]+b[0]*a[1]-b[5]*a[2]-b[6]*a[3]-b[7]*a[4]+b[2]*a[5]+b[3]*a[6]+b[4]*a[7]+b[11]*a[8]+b[12]*a[9]+b[13]*a[10]+b[8]*a[11]+b[9]*a[12]+b[10]*a[13]+b[15]*a[14]-b[14]*a[15]
+        res[2]=b[2]*a[0]+b[0]*a[2]-b[8]*a[3]+b[9]*a[4]+b[3]*a[8]-b[4]*a[9]-b[14]*a[10]-b[10]*a[14]
+        res[3]=b[3]*a[0]+b[8]*a[2]+b[0]*a[3]-b[10]*a[4]-b[2]*a[8]-b[14]*a[9]+b[4]*a[10]-b[9]*a[14]
+        res[4]=b[4]*a[0]-b[9]*a[2]+b[10]*a[3]+b[0]*a[4]-b[14]*a[8]+b[2]*a[9]-b[3]*a[10]-b[8]*a[14]
+        res[5]=b[5]*a[0]-b[11]*a[3]+b[12]*a[4]+b[0]*a[5]-b[15]*a[10]-b[3]*a[11]+b[4]*a[12]-b[10]*a[15]
+        res[6]=b[6]*a[0]+b[11]*a[2]-b[13]*a[4]+b[0]*a[6]-b[15]*a[9]+b[2]*a[11]-b[4]*a[13]-b[9]*a[15]
+        res[7]=b[7]*a[0]-b[12]*a[2]+b[13]*a[3]+b[0]*a[7]-b[15]*a[8]-b[2]*a[12]+b[3]*a[13]-b[8]*a[15]
+        res[8]=b[8]*a[0]+b[14]*a[4]+b[0]*a[8]+b[4]*a[14]
+        res[9]=b[9]*a[0]+b[14]*a[3]+b[0]*a[9]+b[3]*a[14]
+        res[10]=b[10]*a[0]+b[14]*a[2]+b[0]*a[10]+b[2]*a[14]
+        res[11]=b[11]*a[0]+b[15]*a[4]+b[0]*a[11]-b[4]*a[15]
+        res[12]=b[12]*a[0]+b[15]*a[3]+b[0]*a[12]-b[3]*a[15]
+        res[13]=b[13]*a[0]+b[15]*a[2]+b[0]*a[13]-b[2]*a[15]
+        res[14]=b[14]*a[0]+b[0]*a[14]
+        res[15]=b[15]*a[0]+b[0]*a[15]
+        return res
 
 
-	def muls(a,b):
-		res = PGA3D()
-		res[0] = a[0]*b
-		res[1] = a[1]*b
-		res[2] = a[2]*b
-		res[3] = a[3]*b
-		res[4] = a[4]*b
-		res[5] = a[5]*b
-		res[6] = a[6]*b
-		res[7] = a[7]*b
-		res[8] = a[8]*b
-		res[9] = a[9]*b
-		res[10] = a[10]*b
-		res[11] = a[11]*b
-		res[12] = a[12]*b
-		res[13] = a[13]*b
-		res[14] = a[14]*b
-		res[15] = a[15]*b
-		return res
+    def __add__(a,b):
+        """PGA3D.Add
+        
+        Multivector addition
+        """
+        if type(b) in (int, float):
+            return a.adds(b)
+        res = PGA3D()
+        res[0] = a[0]+b[0]
+        res[1] = a[1]+b[1]
+        res[2] = a[2]+b[2]
+        res[3] = a[3]+b[3]
+        res[4] = a[4]+b[4]
+        res[5] = a[5]+b[5]
+        res[6] = a[6]+b[6]
+        res[7] = a[7]+b[7]
+        res[8] = a[8]+b[8]
+        res[9] = a[9]+b[9]
+        res[10] = a[10]+b[10]
+        res[11] = a[11]+b[11]
+        res[12] = a[12]+b[12]
+        res[13] = a[13]+b[13]
+        res[14] = a[14]+b[14]
+        res[15] = a[15]+b[15]
+        return res
+    __radd__=__add__
+
+    def __sub__(a,b):
+        """PGA3D.Sub
+        
+        Multivector subtraction
+        """
+        if type(b) in (int, float):
+            return a.subs(b)
+        res = PGA3D()
+        res[0] = a[0]-b[0]
+        res[1] = a[1]-b[1]
+        res[2] = a[2]-b[2]
+        res[3] = a[3]-b[3]
+        res[4] = a[4]-b[4]
+        res[5] = a[5]-b[5]
+        res[6] = a[6]-b[6]
+        res[7] = a[7]-b[7]
+        res[8] = a[8]-b[8]
+        res[9] = a[9]-b[9]
+        res[10] = a[10]-b[10]
+        res[11] = a[11]-b[11]
+        res[12] = a[12]-b[12]
+        res[13] = a[13]-b[13]
+        res[14] = a[14]-b[14]
+        res[15] = a[15]-b[15]
+        return res
+    __rsub__=__sub__
+
+    def smul(a,b):
+        res = PGA3D()
+        res[0] = a*b[0]
+        res[1] = a*b[1]
+        res[2] = a*b[2]
+        res[3] = a*b[3]
+        res[4] = a*b[4]
+        res[5] = a*b[5]
+        res[6] = a*b[6]
+        res[7] = a*b[7]
+        res[8] = a*b[8]
+        res[9] = a*b[9]
+        res[10] = a*b[10]
+        res[11] = a*b[11]
+        res[12] = a*b[12]
+        res[13] = a*b[13]
+        res[14] = a*b[14]
+        res[15] = a*b[15]
+        return res
 
 
-	def sadd(a,b):
-		res = PGA3D()
-		res[0] = a+b[0]
-		res[1] = b[1]
-		res[2] = b[2]
-		res[3] = b[3]
-		res[4] = b[4]
-		res[5] = b[5]
-		res[6] = b[6]
-		res[7] = b[7]
-		res[8] = b[8]
-		res[9] = b[9]
-		res[10] = b[10]
-		res[11] = b[11]
-		res[12] = b[12]
-		res[13] = b[13]
-		res[14] = b[14]
-		res[15] = b[15]
-		return res
+    def muls(a,b):
+        res = PGA3D()
+        res[0] = a[0]*b
+        res[1] = a[1]*b
+        res[2] = a[2]*b
+        res[3] = a[3]*b
+        res[4] = a[4]*b
+        res[5] = a[5]*b
+        res[6] = a[6]*b
+        res[7] = a[7]*b
+        res[8] = a[8]*b
+        res[9] = a[9]*b
+        res[10] = a[10]*b
+        res[11] = a[11]*b
+        res[12] = a[12]*b
+        res[13] = a[13]*b
+        res[14] = a[14]*b
+        res[15] = a[15]*b
+        return res
 
 
-	def adds(a,b):
-		res = PGA3D()
-		res[0] = a[0]+b
-		res[1] = a[1]
-		res[2] = a[2]
-		res[3] = a[3]
-		res[4] = a[4]
-		res[5] = a[5]
-		res[6] = a[6]
-		res[7] = a[7]
-		res[8] = a[8]
-		res[9] = a[9]
-		res[10] = a[10]
-		res[11] = a[11]
-		res[12] = a[12]
-		res[13] = a[13]
-		res[14] = a[14]
-		res[15] = a[15]
-		return res
+    def sadd(a,b):
+        res = PGA3D()
+        res[0] = a+b[0]
+        res[1] = b[1]
+        res[2] = b[2]
+        res[3] = b[3]
+        res[4] = b[4]
+        res[5] = b[5]
+        res[6] = b[6]
+        res[7] = b[7]
+        res[8] = b[8]
+        res[9] = b[9]
+        res[10] = b[10]
+        res[11] = b[11]
+        res[12] = b[12]
+        res[13] = b[13]
+        res[14] = b[14]
+        res[15] = b[15]
+        return res
 
 
-	def norm(a):
-		return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+    def adds(a,b):
+        res = PGA3D()
+        res[0] = a[0]+b
+        res[1] = a[1]
+        res[2] = a[2]
+        res[3] = a[3]
+        res[4] = a[4]
+        res[5] = a[5]
+        res[6] = a[6]
+        res[7] = a[7]
+        res[8] = a[8]
+        res[9] = a[9]
+        res[10] = a[10]
+        res[11] = a[11]
+        res[12] = a[12]
+        res[13] = a[13]
+        res[14] = a[14]
+        res[15] = a[15]
+        return res
 
-	def inorm(a):
-		return a.Dual().norm()
-		
-	def normalized(a):
-		return a * (1 / a.norm())
+
+    def norm(a):
+        return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+        
+    def inorm(a):
+        return a.Dual().norm()
+        
+    def normalized(a):
+        return a * (1 / a.norm())
 
 if __name__ == '__main__':
     # A rotor (Euclidean line) and translator (Ideal line)
@@ -434,14 +434,13 @@ if __name__ == '__main__':
     POINT_ON_PLANE = (P | PX) * P
 
     # output some numbers.
-    print("a point       :",str(PX))
-    print("a line        :",str(LINE))
-    print("a plane       :",str(P))
-    print("a rotor       :",str(ROT))
-    print("rotated line  :",str(ROTATED_LINE))
-    print("rotated point :",str(ROTATED_POINT))
-    print("rotated plane :",str(ROTATED_PLANE))
-    print("point on plane:",str(POINT_ON_PLANE.normalized()))
-    print("point on torus:",str(POINT_ON_TORUS(0.0, 0.0)))
-
+    print("a point       :", str(PX))
+    print("a line        :", str(LINE))
+    print("a plane       :", str(P))
+    print("a rotor       :", str(ROT))
+    print("rotated line  :", str(ROTATED_LINE))
+    print("rotated point :", str(ROTATED_POINT))
+    print("rotated plane :", str(ROTATED_PLANE))
+    print("point on plane:", str(POINT_ON_PLANE.normalized()))
+    print("point on torus:", str(POINT_ON_TORUS(0.0, 0.0)))
 
