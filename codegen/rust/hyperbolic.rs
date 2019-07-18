@@ -18,27 +18,27 @@ const PI: float_t = 3.14159265358979323846;
 const basis: &'static [&'static str] = &[ "1","e1" ];
 const basis_count: usize = basis.len();
 
-#[derive(Default,Debug,Clone,Copy,PartialEq)]
+#[derive(Default,Debug,Clone,PartialEq)]
 struct HYPERBOLIC {
-    mvec: [float_t; basis_count]
+    mvec: Vec<float_t>
 }
 
 impl HYPERBOLIC {
-    pub const fn zero() -> Self {
+    pub fn zero() -> Self {
         Self {
-            mvec: [0.0; basis_count]
+            mvec: vec![0.0; basis_count]
         }
     }
 
-    pub const fn new(f: float_t, idx: usize) -> Self {
+    pub fn new(f: float_t, idx: usize) -> Self {
         let mut ret = Self::zero();
         ret.mvec[idx] = f;
         ret
     }
-}
 
-// basis vectors are available as global constants.
-const e1: HYPERBOLIC = HYPERBOLIC::new(1.0, 1);
+    // basis vectors are available as methods
+    pub fn e1() -> Self { HYPERBOLIC::new(1.0, 1) }
+}
 
 impl Index<usize> for HYPERBOLIC {
     type Output = float_t;
@@ -73,10 +73,77 @@ impl fmt::Display for HYPERBOLIC {
     }
 }
 
+macro_rules! define_binary_op(
+    (
+        // Operator, operator method, and scalar bounds.
+        $Op: ident, $op: ident;
+        // Argument identifiers and types + output.
+        $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
+        // Operator actual implementation.
+        $action: expr;
+        // Lifetime.
+        $($lives: tt),*
+    ) => {
+       impl<$($lives ,)*> $Op<$Rhs> for $Lhs {
+           type Output = $Result;
+
+           #[inline]
+           fn $op($lhs, $rhs: $Rhs) -> Self::Output {
+               $action
+           }
+       }
+    }
+);
+
+macro_rules! define_binary_op_all(
+    (
+        // Operator, operator method, and scalar bounds.
+        $Op: ident, $op: ident;
+        // Argument identifiers and types + output.
+        $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
+        // Operators actual implementations.
+        [val val] => $action_val_val: expr;
+        [ref val] => $action_ref_val: expr;
+        [val ref] => $action_val_ref: expr;
+        [ref ref] => $action_ref_ref: expr;
+    ) => {
+        define_binary_op!(
+            $Op, $op;
+            $lhs: $Lhs, $rhs: $Rhs, Output = $Result;
+            $action_val_val;
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: &'a $Lhs, $rhs: $Rhs, Output = $Result;
+            $action_ref_val;
+            'a
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: $Lhs, $rhs: &'b $Rhs, Output = $Result;
+            $action_val_ref;
+            'b
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: &'a $Lhs, $rhs: &'b $Rhs, Output = $Result;
+            $action_ref_ref;
+            'a, 'b
+        );
+    }
+);
+
+// TODO define_unary_op
+
+
+
 // Reverse
 // Reverse the order of the basis blades.
 impl HYPERBOLIC {
-    pub fn Reverse(self: Self) -> HYPERBOLIC {
+    pub fn Reverse(self: & Self) -> HYPERBOLIC {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0]=a[0];
@@ -88,7 +155,7 @@ impl HYPERBOLIC {
 // Dual
 // Poincare duality operator.
 impl HYPERBOLIC {
-    pub fn Dual(self: Self) -> HYPERBOLIC {
+    pub fn Dual(self: & Self) -> HYPERBOLIC {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0]=a[1];
@@ -97,7 +164,7 @@ impl HYPERBOLIC {
     }
 }
 
-impl Not for HYPERBOLIC {
+impl Not for & HYPERBOLIC {
     type Output = HYPERBOLIC;
 
     fn not(self: Self) -> HYPERBOLIC {
@@ -112,7 +179,7 @@ impl Not for HYPERBOLIC {
 // Conjugate
 // Clifford Conjugation
 impl HYPERBOLIC {
-    pub fn Conjugate(self: Self) -> HYPERBOLIC {
+    pub fn Conjugate(self: & Self) -> HYPERBOLIC {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0]=a[0];
@@ -124,7 +191,7 @@ impl HYPERBOLIC {
 // Involute
 // Main involution
 impl HYPERBOLIC {
-    pub fn Involute(self: Self) -> HYPERBOLIC {
+    pub fn Involute(self: & Self) -> HYPERBOLIC {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0]=a[0];
@@ -135,156 +202,216 @@ impl HYPERBOLIC {
 
 // Mul
 // The geometric product.
-impl Mul for HYPERBOLIC {
-    type Output = HYPERBOLIC;
 
-    fn mul(self: HYPERBOLIC, b: HYPERBOLIC) -> HYPERBOLIC {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: HYPERBOLIC, b: HYPERBOLIC, Output = HYPERBOLIC;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0]=b[0]*a[0]+b[1]*a[1];
 		res[1]=b[1]*a[0]+b[0]*a[1];
         res
-    }
-}
+    };
+);
+
 
 // Wedge
 // The outer product. (MEET)
-impl BitXor for HYPERBOLIC {
-    type Output = HYPERBOLIC;
 
-    fn bitxor(self: HYPERBOLIC, b: HYPERBOLIC) -> HYPERBOLIC {
+define_binary_op_all!(
+    BitXor,
+    bitxor;
+    self: HYPERBOLIC, b: HYPERBOLIC, Output = HYPERBOLIC;
+    [val val] => &self ^ &b;
+    [ref val] =>  self ^ &b;
+    [val ref] => &self ^  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0]=b[0]*a[0];
 		res[1]=b[1]*a[0]+b[0]*a[1];
         res
-    }
-}
+    };
+);
+
 
 // Vee
 // The regressive product. (JOIN)
-impl BitAnd for HYPERBOLIC {
-    type Output = HYPERBOLIC;
 
-    fn bitand(self: HYPERBOLIC, b: HYPERBOLIC) -> HYPERBOLIC {
+define_binary_op_all!(
+    BitAnd,
+    bitand;
+    self: HYPERBOLIC, b: HYPERBOLIC, Output = HYPERBOLIC;
+    [val val] => &self & &b;
+    [ref val] =>  self & &b;
+    [val ref] => &self &  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[1]=b[1]*a[1];
 		res[0]=b[0]*a[1]+b[1]*a[0];
         res
-    }
-}
+    };
+);
+
 
 // Dot
 // The inner product.
-impl BitOr for HYPERBOLIC {
-    type Output = HYPERBOLIC;
 
-    fn bitor(self: HYPERBOLIC, b: HYPERBOLIC) -> HYPERBOLIC {
+define_binary_op_all!(
+    BitOr,
+    bitor;
+    self: HYPERBOLIC, b: HYPERBOLIC, Output = HYPERBOLIC;
+    [val val] => &self | &b;
+    [ref val] =>  self | &b;
+    [val ref] => &self |  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0]=b[0]*a[0]+b[1]*a[1];
 		res[1]=b[1]*a[0]+b[0]*a[1];
         res
-    }
-}
+    };
+);
+
 
 // Add
 // Multivector addition
-impl Add for HYPERBOLIC {
-    type Output = HYPERBOLIC;
 
-    fn add(self: HYPERBOLIC, b: HYPERBOLIC) -> HYPERBOLIC {
+define_binary_op_all!(
+    Add,
+    add;
+    self: HYPERBOLIC, b: HYPERBOLIC, Output = HYPERBOLIC;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0] = a[0]+b[0];
 		res[1] = a[1]+b[1];
         res
-    }
-}
+    };
+);
+
 
 // Sub
 // Multivector subtraction
-impl Sub for HYPERBOLIC {
-    type Output = HYPERBOLIC;
 
-    fn sub(self: HYPERBOLIC, b: HYPERBOLIC) -> HYPERBOLIC {
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: HYPERBOLIC, b: HYPERBOLIC, Output = HYPERBOLIC;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0] = a[0]-b[0];
 		res[1] = a[1]-b[1];
         res
-    }
-}
+    };
+);
+
 
 // smul
 // scalar/multivector multiplication
-impl Mul<HYPERBOLIC> for float_t {
-    type Output = HYPERBOLIC;
 
-    fn mul(self: float_t, b: HYPERBOLIC) -> HYPERBOLIC {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: float_t, b: HYPERBOLIC, Output = HYPERBOLIC;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0] = a*b[0];
         res[1] = a*b[1];
         res
-    }
-}
+    };
+);
+
 
 // muls
 // multivector/scalar multiplication
-impl Mul<float_t> for HYPERBOLIC {
-    type Output = HYPERBOLIC;
 
-    fn mul(self: HYPERBOLIC, b: float_t) -> HYPERBOLIC {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: HYPERBOLIC, b: float_t, Output = HYPERBOLIC;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0] = a[0]*b;
         res[1] = a[1]*b;
         res
-    }
-    }
+    };
+);
+
 
 // sadd
 // scalar/multivector addition
-impl Add<HYPERBOLIC> for float_t {
-    type Output = HYPERBOLIC;
 
-    fn add(self: float_t, b: HYPERBOLIC) -> HYPERBOLIC {
+define_binary_op_all!(
+    Add,
+    add;
+    self: float_t, b: HYPERBOLIC, Output = HYPERBOLIC;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0] = a+b[0];
         res[1] = b[1];
         res
-    }
-}
+    };
+);
+
 
 // adds
 // multivector/scalar addition
-impl Add<float_t> for HYPERBOLIC {
-    type Output = HYPERBOLIC;
 
-    fn add(self: HYPERBOLIC, b: float_t) -> HYPERBOLIC {
+define_binary_op_all!(
+    Add,
+    add;
+    self: HYPERBOLIC, b: float_t, Output = HYPERBOLIC;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = HYPERBOLIC::zero();
         let a = self;
         res[0] = a[0]+b;
         res[1] = a[1];
         res
-    }
-    }
+    };
+);
+
 
 impl HYPERBOLIC {
-    pub fn norm(self: Self) -> float_t {
+    pub fn norm(self: & Self) -> float_t {
         let scalar_part = (self * self.Conjugate())[0];
 
         scalar_part.abs().sqrt()
     }
 
-    pub fn inorm(self: Self) -> float_t {
+    pub fn inorm(self: & Self) -> float_t {
         self.Dual().norm()
     }
 
-    pub fn normalized(self: Self) -> Self {
+    pub fn normalized(self: & Self) -> Self {
         self * (1.0 / self.norm())
     }
     
@@ -295,8 +422,8 @@ impl HYPERBOLIC {
 
 fn main() {
 
-  println!("e1*e1         : {}", e1 * e1);
-  println!("pss           : {}", e1);
-  println!("pss*pss       : {}", e1*e1);
+  println!("e1*e1         : {}", HYPERBOLIC::e1() * HYPERBOLIC::e1());
+  println!("pss           : {}", HYPERBOLIC::e1());
+  println!("pss*pss       : {}", HYPERBOLIC::e1() * HYPERBOLIC::e1());
 
 }

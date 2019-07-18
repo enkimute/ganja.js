@@ -15,15 +15,15 @@ type float_t = f64;
 // use std::f64::consts::PI;
 const PI: float_t = 3.14159265358979323846;
 
-const basis: &'static [&'static str] = &[ "1","e1","e2","e3","e12","e13","e23","e123" ];
+const basis: &'static [&'static str] = &[ "1","e0","e1","e2","e01","e02","e12","e012" ];
 const basis_count: usize = basis.len();
 
 #[derive(Default,Debug,Clone,PartialEq)]
-struct R3 {
+struct R111 {
     mvec: Vec<float_t>
 }
 
-impl R3 {
+impl R111 {
     pub fn zero() -> Self {
         Self {
             mvec: vec![0.0; basis_count]
@@ -37,16 +37,16 @@ impl R3 {
     }
 
     // basis vectors are available as methods
-    pub fn e1() -> Self { R3::new(1.0, 1) }
-    pub fn e2() -> Self { R3::new(1.0, 2) }
-    pub fn e3() -> Self { R3::new(1.0, 3) }
-    pub fn e12() -> Self { R3::new(1.0, 4) }
-    pub fn e13() -> Self { R3::new(1.0, 5) }
-    pub fn e23() -> Self { R3::new(1.0, 6) }
-    pub fn e123() -> Self { R3::new(1.0, 7) }
+    pub fn e0() -> Self { R111::new(1.0, 1) }
+    pub fn e1() -> Self { R111::new(1.0, 2) }
+    pub fn e2() -> Self { R111::new(1.0, 3) }
+    pub fn e01() -> Self { R111::new(1.0, 4) }
+    pub fn e02() -> Self { R111::new(1.0, 5) }
+    pub fn e12() -> Self { R111::new(1.0, 6) }
+    pub fn e012() -> Self { R111::new(1.0, 7) }
 }
 
-impl Index<usize> for R3 {
+impl Index<usize> for R111 {
     type Output = float_t;
 
     fn index<'a>(&'a self, index: usize) -> &'a Self::Output {
@@ -54,13 +54,13 @@ impl Index<usize> for R3 {
     }
 }
 
-impl IndexMut<usize> for R3 {
+impl IndexMut<usize> for R111 {
     fn index_mut<'a>(&'a mut self, index: usize) -> &'a mut Self::Output {
         &mut self.mvec[index]
     }
 }
 
-impl fmt::Display for R3 {
+impl fmt::Display for R111 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut n = 0;
         let ret = self.mvec.iter().enumerate().filter_map(|(i, &coeff)| {
@@ -148,9 +148,9 @@ macro_rules! define_binary_op_all(
 
 // Reverse
 // Reverse the order of the basis blades.
-impl R3 {
-    pub fn Reverse(self: & Self) -> R3 {
-        let mut res = R3::zero();
+impl R111 {
+    pub fn Reverse(self: & Self) -> R111 {
+        let mut res = R111::zero();
         let a = self;
         res[0]=a[0];
         res[1]=a[1];
@@ -166,34 +166,34 @@ impl R3 {
 
 // Dual
 // Poincare duality operator.
-impl R3 {
-    pub fn Dual(self: & Self) -> R3 {
-        let mut res = R3::zero();
+impl R111 {
+    pub fn Dual(self: & Self) -> R111 {
+        let mut res = R111::zero();
         let a = self;
-        res[0]=-a[7];
-        res[1]=-a[6];
+        res[0]=a[7];
+        res[1]=a[6];
         res[2]=a[5];
-        res[3]=-a[4];
+        res[3]=a[4];
         res[4]=a[3];
-        res[5]=-a[2];
+        res[5]=a[2];
         res[6]=a[1];
         res[7]=a[0];
         res
     }
 }
 
-impl Not for & R3 {
-    type Output = R3;
+impl Not for & R111 {
+    type Output = R111;
 
-    fn not(self: Self) -> R3 {
-        let mut res = R3::zero();
+    fn not(self: Self) -> R111 {
+        let mut res = R111::zero();
         let a = self;
-        res[0]=-a[7];
-        res[1]=-a[6];
+        res[0]=a[7];
+        res[1]=a[6];
         res[2]=a[5];
-        res[3]=-a[4];
+        res[3]=a[4];
         res[4]=a[3];
-        res[5]=-a[2];
+        res[5]=a[2];
         res[6]=a[1];
         res[7]=a[0];
         res
@@ -202,9 +202,9 @@ impl Not for & R3 {
 
 // Conjugate
 // Clifford Conjugation
-impl R3 {
-    pub fn Conjugate(self: & Self) -> R3 {
-        let mut res = R3::zero();
+impl R111 {
+    pub fn Conjugate(self: & Self) -> R111 {
+        let mut res = R111::zero();
         let a = self;
         res[0]=a[0];
         res[1]=-a[1];
@@ -220,9 +220,9 @@ impl R3 {
 
 // Involute
 // Main involution
-impl R3 {
-    pub fn Involute(self: & Self) -> R3 {
-        let mut res = R3::zero();
+impl R111 {
+    pub fn Involute(self: & Self) -> R111 {
+        let mut res = R111::zero();
         let a = self;
         res[0]=a[0];
         res[1]=-a[1];
@@ -242,20 +242,20 @@ impl R3 {
 define_binary_op_all!(
     Mul,
     mul;
-    self: R3, b: R3, Output = R3;
+    self: R111, b: R111, Output = R111;
     [val val] => &self * &b;
     [ref val] =>  self * &b;
     [val ref] => &self *  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
-        res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]-b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7];
-		res[1]=b[1]*a[0]+b[0]*a[1]-b[4]*a[2]-b[5]*a[3]+b[2]*a[4]+b[3]*a[5]-b[7]*a[6]-b[6]*a[7];
-		res[2]=b[2]*a[0]+b[4]*a[1]+b[0]*a[2]-b[6]*a[3]-b[1]*a[4]+b[7]*a[5]+b[3]*a[6]+b[5]*a[7];
-		res[3]=b[3]*a[0]+b[5]*a[1]+b[6]*a[2]+b[0]*a[3]-b[7]*a[4]-b[1]*a[5]-b[2]*a[6]-b[4]*a[7];
-		res[4]=b[4]*a[0]+b[2]*a[1]-b[1]*a[2]+b[7]*a[3]+b[0]*a[4]-b[6]*a[5]+b[5]*a[6]+b[3]*a[7];
+        res[0]=b[0]*a[0]+b[2]*a[2]-b[3]*a[3]+b[6]*a[6];
+		res[1]=b[1]*a[0]+b[0]*a[1]-b[4]*a[2]+b[5]*a[3]+b[2]*a[4]-b[3]*a[5]+b[7]*a[6]+b[6]*a[7];
+		res[2]=b[2]*a[0]+b[0]*a[2]+b[6]*a[3]-b[3]*a[6];
+		res[3]=b[3]*a[0]+b[6]*a[2]+b[0]*a[3]-b[2]*a[6];
+		res[4]=b[4]*a[0]+b[2]*a[1]-b[1]*a[2]-b[7]*a[3]+b[0]*a[4]+b[6]*a[5]-b[5]*a[6]-b[3]*a[7];
 		res[5]=b[5]*a[0]+b[3]*a[1]-b[7]*a[2]-b[1]*a[3]+b[6]*a[4]+b[0]*a[5]-b[4]*a[6]-b[2]*a[7];
-		res[6]=b[6]*a[0]+b[7]*a[1]+b[3]*a[2]-b[2]*a[3]-b[5]*a[4]+b[4]*a[5]+b[0]*a[6]+b[1]*a[7];
+		res[6]=b[6]*a[0]+b[3]*a[2]-b[2]*a[3]+b[0]*a[6];
 		res[7]=b[7]*a[0]+b[6]*a[1]-b[5]*a[2]+b[4]*a[3]+b[3]*a[4]-b[2]*a[5]+b[1]*a[6]+b[0]*a[7];
         res
     };
@@ -268,12 +268,12 @@ define_binary_op_all!(
 define_binary_op_all!(
     BitXor,
     bitxor;
-    self: R3, b: R3, Output = R3;
+    self: R111, b: R111, Output = R111;
     [val val] => &self ^ &b;
     [ref val] =>  self ^ &b;
     [val ref] => &self ^  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
         res[0]=b[0]*a[0];
 		res[1]=b[1]*a[0]+b[0]*a[1];
@@ -294,12 +294,12 @@ define_binary_op_all!(
 define_binary_op_all!(
     BitAnd,
     bitand;
-    self: R3, b: R3, Output = R3;
+    self: R111, b: R111, Output = R111;
     [val val] => &self & &b;
     [ref val] =>  self & &b;
     [val ref] => &self &  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
         res[7]=b[7]*a[7];
 		res[6]=b[6]*a[7]+b[7]*a[6];
@@ -320,20 +320,20 @@ define_binary_op_all!(
 define_binary_op_all!(
     BitOr,
     bitor;
-    self: R3, b: R3, Output = R3;
+    self: R111, b: R111, Output = R111;
     [val val] => &self | &b;
     [ref val] =>  self | &b;
     [val ref] => &self |  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
-        res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]-b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7];
-		res[1]=b[1]*a[0]+b[0]*a[1]-b[4]*a[2]-b[5]*a[3]+b[2]*a[4]+b[3]*a[5]-b[7]*a[6]-b[6]*a[7];
-		res[2]=b[2]*a[0]+b[4]*a[1]+b[0]*a[2]-b[6]*a[3]-b[1]*a[4]+b[7]*a[5]+b[3]*a[6]+b[5]*a[7];
-		res[3]=b[3]*a[0]+b[5]*a[1]+b[6]*a[2]+b[0]*a[3]-b[7]*a[4]-b[1]*a[5]-b[2]*a[6]-b[4]*a[7];
-		res[4]=b[4]*a[0]+b[7]*a[3]+b[0]*a[4]+b[3]*a[7];
+        res[0]=b[0]*a[0]+b[2]*a[2]-b[3]*a[3]+b[6]*a[6];
+		res[1]=b[1]*a[0]+b[0]*a[1]-b[4]*a[2]+b[5]*a[3]+b[2]*a[4]-b[3]*a[5]+b[7]*a[6]+b[6]*a[7];
+		res[2]=b[2]*a[0]+b[0]*a[2]+b[6]*a[3]-b[3]*a[6];
+		res[3]=b[3]*a[0]+b[6]*a[2]+b[0]*a[3]-b[2]*a[6];
+		res[4]=b[4]*a[0]-b[7]*a[3]+b[0]*a[4]-b[3]*a[7];
 		res[5]=b[5]*a[0]-b[7]*a[2]+b[0]*a[5]-b[2]*a[7];
-		res[6]=b[6]*a[0]+b[7]*a[1]+b[0]*a[6]+b[1]*a[7];
+		res[6]=b[6]*a[0]+b[0]*a[6];
 		res[7]=b[7]*a[0]+b[0]*a[7];
         res
     };
@@ -346,12 +346,12 @@ define_binary_op_all!(
 define_binary_op_all!(
     Add,
     add;
-    self: R3, b: R3, Output = R3;
+    self: R111, b: R111, Output = R111;
     [val val] => &self + &b;
     [ref val] =>  self + &b;
     [val ref] => &self +  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
         res[0] = a[0]+b[0];
 		res[1] = a[1]+b[1];
@@ -372,12 +372,12 @@ define_binary_op_all!(
 define_binary_op_all!(
     Sub,
     sub;
-    self: R3, b: R3, Output = R3;
+    self: R111, b: R111, Output = R111;
     [val val] => &self - &b;
     [ref val] =>  self - &b;
     [val ref] => &self -  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
         res[0] = a[0]-b[0];
 		res[1] = a[1]-b[1];
@@ -398,12 +398,12 @@ define_binary_op_all!(
 define_binary_op_all!(
     Mul,
     mul;
-    self: float_t, b: R3, Output = R3;
+    self: float_t, b: R111, Output = R111;
     [val val] => &self * &b;
     [ref val] =>  self * &b;
     [val ref] => &self *  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
         res[0] = a*b[0];
         res[1] = a*b[1];
@@ -424,12 +424,12 @@ define_binary_op_all!(
 define_binary_op_all!(
     Mul,
     mul;
-    self: R3, b: float_t, Output = R3;
+    self: R111, b: float_t, Output = R111;
     [val val] => &self * &b;
     [ref val] =>  self * &b;
     [val ref] => &self *  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
         res[0] = a[0]*b;
         res[1] = a[1]*b;
@@ -450,12 +450,12 @@ define_binary_op_all!(
 define_binary_op_all!(
     Add,
     add;
-    self: float_t, b: R3, Output = R3;
+    self: float_t, b: R111, Output = R111;
     [val val] => &self + &b;
     [ref val] =>  self + &b;
     [val ref] => &self +  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
         res[0] = a+b[0];
         res[1] = b[1];
@@ -476,12 +476,12 @@ define_binary_op_all!(
 define_binary_op_all!(
     Add,
     add;
-    self: R3, b: float_t, Output = R3;
+    self: R111, b: float_t, Output = R111;
     [val val] => &self + &b;
     [ref val] =>  self + &b;
     [val ref] => &self +  b;
     [ref ref] => {
-        let mut res = R3::zero();
+        let mut res = R111::zero();
         let a = self;
         res[0] = a[0]+b;
         res[1] = a[1];
@@ -496,7 +496,7 @@ define_binary_op_all!(
 );
 
 
-impl R3 {
+impl R111 {
     pub fn norm(self: & Self) -> float_t {
         let scalar_part = (self * self.Conjugate())[0];
 
@@ -518,8 +518,8 @@ impl R3 {
 
 fn main() {
 
-  println!("e1*e1         : {}", R3::e1() * R3::e1());
-  println!("pss           : {}", R3::e123());
-  println!("pss*pss       : {}", R3::e123() * R3::e123());
+  println!("e0*e0         : {}", R111::e0() * R111::e0());
+  println!("pss           : {}", R111::e012());
+  println!("pss*pss       : {}", R111::e012() * R111::e012());
 
 }

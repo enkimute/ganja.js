@@ -18,29 +18,29 @@ const PI: float_t = 3.14159265358979323846;
 const basis: &'static [&'static str] = &[ "1","e1","e2","e12" ];
 const basis_count: usize = basis.len();
 
-#[derive(Default,Debug,Clone,Copy,PartialEq)]
+#[derive(Default,Debug,Clone,PartialEq)]
 struct MINK {
-    mvec: [float_t; basis_count]
+    mvec: Vec<float_t>
 }
 
 impl MINK {
-    pub const fn zero() -> Self {
+    pub fn zero() -> Self {
         Self {
-            mvec: [0.0; basis_count]
+            mvec: vec![0.0; basis_count]
         }
     }
 
-    pub const fn new(f: float_t, idx: usize) -> Self {
+    pub fn new(f: float_t, idx: usize) -> Self {
         let mut ret = Self::zero();
         ret.mvec[idx] = f;
         ret
     }
-}
 
-// basis vectors are available as global constants.
-const e1: MINK = MINK::new(1.0, 1);
-const e2: MINK = MINK::new(1.0, 2);
-const e12: MINK = MINK::new(1.0, 3);
+    // basis vectors are available as methods
+    pub fn e1() -> Self { MINK::new(1.0, 1) }
+    pub fn e2() -> Self { MINK::new(1.0, 2) }
+    pub fn e12() -> Self { MINK::new(1.0, 3) }
+}
 
 impl Index<usize> for MINK {
     type Output = float_t;
@@ -75,10 +75,77 @@ impl fmt::Display for MINK {
     }
 }
 
+macro_rules! define_binary_op(
+    (
+        // Operator, operator method, and scalar bounds.
+        $Op: ident, $op: ident;
+        // Argument identifiers and types + output.
+        $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
+        // Operator actual implementation.
+        $action: expr;
+        // Lifetime.
+        $($lives: tt),*
+    ) => {
+       impl<$($lives ,)*> $Op<$Rhs> for $Lhs {
+           type Output = $Result;
+
+           #[inline]
+           fn $op($lhs, $rhs: $Rhs) -> Self::Output {
+               $action
+           }
+       }
+    }
+);
+
+macro_rules! define_binary_op_all(
+    (
+        // Operator, operator method, and scalar bounds.
+        $Op: ident, $op: ident;
+        // Argument identifiers and types + output.
+        $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
+        // Operators actual implementations.
+        [val val] => $action_val_val: expr;
+        [ref val] => $action_ref_val: expr;
+        [val ref] => $action_val_ref: expr;
+        [ref ref] => $action_ref_ref: expr;
+    ) => {
+        define_binary_op!(
+            $Op, $op;
+            $lhs: $Lhs, $rhs: $Rhs, Output = $Result;
+            $action_val_val;
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: &'a $Lhs, $rhs: $Rhs, Output = $Result;
+            $action_ref_val;
+            'a
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: $Lhs, $rhs: &'b $Rhs, Output = $Result;
+            $action_val_ref;
+            'b
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: &'a $Lhs, $rhs: &'b $Rhs, Output = $Result;
+            $action_ref_ref;
+            'a, 'b
+        );
+    }
+);
+
+// TODO define_unary_op
+
+
+
 // Reverse
 // Reverse the order of the basis blades.
 impl MINK {
-    pub fn Reverse(self: Self) -> MINK {
+    pub fn Reverse(self: & Self) -> MINK {
         let mut res = MINK::zero();
         let a = self;
         res[0]=a[0];
@@ -92,7 +159,7 @@ impl MINK {
 // Dual
 // Poincare duality operator.
 impl MINK {
-    pub fn Dual(self: Self) -> MINK {
+    pub fn Dual(self: & Self) -> MINK {
         let mut res = MINK::zero();
         let a = self;
         res[0]=a[3];
@@ -103,7 +170,7 @@ impl MINK {
     }
 }
 
-impl Not for MINK {
+impl Not for & MINK {
     type Output = MINK;
 
     fn not(self: Self) -> MINK {
@@ -120,7 +187,7 @@ impl Not for MINK {
 // Conjugate
 // Clifford Conjugation
 impl MINK {
-    pub fn Conjugate(self: Self) -> MINK {
+    pub fn Conjugate(self: & Self) -> MINK {
         let mut res = MINK::zero();
         let a = self;
         res[0]=a[0];
@@ -134,7 +201,7 @@ impl MINK {
 // Involute
 // Main involution
 impl MINK {
-    pub fn Involute(self: Self) -> MINK {
+    pub fn Involute(self: & Self) -> MINK {
         let mut res = MINK::zero();
         let a = self;
         res[0]=a[0];
@@ -147,10 +214,15 @@ impl MINK {
 
 // Mul
 // The geometric product.
-impl Mul for MINK {
-    type Output = MINK;
 
-    fn mul(self: MINK, b: MINK) -> MINK {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: MINK, b: MINK, Output = MINK;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0]=b[0]*a[0]+b[1]*a[1]-b[2]*a[2]+b[3]*a[3];
@@ -158,15 +230,21 @@ impl Mul for MINK {
 		res[2]=b[2]*a[0]+b[3]*a[1]+b[0]*a[2]-b[1]*a[3];
 		res[3]=b[3]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[3];
         res
-    }
-}
+    };
+);
+
 
 // Wedge
 // The outer product. (MEET)
-impl BitXor for MINK {
-    type Output = MINK;
 
-    fn bitxor(self: MINK, b: MINK) -> MINK {
+define_binary_op_all!(
+    BitXor,
+    bitxor;
+    self: MINK, b: MINK, Output = MINK;
+    [val val] => &self ^ &b;
+    [ref val] =>  self ^ &b;
+    [val ref] => &self ^  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0]=b[0]*a[0];
@@ -174,15 +252,21 @@ impl BitXor for MINK {
 		res[2]=b[2]*a[0]+b[0]*a[2];
 		res[3]=b[3]*a[0]+b[2]*a[1]-b[1]*a[2]+b[0]*a[3];
         res
-    }
-}
+    };
+);
+
 
 // Vee
 // The regressive product. (JOIN)
-impl BitAnd for MINK {
-    type Output = MINK;
 
-    fn bitand(self: MINK, b: MINK) -> MINK {
+define_binary_op_all!(
+    BitAnd,
+    bitand;
+    self: MINK, b: MINK, Output = MINK;
+    [val val] => &self & &b;
+    [ref val] =>  self & &b;
+    [val ref] => &self &  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[3]=b[3]*a[3];
@@ -190,15 +274,21 @@ impl BitAnd for MINK {
 		res[1]=b[1]*a[3]+b[3]*a[1];
 		res[0]=b[0]*a[3]+b[1]*a[2]-b[2]*a[1]+b[3]*a[0];
         res
-    }
-}
+    };
+);
+
 
 // Dot
 // The inner product.
-impl BitOr for MINK {
-    type Output = MINK;
 
-    fn bitor(self: MINK, b: MINK) -> MINK {
+define_binary_op_all!(
+    BitOr,
+    bitor;
+    self: MINK, b: MINK, Output = MINK;
+    [val val] => &self | &b;
+    [ref val] =>  self | &b;
+    [val ref] => &self |  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0]=b[0]*a[0]+b[1]*a[1]-b[2]*a[2]+b[3]*a[3];
@@ -206,15 +296,21 @@ impl BitOr for MINK {
 		res[2]=b[2]*a[0]+b[3]*a[1]+b[0]*a[2]-b[1]*a[3];
 		res[3]=b[3]*a[0]+b[0]*a[3];
         res
-    }
-}
+    };
+);
+
 
 // Add
 // Multivector addition
-impl Add for MINK {
-    type Output = MINK;
 
-    fn add(self: MINK, b: MINK) -> MINK {
+define_binary_op_all!(
+    Add,
+    add;
+    self: MINK, b: MINK, Output = MINK;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0] = a[0]+b[0];
@@ -222,15 +318,21 @@ impl Add for MINK {
 		res[2] = a[2]+b[2];
 		res[3] = a[3]+b[3];
         res
-    }
-}
+    };
+);
+
 
 // Sub
 // Multivector subtraction
-impl Sub for MINK {
-    type Output = MINK;
 
-    fn sub(self: MINK, b: MINK) -> MINK {
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: MINK, b: MINK, Output = MINK;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0] = a[0]-b[0];
@@ -238,15 +340,21 @@ impl Sub for MINK {
 		res[2] = a[2]-b[2];
 		res[3] = a[3]-b[3];
         res
-    }
-}
+    };
+);
+
 
 // smul
 // scalar/multivector multiplication
-impl Mul<MINK> for float_t {
-    type Output = MINK;
 
-    fn mul(self: float_t, b: MINK) -> MINK {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: float_t, b: MINK, Output = MINK;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0] = a*b[0];
@@ -254,15 +362,21 @@ impl Mul<MINK> for float_t {
         res[2] = a*b[2];
         res[3] = a*b[3];
         res
-    }
-}
+    };
+);
+
 
 // muls
 // multivector/scalar multiplication
-impl Mul<float_t> for MINK {
-    type Output = MINK;
 
-    fn mul(self: MINK, b: float_t) -> MINK {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: MINK, b: float_t, Output = MINK;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0] = a[0]*b;
@@ -270,15 +384,21 @@ impl Mul<float_t> for MINK {
         res[2] = a[2]*b;
         res[3] = a[3]*b;
         res
-    }
-    }
+    };
+);
+
 
 // sadd
 // scalar/multivector addition
-impl Add<MINK> for float_t {
-    type Output = MINK;
 
-    fn add(self: float_t, b: MINK) -> MINK {
+define_binary_op_all!(
+    Add,
+    add;
+    self: float_t, b: MINK, Output = MINK;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0] = a+b[0];
@@ -286,15 +406,21 @@ impl Add<MINK> for float_t {
         res[2] = b[2];
         res[3] = b[3];
         res
-    }
-}
+    };
+);
+
 
 // adds
 // multivector/scalar addition
-impl Add<float_t> for MINK {
-    type Output = MINK;
 
-    fn add(self: MINK, b: float_t) -> MINK {
+define_binary_op_all!(
+    Add,
+    add;
+    self: MINK, b: float_t, Output = MINK;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = MINK::zero();
         let a = self;
         res[0] = a[0]+b;
@@ -302,21 +428,22 @@ impl Add<float_t> for MINK {
         res[2] = a[2];
         res[3] = a[3];
         res
-    }
-    }
+    };
+);
+
 
 impl MINK {
-    pub fn norm(self: Self) -> float_t {
+    pub fn norm(self: & Self) -> float_t {
         let scalar_part = (self * self.Conjugate())[0];
 
         scalar_part.abs().sqrt()
     }
 
-    pub fn inorm(self: Self) -> float_t {
+    pub fn inorm(self: & Self) -> float_t {
         self.Dual().norm()
     }
 
-    pub fn normalized(self: Self) -> Self {
+    pub fn normalized(self: & Self) -> Self {
         self * (1.0 / self.norm())
     }
     
@@ -327,8 +454,8 @@ impl MINK {
 
 fn main() {
 
-  println!("e1*e1         : {}", e1 * e1);
-  println!("pss           : {}", e12);
-  println!("pss*pss       : {}", e12*e12);
+  println!("e1*e1         : {}", MINK::e1() * MINK::e1());
+  println!("pss           : {}", MINK::e12());
+  println!("pss*pss       : {}", MINK::e12() * MINK::e12());
 
 }

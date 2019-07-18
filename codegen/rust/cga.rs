@@ -18,57 +18,57 @@ const PI: float_t = 3.14159265358979323846;
 const basis: &'static [&'static str] = &[ "1","e1","e2","e3","e4","e5","e12","e13","e14","e15","e23","e24","e25","e34","e35","e45","e123","e124","e125","e134","e135","e145","e234","e235","e245","e345","e1234","e1235","e1245","e1345","e2345","e12345" ];
 const basis_count: usize = basis.len();
 
-#[derive(Default,Debug,Clone,Copy,PartialEq)]
+#[derive(Default,Debug,Clone,PartialEq)]
 struct CGA {
-    mvec: [float_t; basis_count]
+    mvec: Vec<float_t>
 }
 
 impl CGA {
-    pub const fn zero() -> Self {
+    pub fn zero() -> Self {
         Self {
-            mvec: [0.0; basis_count]
+            mvec: vec![0.0; basis_count]
         }
     }
 
-    pub const fn new(f: float_t, idx: usize) -> Self {
+    pub fn new(f: float_t, idx: usize) -> Self {
         let mut ret = Self::zero();
         ret.mvec[idx] = f;
         ret
     }
-}
 
-// basis vectors are available as global constants.
-const e1: CGA = CGA::new(1.0, 1);
-const e2: CGA = CGA::new(1.0, 2);
-const e3: CGA = CGA::new(1.0, 3);
-const e4: CGA = CGA::new(1.0, 4);
-const e5: CGA = CGA::new(1.0, 5);
-const e12: CGA = CGA::new(1.0, 6);
-const e13: CGA = CGA::new(1.0, 7);
-const e14: CGA = CGA::new(1.0, 8);
-const e15: CGA = CGA::new(1.0, 9);
-const e23: CGA = CGA::new(1.0, 10);
-const e24: CGA = CGA::new(1.0, 11);
-const e25: CGA = CGA::new(1.0, 12);
-const e34: CGA = CGA::new(1.0, 13);
-const e35: CGA = CGA::new(1.0, 14);
-const e45: CGA = CGA::new(1.0, 15);
-const e123: CGA = CGA::new(1.0, 16);
-const e124: CGA = CGA::new(1.0, 17);
-const e125: CGA = CGA::new(1.0, 18);
-const e134: CGA = CGA::new(1.0, 19);
-const e135: CGA = CGA::new(1.0, 20);
-const e145: CGA = CGA::new(1.0, 21);
-const e234: CGA = CGA::new(1.0, 22);
-const e235: CGA = CGA::new(1.0, 23);
-const e245: CGA = CGA::new(1.0, 24);
-const e345: CGA = CGA::new(1.0, 25);
-const e1234: CGA = CGA::new(1.0, 26);
-const e1235: CGA = CGA::new(1.0, 27);
-const e1245: CGA = CGA::new(1.0, 28);
-const e1345: CGA = CGA::new(1.0, 29);
-const e2345: CGA = CGA::new(1.0, 30);
-const e12345: CGA = CGA::new(1.0, 31);
+    // basis vectors are available as methods
+    pub fn e1() -> Self { CGA::new(1.0, 1) }
+    pub fn e2() -> Self { CGA::new(1.0, 2) }
+    pub fn e3() -> Self { CGA::new(1.0, 3) }
+    pub fn e4() -> Self { CGA::new(1.0, 4) }
+    pub fn e5() -> Self { CGA::new(1.0, 5) }
+    pub fn e12() -> Self { CGA::new(1.0, 6) }
+    pub fn e13() -> Self { CGA::new(1.0, 7) }
+    pub fn e14() -> Self { CGA::new(1.0, 8) }
+    pub fn e15() -> Self { CGA::new(1.0, 9) }
+    pub fn e23() -> Self { CGA::new(1.0, 10) }
+    pub fn e24() -> Self { CGA::new(1.0, 11) }
+    pub fn e25() -> Self { CGA::new(1.0, 12) }
+    pub fn e34() -> Self { CGA::new(1.0, 13) }
+    pub fn e35() -> Self { CGA::new(1.0, 14) }
+    pub fn e45() -> Self { CGA::new(1.0, 15) }
+    pub fn e123() -> Self { CGA::new(1.0, 16) }
+    pub fn e124() -> Self { CGA::new(1.0, 17) }
+    pub fn e125() -> Self { CGA::new(1.0, 18) }
+    pub fn e134() -> Self { CGA::new(1.0, 19) }
+    pub fn e135() -> Self { CGA::new(1.0, 20) }
+    pub fn e145() -> Self { CGA::new(1.0, 21) }
+    pub fn e234() -> Self { CGA::new(1.0, 22) }
+    pub fn e235() -> Self { CGA::new(1.0, 23) }
+    pub fn e245() -> Self { CGA::new(1.0, 24) }
+    pub fn e345() -> Self { CGA::new(1.0, 25) }
+    pub fn e1234() -> Self { CGA::new(1.0, 26) }
+    pub fn e1235() -> Self { CGA::new(1.0, 27) }
+    pub fn e1245() -> Self { CGA::new(1.0, 28) }
+    pub fn e1345() -> Self { CGA::new(1.0, 29) }
+    pub fn e2345() -> Self { CGA::new(1.0, 30) }
+    pub fn e12345() -> Self { CGA::new(1.0, 31) }
+}
 
 impl Index<usize> for CGA {
     type Output = float_t;
@@ -103,10 +103,77 @@ impl fmt::Display for CGA {
     }
 }
 
+macro_rules! define_binary_op(
+    (
+        // Operator, operator method, and scalar bounds.
+        $Op: ident, $op: ident;
+        // Argument identifiers and types + output.
+        $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
+        // Operator actual implementation.
+        $action: expr;
+        // Lifetime.
+        $($lives: tt),*
+    ) => {
+       impl<$($lives ,)*> $Op<$Rhs> for $Lhs {
+           type Output = $Result;
+
+           #[inline]
+           fn $op($lhs, $rhs: $Rhs) -> Self::Output {
+               $action
+           }
+       }
+    }
+);
+
+macro_rules! define_binary_op_all(
+    (
+        // Operator, operator method, and scalar bounds.
+        $Op: ident, $op: ident;
+        // Argument identifiers and types + output.
+        $lhs: ident: $Lhs: ty, $rhs: ident: $Rhs: ty, Output = $Result: ty;
+        // Operators actual implementations.
+        [val val] => $action_val_val: expr;
+        [ref val] => $action_ref_val: expr;
+        [val ref] => $action_val_ref: expr;
+        [ref ref] => $action_ref_ref: expr;
+    ) => {
+        define_binary_op!(
+            $Op, $op;
+            $lhs: $Lhs, $rhs: $Rhs, Output = $Result;
+            $action_val_val;
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: &'a $Lhs, $rhs: $Rhs, Output = $Result;
+            $action_ref_val;
+            'a
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: $Lhs, $rhs: &'b $Rhs, Output = $Result;
+            $action_val_ref;
+            'b
+        );
+
+        define_binary_op!(
+            $Op, $op;
+            $lhs: &'a $Lhs, $rhs: &'b $Rhs, Output = $Result;
+            $action_ref_ref;
+            'a, 'b
+        );
+    }
+);
+
+// TODO define_unary_op
+
+
+
 // Reverse
 // Reverse the order of the basis blades.
 impl CGA {
-    pub fn Reverse(self: Self) -> CGA {
+    pub fn Reverse(self: & Self) -> CGA {
         let mut res = CGA::zero();
         let a = self;
         res[0]=a[0];
@@ -148,7 +215,7 @@ impl CGA {
 // Dual
 // Poincare duality operator.
 impl CGA {
-    pub fn Dual(self: Self) -> CGA {
+    pub fn Dual(self: & Self) -> CGA {
         let mut res = CGA::zero();
         let a = self;
         res[0]=-a[31];
@@ -187,7 +254,7 @@ impl CGA {
     }
 }
 
-impl Not for CGA {
+impl Not for & CGA {
     type Output = CGA;
 
     fn not(self: Self) -> CGA {
@@ -232,7 +299,7 @@ impl Not for CGA {
 // Conjugate
 // Clifford Conjugation
 impl CGA {
-    pub fn Conjugate(self: Self) -> CGA {
+    pub fn Conjugate(self: & Self) -> CGA {
         let mut res = CGA::zero();
         let a = self;
         res[0]=a[0];
@@ -274,7 +341,7 @@ impl CGA {
 // Involute
 // Main involution
 impl CGA {
-    pub fn Involute(self: Self) -> CGA {
+    pub fn Involute(self: & Self) -> CGA {
         let mut res = CGA::zero();
         let a = self;
         res[0]=a[0];
@@ -315,10 +382,15 @@ impl CGA {
 
 // Mul
 // The geometric product.
-impl Mul for CGA {
-    type Output = CGA;
 
-    fn mul(self: CGA, b: CGA) -> CGA {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: CGA, b: CGA, Output = CGA;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]+b[9]*a[9]-b[10]*a[10]-b[11]*a[11]+b[12]*a[12]-b[13]*a[13]+b[14]*a[14]+b[15]*a[15]-b[16]*a[16]-b[17]*a[17]+b[18]*a[18]-b[19]*a[19]+b[20]*a[20]+b[21]*a[21]-b[22]*a[22]+b[23]*a[23]+b[24]*a[24]+b[25]*a[25]+b[26]*a[26]-b[27]*a[27]-b[28]*a[28]-b[29]*a[29]-b[30]*a[30]-b[31]*a[31];
@@ -354,15 +426,21 @@ impl Mul for CGA {
 		res[30]=b[30]*a[0]+b[31]*a[1]+b[25]*a[2]-b[24]*a[3]+b[23]*a[4]-b[22]*a[5]-b[29]*a[6]+b[28]*a[7]-b[27]*a[8]+b[26]*a[9]+b[15]*a[10]-b[14]*a[11]+b[13]*a[12]+b[12]*a[13]-b[11]*a[14]+b[10]*a[15]+b[21]*a[16]-b[20]*a[17]+b[19]*a[18]+b[18]*a[19]-b[17]*a[20]+b[16]*a[21]+b[5]*a[22]-b[4]*a[23]+b[3]*a[24]-b[2]*a[25]-b[9]*a[26]+b[8]*a[27]-b[7]*a[28]+b[6]*a[29]+b[0]*a[30]+b[1]*a[31];
 		res[31]=b[31]*a[0]+b[30]*a[1]-b[29]*a[2]+b[28]*a[3]-b[27]*a[4]+b[26]*a[5]+b[25]*a[6]-b[24]*a[7]+b[23]*a[8]-b[22]*a[9]+b[21]*a[10]-b[20]*a[11]+b[19]*a[12]+b[18]*a[13]-b[17]*a[14]+b[16]*a[15]+b[15]*a[16]-b[14]*a[17]+b[13]*a[18]+b[12]*a[19]-b[11]*a[20]+b[10]*a[21]-b[9]*a[22]+b[8]*a[23]-b[7]*a[24]+b[6]*a[25]+b[5]*a[26]-b[4]*a[27]+b[3]*a[28]-b[2]*a[29]+b[1]*a[30]+b[0]*a[31];
         res
-    }
-}
+    };
+);
+
 
 // Wedge
 // The outer product. (MEET)
-impl BitXor for CGA {
-    type Output = CGA;
 
-    fn bitxor(self: CGA, b: CGA) -> CGA {
+define_binary_op_all!(
+    BitXor,
+    bitxor;
+    self: CGA, b: CGA, Output = CGA;
+    [val val] => &self ^ &b;
+    [ref val] =>  self ^ &b;
+    [val ref] => &self ^  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0]=b[0]*a[0];
@@ -398,15 +476,21 @@ impl BitXor for CGA {
 		res[30]=b[30]*a[0]+b[25]*a[2]-b[24]*a[3]+b[23]*a[4]-b[22]*a[5]+b[15]*a[10]-b[14]*a[11]+b[13]*a[12]+b[12]*a[13]-b[11]*a[14]+b[10]*a[15]+b[5]*a[22]-b[4]*a[23]+b[3]*a[24]-b[2]*a[25]+b[0]*a[30];
 		res[31]=b[31]*a[0]+b[30]*a[1]-b[29]*a[2]+b[28]*a[3]-b[27]*a[4]+b[26]*a[5]+b[25]*a[6]-b[24]*a[7]+b[23]*a[8]-b[22]*a[9]+b[21]*a[10]-b[20]*a[11]+b[19]*a[12]+b[18]*a[13]-b[17]*a[14]+b[16]*a[15]+b[15]*a[16]-b[14]*a[17]+b[13]*a[18]+b[12]*a[19]-b[11]*a[20]+b[10]*a[21]-b[9]*a[22]+b[8]*a[23]-b[7]*a[24]+b[6]*a[25]+b[5]*a[26]-b[4]*a[27]+b[3]*a[28]-b[2]*a[29]+b[1]*a[30]+b[0]*a[31];
         res
-    }
-}
+    };
+);
+
 
 // Vee
 // The regressive product. (JOIN)
-impl BitAnd for CGA {
-    type Output = CGA;
 
-    fn bitand(self: CGA, b: CGA) -> CGA {
+define_binary_op_all!(
+    BitAnd,
+    bitand;
+    self: CGA, b: CGA, Output = CGA;
+    [val val] => &self & &b;
+    [ref val] =>  self & &b;
+    [val ref] => &self &  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[31]=b[31]*a[31];
@@ -442,15 +526,21 @@ impl BitAnd for CGA {
 		res[1]=b[1]*a[31]+b[6]*a[29]-b[7]*a[28]+b[8]*a[27]-b[9]*a[26]+b[16]*a[21]-b[17]*a[20]+b[18]*a[19]+b[19]*a[18]-b[20]*a[17]+b[21]*a[16]+b[26]*a[9]-b[27]*a[8]+b[28]*a[7]-b[29]*a[6]+b[31]*a[1];
 		res[0]=b[0]*a[31]+b[1]*a[30]-b[2]*a[29]+b[3]*a[28]-b[4]*a[27]+b[5]*a[26]+b[6]*a[25]-b[7]*a[24]+b[8]*a[23]-b[9]*a[22]+b[10]*a[21]-b[11]*a[20]+b[12]*a[19]+b[13]*a[18]-b[14]*a[17]+b[15]*a[16]+b[16]*a[15]-b[17]*a[14]+b[18]*a[13]+b[19]*a[12]-b[20]*a[11]+b[21]*a[10]-b[22]*a[9]+b[23]*a[8]-b[24]*a[7]+b[25]*a[6]+b[26]*a[5]-b[27]*a[4]+b[28]*a[3]-b[29]*a[2]+b[30]*a[1]+b[31]*a[0];
         res
-    }
-}
+    };
+);
+
 
 // Dot
 // The inner product.
-impl BitOr for CGA {
-    type Output = CGA;
 
-    fn bitor(self: CGA, b: CGA) -> CGA {
+define_binary_op_all!(
+    BitOr,
+    bitor;
+    self: CGA, b: CGA, Output = CGA;
+    [val val] => &self | &b;
+    [ref val] =>  self | &b;
+    [val ref] => &self |  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]+b[9]*a[9]-b[10]*a[10]-b[11]*a[11]+b[12]*a[12]-b[13]*a[13]+b[14]*a[14]+b[15]*a[15]-b[16]*a[16]-b[17]*a[17]+b[18]*a[18]-b[19]*a[19]+b[20]*a[20]+b[21]*a[21]-b[22]*a[22]+b[23]*a[23]+b[24]*a[24]+b[25]*a[25]+b[26]*a[26]-b[27]*a[27]-b[28]*a[28]-b[29]*a[29]-b[30]*a[30]-b[31]*a[31];
@@ -486,15 +576,21 @@ impl BitOr for CGA {
 		res[30]=b[30]*a[0]+b[31]*a[1]+b[0]*a[30]+b[1]*a[31];
 		res[31]=b[31]*a[0]+b[0]*a[31];
         res
-    }
-}
+    };
+);
+
 
 // Add
 // Multivector addition
-impl Add for CGA {
-    type Output = CGA;
 
-    fn add(self: CGA, b: CGA) -> CGA {
+define_binary_op_all!(
+    Add,
+    add;
+    self: CGA, b: CGA, Output = CGA;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0] = a[0]+b[0];
@@ -530,15 +626,21 @@ impl Add for CGA {
 		res[30] = a[30]+b[30];
 		res[31] = a[31]+b[31];
         res
-    }
-}
+    };
+);
+
 
 // Sub
 // Multivector subtraction
-impl Sub for CGA {
-    type Output = CGA;
 
-    fn sub(self: CGA, b: CGA) -> CGA {
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: CGA, b: CGA, Output = CGA;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0] = a[0]-b[0];
@@ -574,15 +676,21 @@ impl Sub for CGA {
 		res[30] = a[30]-b[30];
 		res[31] = a[31]-b[31];
         res
-    }
-}
+    };
+);
+
 
 // smul
 // scalar/multivector multiplication
-impl Mul<CGA> for float_t {
-    type Output = CGA;
 
-    fn mul(self: float_t, b: CGA) -> CGA {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: float_t, b: CGA, Output = CGA;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0] = a*b[0];
@@ -618,15 +726,21 @@ impl Mul<CGA> for float_t {
         res[30] = a*b[30];
         res[31] = a*b[31];
         res
-    }
-}
+    };
+);
+
 
 // muls
 // multivector/scalar multiplication
-impl Mul<float_t> for CGA {
-    type Output = CGA;
 
-    fn mul(self: CGA, b: float_t) -> CGA {
+define_binary_op_all!(
+    Mul,
+    mul;
+    self: CGA, b: float_t, Output = CGA;
+    [val val] => &self * &b;
+    [ref val] =>  self * &b;
+    [val ref] => &self *  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0] = a[0]*b;
@@ -662,15 +776,21 @@ impl Mul<float_t> for CGA {
         res[30] = a[30]*b;
         res[31] = a[31]*b;
         res
-    }
-    }
+    };
+);
+
 
 // sadd
 // scalar/multivector addition
-impl Add<CGA> for float_t {
-    type Output = CGA;
 
-    fn add(self: float_t, b: CGA) -> CGA {
+define_binary_op_all!(
+    Add,
+    add;
+    self: float_t, b: CGA, Output = CGA;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0] = a+b[0];
@@ -706,15 +826,21 @@ impl Add<CGA> for float_t {
         res[30] = b[30];
         res[31] = b[31];
         res
-    }
-}
+    };
+);
+
 
 // adds
 // multivector/scalar addition
-impl Add<float_t> for CGA {
-    type Output = CGA;
 
-    fn add(self: CGA, b: float_t) -> CGA {
+define_binary_op_all!(
+    Add,
+    add;
+    self: CGA, b: float_t, Output = CGA;
+    [val val] => &self + &b;
+    [ref val] =>  self + &b;
+    [val ref] => &self +  b;
+    [ref ref] => {
         let mut res = CGA::zero();
         let a = self;
         res[0] = a[0]+b;
@@ -750,30 +876,31 @@ impl Add<float_t> for CGA {
         res[30] = a[30];
         res[31] = a[31];
         res
-    }
-    }
+    };
+);
+
 
 impl CGA {
-    pub fn norm(self: Self) -> float_t {
+    pub fn norm(self: & Self) -> float_t {
         let scalar_part = (self * self.Conjugate())[0];
 
         scalar_part.abs().sqrt()
     }
 
-    pub fn inorm(self: Self) -> float_t {
+    pub fn inorm(self: & Self) -> float_t {
         self.Dual().norm()
     }
 
-    pub fn normalized(self: Self) -> Self {
+    pub fn normalized(self: & Self) -> Self {
         self * (1.0 / self.norm())
     }
     
     
-  pub fn eo() -> Self { e4 + e5 }
-  pub fn ei() -> Self { (e5 - e4)*0.5 }
+  pub fn eo() -> Self { Self::e4() + Self::e5() }
+  pub fn ei() -> Self { (Self::e5() - Self::e4())*0.5 }
   
   pub fn up(x: float_t, y: float_t, z: float_t) -> Self {
-    x*e1 + y*e2 + z*e3 + 0.5*(x*x+y*y+z*z)*Self::ei() + Self::eo()
+    x * Self::e1() + y * Self::e2() + z * Self::e3() + 0.5 * (x * x + y * y + z * z) * Self::ei() + Self::eo()
   }
 
 
@@ -782,7 +909,7 @@ impl CGA {
 
 fn main() {
 
-    let px = CGA::up(1.0,2.0,3.0);
+    let px = &CGA::up(1.0,2.0,3.0);
     let line = px ^ CGA::eo() ^ CGA::ei();
     let sphere = (CGA::eo() - CGA::ei()).Dual();
     println!("a point       : {}", px);
