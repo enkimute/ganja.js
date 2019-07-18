@@ -5,7 +5,7 @@ var preamble = (basis,classname)=>
 Written by a generator written by enki.
 """
 
-__author__ = 'Enki'
+__author__ = \'Enki\'
 
 import math
 
@@ -13,7 +13,7 @@ class ${classname}:
 	def __init__(self, value=0, index=0):
 		"""Initiate a new ${classname}.
 		 
-		Optional, the component ``index`` can be set with ``value``.
+		Optional, the component \`\`index\`\` can be set with \`\`value\`\`.
 		"""
 		self.mvec = [0]*${basis.length}
 		self._base = [${basis.map(x=>'"'+x+'"').join(',')}]
@@ -38,7 +38,7 @@ class ${classname}:
 // python Template for our binary operators
 
 var binary = (classname, symbol, name, name_a, name_b, name_ret, code, classname_a=classname, classname_b=classname, desc)=>
-`    def ${name.match("s")?name:({"+":"__add__","-":"__sub__","*":"__mul__","^":"__xor__","&":"__and__","|":"__or__"}[symbol]||name)}(${name_a},${name_b}):${(name in {Mul:1,Add:1,Sub:1})?`
+`	def ${name.match("s")?name:({"+":"__add__","-":"__sub__","*":"__mul__","^":"__xor__","&":"__and__","|":"__or__"}[symbol]||name)}(${name_a},${name_b}):${(name in {Mul:1,Add:1,Sub:1})?`
 		"""${classname}.${name}
 		
 		${desc}
