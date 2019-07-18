@@ -19,9 +19,32 @@ class ${classname}:
         self._base = [${basis.map(x=>'"'+x+'"').join(', ')}]
         if (value != 0):
             self.mvec[index] = value
+            
+    @classmethod
+    def fromarray(cls, array):
+        """Initiate a new ${classname} from an array-like object.
+
+        The first axis of the array is assumed to correspond to the elements
+        of the algebra, and needs to have the same length. Any other dimensions
+        are left unchanged, and should have simple operations such as addition 
+        and multiplication defined. NumPy arrays are therefore a perfect 
+        candidate. 
+
+        :param array: array-like object whose length is the dimension of the algebra.
+        :return: new instance of ${classname}.
+        """
+        self = cls()
+        if len(array) != len(self):
+            raise TypeError('length of array must be identical to the dimension '
+                            'of the algebra.')
+        self.mvec = array
+        return self
         
     def __str__(self):
-        res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        if isinstance(self.mvec, list):
+            res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if abs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        else:  # Assume array-like, redirect str conversion
+            res = str(self.mvec)
         if (res == ''):
             return "0"
         return res
@@ -43,11 +66,11 @@ var binary = (classname, symbol, name, name_a, name_b, name_ret, code, classname
         
         ${desc}
         """
-        if type(b) in (int, float):
-            return a.${name.toLowerCase()}s(b)`:``}
-        ${name_ret} = ${classname}()
+        if type(${name_b}) in (int, float):
+            return ${name_a}.${name.toLowerCase()}s(${name_b})`:``}
+        ${name_ret} = ${name_a}.mvec.copy()
         ${code.replace(/;/g,'').replace(/^ */g,'').replace(/\n */g,'\n        ')}
-        return ${name_ret}
+        return ${classname}.fromarray(${name_ret})
 ${(name in {Mul:1,Add:1,Sub:1})?`    __r${name.toLowerCase()}__=__${name.toLowerCase()}__`:``}`;
 
 // python Template for our unary operators
@@ -58,9 +81,9 @@ var unary = (classname, symbol, name, name_a, name_ret, code, classname_a=classn
         
         ${desc}
         """
-        ${name_ret} = ${classname}()
+        ${name_ret} = ${name_a}.mvec.copy()
         ${code.replace(/;/g,'').replace(/^ */g,'').replace(/\n */g,'\n        ')}
-        return ${name_ret}`;
+        return ${classname}.fromarray(${name_ret})`;
 
 // python template for CGA example
 var CGA = (basis,classname)=>({
@@ -196,7 +219,7 @@ if __name__ == '__main__':
 // python Template for the postamble
 var postamble = (basis,classname,example)=>
 `    def norm(a):
-        return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+        return abs((a * a.Conjugate())[0])**0.5
         
     def inorm(a):
         return a.Dual().norm()
