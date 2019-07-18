@@ -17,9 +17,32 @@ class CGA:
         self._base = ["1", "e1", "e2", "e3", "e4", "e5", "e12", "e13", "e14", "e15", "e23", "e24", "e25", "e34", "e35", "e45", "e123", "e124", "e125", "e134", "e135", "e145", "e234", "e235", "e245", "e345", "e1234", "e1235", "e1245", "e1345", "e2345", "e12345"]
         if (value != 0):
             self.mvec[index] = value
+            
+    @classmethod
+    def fromarray(cls, array):
+        """Initiate a new CGA from an array-like object.
+
+        The first axis of the array is assumed to correspond to the elements
+        of the algebra, and needs to have the same length. Any other dimensions
+        are left unchanged, and should have simple operations such as addition 
+        and multiplication defined. NumPy arrays are therefore a perfect 
+        candidate. 
+
+        :param array: array-like object whose length is the dimension of the algebra.
+        :return: new instance of CGA.
+        """
+        self = cls()
+        if len(array) != len(self):
+            raise TypeError('length of array must be identical to the dimension '
+                            'of the algebra.')
+        self.mvec = array
+        return self
         
     def __str__(self):
-        res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        if isinstance(self.mvec, list):
+            res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if abs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        else:  # Assume array-like, redirect str conversion
+            res = str(self.mvec)
         if (res == ''):
             return "0"
         return res
@@ -38,7 +61,7 @@ class CGA:
         
         Reverse the order of the basis blades.
         """
-        res = CGA()
+        res = a.mvec.copy()
         res[0]=a[0]
         res[1]=a[1]
         res[2]=a[2]
@@ -71,14 +94,14 @@ class CGA:
         res[29]=a[29]
         res[30]=a[30]
         res[31]=a[31]
-        return res
+        return CGA.fromarray(res)
 
     def Dual(a):
         """CGA.Dual
         
         Poincare duality operator.
         """
-        res = CGA()
+        res = a.mvec.copy()
         res[0]=-a[31]
         res[1]=-a[30]
         res[2]=a[29]
@@ -111,14 +134,14 @@ class CGA:
         res[29]=-a[2]
         res[30]=a[1]
         res[31]=a[0]
-        return res
+        return CGA.fromarray(res)
 
     def Conjugate(a):
         """CGA.Conjugate
         
         Clifford Conjugation
         """
-        res = CGA()
+        res = a.mvec.copy()
         res[0]=a[0]
         res[1]=-a[1]
         res[2]=-a[2]
@@ -151,14 +174,14 @@ class CGA:
         res[29]=a[29]
         res[30]=a[30]
         res[31]=-a[31]
-        return res
+        return CGA.fromarray(res)
 
     def Involute(a):
         """CGA.Involute
         
         Main involution
         """
-        res = CGA()
+        res = a.mvec.copy()
         res[0]=a[0]
         res[1]=-a[1]
         res[2]=-a[2]
@@ -191,7 +214,7 @@ class CGA:
         res[29]=a[29]
         res[30]=a[30]
         res[31]=-a[31]
-        return res
+        return CGA.fromarray(res)
 
     def __mul__(a,b):
         """CGA.Mul
@@ -200,7 +223,7 @@ class CGA:
         """
         if type(b) in (int, float):
             return a.muls(b)
-        res = CGA()
+        res = a.mvec.copy()
         res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]+b[9]*a[9]-b[10]*a[10]-b[11]*a[11]+b[12]*a[12]-b[13]*a[13]+b[14]*a[14]+b[15]*a[15]-b[16]*a[16]-b[17]*a[17]+b[18]*a[18]-b[19]*a[19]+b[20]*a[20]+b[21]*a[21]-b[22]*a[22]+b[23]*a[23]+b[24]*a[24]+b[25]*a[25]+b[26]*a[26]-b[27]*a[27]-b[28]*a[28]-b[29]*a[29]-b[30]*a[30]-b[31]*a[31]
         res[1]=b[1]*a[0]+b[0]*a[1]-b[6]*a[2]-b[7]*a[3]-b[8]*a[4]+b[9]*a[5]+b[2]*a[6]+b[3]*a[7]+b[4]*a[8]-b[5]*a[9]-b[16]*a[10]-b[17]*a[11]+b[18]*a[12]-b[19]*a[13]+b[20]*a[14]+b[21]*a[15]-b[10]*a[16]-b[11]*a[17]+b[12]*a[18]-b[13]*a[19]+b[14]*a[20]+b[15]*a[21]+b[26]*a[22]-b[27]*a[23]-b[28]*a[24]-b[29]*a[25]-b[22]*a[26]+b[23]*a[27]+b[24]*a[28]+b[25]*a[29]-b[31]*a[30]-b[30]*a[31]
         res[2]=b[2]*a[0]+b[6]*a[1]+b[0]*a[2]-b[10]*a[3]-b[11]*a[4]+b[12]*a[5]-b[1]*a[6]+b[16]*a[7]+b[17]*a[8]-b[18]*a[9]+b[3]*a[10]+b[4]*a[11]-b[5]*a[12]-b[22]*a[13]+b[23]*a[14]+b[24]*a[15]+b[7]*a[16]+b[8]*a[17]-b[9]*a[18]-b[26]*a[19]+b[27]*a[20]+b[28]*a[21]-b[13]*a[22]+b[14]*a[23]+b[15]*a[24]-b[30]*a[25]+b[19]*a[26]-b[20]*a[27]-b[21]*a[28]+b[31]*a[29]+b[25]*a[30]+b[29]*a[31]
@@ -233,11 +256,11 @@ class CGA:
         res[29]=b[29]*a[0]+b[25]*a[1]-b[31]*a[2]-b[21]*a[3]+b[20]*a[4]-b[19]*a[5]+b[30]*a[6]+b[15]*a[7]-b[14]*a[8]+b[13]*a[9]-b[28]*a[10]+b[27]*a[11]-b[26]*a[12]+b[9]*a[13]-b[8]*a[14]+b[7]*a[15]-b[24]*a[16]+b[23]*a[17]-b[22]*a[18]+b[5]*a[19]-b[4]*a[20]+b[3]*a[21]-b[18]*a[22]+b[17]*a[23]-b[16]*a[24]-b[1]*a[25]+b[12]*a[26]-b[11]*a[27]+b[10]*a[28]+b[0]*a[29]-b[6]*a[30]-b[2]*a[31]
         res[30]=b[30]*a[0]+b[31]*a[1]+b[25]*a[2]-b[24]*a[3]+b[23]*a[4]-b[22]*a[5]-b[29]*a[6]+b[28]*a[7]-b[27]*a[8]+b[26]*a[9]+b[15]*a[10]-b[14]*a[11]+b[13]*a[12]+b[12]*a[13]-b[11]*a[14]+b[10]*a[15]+b[21]*a[16]-b[20]*a[17]+b[19]*a[18]+b[18]*a[19]-b[17]*a[20]+b[16]*a[21]+b[5]*a[22]-b[4]*a[23]+b[3]*a[24]-b[2]*a[25]-b[9]*a[26]+b[8]*a[27]-b[7]*a[28]+b[6]*a[29]+b[0]*a[30]+b[1]*a[31]
         res[31]=b[31]*a[0]+b[30]*a[1]-b[29]*a[2]+b[28]*a[3]-b[27]*a[4]+b[26]*a[5]+b[25]*a[6]-b[24]*a[7]+b[23]*a[8]-b[22]*a[9]+b[21]*a[10]-b[20]*a[11]+b[19]*a[12]+b[18]*a[13]-b[17]*a[14]+b[16]*a[15]+b[15]*a[16]-b[14]*a[17]+b[13]*a[18]+b[12]*a[19]-b[11]*a[20]+b[10]*a[21]-b[9]*a[22]+b[8]*a[23]-b[7]*a[24]+b[6]*a[25]+b[5]*a[26]-b[4]*a[27]+b[3]*a[28]-b[2]*a[29]+b[1]*a[30]+b[0]*a[31]
-        return res
+        return CGA.fromarray(res)
     __rmul__=__mul__
 
     def __xor__(a,b):
-        res = CGA()
+        res = a.mvec.copy()
         res[0]=b[0]*a[0]
         res[1]=b[1]*a[0]+b[0]*a[1]
         res[2]=b[2]*a[0]+b[0]*a[2]
@@ -270,11 +293,11 @@ class CGA:
         res[29]=b[29]*a[0]+b[25]*a[1]-b[21]*a[3]+b[20]*a[4]-b[19]*a[5]+b[15]*a[7]-b[14]*a[8]+b[13]*a[9]+b[9]*a[13]-b[8]*a[14]+b[7]*a[15]+b[5]*a[19]-b[4]*a[20]+b[3]*a[21]-b[1]*a[25]+b[0]*a[29]
         res[30]=b[30]*a[0]+b[25]*a[2]-b[24]*a[3]+b[23]*a[4]-b[22]*a[5]+b[15]*a[10]-b[14]*a[11]+b[13]*a[12]+b[12]*a[13]-b[11]*a[14]+b[10]*a[15]+b[5]*a[22]-b[4]*a[23]+b[3]*a[24]-b[2]*a[25]+b[0]*a[30]
         res[31]=b[31]*a[0]+b[30]*a[1]-b[29]*a[2]+b[28]*a[3]-b[27]*a[4]+b[26]*a[5]+b[25]*a[6]-b[24]*a[7]+b[23]*a[8]-b[22]*a[9]+b[21]*a[10]-b[20]*a[11]+b[19]*a[12]+b[18]*a[13]-b[17]*a[14]+b[16]*a[15]+b[15]*a[16]-b[14]*a[17]+b[13]*a[18]+b[12]*a[19]-b[11]*a[20]+b[10]*a[21]-b[9]*a[22]+b[8]*a[23]-b[7]*a[24]+b[6]*a[25]+b[5]*a[26]-b[4]*a[27]+b[3]*a[28]-b[2]*a[29]+b[1]*a[30]+b[0]*a[31]
-        return res
+        return CGA.fromarray(res)
 
 
     def __and__(a,b):
-        res = CGA()
+        res = a.mvec.copy()
         res[31]=b[31]*a[31]
         res[30]=b[30]*a[31]+b[31]*a[30]
         res[29]=b[29]*a[31]+b[31]*a[29]
@@ -307,11 +330,11 @@ class CGA:
         res[2]=b[2]*a[31]+b[6]*a[30]-b[10]*a[28]+b[11]*a[27]-b[12]*a[26]+b[16]*a[24]-b[17]*a[23]+b[18]*a[22]+b[22]*a[18]-b[23]*a[17]+b[24]*a[16]+b[26]*a[12]-b[27]*a[11]+b[28]*a[10]-b[30]*a[6]+b[31]*a[2]
         res[1]=b[1]*a[31]+b[6]*a[29]-b[7]*a[28]+b[8]*a[27]-b[9]*a[26]+b[16]*a[21]-b[17]*a[20]+b[18]*a[19]+b[19]*a[18]-b[20]*a[17]+b[21]*a[16]+b[26]*a[9]-b[27]*a[8]+b[28]*a[7]-b[29]*a[6]+b[31]*a[1]
         res[0]=b[0]*a[31]+b[1]*a[30]-b[2]*a[29]+b[3]*a[28]-b[4]*a[27]+b[5]*a[26]+b[6]*a[25]-b[7]*a[24]+b[8]*a[23]-b[9]*a[22]+b[10]*a[21]-b[11]*a[20]+b[12]*a[19]+b[13]*a[18]-b[14]*a[17]+b[15]*a[16]+b[16]*a[15]-b[17]*a[14]+b[18]*a[13]+b[19]*a[12]-b[20]*a[11]+b[21]*a[10]-b[22]*a[9]+b[23]*a[8]-b[24]*a[7]+b[25]*a[6]+b[26]*a[5]-b[27]*a[4]+b[28]*a[3]-b[29]*a[2]+b[30]*a[1]+b[31]*a[0]
-        return res
+        return CGA.fromarray(res)
 
 
     def __or__(a,b):
-        res = CGA()
+        res = a.mvec.copy()
         res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]+b[9]*a[9]-b[10]*a[10]-b[11]*a[11]+b[12]*a[12]-b[13]*a[13]+b[14]*a[14]+b[15]*a[15]-b[16]*a[16]-b[17]*a[17]+b[18]*a[18]-b[19]*a[19]+b[20]*a[20]+b[21]*a[21]-b[22]*a[22]+b[23]*a[23]+b[24]*a[24]+b[25]*a[25]+b[26]*a[26]-b[27]*a[27]-b[28]*a[28]-b[29]*a[29]-b[30]*a[30]-b[31]*a[31]
         res[1]=b[1]*a[0]+b[0]*a[1]-b[6]*a[2]-b[7]*a[3]-b[8]*a[4]+b[9]*a[5]+b[2]*a[6]+b[3]*a[7]+b[4]*a[8]-b[5]*a[9]-b[16]*a[10]-b[17]*a[11]+b[18]*a[12]-b[19]*a[13]+b[20]*a[14]+b[21]*a[15]-b[10]*a[16]-b[11]*a[17]+b[12]*a[18]-b[13]*a[19]+b[14]*a[20]+b[15]*a[21]+b[26]*a[22]-b[27]*a[23]-b[28]*a[24]-b[29]*a[25]-b[22]*a[26]+b[23]*a[27]+b[24]*a[28]+b[25]*a[29]-b[31]*a[30]-b[30]*a[31]
         res[2]=b[2]*a[0]+b[6]*a[1]+b[0]*a[2]-b[10]*a[3]-b[11]*a[4]+b[12]*a[5]-b[1]*a[6]+b[16]*a[7]+b[17]*a[8]-b[18]*a[9]+b[3]*a[10]+b[4]*a[11]-b[5]*a[12]-b[22]*a[13]+b[23]*a[14]+b[24]*a[15]+b[7]*a[16]+b[8]*a[17]-b[9]*a[18]-b[26]*a[19]+b[27]*a[20]+b[28]*a[21]-b[13]*a[22]+b[14]*a[23]+b[15]*a[24]-b[30]*a[25]+b[19]*a[26]-b[20]*a[27]-b[21]*a[28]+b[31]*a[29]+b[25]*a[30]+b[29]*a[31]
@@ -344,7 +367,7 @@ class CGA:
         res[29]=b[29]*a[0]-b[31]*a[2]+b[0]*a[29]-b[2]*a[31]
         res[30]=b[30]*a[0]+b[31]*a[1]+b[0]*a[30]+b[1]*a[31]
         res[31]=b[31]*a[0]+b[0]*a[31]
-        return res
+        return CGA.fromarray(res)
 
 
     def __add__(a,b):
@@ -354,7 +377,7 @@ class CGA:
         """
         if type(b) in (int, float):
             return a.adds(b)
-        res = CGA()
+        res = a.mvec.copy()
         res[0] = a[0]+b[0]
         res[1] = a[1]+b[1]
         res[2] = a[2]+b[2]
@@ -387,7 +410,7 @@ class CGA:
         res[29] = a[29]+b[29]
         res[30] = a[30]+b[30]
         res[31] = a[31]+b[31]
-        return res
+        return CGA.fromarray(res)
     __radd__=__add__
 
     def __sub__(a,b):
@@ -397,7 +420,7 @@ class CGA:
         """
         if type(b) in (int, float):
             return a.subs(b)
-        res = CGA()
+        res = a.mvec.copy()
         res[0] = a[0]-b[0]
         res[1] = a[1]-b[1]
         res[2] = a[2]-b[2]
@@ -430,11 +453,11 @@ class CGA:
         res[29] = a[29]-b[29]
         res[30] = a[30]-b[30]
         res[31] = a[31]-b[31]
-        return res
+        return CGA.fromarray(res)
     __rsub__=__sub__
 
     def smul(a,b):
-        res = CGA()
+        res = a.mvec.copy()
         res[0] = a*b[0]
         res[1] = a*b[1]
         res[2] = a*b[2]
@@ -467,11 +490,11 @@ class CGA:
         res[29] = a*b[29]
         res[30] = a*b[30]
         res[31] = a*b[31]
-        return res
+        return CGA.fromarray(res)
 
 
     def muls(a,b):
-        res = CGA()
+        res = a.mvec.copy()
         res[0] = a[0]*b
         res[1] = a[1]*b
         res[2] = a[2]*b
@@ -504,11 +527,11 @@ class CGA:
         res[29] = a[29]*b
         res[30] = a[30]*b
         res[31] = a[31]*b
-        return res
+        return CGA.fromarray(res)
 
 
     def sadd(a,b):
-        res = CGA()
+        res = a.mvec.copy()
         res[0] = a+b[0]
         res[1] = b[1]
         res[2] = b[2]
@@ -541,11 +564,11 @@ class CGA:
         res[29] = b[29]
         res[30] = b[30]
         res[31] = b[31]
-        return res
+        return CGA.fromarray(res)
 
 
     def adds(a,b):
-        res = CGA()
+        res = a.mvec.copy()
         res[0] = a[0]+b
         res[1] = a[1]
         res[2] = a[2]
@@ -578,11 +601,11 @@ class CGA:
         res[29] = a[29]
         res[30] = a[30]
         res[31] = a[31]
-        return res
+        return CGA.fromarray(res)
 
 
     def norm(a):
-        return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+        return abs((a * a.Conjugate())[0])**0.5
         
     def inorm(a):
         return a.Dual().norm()

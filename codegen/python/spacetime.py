@@ -17,9 +17,32 @@ class SPACETIME:
         self._base = ["1", "e1", "e2", "e3", "e4", "e12", "e13", "e14", "e23", "e24", "e34", "e123", "e124", "e134", "e234", "e1234"]
         if (value != 0):
             self.mvec[index] = value
+            
+    @classmethod
+    def fromarray(cls, array):
+        """Initiate a new SPACETIME from an array-like object.
+
+        The first axis of the array is assumed to correspond to the elements
+        of the algebra, and needs to have the same length. Any other dimensions
+        are left unchanged, and should have simple operations such as addition 
+        and multiplication defined. NumPy arrays are therefore a perfect 
+        candidate. 
+
+        :param array: array-like object whose length is the dimension of the algebra.
+        :return: new instance of SPACETIME.
+        """
+        self = cls()
+        if len(array) != len(self):
+            raise TypeError('length of array must be identical to the dimension '
+                            'of the algebra.')
+        self.mvec = array
+        return self
         
     def __str__(self):
-        res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        if isinstance(self.mvec, list):
+            res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if abs(x) > 0.000001 else None for i,x in enumerate(self)]))
+        else:  # Assume array-like, redirect str conversion
+            res = str(self.mvec)
         if (res == ''):
             return "0"
         return res
@@ -38,7 +61,7 @@ class SPACETIME:
         
         Reverse the order of the basis blades.
         """
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0]=a[0]
         res[1]=a[1]
         res[2]=a[2]
@@ -55,14 +78,14 @@ class SPACETIME:
         res[13]=-a[13]
         res[14]=-a[14]
         res[15]=a[15]
-        return res
+        return SPACETIME.fromarray(res)
 
     def Dual(a):
         """SPACETIME.Dual
         
         Poincare duality operator.
         """
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0]=-a[15]
         res[1]=a[14]
         res[2]=-a[13]
@@ -79,14 +102,14 @@ class SPACETIME:
         res[13]=a[2]
         res[14]=-a[1]
         res[15]=a[0]
-        return res
+        return SPACETIME.fromarray(res)
 
     def Conjugate(a):
         """SPACETIME.Conjugate
         
         Clifford Conjugation
         """
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0]=a[0]
         res[1]=-a[1]
         res[2]=-a[2]
@@ -103,14 +126,14 @@ class SPACETIME:
         res[13]=a[13]
         res[14]=a[14]
         res[15]=a[15]
-        return res
+        return SPACETIME.fromarray(res)
 
     def Involute(a):
         """SPACETIME.Involute
         
         Main involution
         """
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0]=a[0]
         res[1]=-a[1]
         res[2]=-a[2]
@@ -127,7 +150,7 @@ class SPACETIME:
         res[13]=-a[13]
         res[14]=-a[14]
         res[15]=a[15]
-        return res
+        return SPACETIME.fromarray(res)
 
     def __mul__(a,b):
         """SPACETIME.Mul
@@ -136,7 +159,7 @@ class SPACETIME:
         """
         if type(b) in (int, float):
             return a.muls(b)
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]-b[4]*a[4]-b[5]*a[5]-b[6]*a[6]+b[7]*a[7]-b[8]*a[8]+b[9]*a[9]+b[10]*a[10]-b[11]*a[11]+b[12]*a[12]+b[13]*a[13]+b[14]*a[14]-b[15]*a[15]
         res[1]=b[1]*a[0]+b[0]*a[1]-b[5]*a[2]-b[6]*a[3]+b[7]*a[4]+b[2]*a[5]+b[3]*a[6]-b[4]*a[7]-b[11]*a[8]+b[12]*a[9]+b[13]*a[10]-b[8]*a[11]+b[9]*a[12]+b[10]*a[13]-b[15]*a[14]+b[14]*a[15]
         res[2]=b[2]*a[0]+b[5]*a[1]+b[0]*a[2]-b[8]*a[3]+b[9]*a[4]-b[1]*a[5]+b[11]*a[6]-b[12]*a[7]+b[3]*a[8]-b[4]*a[9]+b[14]*a[10]+b[6]*a[11]-b[7]*a[12]+b[15]*a[13]+b[10]*a[14]-b[13]*a[15]
@@ -153,11 +176,11 @@ class SPACETIME:
         res[13]=b[13]*a[0]+b[10]*a[1]-b[15]*a[2]-b[7]*a[3]+b[6]*a[4]+b[14]*a[5]+b[4]*a[6]-b[3]*a[7]-b[12]*a[8]+b[11]*a[9]+b[1]*a[10]-b[9]*a[11]+b[8]*a[12]+b[0]*a[13]-b[5]*a[14]+b[2]*a[15]
         res[14]=b[14]*a[0]+b[15]*a[1]+b[10]*a[2]-b[9]*a[3]+b[8]*a[4]-b[13]*a[5]+b[12]*a[6]-b[11]*a[7]+b[4]*a[8]-b[3]*a[9]+b[2]*a[10]+b[7]*a[11]-b[6]*a[12]+b[5]*a[13]+b[0]*a[14]-b[1]*a[15]
         res[15]=b[15]*a[0]+b[14]*a[1]-b[13]*a[2]+b[12]*a[3]-b[11]*a[4]+b[10]*a[5]-b[9]*a[6]+b[8]*a[7]+b[7]*a[8]-b[6]*a[9]+b[5]*a[10]+b[4]*a[11]-b[3]*a[12]+b[2]*a[13]-b[1]*a[14]+b[0]*a[15]
-        return res
+        return SPACETIME.fromarray(res)
     __rmul__=__mul__
 
     def __xor__(a,b):
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0]=b[0]*a[0]
         res[1]=b[1]*a[0]+b[0]*a[1]
         res[2]=b[2]*a[0]+b[0]*a[2]
@@ -174,11 +197,11 @@ class SPACETIME:
         res[13]=b[13]*a[0]+b[10]*a[1]-b[7]*a[3]+b[6]*a[4]+b[4]*a[6]-b[3]*a[7]+b[1]*a[10]+b[0]*a[13]
         res[14]=b[14]*a[0]+b[10]*a[2]-b[9]*a[3]+b[8]*a[4]+b[4]*a[8]-b[3]*a[9]+b[2]*a[10]+b[0]*a[14]
         res[15]=b[15]*a[0]+b[14]*a[1]-b[13]*a[2]+b[12]*a[3]-b[11]*a[4]+b[10]*a[5]-b[9]*a[6]+b[8]*a[7]+b[7]*a[8]-b[6]*a[9]+b[5]*a[10]+b[4]*a[11]-b[3]*a[12]+b[2]*a[13]-b[1]*a[14]+b[0]*a[15]
-        return res
+        return SPACETIME.fromarray(res)
 
 
     def __and__(a,b):
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[15]=b[15]*a[15]
         res[14]=b[14]*a[15]+b[15]*a[14]
         res[13]=b[13]*a[15]+b[15]*a[13]
@@ -195,11 +218,11 @@ class SPACETIME:
         res[2]=b[2]*a[15]+b[5]*a[14]-b[8]*a[12]+b[9]*a[11]+b[11]*a[9]-b[12]*a[8]+b[14]*a[5]+b[15]*a[2]
         res[1]=b[1]*a[15]+b[5]*a[13]-b[6]*a[12]+b[7]*a[11]+b[11]*a[7]-b[12]*a[6]+b[13]*a[5]+b[15]*a[1]
         res[0]=b[0]*a[15]+b[1]*a[14]-b[2]*a[13]+b[3]*a[12]-b[4]*a[11]+b[5]*a[10]-b[6]*a[9]+b[7]*a[8]+b[8]*a[7]-b[9]*a[6]+b[10]*a[5]+b[11]*a[4]-b[12]*a[3]+b[13]*a[2]-b[14]*a[1]+b[15]*a[0]
-        return res
+        return SPACETIME.fromarray(res)
 
 
     def __or__(a,b):
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]-b[4]*a[4]-b[5]*a[5]-b[6]*a[6]+b[7]*a[7]-b[8]*a[8]+b[9]*a[9]+b[10]*a[10]-b[11]*a[11]+b[12]*a[12]+b[13]*a[13]+b[14]*a[14]-b[15]*a[15]
         res[1]=b[1]*a[0]+b[0]*a[1]-b[5]*a[2]-b[6]*a[3]+b[7]*a[4]+b[2]*a[5]+b[3]*a[6]-b[4]*a[7]-b[11]*a[8]+b[12]*a[9]+b[13]*a[10]-b[8]*a[11]+b[9]*a[12]+b[10]*a[13]-b[15]*a[14]+b[14]*a[15]
         res[2]=b[2]*a[0]+b[5]*a[1]+b[0]*a[2]-b[8]*a[3]+b[9]*a[4]-b[1]*a[5]+b[11]*a[6]-b[12]*a[7]+b[3]*a[8]-b[4]*a[9]+b[14]*a[10]+b[6]*a[11]-b[7]*a[12]+b[15]*a[13]+b[10]*a[14]-b[13]*a[15]
@@ -216,7 +239,7 @@ class SPACETIME:
         res[13]=b[13]*a[0]-b[15]*a[2]+b[0]*a[13]+b[2]*a[15]
         res[14]=b[14]*a[0]+b[15]*a[1]+b[0]*a[14]-b[1]*a[15]
         res[15]=b[15]*a[0]+b[0]*a[15]
-        return res
+        return SPACETIME.fromarray(res)
 
 
     def __add__(a,b):
@@ -226,7 +249,7 @@ class SPACETIME:
         """
         if type(b) in (int, float):
             return a.adds(b)
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0] = a[0]+b[0]
         res[1] = a[1]+b[1]
         res[2] = a[2]+b[2]
@@ -243,7 +266,7 @@ class SPACETIME:
         res[13] = a[13]+b[13]
         res[14] = a[14]+b[14]
         res[15] = a[15]+b[15]
-        return res
+        return SPACETIME.fromarray(res)
     __radd__=__add__
 
     def __sub__(a,b):
@@ -253,7 +276,7 @@ class SPACETIME:
         """
         if type(b) in (int, float):
             return a.subs(b)
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0] = a[0]-b[0]
         res[1] = a[1]-b[1]
         res[2] = a[2]-b[2]
@@ -270,11 +293,11 @@ class SPACETIME:
         res[13] = a[13]-b[13]
         res[14] = a[14]-b[14]
         res[15] = a[15]-b[15]
-        return res
+        return SPACETIME.fromarray(res)
     __rsub__=__sub__
 
     def smul(a,b):
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0] = a*b[0]
         res[1] = a*b[1]
         res[2] = a*b[2]
@@ -291,11 +314,11 @@ class SPACETIME:
         res[13] = a*b[13]
         res[14] = a*b[14]
         res[15] = a*b[15]
-        return res
+        return SPACETIME.fromarray(res)
 
 
     def muls(a,b):
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0] = a[0]*b
         res[1] = a[1]*b
         res[2] = a[2]*b
@@ -312,11 +335,11 @@ class SPACETIME:
         res[13] = a[13]*b
         res[14] = a[14]*b
         res[15] = a[15]*b
-        return res
+        return SPACETIME.fromarray(res)
 
 
     def sadd(a,b):
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0] = a+b[0]
         res[1] = b[1]
         res[2] = b[2]
@@ -333,11 +356,11 @@ class SPACETIME:
         res[13] = b[13]
         res[14] = b[14]
         res[15] = b[15]
-        return res
+        return SPACETIME.fromarray(res)
 
 
     def adds(a,b):
-        res = SPACETIME()
+        res = a.mvec.copy()
         res[0] = a[0]+b
         res[1] = a[1]
         res[2] = a[2]
@@ -354,11 +377,11 @@ class SPACETIME:
         res[13] = a[13]
         res[14] = a[14]
         res[15] = a[15]
-        return res
+        return SPACETIME.fromarray(res)
 
 
     def norm(a):
-        return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+        return abs((a * a.Conjugate())[0])**0.5
         
     def inorm(a):
         return a.Dual().norm()
