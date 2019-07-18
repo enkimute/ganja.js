@@ -219,7 +219,7 @@ if __name__ == '__main__':
 // python Template for the postamble
 var postamble = (basis,classname,example)=>
 `    def norm(a):
-        return math.sqrt(math.fabs((a * a.Conjugate())[0]))
+        return abs((a * a.Conjugate())[0])**0.5
         
     def inorm(a):
         return a.Dual().norm()
