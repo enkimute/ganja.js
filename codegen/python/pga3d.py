@@ -1,30 +1,43 @@
-## 3D Projective Geometric Algebra
-## Written by a generator written by enki.
+"""3D Projective Geometric Algebra.
+
+Written by a generator written by enki.
+"""
+
+__author__ = 'Enki'
+
 import math
+
 class PGA3D:
-	def __init__(self, v=0, i=0):
+	def __init__(self, value=0, index=0):
+		"""Initiate a new PGA3D.
+		 
+		Optional, the component ``index`` can be set with ``value``.
+		"""
 		self.mvec = [0]*16
 		self._base = ["1","e0","e1","e2","e3","e01","e02","e03","e12","e31","e23","e021","e013","e032","e123","e0123"]
-		if (v!=0):
-			self.mvec[i] = v
+		if (value != 0):
+			self.mvec[index] = value
         
 	def __str__(self):
-		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self.mvec)]))
+		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
 		if (res == ''):
 			return "0"
 		return res
 
-	def __getitem__(self,key):
+	def __getitem__(self, key):
 		return self.mvec[key]
 
-	def __setitem__(self,key,value):
-		self.mvec[key]=value
+	def __setitem__(self, key, value):
+		self.mvec[key] = value
+		
+	def __len__(self):
+		return len(self.mvec)
 
-	########################## 
-	# PGA3D.Reverse
-	# Reverse the order of the basis blades.
-	########################## 
 	def __invert__(a):
+		"""PGA3D.Reverse
+		
+		Reverse the order of the basis blades.
+		"""
 		res = PGA3D()
 		res[0]=a[0]
 		res[1]=a[1]
@@ -44,11 +57,11 @@ class PGA3D:
 		res[15]=a[15]
 		return res
 
-	########################## 
-	# PGA3D.Dual
-	# Poincare duality operator.
-	########################## 
 	def Dual(a):
+		"""PGA3D.Dual
+		
+		Poincare duality operator.
+		"""
 		res = PGA3D()
 		res[0]=a[15]
 		res[1]=a[14]
@@ -68,11 +81,11 @@ class PGA3D:
 		res[15]=a[0]
 		return res
 
-	########################## 
-	# PGA3D.Conjugate
-	# Clifford Conjugation
-	########################## 
 	def Conjugate(a):
+		"""PGA3D.Conjugate
+		
+		Clifford Conjugation
+		"""
 		res = PGA3D()
 		res[0]=a[0]
 		res[1]=-a[1]
@@ -92,11 +105,11 @@ class PGA3D:
 		res[15]=a[15]
 		return res
 
-	########################## 
-	# PGA3D.Involute
-	# Main involution
-	########################## 
 	def Involute(a):
+		"""PGA3D.Involute
+		
+		Main involution
+		"""
 		res = PGA3D()
 		res[0]=a[0]
 		res[1]=-a[1]
@@ -116,12 +129,12 @@ class PGA3D:
 		res[15]=a[15]
 		return res
 
-	########################## 
-	# PGA3D.Mul
-	# The geometric product.
-	##########################
 	def __mul__(a,b):
-		if type(b) in (int,float):
+		"""PGA3D.Mul
+		
+		The geometric product.
+		"""
+		if type(b) in (int, float):
 			 return a.muls(b)
 		res = PGA3D()
 		res[0]=b[0]*a[0]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[8]*a[8]-b[9]*a[9]-b[10]*a[10]-b[14]*a[14]
@@ -143,10 +156,6 @@ class PGA3D:
 		return res
 	__rmul__=__mul__
 
-	########################## 
-	# PGA3D.Wedge
-	# The outer product. (MEET)
-	##########################
 	def __xor__(a,b):
 		res = PGA3D()
 		res[0]=b[0]*a[0]
@@ -168,10 +177,6 @@ class PGA3D:
 		return res
 
 
-	########################## 
-	# PGA3D.Vee
-	# The regressive product. (JOIN)
-	##########################
 	def __and__(a,b):
 		res = PGA3D()
 		res[15]=b[15]*a[15]
@@ -193,10 +198,6 @@ class PGA3D:
 		return res
 
 
-	########################## 
-	# PGA3D.Dot
-	# The inner product.
-	##########################
 	def __or__(a,b):
 		res = PGA3D()
 		res[0]=b[0]*a[0]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[8]*a[8]-b[9]*a[9]-b[10]*a[10]-b[14]*a[14]
@@ -218,12 +219,12 @@ class PGA3D:
 		return res
 
 
-	########################## 
-	# PGA3D.Add
-	# Multivector addition
-	##########################
 	def __add__(a,b):
-		if type(b) in (int,float):
+		"""PGA3D.Add
+		
+		Multivector addition
+		"""
+		if type(b) in (int, float):
 			 return a.adds(b)
 		res = PGA3D()
 		res[0] = a[0]+b[0]
@@ -245,12 +246,12 @@ class PGA3D:
 		return res
 	__radd__=__add__
 
-	########################## 
-	# PGA3D.Sub
-	# Multivector subtraction
-	##########################
 	def __sub__(a,b):
-		if type(b) in (int,float):
+		"""PGA3D.Sub
+		
+		Multivector subtraction
+		"""
+		if type(b) in (int, float):
 			 return a.subs(b)
 		res = PGA3D()
 		res[0] = a[0]-b[0]
@@ -272,10 +273,6 @@ class PGA3D:
 		return res
 	__rsub__=__sub__
 
-	########################## 
-	# PGA3D.smul
-	# scalar/multivector multiplication
-	##########################
 	def smul(a,b):
 		res = PGA3D()
 		res[0] = a*b[0]
@@ -297,10 +294,6 @@ class PGA3D:
 		return res
 
 
-	########################## 
-	# PGA3D.muls
-	# multivector/scalar multiplication
-	##########################
 	def muls(a,b):
 		res = PGA3D()
 		res[0] = a[0]*b
@@ -322,10 +315,6 @@ class PGA3D:
 		return res
 
 
-	########################## 
-	# PGA3D.sadd
-	# scalar/multivector addition
-	##########################
 	def sadd(a,b):
 		res = PGA3D()
 		res[0] = a+b[0]
@@ -347,10 +336,6 @@ class PGA3D:
 		return res
 
 
-	########################## 
-	# PGA3D.adds
-	# multivector/scalar addition
-	##########################
 	def adds(a,b):
 		res = PGA3D()
 		res[0] = a[0]+b
@@ -373,88 +358,90 @@ class PGA3D:
 
 
 	def norm(a):
-		return math.sqrt(math.fabs((a*a.Conjugate())[0]))
+		return math.sqrt(math.fabs((a * a.Conjugate())[0]))
 
 	def inorm(a):
 		return a.Dual().norm()
 		
 	def normalized(a):
-		return a*(1/a.norm())
+		return a * (1 / a.norm())
 
-# A rotor (Euclidean line) and translator (Ideal line)
-def rotor(angle,line):
-	return math.cos(angle/2.0) + math.sin(angle/2.0)*line.normalized()
+if __name__ == '__main__':
+    # A rotor (Euclidean line) and translator (Ideal line)
+    def rotor(angle, line):
+	    return math.cos(angle / 2.0) + math.sin(angle / 2.0) * line.normalized()
 	
-def translator(dist,line):
-	return 1.0 + dist/2.0*line
+    def translator(dist, line):
+	    return 1.0 + dist / 2.0 * line
 
-# PGA is plane based. Vectors are planes. (think linear functionals)
-E0 = PGA3D(1.0,1)           # ideal plane
-E1 = PGA3D(1.0,2)           # x=0 plane
-E2 = PGA3D(1.0,3)           # y=0 plane
-E3 = PGA3D(1.0,4)           # z=0 plane
+    # PGA is plane based. Vectors are planes. (think linear functionals)
+    E0 = PGA3D(1.0, 1)           # ideal plane
+    E1 = PGA3D(1.0, 2)           # x=0 plane
+    E2 = PGA3D(1.0, 3)           # y=0 plane
+    E3 = PGA3D(1.0, 4)           # z=0 plane
 
-# A plane is defined using its homogenous equation ax + by + cz + d = 0 
-def PLANE(a,b,c,d):
-        return a*E1 + b*E2 + c*E3 + d*E0
+    # A plane is defined using its homogenous equation ax + by + cz + d = 0 
+    def PLANE(a, b, c, d):
+        return a * E1 + b * E2 + c * E3 + d * E0
 
-# PGA points are trivectors.
-E123 = E1^E2^E3
-E032 = E0^E3^E2
-E013 = E0^E1^E3
-E021 = E0^E2^E1
+    # PGA points are trivectors.
+    E123 = E1 ^ E2 ^ E3
+    E032 = E0 ^ E3 ^ E2
+    E013 = E0 ^ E1 ^ E3
+    E021 = E0 ^ E2 ^ E1
 
-# A point is just a homogeneous point, euclidean coordinates plus the origin
-def POINT(x,y,z):
-        return E123 + x*E032 + y*E013 + z*E021
+    # A point is just a homogeneous point, euclidean coordinates plus the origin
+    def POINT(x, y, z):
+        return E123 + x * E032 + y * E013 + z * E021
 
-# for our toy problem (generate points on the surface of a torus)
-# we start with a function that generates motors.
-# circle(t) with t going from 0 to 1.
-def CIRCLE(t,radius,line):
-	return rotor(t*math.pi*2.0,line)*translator(radius,E1*E0)
+    # for our toy problem (generate points on the surface of a torus)
+    # we start with a function that generates motors.
+    # circle(t) with t going from 0 to 1.
+    def CIRCLE(t, radius, line):
+    	return rotor(t * math.pi * 2.0, line) * translator(radius, E1 * E0)
 	
-# a torus is now the product of two circles.
-def TORUS(s,t,r1,l1,r2,l2):
-	return CIRCLE(s,r2,l2)*CIRCLE(t,r1,l1)
+    # a torus is now the product of two circles.
+    def TORUS(s, t, r1, l1, r2, l2):
+	    return CIRCLE(s, r2, l2)*CIRCLE(t, r1, l1)
 
-# sample the torus points by sandwich with the origin
-def POINT_ON_TORUS(s,t):
-	to = TORUS(s,t,0.25,E1*E2,0.6,E1*E3)
-	return to * E123 * ~to
+    # sample the torus points by sandwich with the origin
+    def POINT_ON_TORUS(s, t):
+	    to = TORUS(s, t, 0.25, E1 * E2, 0.6, E1 * E3)
+	    return to * E123 * ~to
 
-# Elements of the even subalgebra (scalar + bivector + pss) of unit length are motors
-ROT = rotor(math.pi/2.0,E1*E2)
+    # Elements of the even subalgebra (scalar + bivector + pss) of unit length are motors
+    ROT = rotor(math.pi / 2.0, E1 * E2)
 
-# The outer product ^ is the MEET. Here we intersect the yz (x=0) and xz (y=0) planes.
-AXZ = E1 ^ E2                # x=0, y=0 -> z-axis line
+    # The outer product ^ is the MEET. Here we intersect the yz (x=0) and xz (y=0) planes.
+    AXZ = E1 ^ E2                # x=0, y=0 -> z-axis line
 
-# line and plane meet in point. We intersect the line along the z-axis (x=0,y=0) with the xy (z=0) plane.
-ORIG = AXZ ^ E3              # x=0, y=0, z=0 -> origin
+    # line and plane meet in point. We intersect the line along the z-axis (x=0,y=0) with the xy (z=0) plane.
+    ORIG = AXZ ^ E3              # x=0, y=0, z=0 -> origin
 
-# We can also easily create points and join them into a line using the regressive (vee, &) product.
-PX = POINT(1,0,0)
-LINE = ORIG & PX             # & = regressive product, JOIN, here, x-axis line.
+    # We can also easily create points and join them into a line using the regressive (vee, &) product.
+    PX = POINT(1, 0, 0)
+    LINE = ORIG & PX             # & = regressive product, JOIN, here, x-axis line.
 
-# Lets also create the plane with equation 2x + z - 3 = 0
-P = PLANE(2,0,1,-3)
+    # Lets also create the plane with equation 2x + z - 3 = 0
+    P = PLANE(2, 0, 1, -3)
 
-# rotations work on all elements ..
-ROTATED_LINE = ROT * LINE * ~ROT
-ROTATED_POINT = ROT * PX * ~ROT
-ROTATED_PLANE = ROT * P * ~ROT
+    # rotations work on all elements ..
+    ROTATED_LINE = ROT * LINE * ~ROT
+    ROTATED_POINT = ROT * PX * ~ROT
+    ROTATED_PLANE = ROT * P * ~ROT
 
-# See the 3D PGA Cheat sheet for a huge collection of useful formulas
-POINT_ON_PLANE = (P | PX) * P
+    # See the 3D PGA Cheat sheet for a huge collection of useful formulas
+    POINT_ON_PLANE = (P | PX) * P
 
-# output some numbers.
-print("a point       :",str(PX))
-print("a line        :",str(LINE))
-print("a plane       :",str(P))
-print("a rotor       :",str(ROT))
-print("rotated line  :",str(ROTATED_LINE))
-print("rotated point :",str(ROTATED_POINT))
-print("rotated plane :",str(ROTATED_PLANE))
-print("point on plane:",str(POINT_ON_PLANE.normalized()))
-print("point on torus:",str(POINT_ON_TORUS(0.0,0.0)))
+    # output some numbers.
+    print("a point       :",str(PX))
+    print("a line        :",str(LINE))
+    print("a plane       :",str(P))
+    print("a rotor       :",str(ROT))
+    print("rotated line  :",str(ROTATED_LINE))
+    print("rotated point :",str(ROTATED_POINT))
+    print("rotated plane :",str(ROTATED_PLANE))
+    print("point on plane:",str(POINT_ON_PLANE.normalized()))
+    print("point on torus:",str(POINT_ON_TORUS(0.0, 0.0)))
+
 

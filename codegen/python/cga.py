@@ -1,30 +1,43 @@
-## 3D Projective Geometric Algebra
-## Written by a generator written by enki.
+"""3D Projective Geometric Algebra.
+
+Written by a generator written by enki.
+"""
+
+__author__ = 'Enki'
+
 import math
+
 class CGA:
-	def __init__(self, v=0, i=0):
+	def __init__(self, value=0, index=0):
+		"""Initiate a new CGA.
+		 
+		Optional, the component ``index`` can be set with ``value``.
+		"""
 		self.mvec = [0]*32
 		self._base = ["1","e1","e2","e3","e4","e5","e12","e13","e14","e15","e23","e24","e25","e34","e35","e45","e123","e124","e125","e134","e135","e145","e234","e235","e245","e345","e1234","e1235","e1245","e1345","e2345","e12345"]
-		if (v!=0):
-			self.mvec[i] = v
+		if (value != 0):
+			self.mvec[index] = value
         
 	def __str__(self):
-		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self.mvec)]))
+		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
 		if (res == ''):
 			return "0"
 		return res
 
-	def __getitem__(self,key):
+	def __getitem__(self, key):
 		return self.mvec[key]
 
-	def __setitem__(self,key,value):
-		self.mvec[key]=value
+	def __setitem__(self, key, value):
+		self.mvec[key] = value
+		
+	def __len__(self):
+		return len(self.mvec)
 
-	########################## 
-	# CGA.Reverse
-	# Reverse the order of the basis blades.
-	########################## 
 	def __invert__(a):
+		"""CGA.Reverse
+		
+		Reverse the order of the basis blades.
+		"""
 		res = CGA()
 		res[0]=a[0]
 		res[1]=a[1]
@@ -60,11 +73,11 @@ class CGA:
 		res[31]=a[31]
 		return res
 
-	########################## 
-	# CGA.Dual
-	# Poincare duality operator.
-	########################## 
 	def Dual(a):
+		"""CGA.Dual
+		
+		Poincare duality operator.
+		"""
 		res = CGA()
 		res[0]=-a[31]
 		res[1]=-a[30]
@@ -100,11 +113,11 @@ class CGA:
 		res[31]=a[0]
 		return res
 
-	########################## 
-	# CGA.Conjugate
-	# Clifford Conjugation
-	########################## 
 	def Conjugate(a):
+		"""CGA.Conjugate
+		
+		Clifford Conjugation
+		"""
 		res = CGA()
 		res[0]=a[0]
 		res[1]=-a[1]
@@ -140,11 +153,11 @@ class CGA:
 		res[31]=-a[31]
 		return res
 
-	########################## 
-	# CGA.Involute
-	# Main involution
-	########################## 
 	def Involute(a):
+		"""CGA.Involute
+		
+		Main involution
+		"""
 		res = CGA()
 		res[0]=a[0]
 		res[1]=-a[1]
@@ -180,12 +193,12 @@ class CGA:
 		res[31]=-a[31]
 		return res
 
-	########################## 
-	# CGA.Mul
-	# The geometric product.
-	##########################
 	def __mul__(a,b):
-		if type(b) in (int,float):
+		"""CGA.Mul
+		
+		The geometric product.
+		"""
+		if type(b) in (int, float):
 			 return a.muls(b)
 		res = CGA()
 		res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]+b[9]*a[9]-b[10]*a[10]-b[11]*a[11]+b[12]*a[12]-b[13]*a[13]+b[14]*a[14]+b[15]*a[15]-b[16]*a[16]-b[17]*a[17]+b[18]*a[18]-b[19]*a[19]+b[20]*a[20]+b[21]*a[21]-b[22]*a[22]+b[23]*a[23]+b[24]*a[24]+b[25]*a[25]+b[26]*a[26]-b[27]*a[27]-b[28]*a[28]-b[29]*a[29]-b[30]*a[30]-b[31]*a[31]
@@ -223,10 +236,6 @@ class CGA:
 		return res
 	__rmul__=__mul__
 
-	########################## 
-	# CGA.Wedge
-	# The outer product. (MEET)
-	##########################
 	def __xor__(a,b):
 		res = CGA()
 		res[0]=b[0]*a[0]
@@ -264,10 +273,6 @@ class CGA:
 		return res
 
 
-	########################## 
-	# CGA.Vee
-	# The regressive product. (JOIN)
-	##########################
 	def __and__(a,b):
 		res = CGA()
 		res[31]=b[31]*a[31]
@@ -305,10 +310,6 @@ class CGA:
 		return res
 
 
-	########################## 
-	# CGA.Dot
-	# The inner product.
-	##########################
 	def __or__(a,b):
 		res = CGA()
 		res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]+b[4]*a[4]-b[5]*a[5]-b[6]*a[6]-b[7]*a[7]-b[8]*a[8]+b[9]*a[9]-b[10]*a[10]-b[11]*a[11]+b[12]*a[12]-b[13]*a[13]+b[14]*a[14]+b[15]*a[15]-b[16]*a[16]-b[17]*a[17]+b[18]*a[18]-b[19]*a[19]+b[20]*a[20]+b[21]*a[21]-b[22]*a[22]+b[23]*a[23]+b[24]*a[24]+b[25]*a[25]+b[26]*a[26]-b[27]*a[27]-b[28]*a[28]-b[29]*a[29]-b[30]*a[30]-b[31]*a[31]
@@ -346,12 +347,12 @@ class CGA:
 		return res
 
 
-	########################## 
-	# CGA.Add
-	# Multivector addition
-	##########################
 	def __add__(a,b):
-		if type(b) in (int,float):
+		"""CGA.Add
+		
+		Multivector addition
+		"""
+		if type(b) in (int, float):
 			 return a.adds(b)
 		res = CGA()
 		res[0] = a[0]+b[0]
@@ -389,12 +390,12 @@ class CGA:
 		return res
 	__radd__=__add__
 
-	########################## 
-	# CGA.Sub
-	# Multivector subtraction
-	##########################
 	def __sub__(a,b):
-		if type(b) in (int,float):
+		"""CGA.Sub
+		
+		Multivector subtraction
+		"""
+		if type(b) in (int, float):
 			 return a.subs(b)
 		res = CGA()
 		res[0] = a[0]-b[0]
@@ -432,10 +433,6 @@ class CGA:
 		return res
 	__rsub__=__sub__
 
-	########################## 
-	# CGA.smul
-	# scalar/multivector multiplication
-	##########################
 	def smul(a,b):
 		res = CGA()
 		res[0] = a*b[0]
@@ -473,10 +470,6 @@ class CGA:
 		return res
 
 
-	########################## 
-	# CGA.muls
-	# multivector/scalar multiplication
-	##########################
 	def muls(a,b):
 		res = CGA()
 		res[0] = a[0]*b
@@ -514,10 +507,6 @@ class CGA:
 		return res
 
 
-	########################## 
-	# CGA.sadd
-	# scalar/multivector addition
-	##########################
 	def sadd(a,b):
 		res = CGA()
 		res[0] = a+b[0]
@@ -555,10 +544,6 @@ class CGA:
 		return res
 
 
-	########################## 
-	# CGA.adds
-	# multivector/scalar addition
-	##########################
 	def adds(a,b):
 		res = CGA()
 		res[0] = a[0]+b
@@ -597,35 +582,35 @@ class CGA:
 
 
 	def norm(a):
-		return math.sqrt(math.fabs((a*a.Conjugate())[0]))
+		return math.sqrt(math.fabs((a * a.Conjugate())[0]))
 
 	def inorm(a):
 		return a.Dual().norm()
 		
 	def normalized(a):
-		return a*(1/a.norm())
+		return a * (1 / a.norm())
 
-# CGA is point based. Vectors are points.
-E1 = CGA(1.0,1)
-E2 = CGA(1.0,2)
-E3 = CGA(1.0,3)
-E4 = CGA(1.0,4)
-E5 = CGA(1.0,5)
+if __name__ == '__main__':
+    # CGA is point based. Vectors are points.
+    E1 = CGA(1.0, 1)
+    E2 = CGA(1.0, 2)
+    E3 = CGA(1.0, 3)
+    E4 = CGA(1.0, 4)
+    E5 = CGA(1.0, 5)
 
-EO = E4 + E5
-EI = (E5 - E4)*0.5
+    EO = E4 + E5
+    EI = (E5 - E4) * 0.5
 
-def up(x,y,z):
-	return x*E1 + y*E2 + z*E3 + 0.5*(x*x+y*y+z*z)*EI + EO
+    def up(x, y, z):
+	    return x * E1 + y * E2 + z * E3 + 0.5 * (x * x + y * y + z * z) * EI + EO
 
-PX = up(1,2,3)
-LINE = PX^EO^EI
-SPHERE = (EO-EI).Dual()
+    PX = up(1, 2, 3)
+    LINE = PX ^ EO ^ EI
+    SPHERE = (EO - EI).Dual()
 
-# output some numbers.
-print("a point       :",str(PX))
-print("a line        :",str(LINE))
-print("a sphere      :",str(SPHERE))
-
+    # output some numbers.
+    print("a point       :", str(PX))
+    print("a line        :", str(LINE))
+    print("a sphere      :", str(SPHERE))
 
 

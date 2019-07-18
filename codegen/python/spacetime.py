@@ -1,30 +1,43 @@
-## 3D Projective Geometric Algebra
-## Written by a generator written by enki.
+"""3D Projective Geometric Algebra.
+
+Written by a generator written by enki.
+"""
+
+__author__ = 'Enki'
+
 import math
+
 class SPACETIME:
-	def __init__(self, v=0, i=0):
+	def __init__(self, value=0, index=0):
+		"""Initiate a new SPACETIME.
+		 
+		Optional, the component ``index`` can be set with ``value``.
+		"""
 		self.mvec = [0]*16
 		self._base = ["1","e1","e2","e3","e4","e12","e13","e14","e23","e24","e34","e123","e124","e134","e234","e1234"]
-		if (v!=0):
-			self.mvec[i] = v
+		if (value != 0):
+			self.mvec[index] = value
         
 	def __str__(self):
-		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self.mvec)]))
+		res = ' + '.join(filter(None, [("%.7f" % x).rstrip("0").rstrip(".")+(["",self._base[i]][i>0]) if math.fabs(x) > 0.000001 else None for i,x in enumerate(self)]))
 		if (res == ''):
 			return "0"
 		return res
 
-	def __getitem__(self,key):
+	def __getitem__(self, key):
 		return self.mvec[key]
 
-	def __setitem__(self,key,value):
-		self.mvec[key]=value
+	def __setitem__(self, key, value):
+		self.mvec[key] = value
+		
+	def __len__(self):
+		return len(self.mvec)
 
-	########################## 
-	# SPACETIME.Reverse
-	# Reverse the order of the basis blades.
-	########################## 
 	def __invert__(a):
+		"""SPACETIME.Reverse
+		
+		Reverse the order of the basis blades.
+		"""
 		res = SPACETIME()
 		res[0]=a[0]
 		res[1]=a[1]
@@ -44,11 +57,11 @@ class SPACETIME:
 		res[15]=a[15]
 		return res
 
-	########################## 
-	# SPACETIME.Dual
-	# Poincare duality operator.
-	########################## 
 	def Dual(a):
+		"""SPACETIME.Dual
+		
+		Poincare duality operator.
+		"""
 		res = SPACETIME()
 		res[0]=-a[15]
 		res[1]=a[14]
@@ -68,11 +81,11 @@ class SPACETIME:
 		res[15]=a[0]
 		return res
 
-	########################## 
-	# SPACETIME.Conjugate
-	# Clifford Conjugation
-	########################## 
 	def Conjugate(a):
+		"""SPACETIME.Conjugate
+		
+		Clifford Conjugation
+		"""
 		res = SPACETIME()
 		res[0]=a[0]
 		res[1]=-a[1]
@@ -92,11 +105,11 @@ class SPACETIME:
 		res[15]=a[15]
 		return res
 
-	########################## 
-	# SPACETIME.Involute
-	# Main involution
-	########################## 
 	def Involute(a):
+		"""SPACETIME.Involute
+		
+		Main involution
+		"""
 		res = SPACETIME()
 		res[0]=a[0]
 		res[1]=-a[1]
@@ -116,12 +129,12 @@ class SPACETIME:
 		res[15]=a[15]
 		return res
 
-	########################## 
-	# SPACETIME.Mul
-	# The geometric product.
-	##########################
 	def __mul__(a,b):
-		if type(b) in (int,float):
+		"""SPACETIME.Mul
+		
+		The geometric product.
+		"""
+		if type(b) in (int, float):
 			 return a.muls(b)
 		res = SPACETIME()
 		res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]-b[4]*a[4]-b[5]*a[5]-b[6]*a[6]+b[7]*a[7]-b[8]*a[8]+b[9]*a[9]+b[10]*a[10]-b[11]*a[11]+b[12]*a[12]+b[13]*a[13]+b[14]*a[14]-b[15]*a[15]
@@ -143,10 +156,6 @@ class SPACETIME:
 		return res
 	__rmul__=__mul__
 
-	########################## 
-	# SPACETIME.Wedge
-	# The outer product. (MEET)
-	##########################
 	def __xor__(a,b):
 		res = SPACETIME()
 		res[0]=b[0]*a[0]
@@ -168,10 +177,6 @@ class SPACETIME:
 		return res
 
 
-	########################## 
-	# SPACETIME.Vee
-	# The regressive product. (JOIN)
-	##########################
 	def __and__(a,b):
 		res = SPACETIME()
 		res[15]=b[15]*a[15]
@@ -193,10 +198,6 @@ class SPACETIME:
 		return res
 
 
-	########################## 
-	# SPACETIME.Dot
-	# The inner product.
-	##########################
 	def __or__(a,b):
 		res = SPACETIME()
 		res[0]=b[0]*a[0]+b[1]*a[1]+b[2]*a[2]+b[3]*a[3]-b[4]*a[4]-b[5]*a[5]-b[6]*a[6]+b[7]*a[7]-b[8]*a[8]+b[9]*a[9]+b[10]*a[10]-b[11]*a[11]+b[12]*a[12]+b[13]*a[13]+b[14]*a[14]-b[15]*a[15]
@@ -218,12 +219,12 @@ class SPACETIME:
 		return res
 
 
-	########################## 
-	# SPACETIME.Add
-	# Multivector addition
-	##########################
 	def __add__(a,b):
-		if type(b) in (int,float):
+		"""SPACETIME.Add
+		
+		Multivector addition
+		"""
+		if type(b) in (int, float):
 			 return a.adds(b)
 		res = SPACETIME()
 		res[0] = a[0]+b[0]
@@ -245,12 +246,12 @@ class SPACETIME:
 		return res
 	__radd__=__add__
 
-	########################## 
-	# SPACETIME.Sub
-	# Multivector subtraction
-	##########################
 	def __sub__(a,b):
-		if type(b) in (int,float):
+		"""SPACETIME.Sub
+		
+		Multivector subtraction
+		"""
+		if type(b) in (int, float):
 			 return a.subs(b)
 		res = SPACETIME()
 		res[0] = a[0]-b[0]
@@ -272,10 +273,6 @@ class SPACETIME:
 		return res
 	__rsub__=__sub__
 
-	########################## 
-	# SPACETIME.smul
-	# scalar/multivector multiplication
-	##########################
 	def smul(a,b):
 		res = SPACETIME()
 		res[0] = a*b[0]
@@ -297,10 +294,6 @@ class SPACETIME:
 		return res
 
 
-	########################## 
-	# SPACETIME.muls
-	# multivector/scalar multiplication
-	##########################
 	def muls(a,b):
 		res = SPACETIME()
 		res[0] = a[0]*b
@@ -322,10 +315,6 @@ class SPACETIME:
 		return res
 
 
-	########################## 
-	# SPACETIME.sadd
-	# scalar/multivector addition
-	##########################
 	def sadd(a,b):
 		res = SPACETIME()
 		res[0] = a+b[0]
@@ -347,10 +336,6 @@ class SPACETIME:
 		return res
 
 
-	########################## 
-	# SPACETIME.adds
-	# multivector/scalar addition
-	##########################
 	def adds(a,b):
 		res = SPACETIME()
 		res[0] = a[0]+b
@@ -373,31 +358,32 @@ class SPACETIME:
 
 
 	def norm(a):
-		return math.sqrt(math.fabs((a*a.Conjugate())[0]))
+		return math.sqrt(math.fabs((a * a.Conjugate())[0]))
 
 	def inorm(a):
 		return a.Dual().norm()
 		
 	def normalized(a):
-		return a*(1/a.norm())
+		return a * (1 / a.norm())
 
-e1 = SPACETIME(1.0,1)
-e2 = SPACETIME(1.0,2)
-e3 = SPACETIME(1.0,3)
-e4 = SPACETIME(1.0,4)
-e12 = SPACETIME(1.0,5)
-e13 = SPACETIME(1.0,6)
-e14 = SPACETIME(1.0,7)
-e23 = SPACETIME(1.0,8)
-e24 = SPACETIME(1.0,9)
-e34 = SPACETIME(1.0,10)
-e123 = SPACETIME(1.0,11)
-e124 = SPACETIME(1.0,12)
-e134 = SPACETIME(1.0,13)
-e234 = SPACETIME(1.0,14)
-e1234 = SPACETIME(1.0,15)
+e1 = SPACETIME(1.0, 1)
+e2 = SPACETIME(1.0, 2)
+e3 = SPACETIME(1.0, 3)
+e4 = SPACETIME(1.0, 4)
+e12 = SPACETIME(1.0, 5)
+e13 = SPACETIME(1.0, 6)
+e14 = SPACETIME(1.0, 7)
+e23 = SPACETIME(1.0, 8)
+e24 = SPACETIME(1.0, 9)
+e34 = SPACETIME(1.0, 10)
+e123 = SPACETIME(1.0, 11)
+e124 = SPACETIME(1.0, 12)
+e134 = SPACETIME(1.0, 13)
+e234 = SPACETIME(1.0, 14)
+e1234 = SPACETIME(1.0, 15)
+if __name__ == '__main__':
+    print("e1*e1         :", str(e1*e1))
+    print("pss           :", str(e1234))
+    print("pss*pss       :", str(e1234*e1234))
 
-print("e1*e1         :", str(e1*e1))
-print("pss           :", str(e1234))
-print("pss*pss       :", str(e1234*e1234))
 
