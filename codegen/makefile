@@ -6,7 +6,7 @@ ALL: c hyperbolic dual r2 r3 mink quat r111 spacetime cga pga3d
 	@echo "done !"
 
 ## Generate all languages by default
-GEN_LANG = "csharp cpp python rust"
+GEN_LANG="csharp cpp python rust"
 
 %:
 	@node generate `echo $*| tr "[a-z]" "[A-Z]"`
