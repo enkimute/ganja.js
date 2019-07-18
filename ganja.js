@@ -66,7 +66,7 @@
     } else { options={}; p=p|0; r=r|0; q=q|0; };
 
   // Support for multi-dual-algebras
-    if (p==0 && q==0 && r>1) { // Create a dual number algebra if r>1 .. consider more explicit syntax
+    if (p==0 && q==0 && r<0) { r=-r; // Create a dual number algebra if r>1 .. consider more explicit syntax
       options.basis  = [...Array(r+1)].map((a,i)=>i?'e0'+i:'1');  options.metric = [1,...Array(r)]; options.tot=r+1;
       options.Cayley = [...Array(r+1)].map((a,i)=>[...Array(r+1)].map((y,j)=>i*j==0?((i+j)?'e0'+(i+j):'1'):'0'));
     }
@@ -314,7 +314,7 @@
         return r;
       }    
     // Symmetric contraction.
-      LDot(b,r) {
+      Dot(b,r) {
         r=r||new this.constructor();
         for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<x.length; a++) if (x[a]) for (var bb=0; bb<y.length; bb++) if (y[bb]) {
           if (i==j && a==bb) { r[0] = r[0]||[0]; r[0][0] += x[a]*y[bb]*metric[i][a]; } 
