@@ -24,5 +24,6 @@ GEN_LANG="csharp cpp python rust"
 ## rough clean generated files	
 clean:
 	@echo "cleaning .."
-	-@rm {csharp,cpp,python,rust}/*{.cs,.cpp,.py,.exe,.rs,_cpp,_rust}  -f
+	-@rm {csharp,cpp,python,rust}/*{.exe,_cpp,_rust}  -f
+	-@rm {csharp,cpp,python,rust}/r111*  -f
 	-@rm *~ -f
