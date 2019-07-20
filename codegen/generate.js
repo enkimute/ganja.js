@@ -58,7 +58,7 @@ if (process.argv[2] && process.argv[2]!='PGA3D') {
 }
 
 // A Javascript implementation of the algebra.
-var pga = Algebra({p,q,r,basis});
+var pga = Algebra({p,q,r,basis,graded:false});
 
 basis = pga.describe().basis;
 var d= 2**(p+q+r);

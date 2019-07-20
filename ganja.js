@@ -108,7 +108,7 @@
     var simplify_bits = (A,B,p2)=>{ var n=p2||(p+q+r),t=0,ab=A&B,res=A^B; if (ab&((1<<r)-1)) return [0,0]; while (n--) t^=(A=A>>1); t&=B; t^=ab>>(p+r); t^=t>>16; t^=t>>8; t^=t>>4; return [1-2*(27030>>(t&15)&1),res]; },
         bc = (v)=>{ v=v-((v>>1)& 0x55555555); v=(v&0x33333333)+((v>>2)&0x33333333); c=((v+(v>>4)&0xF0F0F0F)*0x1010101)>>24; return c }; 
   
-  if (!options.graded && tot <= 6 || options.Cayley) {
+  if (!options.graded && tot <= 6 || options.graded===false || options.Cayley) {
   // Faster and degenerate-metric-resistant dualization. (a remapping table that maps items into their duals).         
     var drm=basis.map((a,i)=>{ return {a:a,i:i} })
                  .sort((a,b)=>a.a.length>b.a.length?1:a.a.length<b.a.length?-1:(+a.a.slice(1).split('').sort().join(''))-(+b.a.slice(1).split('').sort().join('')) )
