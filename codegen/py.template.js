@@ -61,7 +61,7 @@ class ${classname}:
 // python Template for our binary operators
 
 var binary = (classname, symbol, name, name_a, name_b, name_ret, code, classname_a=classname, classname_b=classname, desc)=>
-`    def ${name.match("s")?name:({"+":"__add__","-":"__sub__","*":"__mul__","^":"__xor__","&":"__and__","|":"__or__"}[symbol]||name)}(${name_a},${name_b}):${(name in {Mul:1,Add:1,Sub:1})?`
+`    def ${(name.match(/^s[^u]/) || name.match(/s$/))?name:({"+":"__add__","-":"__sub__","*":"__mul__","^":"__xor__","&":"__and__","|":"__or__"}[symbol]||name)}(${name_a},${name_b}):${(name in {Mul:1,Add:1,Sub:1})?`
         """${classname}.${name}
         
         ${desc}
@@ -71,7 +71,14 @@ var binary = (classname, symbol, name, name_a, name_b, name_ret, code, classname
         ${name_ret} = ${name_a}.mvec.copy()
         ${code.replace(/;/g,'').replace(/^ */g,'').replace(/\n */g,'\n        ')}
         return ${classname}.fromarray(${name_ret})
-${(name in {Mul:1,Add:1,Sub:1})?`    __r${name.toLowerCase()}__=__${name.toLowerCase()}__`:``}`;
+${(name in {Mul:1,Add:1})?`    __r${name.toLowerCase()}__=__${name.toLowerCase()}__`:((name in {Sub:1})?`
+    def __r${name.toLowerCase()}__(${name_a},${name_b}):
+        """${classname}.${name}
+                
+        ${desc}
+        """
+        return ${name_b} + -1 * ${name_a}
+`:``)}`;
 
 // python Template for our unary operators
 
