@@ -213,6 +213,8 @@ if __name__ == '__main__':
     print("rotated plane :", str(ROTATED_PLANE))
     print("point on plane:", str(POINT_ON_PLANE.normalized()))
     print("point on torus:", str(POINT_ON_TORUS(0.0, 0.0)))
+    print(E0 - 1)
+    print(1 - E0)
 `
 })
 
