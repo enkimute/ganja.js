@@ -351,6 +351,8 @@ amble:`
     println!("rotated plane : {}", rotated_plane);
     println!("point on plane: {}", point_on_plane.normalized());
     println!("point on torus: {}", ${classname}::point_on_torus(0.0, 0.0));
+    println!("{}", ${classname}::e0()-1.0);
+    println!("{}", 1.0-${classname}::e0());
 `});
 
 // rust Template for the postamble

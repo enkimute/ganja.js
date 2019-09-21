@@ -101,7 +101,7 @@ pga.prototype.subs= new Function("b,res",
 pga.prototype.ssub= new Function("b,res",
 `  res = res||new pga();
   res[0] = a-b[0];
-  ${[...Array(2**(p+q+r)-1)].map((x,i)=>`  res[${i+1}] = b[${i+1}];`).join("\n")}
+  ${[...Array(2**(p+q+r)-1)].map((x,i)=>`  res[${i+1}] = -b[${i+1}];`).join("\n")}
   return res;`)
 
 

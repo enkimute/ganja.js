@@ -165,6 +165,8 @@ amble:`
   printf("rotated plane : "); rotated_plane.log();
   printf("point on plane: "); point_on_plane.normalized().log();
   printf("point on torus: "); point_on_torus(0.0f,0.0f).log();
+  (e0-1.0f).log();
+  (1.0f-e0).log();
 `})
 
 // c++ Template for the postamble

@@ -209,6 +209,8 @@ amble:`
 			Console.WriteLine("rotated plane : "+rotated_plane);
 			Console.WriteLine("point on plane: "+point_on_plane.normalized());
 			Console.WriteLine("point on torus: "+point_on_torus(0.0f,0.0f));
+			Console.WriteLine(e0-1);
+			Console.WriteLine(1-e0);
 `
 })
 
