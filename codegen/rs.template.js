@@ -150,11 +150,11 @@ var binary = (classname, symbol, name, name_a, name_b, name_ret, code, classname
 
   if (symbol) {
 
-    if (name.match(/^s/)) {
+    if (name.match(/^s[^u]/)) {
 body = `
 define_binary_op_all!(
-    ${{ "+": "Add", "*": "Mul" }[symbol] || name},
-    ${{ "+": "add", "*": "mul" }[symbol] || name};
+    ${{ "+": "Add", "*": "Mul", "-": "Sub" }[symbol] || name},
+    ${{ "+": "add", "*": "mul", "-": "sub" }[symbol] || name};
     self: float_t, b: ${classname}, Output = ${classname};
     [val val] => &self ${symbol} &b;
     [ref val] =>  self ${symbol} &b;
@@ -170,8 +170,8 @@ define_binary_op_all!(
     } else if (name.match(/s$/)) {
     body = `
 define_binary_op_all!(
-    ${{ "+": "Add", "*": "Mul" }[symbol] || name},
-    ${{ "+": "add", "*": "mul" }[symbol] || name};
+    ${{ "+": "Add", "*": "Mul", "-": "Sub" }[symbol] || name},
+    ${{ "+": "add", "*": "mul", "-": "sub" }[symbol] || name};
     self: ${classname}, b: float_t, Output = ${classname};
     [val val] => &self ${symbol} &b;
     [ref val] =>  self ${symbol} &b;
@@ -351,6 +351,8 @@ amble:`
     println!("rotated plane : {}", rotated_plane);
     println!("point on plane: {}", point_on_plane.normalized());
     println!("point on torus: {}", ${classname}::point_on_torus(0.0, 0.0));
+    println!("{}", ${classname}::e0()-1.0);
+    println!("{}", 1.0-${classname}::e0());
 `});
 
 // rust Template for the postamble

@@ -93,6 +93,16 @@ pga.prototype.sadd= new Function("b,res",
   res[0] = a+b[0];
   ${[...Array(2**(p+q+r)-1)].map((x,i)=>`  res[${i+1}] = b[${i+1}];`).join("\n")}
   return res;`)
+pga.prototype.subs= new Function("b,res",
+`  res = res||new pga();
+  res[0] = this[0]-b;
+  ${[...Array(2**(p+q+r)-1)].map((x,i)=>`  res[${i+1}] = this[${i+1}];`).join("\n")}
+  return res;`)
+pga.prototype.ssub= new Function("b,res",
+`  res = res||new pga();
+  res[0] = a-b[0];
+  ${[...Array(2**(p+q+r)-1)].map((x,i)=>`  res[${i+1}] = -b[${i+1}];`).join("\n")}
+  return res;`)
 
 
 // The binary operators we support
@@ -107,6 +117,8 @@ var binops = [
       { name:"muls",  symbol:"*", classname_b:"float", desc:"multivector/scalar multiplication" },
       { name:"sadd",  symbol:"+", classname_a:"float", desc:"scalar/multivector addition" },
       { name:"adds",  symbol:"+", classname_b:"float", desc:"multivector/scalar addition" },
+      { name:"ssub",  symbol:"-", classname_a:"float", desc:"scalar/multivector subtraction" },
+      { name:"subs",  symbol:"-", classname_b:"float", desc:"multivector/scalar subtraction" },
     ];
 
 // The unary operators we support
