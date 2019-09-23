@@ -624,6 +624,74 @@ define_binary_op_all!(
 );
 
 
+// ssub
+// scalar/multivector subtraction
+
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: float_t, b: PGA3D, Output = PGA3D;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
+        let mut res = PGA3D::zero();
+        let a = self;
+        res[0] = a-b[0];
+        res[1] = -b[1];
+        res[2] = -b[2];
+        res[3] = -b[3];
+        res[4] = -b[4];
+        res[5] = -b[5];
+        res[6] = -b[6];
+        res[7] = -b[7];
+        res[8] = -b[8];
+        res[9] = -b[9];
+        res[10] = -b[10];
+        res[11] = -b[11];
+        res[12] = -b[12];
+        res[13] = -b[13];
+        res[14] = -b[14];
+        res[15] = -b[15];
+        res
+    };
+);
+
+
+// subs
+// multivector/scalar subtraction
+
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: PGA3D, b: float_t, Output = PGA3D;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
+        let mut res = PGA3D::zero();
+        let a = self;
+        res[0] = a[0]-b;
+        res[1] = a[1];
+        res[2] = a[2];
+        res[3] = a[3];
+        res[4] = a[4];
+        res[5] = a[5];
+        res[6] = a[6];
+        res[7] = a[7];
+        res[8] = a[8];
+        res[9] = a[9];
+        res[10] = a[10];
+        res[11] = a[11];
+        res[12] = a[12];
+        res[13] = a[13];
+        res[14] = a[14];
+        res[15] = a[15];
+        res
+    };
+);
+
+
 impl PGA3D {
     pub fn norm(self: & Self) -> float_t {
         let scalar_part = (self * self.Conjugate())[0];
@@ -719,5 +787,7 @@ fn main() {
     println!("rotated plane : {}", rotated_plane);
     println!("point on plane: {}", point_on_plane.normalized());
     println!("point on torus: {}", PGA3D::point_on_torus(0.0, 0.0));
+    println!("{}", PGA3D::e0()-1.0);
+    println!("{}", 1.0-PGA3D::e0());
 
 }

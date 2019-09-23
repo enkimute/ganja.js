@@ -397,6 +397,58 @@ namespace PGA
 			return res;
 		}
 
+		/// <summary>
+		/// PGA3D.ssub : res = a - b
+		/// scalar/multivector subtraction
+		/// </summary>
+		public static PGA3D operator - (float a, PGA3D b)
+		{
+			PGA3D res = new PGA3D();
+			res[0] = a-b[0];
+			res[1] = -b[1];
+			res[2] = -b[2];
+			res[3] = -b[3];
+			res[4] = -b[4];
+			res[5] = -b[5];
+			res[6] = -b[6];
+			res[7] = -b[7];
+			res[8] = -b[8];
+			res[9] = -b[9];
+			res[10] = -b[10];
+			res[11] = -b[11];
+			res[12] = -b[12];
+			res[13] = -b[13];
+			res[14] = -b[14];
+			res[15] = -b[15];
+			return res;
+		}
+
+		/// <summary>
+		/// PGA3D.subs : res = a - b
+		/// multivector/scalar subtraction
+		/// </summary>
+		public static PGA3D operator - (PGA3D a, float b)
+		{
+			PGA3D res = new PGA3D();
+			res[0] = a[0]-b;
+			res[1] = a[1];
+			res[2] = a[2];
+			res[3] = a[3];
+			res[4] = a[4];
+			res[5] = a[5];
+			res[6] = a[6];
+			res[7] = a[7];
+			res[8] = a[8];
+			res[9] = a[9];
+			res[10] = a[10];
+			res[11] = a[11];
+			res[12] = a[12];
+			res[13] = a[13];
+			res[14] = a[14];
+			res[15] = a[15];
+			return res;
+		}
+
 		#endregion
 
                 /// <summary>
@@ -531,6 +583,8 @@ namespace PGA
 			Console.WriteLine("rotated plane : "+rotated_plane);
 			Console.WriteLine("point on plane: "+point_on_plane.normalized());
 			Console.WriteLine("point on torus: "+point_on_torus(0.0f,0.0f));
+			Console.WriteLine(e0-1);
+			Console.WriteLine(1-e0);
 
 		}
 	}

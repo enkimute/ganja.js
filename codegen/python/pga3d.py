@@ -294,7 +294,14 @@ class PGA3D:
         res[14] = a[14]-b[14]
         res[15] = a[15]-b[15]
         return PGA3D.fromarray(res)
-    __rsub__=__sub__
+
+    def __rsub__(a,b):
+        """PGA3D.Sub
+                
+        Multivector subtraction
+        """
+        return b + -1 * a
+
 
     def smul(a,b):
         res = a.mvec.copy()
@@ -362,6 +369,48 @@ class PGA3D:
     def adds(a,b):
         res = a.mvec.copy()
         res[0] = a[0]+b
+        res[1] = a[1]
+        res[2] = a[2]
+        res[3] = a[3]
+        res[4] = a[4]
+        res[5] = a[5]
+        res[6] = a[6]
+        res[7] = a[7]
+        res[8] = a[8]
+        res[9] = a[9]
+        res[10] = a[10]
+        res[11] = a[11]
+        res[12] = a[12]
+        res[13] = a[13]
+        res[14] = a[14]
+        res[15] = a[15]
+        return PGA3D.fromarray(res)
+
+
+    def ssub(a,b):
+        res = a.mvec.copy()
+        res[0] = a-b[0]
+        res[1] = -b[1]
+        res[2] = -b[2]
+        res[3] = -b[3]
+        res[4] = -b[4]
+        res[5] = -b[5]
+        res[6] = -b[6]
+        res[7] = -b[7]
+        res[8] = -b[8]
+        res[9] = -b[9]
+        res[10] = -b[10]
+        res[11] = -b[11]
+        res[12] = -b[12]
+        res[13] = -b[13]
+        res[14] = -b[14]
+        res[15] = -b[15]
+        return PGA3D.fromarray(res)
+
+
+    def subs(a,b):
+        res = a.mvec.copy()
+        res[0] = a[0]-b
         res[1] = a[1]
         res[2] = a[2]
         res[3] = a[3]
@@ -466,4 +515,6 @@ if __name__ == '__main__':
     print("rotated plane :", str(ROTATED_PLANE))
     print("point on plane:", str(POINT_ON_PLANE.normalized()))
     print("point on torus:", str(POINT_ON_TORUS(0.0, 0.0)))
+    print(E0 - 1)
+    print(1 - E0)
 
