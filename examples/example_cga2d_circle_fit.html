@@ -1,0 +1,47 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// https://www.researchgate.net/publication/266149530
+// Circle LLS fitting. MATRIX FREE version by enki.
+
+// Find a single eigenvector/value (orthogonal to the list in orth)
+var GA_Rayleigh = Algebra(4,0,1).inline(function(P,mu=0,orth=[],g=(1e1+1e2+1e3+1e4).Normalized) {
+      P = P.map(x=>[...x.Vector]*[1e1,1e2,1e3,-1e4])                                         // note -1e4 from our source algebra ..  
+      orth=orth.map(o=>{o=o.vec*[1e1,1e2,1e3,-1e4]; g=(g-(g|o)*o).Normalized; return o;})    // orthogonalize guess
+      for (var i=0; i<30; i++) {
+        var sol = (!P.reduce((s,P,j)=>s=s^(P-g[2+j]*1e0-Element.Coeff(mu,j)),1)).Normalized  // solve with OP
+        orth.forEach(orth=>sol=(sol-(sol|orth)*orth).Normalized);                            // orthogonalize
+        var newmu = mu+sol.e0*[sol.e1,sol.e2,sol.e3,sol.e4]*[g.e1,g.e2,g.e3,g.e4];           // update eigenvalue
+        g = sol; if (Math.abs(newmu-mu)<1E-8) break; mu=newmu                                // stop when done
+      }
+      return {vec:[...g.Vector.slice(1)],val:mu.s};
+    });
+
+// Find all eigenvectors given a vector of covariant planes P, and sort them small->big
+var GA_Eigen = P=>P.reduce((s,p)=>s.concat([GA_Rayleigh(P,0,s)]),[]).sort((a,b)=>a.val-b.val) 
+
+// Now create a 2D conformal geometric algebra.
+Algebra(3,1,()=>{
+    // Standard conformal setup.
+    var no=.5e4+.5e3, ni=1e4-1e3, pss=1e1234,     // null basis and pss
+        up=x=>no+x+0.5*x*x*ni;                    // conformal vec->point
+    
+    // Generate noisy points on circle    
+    var pts=[...Array(6)].map(x=>{
+       var alpha  = Math.random()*2*Math.PI, radius = 1 + Math.random()*0.05-0.025;
+       return up(Math.sin(alpha)*radius*1e1 + Math.cos(alpha)*radius*1e2);
+    });
+    
+    // Compute covariance planes, find eigen circles and render ..
+    document.body.appendChild(this.graph(()=>{
+    // Calculate vector of covariance planes     
+      var planes=[1,2,3,4].map(j=>pts.reduce((s,P)=>s+P*P[j],0))
+    // Find two smallest positive eigenvectors and convert them to circles  
+      var eigen = GA_Eigen(planes).filter(x=>x.val>0).map(x=>!(x.vec*[1e1,1e2,1e3,1e4]));
+    // Render the points, circles and intersection of circles (best point pair)  
+      return  [ 0xff0000,"drag the points..",0x0000ff,"Best circle",0xff00ff,"Best point pair",
+                0xff0000,...pts,0x0000ff,eigen[0], 0xffaaff,eigen[1], 0xff00ff,eigen[0]&eigen[1],
+    ]},{conformal:true,animate:1,pointRadius:1,grid:1}));
+})
+</SCRIPT></BODY>
