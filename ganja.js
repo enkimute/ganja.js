@@ -359,7 +359,7 @@
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.  
       Exp  ()      { 
         if (r==1 && tot<=4 && this[0]==0) { 
-          var sq = this.Mul(this).s;       if (sq==0) { var res = Element.Scalar(1); return this.Add(res,res); }
+          var sq = (tot==4)?-(this[8]**2+this[9]**2+this[10]**2):this.Mul(this).s;  if (sq==0) { var res = this.slice();res[0]+=1; return res; }
           var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
           var res = this.Scale( Math.sinh(l)/l ); res[0]=Math.cosh(l); return res;
         }
@@ -422,7 +422,7 @@
       // still functions -> experimental curry style (dont use this.)
         if (a.call && b.call) return (ai,bi)=>Element.Mul(a(ai),b(bi));   
       // scalar mul.
-        if (typeof a == 'number' && b.Scale) return b.Scale(a); if (typeof b=='number' && a.Scale) return a.Scale(b);  
+        if (Number.isFinite(a) && b.Scale) return b.Scale(a); else if (Number.isFinite(b) && a.Scale) return a.Scale(b);  
       // Handle matrices and vectors.  
         if ((a instanceof Array)&&(b instanceof Array)) { 
         // vector times vector performs a dot product. (which internally uses the GP on each component)
@@ -499,7 +499,7 @@
       // js or call through to element divide.  
         if (!(a instanceof Element || b instanceof Element)) return a/b; 
         a=Element.toEl(a);
-        if (typeof b=="number") { return a.Scale(1/b,res); }
+        if (Number.isFinite(b)) { return a.Scale(1/b,res); }
         b=Element.toEl(b); return a.Div(b,res); 
       }  
       
@@ -507,14 +507,14 @@
       static Pow(a,b,res) {  
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); if (a.Pow) return a.Pow(b,res); 
+      // Exponentiation.  
+        if (a==Math.E && b.Exp) return b.Exp(); 
       // Squaring  
-        if (b==2) return this.Mul(a,a,res);
+        if (b===2) return this.Mul(a,a,res);
       // No elements, call through to js  
         if (!(a instanceof Element || b instanceof Element)) return a**b; 
       // Inverse  
-        if (b==-1) return a.Inverse;  
-      // Exponentiation.  
-        if (a==Math.E) return b.Exp(); 
+        if (b===-1) return a.Inverse;  
       // Call through to element pow.  
         a=Element.toEl(a); return a.Pow(b); 
       }  
@@ -1099,19 +1099,27 @@
             if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()])); 
             if (e instanceof Array && e.length%3==0) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
           // Render orbits of parametrised motors
+            function sw_mot_orig(A,R){
+              var a0=A[0],a1=A[5],a2=A[6],a3=A[7],a4=A[8],a5=A[9],a6=A[10],a7=A[15];
+              var _2a0=2*a0, _2a4=2*a4, _2a5=2*a5, _2a6=2*a6;
+              R[2] = -(_2a0*a3+_2a4*a7-_2a6*a2-_2a5*a1);
+              R[1] = -(_2a4*a1-_2a0*a2-_2a6*a3+_2a5*a7);
+              R[0] =  (_2a0*a1+_2a4*a2+_2a5*a3+_2a6*a7);
+              return R
+            }
             if ( e.call && e.length==1) { var count=64;
-              for (var xx,o=Element.Coeff(14,1),ii=0; ii<count; ii++) {
-                if (ii>1) l.push(-xx[13]/xx[14],-xx[12]/xx[14],xx[11]/xx[14]); 
-                xx = Element.sw(e(ii/(count-1)),o);
-                l.push(-xx[13]/xx[14],-xx[12]/xx[14],xx[11]/xx[14]); 
+              for (var xx,o=new Float32Array(3),ii=0; ii<count; ii++) {
+                if (ii>1) l.push(xx[0],xx[1],xx[2]);
+                xx = sw_mot_orig(e(ii/(count-1)),o); //Element.sw(e(ii/(count-1)),o);
+                l.push(xx[0],xx[1],xx[2]);
               }
-            }  
-            if ( e.call && e.length==2 && !e.va) { var countx=e.dx||64,county=e.dy||32; 
-              var temp=[],o=Element.Coeff(14,1),norm=o.Add(Element.Coeff(13,-1)),et=[];
-              for (ii=0; ii<countx; ii++) for (var jj=0; jj<county; jj++) temp.push.apply(temp,Element.sw(e(ii/(countx-1),jj/(county-1)),o).slice(11,14).map((x,i,a)=>i?-x:x).reverse());
+            }
+            if ( e.call && e.length==2 && !e.va) { var countx=e.dx||64,county=e.dy||32;
+              var temp=new Float32Array(3*countx*county),o=new Float32Array(3),et=[];
+              for (var pp=0,ii=0; ii<countx; ii++) for (var jj=0; jj<county; jj++,pp+=3) temp.set(sw_mot_orig(e(ii/(countx-1),jj/(county-1)),o),pp);
               for (ii=0; ii<countx-1; ii++) for (var jj=0; jj<county; jj++) et.push((ii+0)*county+(jj+0),(ii+0)*county+(jj+1),(ii+1)*county+(jj+1),(ii+0)*county+(jj+0),(ii+1)*county+(jj+1),(ii+1)*county+(jj+0));
               e.va = createVA(temp,undefined,et.map(x=>x%(countx*county))); e.va.tcount = (countx-1)*county*2*3;
-            }  
+            }
           // we could also be an object with cached vertex array of triangles ..   
             if (e.va || (e instanceof Object && e.data)) {
               // Create the vertex array and store it for re-use.
