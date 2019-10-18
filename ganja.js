@@ -1101,13 +1101,12 @@
           // Render orbits of parametrised motors
             function sw_mot_orig(A,R){
               var a0=A[0],a1=A[5],a2=A[6],a3=A[7],a4=A[8],a5=A[9],a6=A[10],a7=A[15];
-              var _2a0=2*a0, _2a4=2*a4, _2a5=2*a5, _2a6=2*a6;
-              R[2] = -(_2a0*a3+_2a4*a7-_2a6*a2-_2a5*a1);
-              R[1] = -(_2a4*a1-_2a0*a2-_2a6*a3+_2a5*a7);
-              R[0] =  (_2a0*a1+_2a4*a2+_2a5*a3+_2a6*a7);
+              R[2] = -2*(a0*a3+a4*a7-a6*a2-a5*a1);
+              R[1] = -2*(a4*a1-a0*a2-a6*a3+a5*a7);
+              R[0] =  2*(a0*a1+a4*a2+a5*a3+a6*a7);
               return R
             }
-            if ( e.call && e.length==1) { var count=64;
+            if ( e.call && e.length==1) { var count=e.dx||64;
               for (var xx,o=new Float32Array(3),ii=0; ii<count; ii++) {
                 if (ii>1) l.push(xx[0],xx[1],xx[2]);
                 xx = sw_mot_orig(e(ii/(count-1)),o); //Element.sw(e(ii/(count-1)),o);
