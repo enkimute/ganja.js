@@ -999,6 +999,8 @@
               draw(program,gl.LINES,options.gridLines[0],[0,0,0],[.6,1,.6],r); draw(program,gl.LINES,options.gridLines[1],[0,0,0],[1,.8,.8],r); draw(program,gl.LINES,options.gridLines[2],[0,0,0],[.8,.8,1],r);
             gl.depthMask(true);
           }
+        // Z-buffer override.
+          if (options.noZ) gl.depthMask(false);  
         // Loop over all items to render.  
           for (var i=0,ll=x.length;i<ll;i++) { 
             var e=x[i]; while (e&&e.call&&e.length==0) e=e(); if (e==undefined) continue;
