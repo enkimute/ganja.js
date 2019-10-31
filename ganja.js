@@ -608,7 +608,10 @@
           // Create the svg element. (master template string till end of function)
             var svg=new DOMParser().parseFromString(`<SVG onmousedown="if(evt.target==this)this.sel=undefined" viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none">
             // Add a grid (option)
-            ${options.grid?[...Array(21)].map((x,xi)=>`<line x1="-10" y1="${((xi-10)/2-(tot<4?2*options.camera.e02:0))*options.scale}" x2="10" y2="${((xi-10)/2-(tot<4?2*options.camera.e02:0))*options.scale}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${((xi-10)/2-(tot<4?2*options.camera.e01:0))*options.scale}" y2="10" x2="${((xi-10)/2-(tot<4?2*options.camera.e01:0))*options.scale}"  stroke-width="0.005" stroke="#CCC"/>`):''}
+            ${options.grid?(()=>{
+              var n = Math.floor(10 / options.scale);
+              return [...Array(2*n + 1)].map((x,xi)=>`<line x1="-10" y1="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" x2="10" y2="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}" y2="10" x2="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}"  stroke-width="0.005" stroke="#CCC"/>`);
+            })():''}
             // Handle conformal 2D elements.
             ${options.conformal?f.map&&f.map((o,oidx)=>{
             // Optional animation handling.
