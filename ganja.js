@@ -620,7 +620,7 @@
               while (o.call) o=o();
               var sc = options.scale;
             // Arrays are rendered as segments or polygons. (2 or more elements)
-              if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o; }); o.forEach((o)=>{lx+=sc*(o.e1);ly+=sc*(-o.e2)});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(o.e1+','+(-o.e2)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1} y1=${-o[0].e2} x2=${o[1].e1} y2=${-o[1].e2} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}"/>`; }
+              if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o; }); o.forEach((o)=>{lx+=sc*(o.e1);ly+=sc*(-o.e2)});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(sc*o.e1+','+(-o.e2*sc)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1*sc} y1=${-o[0].e2*sc} x2=${o[1].e1*sc} y2=${-o[1].e2*sc} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}"/>`; }
             // Strings are rendered at the current cursor position.
               if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize*0.1||0.1}" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly+=0.14; return res2; }
             // Numbers change the current color.
@@ -637,7 +637,7 @@
                   lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(att[8],att[7])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
                 };
               // Circles
-                var loc=o.Div((Element.Coeff(4,1,3,-1)).LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2); var r=-o.Mul(o.Conjugate).s/(Element.Pow((Element.Coeff(4,1,3,-1)).LDot(o),2).s); r=r**0.5; return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${options.lineWidth*0.005||0.005}" fill="none" stroke="${color||'green'}"/>`;
+                var loc=o.Div((Element.Coeff(4,1,3,-1)).LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2); var r=-o.Mul(o.Conjugate).s/(Element.Pow((Element.Coeff(4,1,3,-1)).LDot(o),2).s); r=r**0.5*sc; return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${options.lineWidth*0.005||0.005}" fill="none" stroke="${color||'green'}"/>`;
               } else if (!b1 && b2 &&!b3) {
               // Point Pairs.
                 lr=0; var ei=Element.Coeff(4,1,3,-1),eo=Element.Coeff(4,.5,3,.5), nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
