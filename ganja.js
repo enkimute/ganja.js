@@ -79,7 +79,7 @@
   // from numbers in binary representation and changing the set bits into their relative position.
   // Basis names are ordered first per grade, then lexically (not cyclic!).
   // For 10 or more dimensions all names will be double digits ! 1e01 instead of 1e1 ..
-    var basis=options.basis||[...Array(2**tot)]                                                                                 // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
+    var basis=(options.basis&&(options.basis.length==2**tot||r<0||options.Cayley)&&options.basis)||[...Array(2**tot)]           // => [undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined]
               .map((x,xi)=>(((1<<30)+xi).toString(2)).slice(-tot||-1)                                                           // => ["000", "001", "010", "011", "100", "101", "110", "111"]  (index of array in base 2)
               .replace(/./g,(a,ai)=>a=='0'?'':String.fromCharCode(66+ai-(r!=0))))                                               // => ["", "3", "2", "23", "1", "13", "12", "123"] (1 bits replaced with their positions, 0's removed)
               .sort((a,b)=>(a.toString().length==b.toString().length)?(a>b?1:b>a?-1:0):a.toString().length-b.toString().length) // => ["", "1", "2", "3", "12", "13", "23", "123"] (sorted numerically)
@@ -120,6 +120,14 @@
 
   /// Generate multiplication tables for the outer and geometric products.
     var mulTable   = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r)));
+
+  // subalgebra support. (must be bit-order basis blades, does no error checking.)
+    if (options.even) options.basis = basis.filter(x=>x.length%2==1);
+    if (options.basis && !options.Cayley && r>=0 && options.basis.length != 2**tot) {
+      metric = metric.filter((x,i)=>options.basis.indexOf(basis[i])!=-1);
+      mulTable = mulTable.filter((x,i)=>options.basis.indexOf(basis[i])!=-1).map(x=>x.filter((x,i)=>options.basis.indexOf(basis[i])!=-1));
+      basis  = options.basis;
+    }
 
   /// Convert Cayley table to product matrices. The outer product selects the strict sum of the GP (but without metric), the inner product
   /// is the left contraction.
@@ -592,7 +600,7 @@
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.
         project=(o)=>{ if (!o) return o; while (o.call) o=o(); return (tot==4 && (o.length==16))?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):(o.length==2**tot)?Element.sw(options.camera,o):o;};
       // gl escape.
-        if (options.gl && (tot!=4 && options.conformal)) return Element.graphGL(f,options); if (options.up) return Element.graphGL2(f,options);
+        if (options.gl && !(tot==4 && options.conformal)) return Element.graphGL(f,options); if (options.up) return Element.graphGL2(f,options);
       // if we get an array or function without parameters, we render c2d or p2d SVG points/lines/circles/etc
         if (!(f instanceof Function) || f.length===0) {
         // Our current cursor, color, animation state and 2D mapping.
@@ -610,7 +618,7 @@
             // Add a grid (option)
             ${options.grid?(()=>{
               var n = Math.floor(10 / options.scale);
-              return [...Array(2*n + 1)].map((x,xi)=>`<line x1="-10" y1="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" x2="10" y2="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}" y2="10" x2="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}"  stroke-width="0.005" stroke="#CCC"/>`);
+              return n>50?'':[...Array(2*n + 1)].map((x,xi)=>`<line x1="-10" y1="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" x2="10" y2="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}" y2="10" x2="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}"  stroke-width="0.005" stroke="#CCC"/>`);
             })():''}
             // Handle conformal 2D elements.
             ${options.conformal?f.map&&f.map((o,oidx)=>{
@@ -1228,7 +1236,7 @@
           /^[A-Za-z0-9_]*/g]                                                                                                            // 5: identifier
         while (txt.length) for(t in tokens) if(resi=txt.match(tokens[t])){ tok.push([t|0,resi[0]]); txt=txt.slice(resi[0].length); break;} // tokenise
       // Translate algebraic literals. (scientific e-notation to "this.Coeff"
-        tok=tok.map(t=>(t[0]==2)?[2,'Element.Coeff('+basis.indexOf(simplify(t[1].split(/e_|e|i/)[1]||1).replace('-',''))+','+(simplify(t[1].split(/e_|e|i/)[1]||1).match('-')?"-1*":"")+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
+        tok=tok.map(t=>(t[0]==2)?[2,'Element.Coeff('+basis.indexOf((!options.Cayley?simplify:(x)=>x)('e'+t[1].split(/e_|e|i/)[1]||1).replace('-',''))+','+(simplify(t[1].split(/e_|e|i/)[1]||1).match('-')?"-1*":"")+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
       // We support two syntaxes, standard js or if you pass in a text, asciimath.
         var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['^','Wedge'],['&','Vee'],['<<','LDot']],[['*','Mul'],['/','Div']],[['|','Dot']],[['>>>','sw',0,1]],[['-','Sub'],['+','Add']],[['==','eq'],['!=','neq'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
                                                 :[[['pi','Math.PI'],['sin','Math.sin']],[['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual']],[['^','Pow',0,1]],[['^^','Wedge'],['*','LDot']],[['**','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]];
