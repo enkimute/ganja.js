@@ -517,7 +517,7 @@
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); if (a.Pow) return a.Pow(b,res);
       // Exponentiation.
-        if (a==Math.E && b.Exp) return b.Exp();
+        if (a===Math.E && b.Exp) return b.Exp();
       // Squaring
         if (b===2) return this.Mul(a,a,res);
       // No elements, call through to js
@@ -1157,7 +1157,7 @@
               if (e.transform) { M=mtx(options.camera); }
             }
           // if we're a number (color), label or the last item, we output the collected items.
-            else if (!isNaN(e) || i==ll-1 || typeof e == 'string') {
+            else if (typeof e=='number' || i==ll-1 || typeof e == 'string') {
             // render triangles, lines, points.
               if (alpha) { gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-alpha); }
               if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
