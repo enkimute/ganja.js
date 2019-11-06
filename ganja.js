@@ -596,6 +596,7 @@
         if (!f) return; var origf=f;
       // generate default options.
         options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot<4?Element.Scalar(1):new Element([0.7071067690849304, 0, 0, 0, 0, 0, 0, 0, 0, 0.7071067690849304, 0, 0, 0, 0, 0, 0]));
+        if (options.conformal && tot==4) var cga2d_ni = this.Coeff(4,1).Sub(this.Coeff(3,1));
         var ww=options.width, hh=options.height, cvs=options.canvas, tpcam=new Element([0,0,0,0,0,0,0,0,0,0,0,-5,0,0,1,0]),tpy=this.Coeff(4,1),tp=new Element(),
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.
         project=(o)=>{ if (!o) return o; while (o.call) o=o(); return (tot==4 && (o.length==16))?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):(o.length==2**tot)?Element.sw(options.camera,o):o;};
@@ -637,6 +638,7 @@
               var b1=o.Grade(1).VLength>0.001,b2=o.Grade(2).VLength>0.001,b3=o.Grade(3).VLength>0.001;
             // Points
               if (b1 && !b2 && !b3) {
+                o = o.Scale(-1/o.Dot(cga2d_ni).s);
                 lx=sc*(o.e1); ly=sc*(-o.e2); lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" fill="${color||'green'}"/>`;
               } else if (!b1 && !b2 && b3) { var isLine=Element.Coeff(4,1,3,-1).LDot(o).Length==0;
               // Lines.
