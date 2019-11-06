@@ -6,27 +6,27 @@
 Algebra(3,1,()=>{ 
 
 // Two null vectors to work with (called origin and infinite)
-  var ei = 1e4-1e3,           // e-infinite
-      eo = 0.5*(1e4+1e3);     // e-origin
+  var ni = 1e4+1e3,           // n-infinity
+      no = .5e4-.5e3;         // n-origin
   
 // Define points, lines, circles using the null basis.  
-  var point  = (x,y)=>eo + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ei,
-      line   = (a,b,c)=>!(a*1e1 + b*1e2 + c*ei),
-      circle = (x,y,r)=>!(point(x,y) - r**2/2*ei);
+  var point  = (x,y)=>no + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ni,
+      line   = (a,b,c)=>!(a*1e1 + b*1e2 + c*ni),
+      circle = (x,y,r)=>!(point(x,y) - r**2/2*ni);
   
 // Some identities
-  var line_through_P_parallel_with_X = (P,X)=>(P^ei)<<X*(P^ei),
-      project_point_on_circle        = (P,C)=>(P^ei)<<C*C,
+  var line_through_P_parallel_with_X = (P,X)=>(P^ni)<<X*(P^ni),
+      project_point_on_circle        = (P,C)=>(P^ni)<<C*C,
       project_point_on_line          = (P,L)=>P<<L.Normalized*L.Normalized,
-      position                       = (X)=>{ X=X/(X^ei); return X/(X<<-ei); },
-      radius                         = (X)=>Math.abs(((X<<X).s/((X^ei)**2).s))**.5,
-      attitude                       = (X)=>(ei^eo<<(X^ei)).Normalized,
+      position                       = (X)=>{ X=X/(X^ni); return X/(X<<-ni); },
+      radius                         = (X)=>Math.abs(((X<<X).s/((X^ni)**2).s))**.5,
+      attitude                       = (X)=>(ni^no<<(X^ni)).Normalized,
       split                          = (pp)=>position(pp)-radius(pp)*attitude(pp);
 
 // Define some elements.
   var p1 = point(-0.7,0.4), p2 = point(1,-0.5), p3 = point(0,1.5),
       D = circle(1,-1,0.7),
-      X = line(0,1,0), Y=()=>p2^p3^ei;
+      X = line(0,1,0), Y=()=>p2^p3^ni;
       
 // Graph 
   document.body.appendChild(this.graph([
