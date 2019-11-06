@@ -640,17 +640,17 @@
               if (b1 && !b2 && !b3) {
                 o = o.Scale(-1/o.Dot(cga2d_ni).s);
                 lx=sc*(o.e1); ly=sc*(-o.e2); lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" fill="${color||'green'}"/>`;
-              } else if (!b1 && !b2 && b3) { var isLine=Element.Coeff(4,1,3,-1).LDot(o).Length==0;
+              } else if (!b1 && !b2 && b3) { var isLine=cga2d_ni.LDot(o).Length==0;
               // Lines.
                 if (isLine) {
-                  var loc=((Element.Coeff(4,-.5).Add(Element.Coeff(3,-.5))).LDot(o)).Div(o), att=(Element.Coeff(4,1,3,-1)).LDot(o);
+                  var loc=((Element.Coeff(4,-.5).Add(Element.Coeff(3,-.5))).LDot(o)).Div(o), att=cga2d_ni.LDot(o);
                   lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(att[8],att[7])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
                 };
               // Circles
-                var loc=o.Div((Element.Coeff(4,1,3,-1)).LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2); var r=-o.Mul(o.Conjugate).s/(Element.Pow((Element.Coeff(4,1,3,-1)).LDot(o),2).s); r=r**0.5*sc; return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${options.lineWidth*0.005||0.005}" fill="none" stroke="${color||'green'}"/>`;
+                var loc=o.Div(cga2d_ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2); var r=-o.Mul(o.Conjugate).s/(Element.Pow(cga2d_ni.LDot(o),2).s); r=r**0.5*sc; return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${options.lineWidth*0.005||0.005}" fill="none" stroke="${color||'green'}"/>`;
               } else if (!b1 && b2 &&!b3) {
               // Point Pairs.
-                lr=0; var ei=Element.Coeff(4,1,3,-1),eo=Element.Coeff(4,.5,3,.5), nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
+                lr=0; var ei=cga2d_ni,eo=Element.Coeff(4,.5,3,.5), nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
                 lx=sc*(pos.e1); ly=sc*(-pos.e2); if (sqr<0) return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`;
                 lx=sc*(pos.e1+attitude.e1); ly=sc*(-pos.e2-attitude.e2); var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" fill="${color||'green'}"/>`;
                 lx=sc*(pos.e1-attitude.e1); ly=sc*(-pos.e2+attitude.e2); return res2+`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" fill="${color||'green'}"/>`;
