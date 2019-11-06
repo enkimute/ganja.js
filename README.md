@@ -23,6 +23,11 @@ operations over **reals**, **complex numbers**, **dual numbers**, **hyperbolic n
 run some quick numbers using the [GAlculator](https://enkimute.github.io/ganja.js/examples/galculator.html)
 or play [the wedge game](https://enkimute.github.io/ganja.js/examples/example_game_wedge.html) first.)
 
+## Discourse and Discord
+
+Visit [bivector.net](https://bivector.net) for our forum and chat - the perfect
+place for questions and support.
+
 ## New !
 
 ganja.js now has a nodejs based templated source generator that allows the creation of arbitrary algebras
