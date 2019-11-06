@@ -24,7 +24,7 @@ var GA_Eigen = P=>P.reduce((s,p)=>s.concat([GA_Rayleigh(P,0,s)]),[]).sort((a,b)=
 // Now create a 2D conformal geometric algebra.
 Algebra(3,1,()=>{
     // Standard conformal setup.
-    var no=.5e4+.5e3, ni=1e4-1e3, pss=1e1234,     // null basis and pss
+    var no=.5e4-.5e3, ni=1e4+1e3, pss=1e1234,     // null basis and pss
         up=x=>no+x+0.5*x*x*ni;                    // conformal vec->point
     
     // Generate noisy points on circle    

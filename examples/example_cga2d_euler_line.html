@@ -9,21 +9,21 @@ Algebra(3,1,()=>{
   // We repeat the example from 2D PGA using our new conformal tools.
 
   // Null basis and point helper.
-  var ei = 1e4-1e3, eo = 0.5*(1e4+1e3), 
-      point  = (x,y)=>eo + x*1e1 - y*1e2 + 0.5*(x*x+y*y)*ei,
+  var ni = 1e4+1e3, no = 0.5*(1e4-1e3), 
+      point  = (x,y)=>no + x*1e1 - y*1e2 + 0.5*(x*x+y*y)*ni,
 
   // Three points.
       A=point(-1.5,0.5), B=point(0.5,-1.5), C=point(1,0.5),
   
   // Circle around triangle.
       circle = ()=>A^B^C,     
-      circum = ()=>-circle/(ei<<circle),
+      circum = ()=>-circle/(ni<<circle),
       
   // The centroid      
       centroid = ()=>(A+B+C)/3,
   
   // The Euler line      
-      line = ()=>centroid^circum^ei;
+      line = ()=>centroid^ni^circum;
    
   document.body.appendChild(this.graph([
       0xFFFFEE,[A,B,C],                        // triangle
