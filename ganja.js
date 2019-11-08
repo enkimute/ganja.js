@@ -651,7 +651,8 @@
               } else if (!b1 && b2 &&!b3) {
               // Point Pairs.
                 lr=0; var ei=cga2d_ni,eo=cga2d_no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
-                lx=sc*(pos.e1); ly=sc*(-pos.e2); if (sqr<0) return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" stroke-width="0.005" fill="none" stroke="${color||'green'}"/>`;
+                if (nix==0) { pos = o.Dot(Element.Coeff(4,-1)); sqr=-1; }
+                lx=sc*(pos.e1); ly=sc*(-pos.e2); if (sqr<0) return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" stroke-width="0.01" fill="none" stroke="${color||'green'}"/>`;
                 lx=sc*(pos.e1+attitude.e1); ly=sc*(-pos.e2-attitude.e2); var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" fill="${color||'green'}"/>`;
                 lx=sc*(pos.e1-attitude.e1); ly=sc*(-pos.e2+attitude.e2); return res2+`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" fill="${color||'green'}"/>`;
               }
@@ -963,6 +964,8 @@
             pos = [-pos.e15/pos.e45,-pos.e25/pos.e45,-pos.e34/pos.e45];
             if (x.Grade(3).VLength) {
               normal = [attitude.e1/weight2,attitude.e2/weight2,attitude.e3/weight2]; tp=2;
+            } else if (x.Grade(2).VLength) { // point pair with ni
+              tp = 1;
             } else {
               normal = Element.LDot(Element.Mul(attitude,1/weight2),I3).Normalized;
               var r=normal.Mul(Element.Coeff(3,1)); if (r[0]==-1) r[0]=1; else {r[0]+=1; r=r.Normalized;}
