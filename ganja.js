@@ -1030,29 +1030,29 @@
             var e=x[i]; while (e&&e.call&&e.length==0) e=e(); if (e==undefined) continue;
           // CGA
             if (tot==5 && options.conformal) {
-              if (e instanceof Array && e.length==2) { e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);l.push.apply(l,x.pos); });  var d = {tp:-1}; }
-              else if (e instanceof Array && e.length==3) { e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);t.push.apply(t,x.pos); });  var d = {tp:-1}; }
+              if (e instanceof Array && e.length==2) { e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);l.push(...x.pos); });  var d = {tp:-1}; }
+              else if (e instanceof Array && e.length==3) { e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);t.push(...x.pos); });  var d = {tp:-1}; }
               else var d = interprete(e);
               if (d.tp) lastpos=d.pos;
-              if (d.tp==1) p.push.apply(p,d.pos);
-              if (d.tp==2) { l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]*10)); l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]*10)); }
-              if (d.tp==3) { t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]-d.btg[i]));
-                             t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]-d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]-d.btg[i])); }
+              if (d.tp==1) p.push(...d.pos);
+              if (d.tp==2) { l.push(...d.pos.map((x,i)=>x-d.normal[i]*10)); l.push(...d.pos.map((x,i)=>x+d.normal[i]*10)); }
+              if (d.tp==3) { t.push(...d.pos.map((x,i)=>x+d.tg[i]+d.btg[i])); t.push(...d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push(...d.pos.map((x,i)=>x+d.tg[i]-d.btg[i]));
+                             t.push(...d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push(...d.pos.map((x,i)=>x+d.tg[i]-d.btg[i])); t.push(...d.pos.map((x,i)=>x-d.tg[i]-d.btg[i])); }
               if (d.tp==4) {
                 var ne=0,la=0;
                 if (d.weight2<0) { c[0]=1;c[1]=0;c[2]=0; }
                 for (var j=0; j<65; j++) {
-                  ne = d.pos.map((x,i)=>x+Math.cos(j/32*Math.PI)*d.weight2*d.tg[i]+Math.sin(j/32*Math.PI)*d.weight2*d.btg[i]); if (ne&&la&&(d.weight2>0||j%2==0)) { l.push.apply(l,la); l.push.apply(l,ne); }; la=ne;
+                  ne = d.pos.map((x,i)=>x+Math.cos(j/32*Math.PI)*d.weight2*d.tg[i]+Math.sin(j/32*Math.PI)*d.weight2*d.btg[i]); if (ne&&la&&(d.weight2>0||j%2==0)) { l.push(...la); l.push(...ne); }; la=ne;
                 }
               }
               if (d.tp==6) {
                 if (d.weight2<0) { c[0]=1;c[1]=0;c[2]=0; }
                 if (options.useUnnaturalLineDisplayForPointPairs) {
-                  l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]*(options.scale||1)));
-                  l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]*(options.scale||1)));
+                  l.push(...d.pos.map((x,i)=>x-d.normal[i]*(options.scale||1)));
+                  l.push(...d.pos.map((x,i)=>x+d.normal[i]*(options.scale||1)));
                 }
-                p.push.apply(p,d.pos.map((x,i)=>x-d.normal[i]*(options.scale||1)));
-                p.push.apply(p,d.pos.map((x,i)=>x+d.normal[i]*(options.scale||1)));
+                p.push(...d.pos.map((x,i)=>x-d.normal[i]*(options.scale||1)));
+                p.push(...d.pos.map((x,i)=>x+d.normal[i]*(options.scale||1)));
               }
               if (d.tp==5) {
                 if (!sphere) {
@@ -1060,8 +1060,8 @@
                   for (var j=0; j<W+1; j++) for (var k=0; k<H; k++) {
                     pnts.push( [S(2*pi*j/W)*S(pi*k/(H-1)), C(2*pi*j/W)*S(pi*k/(H-1)), C(pi*k/(H-1))]);
                     if (j && k) {
-                      tris.push.apply(tris, pnts[(j-1)*H+k-1]);tris.push.apply(tris, pnts[(j-1)*H+k]);tris.push.apply(tris, pnts[j*H+k-1]);
-                      tris.push.apply(tris, pnts[j*H+k-1]); tris.push.apply(tris, pnts[(j-1)*H+k]); tris.push.apply(tris, pnts[j*H+k]);
+                      tris.push(...pnts[(j-1)*H+k-1]);tris.push(...pnts[(j-1)*H+k]);tris.push(...pnts[j*H+k-1]);
+                      tris.push(...pnts[j*H+k-1]); tris.push(...pnts[(j-1)*H+k]); tris.push(...pnts[j*H+k]);
                   }}
                   sphere = { va : createVA(tris,undefined) }; sphere.va.tcount = tris.length/3;
                 }
@@ -1098,7 +1098,7 @@
                     // Create the vertex array and store it for re-use.
                     if (!e.va3 && !e.va2) {
                       var et=[],et2=[],et3=[],lc=0,pc=0,tc=0; e.data.forEach(e=>{
-                        if (e instanceof Array && e.length==3) { tc++; e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);et3.push.apply(et3,x.pos); });  var d = {tp:-1}; }
+                        if (e instanceof Array && e.length==3) { tc++; e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);et3.push(...x.pos); });  var d = {tp:-1}; }
                         else {
                           var d = interprete(e);
                           if (d.tp==1) { pc++; et.push(...d.pos);  }
@@ -1146,9 +1146,9 @@
             if (e instanceof Element && e.Grade(2).Length)
                e=[e.LDot(e14).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.LDot(e14).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
           // If euclidean point, store as point, store line segments and triangles.
-            if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
-            if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
-            if (e instanceof Array && e.length%3==0) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
+            if (e.e123) p.push(...e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
+            if (e instanceof Array && e.length==2) l=l.concat(...e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
+            if (e instanceof Array && e.length%3==0) t=t.concat(...e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
           // Render orbits of parametrised motors, as well as lists of points.. 
             function sw_mot_orig(A,R){
               var a0=A[0],a1=A[5],a2=A[6],a3=A[7],a4=A[8],a5=A[9],a6=A[10],a7=A[15];
