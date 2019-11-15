@@ -1102,11 +1102,20 @@
               // setup a new color
                 if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
                 if (typeof(e)=='string') {
-                  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-                  var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
-                  draw(program2,gl.TRIANGLES,
-                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return (0.05*(options.z||5))*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
-                       [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                  if (options.htmlText) {
+                    if (!x['_'+i]) { console.log('creating div'); Object.defineProperty(x,'_'+i, {value: document.body.appendChild(document.createElement('div')), enumerable:false }) };
+                    var rc = canvas.getBoundingClientRect(), div = x['_'+i];
+                    var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...lastpos,1]).map(x=>x.s);
+                    pos2 = Element.Mul( [[5,0,0,0],[0,5*(r||2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
+                    Object.assign(div.style,{position:'fixed',pointerEvents:'none',left:rc.left + (rc.right-rc.left)*(pos2[0]/2+0.5),top: rc.top + (rc.bottom-rc.top)*(-pos2[1]/2+0.5) - 20});
+                    if (div.last != e) { div.innerHTML = e; div.last = e; if (self.renderMathInElement) self.renderMathInElement(div); }
+                  } else { 
+                    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+                    var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
+                    draw(program2,gl.TRIANGLES,
+                         [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return (0.05*(options.z||5))*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
+                         [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                  }      
                 }
               }
               continue;
