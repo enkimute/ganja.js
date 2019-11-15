@@ -934,10 +934,11 @@
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.3,l)*Col+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
       // Create a font texture, lucida console or otherwise monospaced.
-        var fw=22, font = Object.assign(document.createElement('canvas'),{width:94*fw,height:32}),
-            ctx = Object.assign(font.getContext('2d'),{font:'bold 32px lucida console, monospace'}),
+        var fw=33, font = Object.assign(document.createElement('canvas'),{width:(19+94)*fw,height:48}),
+            ctx = Object.assign(font.getContext('2d'),{font:'bold 48px lucida console, monospace'}),
             ftx = gl.createTexture(); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, ftx);
-            for (var i=33; i<127; i++) ctx.fillText(String.fromCharCode(i),(i-33)*fw,26);
+            for (var i=33; i<127; i++) ctx.fillText(String.fromCharCode(i),(i-33)*fw,40);
+            var specialChars = "∞≅¹²³₀₁₂₃₄₅₆₇₈₉⋀⋁∆⋅"; specialChars.split('').forEach((x,i)=>ctx.fillText(x,(i-33+127)*fw,40));
             // 2.0 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,94*fw,32,0,gl.RGBA,gl.UNSIGNED_BYTE,font);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, font);
 
@@ -1102,9 +1103,10 @@
                 if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
                 if (typeof(e)=='string') {
                   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+                  var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
                   draw(program2,gl.TRIANGLES,
                        [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return (0.05*(options.z||5))*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
-                       [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                       [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
                 }
               }
               continue;
@@ -1174,9 +1176,10 @@
             // render a label
               if (typeof(e)=='string') {
                 gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+                var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
                 draw(program2,gl.TRIANGLES,
                      [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
-                     [...Array(e.length*6*2)].map((x,i)=>{ var o=(e.charCodeAt(i/12|0)-33)/94; return [o,1,o+1/94,1,o,0,o+1/94,1,o+1/94,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                     [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
               }
             }
           };
