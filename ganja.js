@@ -1098,7 +1098,7 @@
                     if (e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
                     if (e.va3.tcount) draw(program,gl.TRIANGLES,undefined,[0,0,0],c,r,undefined,e.va3);
                   }
-                if (alpha) gl.disable(gl.BLEND);
+                if (alpha) gl.disable(gl.BLEND); // no alpha for text printing.
               // setup a new color
                 if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
                 if (typeof(e)=='string') {
