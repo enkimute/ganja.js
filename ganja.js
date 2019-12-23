@@ -1133,7 +1133,7 @@
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i==0?1:-1)*y/e[14]).reverse());
             if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
             if (e instanceof Array && e.length%3==0) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i==0?1:-1)*y/x[14]).reverse()]));
-          // Render orbits of parametrised motors
+          // Render orbits of parametrised motors, as well as lists of points.. 
             function sw_mot_orig(A,R){
               var a0=A[0],a1=A[5],a2=A[6],a3=A[7],a4=A[8],a5=A[9],a6=A[10],a7=A[15];
               R[2] = -2*(a0*a3+a4*a7-a6*a2-a5*a1);
@@ -1142,9 +1142,11 @@
               return R
             }
             if ( e.call && e.length==1) { var count=e.dx||64;
-              for (var xx,o=new Float32Array(3),ii=0; ii<count; ii++) {
+              for (var ismot,xx,o=new Float32Array(3),ii=0; ii<count; ii++) {
                 if (ii>1) l.push(xx[0],xx[1],xx[2]);
-                xx = sw_mot_orig(e(ii/(count-1)),o); //Element.sw(e(ii/(count-1)),o);
+                var m = e(ii/(count-1));
+                if (ii==0) ismot = m[0]||m[5]||m[6]||m[7]||m[8]||m[9]||m[10];
+                xx = ismot?sw_mot_orig(e(ii/(count-1)),o):m.slice(11,14); //Element.sw(e(ii/(count-1)),o);
                 l.push(xx[0],xx[1],xx[2]);
               }
             }
