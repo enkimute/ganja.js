@@ -66,11 +66,10 @@
     } else { options={}; p=p|0; r=r|0; q=q|0; };
 
   // Support for multi-dual-algebras
-    if (p==0 && q==0 && r<0) { r=-r; // Create a dual number algebra if r>1 .. consider more explicit syntax
+    if (options.dual || (p==0 && q==0 && r<0)) { r=options.dual=options.dual||-r; // Create a dual number algebra if r<0 (old) or options.dual set(new)
       options.basis  = [...Array(r+1)].map((a,i)=>i?'e0'+i:'1');  options.metric = [1,...Array(r)]; options.tot=r+1;
       options.Cayley = [...Array(r+1)].map((a,i)=>[...Array(r+1)].map((y,j)=>i*j==0?((i+j)?'e0'+(i+j):'1'):'0'));
     }
-
 
   // Calculate the total number of dimensions.
     var tot = options.tot = (options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length))|0;
@@ -87,7 +86,7 @@
 
   // See if the basis names start from 0 or 1, store grade per component and lowest component per grade.
     var low=basis.length==1?1:basis[1].match(/\d+/g)[0]*1,
-        grades=options.grades||basis.map(x=>tot>9?(x.length-1)/2:x.length-1),
+        grades=options.grades||(options.dual&&basis.map((x,i)=>i?1:0))||basis.map(x=>tot>9?(x.length-1)/2:x.length-1),
         grade_start=grades.map((a,b,c)=>c[b-1]!=a?b:-1).filter(x=>x+1).concat([basis.length]);
 
   // String-simplify a concatenation of two basis blades. (and supports custom basis names e.g. e21 instead of e12)
@@ -367,6 +366,7 @@
 
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.
       Exp  ()      {
+        if (options.dual) { var f=Math.exp(x.s); return x.map((x,i)=>i?x*f:1); }
         if (r==1 && tot<=4 && this[0]==0) {
           var sq = (tot==4)?-(this[8]**2+this[9]**2+this[10]**2):this.Mul(this).s;  if (sq==0) { var res = this.slice();res[0]+=1; return res; }
           var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
@@ -437,7 +437,7 @@
         // vector times vector performs a dot product. (which internally uses the GP on each component)
           if((!(a[0] instanceof Array) || (a[0] instanceof Element)) &&(!(b[0] instanceof Array) || (b[0] instanceof Element))) { var r=tot?Element.Scalar(0):0; a.forEach((x,i)=>r=Element.Add(r,Element.Mul(x,b[i]),r)); return r; }
         // Array times vector
-          if(!(b[0] instanceof Array)) return a.map((x,i)=>Element.Mul(a[i],b));
+          if(!(b[0] instanceof Array) || b[0] instanceof Element) return a.map((x,i)=>Element.Mul(a[i],b));
         // Array times Array
           var r=a.map((x,i)=>b[0].map((y,j)=>{ var r=tot?Element.Scalar(0):0; x.forEach((xa,k)=>r=Element.Add(r,Element.Mul(xa,b[k][j]))); return r; }));
         // Return resulting array or scalar if 1 by 1.
@@ -1303,17 +1303,20 @@
     }
 
 
-  // Matrix-free inverses up to 5D. Should translate this to an inline call for readability.
-  // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf
-    Object.defineProperty(res.prototype, 'Inverse', {configurable: true, get(){
-      return (tot==0)?new this.constructor.Scalar([1/this[0]]):
-             (tot==1)?this.Involute.Mul(this.constructor.Scalar(1/this.Mul(this.Involute)[0])):
-             (tot==2)?this.Conjugate.Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate)[0])):
-             (tot==3)?this.Reverse.Mul(this.Involute).Mul(this.Conjugate).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse)[0])):
-             (tot==4)?this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0])):
-                      this.Conjugate.Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4)).Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4))[0]));
-    }});
-
+    if (options.dual) {
+      Object.defineProperty(res.prototype, 'Inverse', {configurable:true, get(){ var s = 1/this.s**2; return this.map((x,i)=>i?-x*s:1/x ); }});
+    } else {
+    // Matrix-free inverses up to 5D. Should translate this to an inline call for readability.
+    // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf
+      Object.defineProperty(res.prototype, 'Inverse', {configurable: true, get(){
+        return (tot==0)?new this.constructor.Scalar([1/this[0]]):
+               (tot==1)?this.Involute.Mul(this.constructor.Scalar(1/this.Mul(this.Involute)[0])):
+               (tot==2)?this.Conjugate.Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate)[0])):
+               (tot==3)?this.Reverse.Mul(this.Involute).Mul(this.Conjugate).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse)[0])):
+               (tot==4)?this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0])):
+                        this.Conjugate.Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4)).Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4))[0]));
+      }});
+    }
   // If a function was passed in, translate, call and return its result. Else just return the Algebra.
     if (fu instanceof Function) return res.inline(fu)(); else return res;
   }
