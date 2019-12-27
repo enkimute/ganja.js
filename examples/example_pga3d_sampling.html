@@ -28,7 +28,7 @@ Algebra(3,0,1,()=>{
     
     // hammersley sampling (popular as easy to implement on GPU)
     var plane_hammersley = (i,n)=>{ return P((i/n)*2-1 ,radical_inverse(i)*2-1); },
-        hemi_hammersley  = (i,n)=>{ var u=(i/n)*2-1, v=radical_inverse(i)*2-1, p=v*2*Math.PI, ct=1-u, st=Math.sqrt(1-ct**2); return P(Math.cos(p)*st,Math.sin(p)*st, ct); };
+        hemi_hammersley  = (i,n)=>{ var u=i/n, v=radical_inverse(i), p=v*2*Math.PI, ct=1-u, st=Math.sqrt(1-ct**2); return P(Math.cos(p)*st,Math.sin(p)*st, ct); };
      
     // Now graph it.    
     document.body.appendChild(this.graph( 
