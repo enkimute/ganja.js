@@ -6,60 +6,39 @@
 //** and use it to do automatic differentiation and rotor estimation between point clouds.            **//
 //** for info see https://beta.observablehq.com/@enkimute/rotor-estimation-and-ad-in-ga               **//
 
-//** Create an algebra with x dual components (and a scalar) **//
-var Dualgebra = (x)=>Algebra({ 
-      basis  : [...Array(x+1)].map((a,i)=>i?'e0'+i:'1'),  metric : [1,...Array(x)],
-      Cayley : [...Array(x+1)].map((a,i)=>[...Array(x+1)].map((y,j)=>i*j==0?((i+j)?'e0'+(i+j):'1'):'0'))
-    });
+var solve = Algebra({p:3,over:Algebra({dual:3})}).inline(()=>{
+  // Convenience    
+  var {E,PI,random} = Math, r=()=>random()*2-1;
+  
+  // Pointset A and B.    
+  var A = [...Array(30)].map(x=>(r*1e1 + r*1e2 + r*1e3)),
+      motor = E**( r*1e23 + r*1e13 + r*1e12 ),
+      B = motor>>>A;
 
-//** An algebra with three dual components, and a clifford algebra over R3 **//
-var D3 = Dualgebra(3), R3 = Algebra(3);
+  // Our cost function and starting gues.
+  var cost = (G,A,B)=>((E**G>>>A)-B)**2/30, guess = 0e12;
+  guess.e12.e01 = guess.e13.e02 = guess.e23.e03 = 1;
+  
+  // Gradient Descent.
+  for (var i=0; i<100; i++) {
+    var c = cost(guess,A,B);
+    [guess.e12,guess.e13,guess.e23].forEach((g,i)=>g.s -= 0.1*c.s[1+i]);
+  }
 
-//** helper .. easily convert scalars or arrays of scalars to dual vectors. **//
-var d3 = (a,b,c,d)=>(a instanceof Array)?a.map(x=>d3(x)):(a instanceof D3)?a:new D3([a||0,b||0,c||0,d||0]);
+  // Return points sets and bivector.
+  return {A,B,G:guess.map(x=>x.s),c:c.s}
+})();
 
-//** Translate the operators of R3 to use dual-number (D3) coefficients **//
-var translate = (x)=>{ var F=D3.inline(R3.prototype[x]); return (a,b)=>F.call(a,b); },
-    [GP,ADD,SUB,SCALE] = ["Mul","Add","Sub","Scale"].map(x=>translate(x));
-
-//** We implement our own exp function using these operators and Taylor **//
-var EXP = (X)=>{
-  var R=d3([1,...Array(X.length-1)]), M, y=1, i=1;
-  while (i<25) { R=ADD(R, SCALE(M||X, 1/y)); M=GP(M||X,X); y=y*(++i); }
-  return R;  
-};
-
-//** random float between -x and x, vector length, rotate, cost function (avg of squared diffs) **//
-var r    = (x)=>(Math.random()*2-1)*(x||1),
-    VLEN = R=>R[1].Mul(R[1]).Add(R[2].Mul(R[2])).Add(R[3].Mul(R[3])),
-    ROT  = (R,x)=>GP(GP(EXP(SCALE(R,-0.5)),x),EXP(SCALE(R,0.5))),
-    COST = (G,Pa,Pb)=>Pa.reduce((C,Pa,x)=>C.Add(VLEN(SUB(ROT(G,Pa),Pb[x]))),d3()).Scale(1/Pa.length);
-
-//** Now we generate some random points, a rotation bivector, the rotated noisy points and our guess+dBV         **//
-//** For our guess, Each of the coefficients we wish to track (e12,e13,e23) gets a different dual unit added in. **//
-var points_a = [...Array(30)].map(x=>[0,r(),r(),r(),0,0,0,0]),
-    bv       = d3([0,0,0,0,r(),r(),r(),0]),
-    points_b = points_a.map(x=>ADD(ROT(bv,x),[0,r(.01),r(.01),r(.01),0,0,0,0]).map(x=>x[0])),
-    guess    = d3([0,0,0,0,d3(0,1),d3(0,0,1),d3(0,0,0,1),0]);
-
-//** Now we implement Gradient Descent - step in the direction of negative cost **//
-for (var alpha=1,i=0; i<100; i++) {
-  var c = COST(guess,points_a,points_b); if (c[0]<5E-4) break;
-  guess = ADD(guess,[0,0,0,0,-c[1]*alpha,-c[2]*alpha,-c[3]*alpha,0])
-}
-
-//** We are done.. code below is graphing results.. **//
-document.body.appendChild(Algebra(3,0,1).inline((pa,pb,i,guess)=>{
-  // convert the arrays to 3D PGA points.
-  var conv = x=>x.map(x=>!(x[1][0]*1e1+(x[2][0])*1e2+x[3][0]*1e3+1e0)); [pa,pb] = [conv(pa),conv(pb)];
-  var trail = (bv,x,n=12)=>[...Array(n).keys()].map(i=>Math.E**(bv*(i/(n-1)))>>>x).map((x,i,a)=>[x,a[i-1]||x]).slice(1);
-  var trails = []; pa.forEach(pa=>trails.push(...trail(guess*[-.5e12,-.5e13,-.5e23], pa)));
-  var camera = Math.E**1e23, items=[0xAAAAFF,...trails,0x0000FF,guess*[1e12,1e13,1e23],0,...pa,0x88FF0000,...pb,0x880000FF];
-  // graph in gl, animate and wiggle the camera
-  return this.graph(()=>{ 
-    camera.set(Math.E**(Math.sin(performance.now()/5000)*1e13));
-    var anim = Math.E**((Math.sin(performance.now()/234)*0.5+.5)*( guess*[-.5e12,-.5e13,-.5e23] ));
-    return ["Estimation",0,"frame A",0xFF0000,"frame B + noise",0x0000FF,"estimated rotation",...items,...anim>>>pa] ;
-  },{grid:1,camera,animate:1,gl:1,width:'100%',height:'400px'});
-})(d3(points_a),d3(points_b),i,guess.map(x=>x[0]).slice(4,7)));
+// Now graph it.
+document.body.appendChild(Algebra(3,0,1).inline(solve=>{
+  var pA     = solve.A.map(x=>!(1e0 + x.e1.s*1e1 + x.e2.s*1e2 + x.e3.s*1e3));
+  var pB     = solve.B.map(x=>!(1e0 + x.e1.s*1e1 + x.e2.s*1e2 + x.e3.s*1e3));
+  var guess  = solve.G.slice(4,7)*[1e12,1e13,1e23];
+  var trails = pA.map(pA=>(t)=>Math.E**(t*guess)>>>pA);
+  var camera = Math.E**1e23;
+  return this.graph(()=>{
+    camera.set(Math.E**(Math.sin(performance.now()/5000)*1e13));  
+    return [ 0x000000,...pA, 0xFF0000, ...pB, 0xAA0000FF, guess, ...trails ];
+  },{gl:1,camera,animate:1});
+})(solve));
 </SCRIPT></BODY>

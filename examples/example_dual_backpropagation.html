@@ -6,25 +6,17 @@
 // an 'AND' relationship using 500 epochs of 4 noisy samples.
 // The resulting decision boundary is displayed.
 
-// A 13 element algebra, scalars and 12 duals for derivatives with a custom cayley table.
-var basis=[...Array(13)].map((x,i)=>i?'e'+i:'1'),
-    Cayley=basis.map((a,i)=>basis.map((b,j)=>i==0?b:j==0?a:"0"));
-    
-Algebra({basis,Cayley},()=>{
-  // Output Algebra info to the console
-  this.describe();
-    
-  // Helper to invert numbers with many dual components.
-  var inv = x=>x.map((c,i)=>i?-c/(x.s**2):1/c);
+Algebra({dual:12},()=>{
+  var {E} = Math;
 
   // The initial weights, input and desired output of our network.
-  var input    = [[.35,.20],[0.7,0.55],[0.17,0.8],[0.9,0.3]],              // input samples.
-      WH       = [[.15+1e1,.20+1e2,.35+1e3],[.25+1e4,.30+1e5,.35+1e6]],    // hidden layer weights and bias
-      WO       = [[.40+1e7,.45+1e8,.60+1e9],[.50+1e10,.55+1e11,.60+1e12]], // output layer weights and bias
-      expected = [[0.01,0.99],[0.99,0.01],[0.01,0.99],[0.01,0.99]];        // desired outputs.
+  var input    = [[.35,.20],[0.7,0.55],[0.17,0.8],[0.9,0.3]],                    // input samples.
+      WH       = [[.15+1e01,.20+1e02,.35+1e03],[.25+1e04,.30+1e05,.35+1e06]],    // hidden layer weights and bias
+      WO       = [[.40+1e07,.45+1e08,.60+1e09],[.50+1e010,.55+1e011,.60+1e012]], // output layer weights and bias
+      expected = [[0.01,0.99],[0.99,0.01],[0.01,0.99],[0.01,0.99]];              // desired outputs.
 
   // The activation function, forward evaluator and error function.
-  var logistic = x=>inv(1+this.exp(-x)),
+  var logistic = x=>1/(1+E**-x),
       forward=(sample)=>(WO*[...(WH*[...sample,1]).map(logistic),1]).map(logistic),
       error = (sample,expected)=>0.5*(expected-sample)**2;
 
