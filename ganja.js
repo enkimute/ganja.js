@@ -70,6 +70,7 @@
       options.basis  = [...Array(r+1)].map((a,i)=>i?'e0'+i:'1');  options.metric = [1,...Array(r)]; options.tot=r+1;
       options.Cayley = [...Array(r+1)].map((a,i)=>[...Array(r+1)].map((y,j)=>i*j==0?((i+j)?'e0'+(i+j):'1'):'0'));
     }
+    if (options.over) options.baseType = Array;
 
   // Calculate the total number of dimensions.
     var tot = options.tot = (options.tot||(p||0)+(q||0)+(r||0)||(options.basis&&options.basis.length))|0;
@@ -172,7 +173,7 @@
 
     /// The Dual, Length, non-metric length and normalized getters.
       get Dual (){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[i]); var res = new this.constructor(); res[res.length-1]=1; return res.Mul(this); };
-      get Length (){  return Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); };
+      get Length (){ return Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); };
       get VLength (){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]; return Math.sqrt(res); };
       get Normalized (){ var res = new this.constructor(),l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) res[i]=this[i]*l; return res; };
     }
@@ -218,7 +219,7 @@
 
     /// Fill in coordinates (accepts sequence of index,value as arguments)
       Coeff() {
-                for (var i=0,l=arguments.length; i<l; i+=2) {
+                for (var i=0,l=arguments.length; i<l; i+=2) if (arguments[i+1]) {
                  var gi = grades[arguments[i]];
                  if (this[gi]==undefined) this[gi]=[];
                  this[gi][arguments[i]-grade_start[gi]]=arguments[i+1];
@@ -236,7 +237,8 @@
       Add(b,r) {
         r=r||new this.constructor();
         for (var i=0,l=Math.max(this.length,b.length);i<l;i++)
-          if (!this[i] || !b[i]) r[i] = (!this[i]) ? b[i]:this[i];
+          if (!this[i] ^ !b[i]) r[i] = (!this[i]) ? b[i].slice():this[i].slice();
+          else if (!(this[i]||b[i])) {}
           else { if (r[i]==undefined) r[i]=[]; for(var j=0,m=Math.max(this[i].length,b[i].length);j<m;j++)
           {
             if (typeof this[i][j]=="string" || typeof r[i][j]=="string" || typeof b[i][j]=="string") {
@@ -355,7 +357,7 @@
     var res = class Element extends generator {
 
     // constructor - create a floating point array with the correct number of coefficients.
-      constructor(a) { super(a); return this; }
+      constructor(a) { super(a); if (this.upgrade) this.upgrade(); return this; }
 
     // Grade selection. (implemented by parent class).
       Grade(grade,res) { res=res||new Element(); return super.Grade(grade,res); }
@@ -366,13 +368,13 @@
 
     // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.
       Exp  ()      {
-        if (options.dual) { var f=Math.exp(x.s); return x.map((x,i)=>i?x*f:1); }
-        if (r==1 && tot<=4 && this[0]==0) {
+        if (options.dual) { var f=Math.exp(this.s); return this.map((x,i)=>i?x*f:f); }
+        if (r==1 && tot<=4 && this[0]==0 && !options.over) {
           var sq = (tot==4)?-(this[8]**2+this[9]**2+this[10]**2):this.Mul(this).s;  if (sq==0) { var res = this.slice();res[0]+=1; return res; }
           var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
           var res = this.Scale( Math.sinh(l)/l ); res[0]=Math.cosh(l); return res;
         }
-        var res = Element.Scalar(1), y=1, M= new Element(this), N=new Element(this); for (var x=1; x<25; x++) { res=res.Add(M.Mul(Element.Scalar(1/y))); M=M.Mul(N); y=y*(x+1); }; return res;
+        var res = Element.Scalar(1), y=1, M= this.Scale(1), N=this.Scale(1); for (var x=1; x<25; x++) { res=res.Add(M.Scale(1/y)); M=M.Mul(N); y=y*(x+1); }; return res;
       }
 
     // Helper for efficient inverses. (custom involutions - negates grades in arguments).
@@ -400,7 +402,7 @@
       // If either is a string, the result is a string.
         if ((typeof a=='string')||(typeof b=='string')) return a.toString()+b.toString();
       // If only one is an array, add the other element to each of the elements.
-        if ((a instanceof Array)^(b instanceof Array)) return (a instanceof Array)?a.map(x=>Element.Add(x,b)):b.map(x=>Element.Add(a,x));
+        if ((a instanceof Array && !a.Add)^(b instanceof Array && !b.Add)) return (a instanceof Array)?a.map(x=>Element.Add(x,b)):b.map(x=>Element.Add(a,x));
       // If both are equal length arrays, add elements one-by-one
         if ((a instanceof Array)&&(b instanceof Array)&&a.length==b.length) return a.map((x,xi)=>Element.Add(x,b[xi]));
       // If they're both not elements let javascript resolve it.
@@ -437,7 +439,7 @@
         // vector times vector performs a dot product. (which internally uses the GP on each component)
           if((!(a[0] instanceof Array) || (a[0] instanceof Element)) &&(!(b[0] instanceof Array) || (b[0] instanceof Element))) { var r=tot?Element.Scalar(0):0; a.forEach((x,i)=>r=Element.Add(r,Element.Mul(x,b[i]),r)); return r; }
         // Array times vector
-          if(!(b[0] instanceof Array) || b[0] instanceof Element) return a.map((x,i)=>Element.Mul(a[i],b));
+          if(!(b[0] instanceof Array)) return a.map((x,i)=>Element.Mul(a[i],b));
         // Array times Array
           var r=a.map((x,i)=>b[0].map((y,j)=>{ var r=tot?Element.Scalar(0):0; x.forEach((xa,k)=>r=Element.Add(r,Element.Mul(xa,b[k][j]))); return r; }));
         // Return resulting array or scalar if 1 by 1.
@@ -496,7 +498,7 @@
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); if (a.sw) return a.sw(b);
       // Map elements in array
-        if (b instanceof Array) return b.map(x=>Element.sw(a,x));
+        if (b instanceof Array && !b.Add) return b.map(x=>Element.sw(a,x));
       // Call through. no specific generated code for it so just perform the muls.
         a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b).Mul(a.Conjugate);
       }
@@ -657,7 +659,7 @@
                 lx=sc*(pos.e1-attitude.e1); ly=sc*(-pos.e2+attitude.e2); return res2+`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" fill="${color||'green'}"/>`;
               }
             // Handle projective 2D and 3D elements.
-            }):f.map&&f.map((o,oidx)=>{  if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; } while (o instanceof Function) o=o(); o=(o instanceof Array)?o.map(project):project(o); if (o===undefined) return;
+            }):f.map&&f.map((o,oidx)=>{  if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; } while (o instanceof Function) o=o(); if (o[0] instanceof Array) o=o.map(x=>x[0]); o=(o instanceof Array && !(o instanceof Element))?o.map(project):project(o); if (o===undefined) return;
             // line segments and polygons
               if (o instanceof Array && o.length)  { lx=ly=lr=0; o.forEach((o)=>{while (o.call) o=o(); lx+=options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]];ly+=options.scale*o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6||drm[1]==14)?-1:1)*options.scale*o[drm[2]]/o[drm[1]]+','+options.scale*o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${options.scale*o[0][drm[3]]/o[0][drm[1]]} x2=${options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${options.scale*o[1][drm[3]]/o[1][drm[1]]} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}"/>`; }
             // svg
@@ -1146,7 +1148,7 @@
                 if (ii>1) l.push(xx[0],xx[1],xx[2]);
                 var m = e(ii/(count-1));
                 if (ii==0) ismot = m[0]||m[5]||m[6]||m[7]||m[8]||m[9]||m[10];
-                xx = ismot?sw_mot_orig(e(ii/(count-1)),o):m.slice(11,14); //Element.sw(e(ii/(count-1)),o);
+                xx = ismot?sw_mot_orig(m,o):m.slice(11,14).map((y,i)=>(i==0?1:-1)*y).reverse(); //Element.sw(e(ii/(count-1)),o);
                 l.push(xx[0],xx[1],xx[2]);
               }
             }
@@ -1302,6 +1304,17 @@
       }
     }
 
+    if (options.over) {
+     // experimental. do not use.
+      res.over = options.over;
+      ["Mul","Add","Sub","Scale","Dot","Wedge","LDot"].forEach(x=>res.prototype[x] = options.over.inline(res.prototype[x]));
+      res.prototype.Coeff   = function() { for (var i=0,l=arguments.length; i<l; i+=2) this[arguments[i]]=options.over.Scalar(arguments[i+1]); return this; }
+      res.prototype.upgrade = function () { for (var i=0; i<this.length; i++) this[i] = options.over.Scalar(0); }
+      Object.defineProperty(res.prototype, 'Conjugate', {configurable:true,get(){
+         var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,-1,-1,1][grades[i]%4]); return res; 
+      }});
+      res.prototype.toString = function() { return [...this].map((x,i)=>x==0?undefined:(i?'('+x+')'+basis[i]:x.toString())).filter(x=>x).join(' + '); }
+    }
 
     if (options.dual) {
       Object.defineProperty(res.prototype, 'Inverse', {configurable:true, get(){ var s = 1/this.s**2; return this.map((x,i)=>i?-x*s:1/x ); }});
