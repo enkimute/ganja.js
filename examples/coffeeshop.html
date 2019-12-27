@@ -410,7 +410,7 @@
   // Generate example cards.
     var excards = examples.map(e=>{
       var card = Object.assign(document.createElement('div'),{className:'card'});
-      card.style.backgroundImage="url('../images/"+e+".jpg')";
+      if (e) card.style.backgroundImage="url('../images/"+e+".jpg')";
       card.innerHTML = '<p>'+e.split('_').slice(1).join(' ')+'</p>';
       card.onclick = (x)=>{
         els.sample.src='example_'+e+'.html';
@@ -430,7 +430,7 @@
       while (els.stash.firstChild) els.stash.removeChild(els.stash.firstChild);
       list.forEach(e=>{
         var card = Object.assign(document.createElement('div'),{className:'card'});
-        card.style.backgroundImage="url('"+e.thumb+"')";
+        if (e.thumb) card.style.backgroundImage="url('"+e.thumb+"')";
         card.innerHTML = '<p>'+e.title+'</p>';
         card.onclick = (x)=>{
           document.location.hash = e.id;
@@ -510,7 +510,7 @@
       postRun();
     // Grab the source and update the editor.  
       var scr = [...els.sample.contentDocument.querySelectorAll("script")].pop();
-      if (window.editor) {
+      if (window.editor && scr) {
         editor.setValue(scr.innerText.split('\n').slice(1).reverse().slice(1).reverse().join('\n'));
         editor.clearSelection();
       // Link shift+enter  
