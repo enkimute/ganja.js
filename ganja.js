@@ -173,9 +173,9 @@
 
     /// The Dual, Length, non-metric length and normalized getters.
       get Dual (){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[i]); var res = new this.constructor(); res[res.length-1]=1; return res.Mul(this); };
-      get Length (){ return Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); };
+      get Length (){ return options.over?Math.sqrt(Math.abs(this.Mul(this.Conjugate).s.s)):Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); };
       get VLength (){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]; return Math.sqrt(res); };
-      get Normalized (){ var res = new this.constructor(),l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) res[i]=this[i]*l; return res; };
+      get Normalized (){ var res = new this.constructor(),l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) if (options.over) {res[i]=this[i].Scale(l);} else {res[i]=this[i]*l}; return res; };
     }
 
   /// Convert symbolic matrices to code. (skipping zero's on dot and wedge matrices).
@@ -1304,18 +1304,6 @@
       }
     }
 
-    if (options.over) {
-     // experimental. do not use.
-      res.over = options.over;
-      ["Mul","Add","Sub","Scale","Dot","Wedge","LDot"].forEach(x=>res.prototype[x] = options.over.inline(res.prototype[x]));
-      res.prototype.Coeff   = function() { for (var i=0,l=arguments.length; i<l; i+=2) this[arguments[i]]=options.over.Scalar(arguments[i+1]); return this; }
-      res.prototype.upgrade = function () { for (var i=0; i<this.length; i++) this[i] = options.over.Scalar(0); }
-      Object.defineProperty(res.prototype, 'Conjugate', {configurable:true,get(){
-         var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,-1,-1,1][grades[i]%4]); return res; 
-      }});
-      res.prototype.toString = function() { return [...this].map((x,i)=>x==0?undefined:(i?'('+x+')'+basis[i]:x.toString())).filter(x=>x).join(' + '); }
-    }
-
     if (options.dual) {
       Object.defineProperty(res.prototype, 'Inverse', {configurable:true, get(){ var s = 1/this.s**2; return this.map((x,i)=>i?-x*s:1/x ); }});
     } else {
@@ -1330,6 +1318,27 @@
                         this.Conjugate.Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4)).Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4))[0]));
       }});
     }
+
+    if (options.over) {
+     // experimental. do not use.
+      res.over = options.over;
+      ["Mul","Add","Sub","Scale","Dot","Wedge","LDot"].forEach(x=>res.prototype[x] = options.over.inline(res.prototype[x]));
+      res.prototype.Coeff   = function() { for (var i=0,l=arguments.length; i<l; i+=2) this[arguments[i]]=(arguments[i+1] instanceof options.over)?arguments[i+1]:options.over.Scalar(arguments[i+1]); return this; }
+      res.prototype.upgrade = function () { for (var i=0; i<this.length; i++) this[i] = options.over.Scalar(0); }
+      Object.defineProperty(res.prototype, 'Conjugate', {configurable:true,get(){var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,-1,-1,1][grades[i]%4]); return res; }});
+      Object.defineProperty(res.prototype, 'Reverse',   {configurable:true,get(){var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,1,-1,-1][grades[i]%4]); return res; }});
+      Object.defineProperty(res.prototype, 'Involute',  {configurable:true,get(){var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,-1,1,-1][grades[i]%4]); return res; }});
+      Object.defineProperty(res.prototype, 'Inverse', {configurable: true, get(){
+        return (tot==0)?new this.constructor.Scalar([this[0].Inverse]):
+               (tot==1)?this.Involute.Mul(this.constructor.Scalar(this.Mul(this.Involute)[0].Inverse)):
+               (tot==2)?this.Conjugate.Mul(this.constructor.Scalar(this.Mul(this.Conjugate)[0].Inverse)):
+               (tot==3)?this.Reverse.Mul(this.Involute).Mul(this.Conjugate).Mul( this.constructor.Scalar(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse)[0].Inverse)):
+               (tot==4)?this.Conjugate.Mul(this.Mul(this.Conjugate).Map(3,4)).Mul( this.constructor.Scalar(this.Mul(this.Conjugate).Mul(this.Mul(this.Conjugate).Map(3,4))[0].Inverse)):
+                        this.Conjugate.Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4)).Mul(this.constructor.Scalar(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Mul(this.Mul(this.Conjugate).Mul(this.Involute).Mul(this.Reverse).Map(1,4))[0].Inverse));
+      }});
+      res.prototype.toString = function() { return [...this].map((x,i)=>x==0?undefined:(i?'('+x+')'+basis[i]:x.toString())).filter(x=>x).join(' + '); }
+    }
+
   // If a function was passed in, translate, call and return its result. Else just return the Algebra.
     if (fu instanceof Function) return res.inline(fu)(); else return res;
   }
