@@ -374,7 +374,7 @@
           var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
           var res = this.Scale( Math.sinh(l)/l ); res[0]=Math.cosh(l); return res;
         }
-        var res = Element.Scalar(1), y=1, M= this.Scale(1), N=this.Scale(1); for (var x=1; x<25; x++) { res=res.Add(M.Scale(1/y)); M=M.Mul(N); y=y*(x+1); }; return res;
+        var res = Element.Scalar(1), y=1, M= this.Scale(1), N=this.Scale(1); for (var x=1; x<15; x++) { res=res.Add(M.Scale(1/y)); M=M.Mul(N); y=y*(x+1); }; return res;
       }
 
     // Helper for efficient inverses. (custom involutions - negates grades in arguments).
@@ -1338,6 +1338,23 @@
       }});
       res.prototype.toString = function() { return [...this].map((x,i)=>x==0?undefined:(i?'('+x+')'+basis[i]:x.toString())).filter(x=>x).join(' + '); }
     }
+
+  // Experimental differential operator.
+    var _D = undefined, _DA;
+    Object.defineProperty(res, 'D', {configurable:true,get(){ if (_D) return _D;
+      _DA = Algebra({ p:p,q:q,r:r,basis:options.basis,even:options.even,over:Algebra({dual:2**tot})});      // same algebra, but over dual numbers.
+      _D = (func)=>{
+        var dfunc = _DA.inline(func), totd = 2**tot;                                                        // convert input function to dual algebra
+        return (val)=>{                                                                                     // return a new function (the differentiated func)
+          var dval = _DA.Scalar(0);                                                                         // upcast the input value to the dual numbers
+          for (var i=0; i<totd; i++) { dval[i][0] = val[i]; dval[i][1+i] = 1; };                            // fill in coefficients and dual components
+          var rval = dfunc(dval); var res = [...Array(totd)].map(x=>val.slice());                           // call the function in the dual algebra.
+          for (var i=0; i<totd; i++) for (var j=0; j<totd; j++) { res[j][i] = rval[i][j+1]; }               // downcast from dual algebra to Jacobian vector.
+          return res;
+        };      
+      }
+      return _D;
+    }});
 
   // If a function was passed in, translate, call and return its result. Else just return the Algebra.
     if (fu instanceof Function) return res.inline(fu)(); else return res;
