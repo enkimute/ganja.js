@@ -1341,16 +1341,18 @@
 
   // Experimental differential operator.
     var _D = undefined, _DA;
-    Object.defineProperty(res, 'D', {configurable:true,get(){ if (_D) return _D;
-      _DA = Algebra({ p:p,q:q,r:r,basis:options.basis,even:options.even,over:Algebra({dual:2**tot})});      // same algebra, but over dual numbers.
+    Object.defineProperty(res, 'D', {configurable:true,get(){ if (_D) return _D; var totd = basis.length;
+      _DA = Algebra({ p:p,q:q,r:r,basis:options.basis,even:options.even,over:Algebra({dual:totd})});        // same algebra, but over dual numbers.
       _D = (func)=>{
-        var dfunc = _DA.inline(func), totd = 2**tot;                                                        // convert input function to dual algebra
-        return (val)=>{                                                                                     // return a new function (the differentiated func)
+        var dfunc = _DA.inline(func);                                                                       // convert input function to dual algebra
+        return (val,...args)=>{                                                                             // return a new function (the differentiated func)
+          if (!(val instanceof res)) val = res.Scalar(val);
+          args = args.map(x=>{ var r = _DA.Scalar(0); for (var i=0; i<totd; i++) r[i][0]=x[i]; return r;}); // upcast args.
           var dval = _DA.Scalar(0);                                                                         // upcast the input value to the dual numbers
           for (var i=0; i<totd; i++) { dval[i][0] = val[i]; dval[i][1+i] = 1; };                            // fill in coefficients and dual components
-          var rval = dfunc(dval); var res = [...Array(totd)].map(x=>val.slice());                           // call the function in the dual algebra.
-          for (var i=0; i<totd; i++) for (var j=0; j<totd; j++) { res[j][i] = rval[i][j+1]; }               // downcast from dual algebra to Jacobian vector.
-          return res;
+          var rval = dfunc(dval,...args); var r = [...Array(totd)].map(x=>val.slice());                     // call the function in the dual algebra.
+          for (var i=0; i<totd; i++) for (var j=0; j<totd; j++) { r[j][i] = rval[i][j+1]; }                 // downcast from dual algebra to Jacobian vector.
+          return r.length<=2?r[0]:r;
         };      
       }
       return _D;
