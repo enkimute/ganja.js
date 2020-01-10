@@ -1340,23 +1340,24 @@
     }
 
   // Experimental differential operator.
-    var _D = undefined, _DA;
-    Object.defineProperty(res, 'D', {configurable:true,get(){ if (_D) return _D; var totd = basis.length;
-      _DA = Algebra({ p:p,q:q,r:r,basis:options.basis,even:options.even,over:Algebra({dual:totd})});        // same algebra, but over dual numbers.
-      _D = (func)=>{
+    var _D, _DT, _DA, totd = basis.length;
+    function makeD(transpose=false){
+      _DA = _DA || Algebra({ p:p,q:q,r:r,basis:options.basis,even:options.even,over:Algebra({dual:totd})}); // same algebra, but over dual numbers.
+      return (func)=>{
         var dfunc = _DA.inline(func);                                                                       // convert input function to dual algebra
-        return (val,...args)=>{                                                                             // return a new function (the differentiated func)
-          if (!(val instanceof res)) val = res.Scalar(val);
+        return (val,...args)=>{                                                                             // return a new function (the derivative w.r.t 1st param)
+          if (!(val instanceof res)) val = res.Scalar(val);                                                 // allow to be called with scalars.
           args = args.map(x=>{ var r = _DA.Scalar(0); for (var i=0; i<totd; i++) r[i][0]=x[i]; return r;}); // upcast args.
-          var dval = _DA.Scalar(0);                                                                         // upcast the input value to the dual numbers
-          for (var i=0; i<totd; i++) { dval[i][0] = val[i]; dval[i][1+i] = 1; };                            // fill in coefficients and dual components
+          for (var dval=_DA.Scalar(0),i=0; i<totd; i++) { dval[i][0] = val[i]; dval[i][1+i] = 1; };         // fill in coefficients and dual components
           var rval = dfunc(dval,...args); var r = [...Array(totd)].map(x=>val.slice());                     // call the function in the dual algebra.
-          for (var i=0; i<totd; i++) for (var j=0; j<totd; j++) { r[j][i] = rval[i][j+1]; }                 // downcast from dual algebra to Jacobian vector.
-          return r.length<=2?r[0]:r;
-        };      
+          if (transpose) for (var i=0; i<totd; i++) for (var j=0; j<totd; j++) { r[i][j] = rval[i][j+1]; }  // downcast transpose from dual algebra to Jacobian vector.
+          else for (var i=0; i<totd; i++) for (var j=0; j<totd; j++) { r[j][i] = rval[i][j+1]; }            // downcast from dual algebra to Jacobian vector.
+          return r.length<=2?r[0]:r;                                                                        // return derivative or jacobian.
+        }
       }
-      return _D;
-    }});
+    }
+    Object.defineProperty(res, 'D',  {configurable:true,get(){ if (_D) return _D; _D = makeD(false); return _D }});
+    Object.defineProperty(res, 'Dt', {configurable:true,get(){ if (_DT) return _DT; _DT = makeD(true); return _DT }});
 
   // If a function was passed in, translate, call and return its result. Else just return the Algebra.
     if (fu instanceof Function) return res.inline(fu)(); else return res;
