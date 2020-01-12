@@ -923,7 +923,7 @@
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; }`,
                 `#extension GL_OES_standard_derivatives : enable
                  precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos;
-                 void main() { vec3 ldir = normalize(Pos.xyz - vec3(1.0,1.0,2.0));
+                 void main() { vec3 ldir = normalize(Pos.xyz - vec3(2.0,2.0,-4.0));
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
@@ -934,7 +934,7 @@
                  void main() { vec3 ldir = normalize(Pos.xyz - vec3(1.0,1.0,2.0));
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
-                 gl_FragColor = vec4(max(0.3,l)*Col+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+                 gl_FragColor = vec4(max(0.3,l)*Col+vec3(pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
       // Create a font texture, lucida console or otherwise monospaced.
         var fw=33, font = Object.assign(document.createElement('canvas'),{width:(19+94)*fw,height:48}),
             ctx = Object.assign(font.getContext('2d'),{font:'bold 48px lucida console, monospace'}),
@@ -943,7 +943,6 @@
             var specialChars = "∞≅¹²³₀₁₂₃₄₅₆₇₈₉⋀⋁∆⋅"; specialChars.split('').forEach((x,i)=>ctx.fillText(x,(i-33+127)*fw,40));
             // 2.0 gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,94*fw,32,0,gl.RGBA,gl.UNSIGNED_BYTE,font);
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, font);
-
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
       // Font rendering program. Renders billboarded fonts, transforms offset passed as color2.
@@ -1079,10 +1078,21 @@
                 if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
                 if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
                 if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
+                // Motor orbits
+                  if ( e.call && e.length==2 && !e.va3) { var countx=e.dx||32,county=e.dy||32;
+                    var temp=new Float32Array(3*countx*county),o=new Float32Array(3),et=[];
+                    for (var pp=0,ii=0; ii<countx; ii++) for (var jj=0; jj<county; jj++,pp+=3) {
+                      var mot   = e(ii/(countx-1),jj/(county-1));
+                      var point = Element.sw(mot,no);
+                      temp.set(point.slice(1,4),pp);
+                    }//temp.set(sw_mot_orig(e(ii/(countx-1),jj/(county-1)),o),pp);
+                    for (ii=0; ii<countx-1; ii++) for (var jj=0; jj<county; jj++) et.push((ii+0)*county+(jj+0),(ii+0)*county+(jj+1),(ii+1)*county+(jj+1),(ii+0)*county+(jj+0),(ii+1)*county+(jj+1),(ii+1)*county+(jj+0));
+                    e.va3 = createVA(temp,undefined,et.map(x=>x%(countx*county))); e.va3.tcount = (countx-1)*county*2*3;
+                  }
                 // we could also be an object with cached vertex array of triangles ..
-                  if (e instanceof Object && e.data) {
+                  if (e.va || e.va2 || e.va3 || (e instanceof Object && e.data)) {
                     // Create the vertex array and store it for re-use.
-                    if (!e.va) {
+                    if (!e.va3) {
                       var et=[],et2=[],et3=[],lc=0,pc=0,tc=0; e.data.forEach(e=>{
                         if (e instanceof Array && e.length==3) { tc++; e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);et3.push.apply(et3,x.pos); });  var d = {tp:-1}; }
                         else {
@@ -1096,9 +1106,9 @@
                       e.va3 = createVA(et3,undefined); e.va3.tcount = tc*3;
                     }
                     // render the vertex array.
-                    if (e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
-                    if (e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
-                    if (e.va3.tcount) draw(program,gl.TRIANGLES,undefined,[0,0,0],c,r,undefined,e.va3);
+                    if (a.va  && e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
+                    if (a.va2 && e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
+                    if (e.va3 && e.va3.tcount) draw(program,gl.TRIANGLES,undefined,c,[0,0,0],r,undefined,e.va3);
                   }
                 if (alpha) gl.disable(gl.BLEND); // no alpha for text printing.
               // setup a new color
