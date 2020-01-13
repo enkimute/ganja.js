@@ -1079,20 +1079,24 @@
                 if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
                 if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
                 // Motor orbits
+                // Motor orbits
                   if ( e.call && e.length==2 && !e.va3) { var countx=e.dx||32,county=e.dy||32;
                     var temp=new Float32Array(3*countx*county),o=new Float32Array(3),et=[];
-                    for (var pp=0,ii=0; ii<countx; ii++) for (var jj=0; jj<county; jj++,pp+=3) {
-                      var mot   = e(ii/(countx-1),jj/(county-1));
-                      var point = Element.sw(mot,no);
-                      temp.set(point.slice(1,4),pp);
-                    }//temp.set(sw_mot_orig(e(ii/(countx-1),jj/(county-1)),o),pp);
-                    for (ii=0; ii<countx-1; ii++) for (var jj=0; jj<county; jj++) et.push((ii+0)*county+(jj+0),(ii+0)*county+(jj+1),(ii+1)*county+(jj+1),(ii+0)*county+(jj+0),(ii+1)*county+(jj+1),(ii+1)*county+(jj+0));
+                    for (var pp=0,ii=0; ii<countx; ii++) for (var jj=0; jj<county; jj++,pp+=3)
+                      temp.set(Element.sw(e(ii/(countx-1),jj/(county-1)),no).slice(1,4),pp);
+                    for (ii=0; ii<countx-1; ii++) for (var jj=0; jj<county; jj++)
+                      et.push((ii+0)*county+(jj+0),(ii+0)*county+(jj+1),(ii+1)*county+(jj+1),(ii+0)*county+(jj+0),(ii+1)*county+(jj+1),(ii+1)*county+(jj+0));
                     e.va3 = createVA(temp,undefined,et.map(x=>x%(countx*county))); e.va3.tcount = (countx-1)*county*2*3;
+                  }
+                  if ( e.call && e.length==1 && !e.va2) { var countx=e.dx||256;
+                    var temp=new Float32Array(3*countx),o=new Float32Array(3),et=[];
+                    for (var ii=0; ii<countx; ii++) { temp.set(Element.sw(e(ii/(countx-1)),no).slice(1,4),ii*3); if (ii) et.push(ii-1,ii); }
+                    e.va2 = createVA(temp,undefined,et); e.va2.tcount = et.length;
                   }
                 // we could also be an object with cached vertex array of triangles ..
                   if (e.va || e.va2 || e.va3 || (e instanceof Object && e.data)) {
                     // Create the vertex array and store it for re-use.
-                    if (!e.va3) {
+                    if (!e.va3 && !e.va2) {
                       var et=[],et2=[],et3=[],lc=0,pc=0,tc=0; e.data.forEach(e=>{
                         if (e instanceof Array && e.length==3) { tc++; e.forEach(x=>{ while (x.call) x=x.call(); x=interprete(x);et3.push.apply(et3,x.pos); });  var d = {tp:-1}; }
                         else {
@@ -1106,8 +1110,8 @@
                       e.va3 = createVA(et3,undefined); e.va3.tcount = tc*3;
                     }
                     // render the vertex array.
-                    if (a.va  && e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
-                    if (a.va2 && e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
+                    if (e.va  && e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
+                    if (e.va2 && e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
                     if (e.va3 && e.va3.tcount) draw(program,gl.TRIANGLES,undefined,c,[0,0,0],r,undefined,e.va3);
                   }
                 if (alpha) gl.disable(gl.BLEND); // no alpha for text printing.
