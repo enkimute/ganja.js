@@ -672,6 +672,7 @@
               var b0=direction.Grade(0).VLength>0.001,b1=direction.Grade(1).VLength>0.001,b2=direction.Grade(2).VLength>0.001;
               if (!is_flat && b0 && !b1 && !b2) {
                 // Points
+                if (direction.s < 0) { o = Element.Sub(o); }
                 lx=sc*(o.e1); ly=sc*(-o.e2); lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" fill="${color||'green'}"/>`;
               } else if (is_flat && !b0 && b1 && !b2) {
                 // Lines.
