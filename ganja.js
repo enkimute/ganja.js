@@ -646,24 +646,45 @@
             // Numbers change the current color.
               if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
             // All other elements are rendered ..
-              var b1=o.Grade(1).VLength>0.001,b2=o.Grade(2).VLength>0.001,b3=o.Grade(3).VLength>0.001;
-            // Points
-              if (b1 && !b2 && !b3) {
-                o.set(o.Scale(-1/o.Dot(cga2d_ni).s));
+              var einf_part = o.Dot(cga2d_no.Scale(-1));  // O_i + n_o O_oi
+              var eo_part = cga2d_ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
+              if (einf_part * 1e-9 > eo_part) {
+                // direction or dual - nothing to render
+                return "";
+              }
+              var eo_einf_part = eo_part.Dot(cga2d_no.Scale(-1));  // O_oi
+              var eo_only_part = cga2d_ni.Wedge(eo_part).Dot(cga2d_no.Scale(-1));  // O_o
+
+              /* Note: making 1e-6 smaller increases the maximum circle radius before they are drawn as lines */
+              if (eo_einf_part.Length * 1e-6 > eo_only_part.Length) {
+                var is_flat = true;
+                var direction = eo_einf_part;
+              }
+              else {
+                var is_flat = false;
+                var direction = eo_only_part;
+              }
+              // normalize to make the direction unitary
+              var dl = direction.Length;
+              o = o.Scale(1/dl);
+              direction = direction.Scale(1/dl)
+
+              var b0=direction.Grade(0).VLength>0.001,b1=direction.Grade(1).VLength>0.001,b2=direction.Grade(2).VLength>0.001;
+              if (!is_flat && b0 && !b1 && !b2) {
+                // Points
                 lx=sc*(o.e1); ly=sc*(-o.e2); lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" fill="${color||'green'}"/>`;
-              } else if (!b1 && !b2 && b3) { var isLine=cga2d_ni.LDot(o).Length==0;
-              // Lines.
-                if (isLine) {
-                  var loc=cga2d_nno.LDot(o).Div(o), att=cga2d_ni.Dot(o);
-                  lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
-                };
-              // Circles
+              } else if (is_flat && !b0 && b1 && !b2) {
+                // Lines.
+                var loc=cga2d_nno.LDot(o).Div(o), att=cga2d_ni.Dot(o);
+                lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
+              } else if (!is_flat && !b0 && !b1 && b2) {
+                // Circles
                 var loc=o.Div(cga2d_ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
-                var r2=-o.Mul(o.Conjugate).s/(Element.Pow(cga2d_ni.LDot(o),2).s);
+                var r2=o.Mul(o.Conjugate).s;
                 var r = Math.sqrt(Math.abs(r2))*sc;
                 return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
-              } else if (!b1 && b2 &&!b3) {
-              // Point Pairs.
+              } else if (!is_flat && !b0 && b1 && !b2) {
+                // Point Pairs.
                 lr=0; var ei=cga2d_ni,eo=cga2d_no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
                 if (nix==0) { pos = o.Dot(Element.Coeff(4,-1)); sqr=-1; }
                 lx=sc*(pos.e1); ly=sc*(-pos.e2);
@@ -675,6 +696,9 @@
                 var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" fill="${fill}" stroke-width="${lineWidth*0.01}" stroke="${stroke}" stroke-dasharray="${dash_for_r2(sqr, pointRadius*0.03, lineWidth*0.020)}" />`;
                 lx=sc*(pos.e1-attitude.e1); ly=sc*(-pos.e2+attitude.e2);
                 return res2+`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" fill="${fill}" stroke-width="${lineWidth*0.01}" stroke="${stroke}" stroke-dasharray="${dash_for_r2(sqr, pointRadius*0.03, lineWidth*0.020)}" />`;
+              } else {
+                /* Unrecognized */
+                return "";
               }
             // Handle projective 2D and 3D elements.
             }):f.map&&f.map((o,oidx)=>{  if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; } while (o instanceof Function) o=o(); o=(o instanceof Array)?o.map(project):project(o); if (o===undefined) return;
