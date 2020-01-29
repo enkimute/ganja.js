@@ -647,8 +647,8 @@
               if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
             // All other elements are rendered ..
               var einf_part = o.Dot(cga2d_no.Scale(-1));  // O_i + n_o O_oi
-              var eo_part = cga2d_ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
-              if (einf_part * 1e-9 > eo_part) {
+              var eo_part = cga2d_ni.Scale(-1).Dot(o);    // O_o + O_oi n_i
+              if (einf_part.s * 1e-9 > eo_part.s) {
                 // direction or dual - nothing to render
                 return "";
               }
