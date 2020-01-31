@@ -645,6 +645,13 @@
               if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize*0.1||0.1}" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly+=0.14; return res2; }
             // Numbers change the current color.
               if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
+
+              var make_arrow_marker_def = (oidx) => `<defs>
+                <marker id="marker-${oidx}" orient="auto" markerWidth="6" markerHeight="6" refX="5" refY="3">
+                  <path d="M 1 1 L 5 3 L 1 5" stroke-width="1" stroke="${color||'#888'}" fill="none"/>
+                </marker>
+              </defs>`;
+
             // All other elements are rendered ..
               var einf_part = o.Dot(cga2d_no.Scale(-1));  // O_i + n_o O_oi
               var eo_part = cga2d_ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
@@ -673,17 +680,22 @@
               if (!is_flat && b0 && !b1 && !b2) {
                 // Points
                 if (direction.s < 0) { o = Element.Sub(o); }
-                lx=sc*(o.e1); ly=sc*(-o.e2); lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" fill="${color||'green'}"/>`;
+                lx=sc*(o.e1); ly=sc*(-o.e2); lr=0;
+                return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" fill="${color||'green'}"/>`;
               } else if (is_flat && !b0 && b1 && !b2) {
                 // Lines.
                 var loc=cga2d_nno.LDot(o).Div(o), att=cga2d_ni.Dot(o);
-                lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
+                lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180;
+                return `${make_arrow_marker_def(oidx)}<path style="pointer-events:none" d="M ${[-10, -5, 0, 5, 10].map(xoff => `${lx+xoff} ${ly}`).join(' L ')}" stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})" marker-mid="url(#marker-${oidx})" fill="none"/>`;
               } else if (!is_flat && !b0 && !b1 && b2) {
                 // Circles
                 var loc=o.Div(cga2d_ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
                 var r2=o.Mul(o.Conjugate).s;
                 var r = Math.sqrt(Math.abs(r2))*sc;
-                return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
+                return `${make_arrow_marker_def(oidx)}<path d="
+                  M ${lx - r} ${ly}
+                  a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${2*r} 0
+                  a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${-2*r} 0"  marker-mid="url(#marker-${oidx})"  marker-end="url(#marker-${oidx})" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
               } else if (!is_flat && !b0 && b1 && !b2) {
                 // Point Pairs.
                 lr=0; var ei=cga2d_ni,eo=cga2d_no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
