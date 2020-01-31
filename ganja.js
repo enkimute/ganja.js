@@ -595,7 +595,7 @@
     // An optional second parameter is an options object { width, height, animate, camera, scale, grid, canvas }
       static graph(f,options) {
       // Store the original input
-        if (!f) return; var origf=f;
+        if (!f) return; var origf=f,marker_defs={};
       // generate default options.
         options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot<4?Element.Scalar(1):new Element([0.7071067690849304, 0, 0, 0, 0, 0, 0, 0, 0, 0.7071067690849304, 0, 0, 0, 0, 0, 0]));
         if (options.conformal && tot==4) var cga2d_ni = options.ni||this.Coeff(4,1,3,1), cga2d_no = options.no||this.Coeff(4,0.5,3,-0.5), cga2d_nno = cga2d_no.Scale(-1);
@@ -618,13 +618,13 @@
             lx=-2;ly=-1.85;lr=0;color='#444';
           // Create the svg element. (master template string till end of function)
             var svg=new DOMParser().parseFromString(`<SVG onmousedown="if(evt.target==this)this.sel=undefined" viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none">
-            // Add a grid (option)
-            ${options.grid?(()=>{
-              var n = Math.floor(10 / options.scale);
-              return n>50?'':[...Array(2*n + 1)].map((x,xi)=>`<line x1="-10" y1="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" x2="10" y2="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}" y2="10" x2="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}"  stroke-width="0.005" stroke="#CCC"/>`);
+            ${// Add a grid (option)
+              options.grid?(()=>{
+                var n = Math.floor(10 / options.scale);
+                return n>50?'':[...Array(2*n + 1)].map((x,xi)=>`<line x1="-10" y1="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" x2="10" y2="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}" y2="10" x2="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}"  stroke-width="0.005" stroke="#CCC"/>`).join('');
             })():''}
-            // Handle conformal 2D elements.
-            ${options.conformal?f.map&&f.map((o,oidx)=>{
+            ${// Handle conformal 2D elements.
+              options.conformal?f.map&&f.map((o,oidx)=>{
             // Optional animation handling.
               if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; }
             // Resolve expressions passed in.
@@ -646,11 +646,12 @@
             // Numbers change the current color.
               if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
 
-              var make_arrow_marker_def = (oidx) => `<defs>
-                <marker id="marker-${oidx}" orient="auto" markerWidth="6" markerHeight="6" refX="5" refY="3">
-                  <path d="M 1 1 L 5 3 L 1 5" stroke-width="1" stroke="${color||'#888'}" fill="none"/>
-                </marker>
-              </defs>`;
+              var make_arrow_marker_def = (color) => {
+                if (marker_defs[color]) return ''; marker_defs[color]=true;
+                return `<defs>
+                  <marker id="marker-${color}" orient="auto" markerWidth="10" markerHeight="10" refX="9" refY="5"><path d="M 1 1 L 9 5 L 1 10" stroke-width="1" stroke="${color||'#888'}" fill="none"/></marker>
+                </defs>`;
+              };
 
             // All other elements are rendered ..
               var einf_part = o.Dot(cga2d_no.Scale(-1));  // O_i + n_o O_oi
@@ -686,16 +687,16 @@
                 // Lines.
                 var loc=cga2d_nno.LDot(o).Div(o), att=cga2d_ni.Dot(o);
                 lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180;
-                return `${make_arrow_marker_def(oidx)}<path style="pointer-events:none" d="M ${[-10, -5, 0, 5, 10].map(xoff => `${lx+xoff} ${ly}`).join(' L ')}" stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})" marker-mid="url(#marker-${oidx})" fill="none"/>`;
+                return `${make_arrow_marker_def(color||'#888')}<path style="pointer-events:none" d="M ${[-10, -5, 0, 5, 10].map(xoff => `${lx+xoff} ${ly}`).join(' L ')}" stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})" marker-mid="url(#marker-${color||'#888'})" fill="none"/>`;
               } else if (!is_flat && !b0 && !b1 && b2) {
                 // Circles
                 var loc=o.Div(cga2d_ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
                 var r2=o.Mul(o.Conjugate).s;
                 var r = Math.sqrt(Math.abs(r2))*sc;
-                return `${make_arrow_marker_def(oidx)}<path d="
+                return `${make_arrow_marker_def(color||'#888')}<path d="
                   M ${lx - r} ${ly}
                   a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${2*r} 0
-                  a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${-2*r} 0"  marker-mid="url(#marker-${oidx})"  marker-end="url(#marker-${oidx})" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
+                  a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${-2*r} 0"  marker-mid="url(#marker-${color||'#888'})"  marker-end="url(#marker-${color||'#888'})" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
               } else if (!is_flat && !b0 && b1 && !b2) {
                 // Point Pairs.
                 lr=0; var ei=cga2d_ni,eo=cga2d_no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
@@ -714,7 +715,7 @@
                 return "";
               }
             // Handle projective 2D and 3D elements.
-            }):f.map&&f.map((o,oidx)=>{  if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; } while (o instanceof Function) o=o(); o=(o instanceof Array)?o.map(project):project(o); if (o===undefined) return;
+            }).join(''):f.map&&f.map((o,oidx)=>{  if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; } while (o instanceof Function) o=o(); o=(o instanceof Array)?o.map(project):project(o); if (o===undefined) return;
             // line segments and polygons
               if (o instanceof Array && o.length)  { lx=ly=lr=0; o.forEach((o)=>{while (o.call) o=o(); lx+=options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]];ly+=options.scale*o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6||drm[1]==14)?-1:1)*options.scale*o[drm[2]]/o[drm[1]]+','+options.scale*o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${options.scale*o[0][drm[3]]/o[0][drm[1]]} x2=${options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${options.scale*o[1][drm[3]]/o[1][drm[1]]} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}"/>`; }
             // svg
@@ -729,7 +730,7 @@
               if (o[to2d[2]]**2+o[to2d[3]]**2>0.0001) { var l=Math.sqrt(o[to2d[2]]**2+o[to2d[3]]**2); o[to2d[2]]/=l; o[to2d[3]]/=l; o[to2d[1]]/=l; lx=0.5; ly=options.scale*((drm[1]==6)?-1:-1)*o[to2d[1]]; lr=-Math.atan2(o[to2d[2]],o[to2d[3]])/Math.PI*180; var res2=`<LINE style="pointer-events:none" x1=-10 y1=${ly} x2=10 y2=${ly} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}" transform="rotate(${lr},0,0)"/>`; ly-=0.05; return res2; }
             // Vectors
               if (o[to2d[4]]**2+o[to2d[5]]**2>0.0001) { lr=0; ly+=0.05; lx+=0.1; var res2=`<LINE style="pointer-events:none" x1=${lx} y1=${ly} x2=${lx-o.e02} y2=${ly+o.e01} stroke-width="0.005" stroke="${color||'#888'}"/>`; ly=ly+o.e01/4*3-0.05; lx=lx-o.e02/4*3; return res2; }
-            }).join()}`,'text/html').body;
+            }).join('')}`,'text/html').body;
           // return the inside of the created svg element.
             return svg.removeChild(svg.firstChild);
           };
