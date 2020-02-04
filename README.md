@@ -80,7 +80,9 @@ And require it in your script :
 var Algebra=require('ganja.js');
 ```
 
-Or in the browser, just include the ganja.js script. (ganja.js has no dependencies - just 20.0kb on the wire)
+Or in the browser, just include the ganja.js script. (ganja.js has no dependencies)
+
+![npm](https://img.shields.io/npm/v/ganja.js)
 
 ```html
 <SCRIPT SRC="https://unpkg.com/ganja.js"></SCRIPT>
