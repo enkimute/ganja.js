@@ -598,7 +598,7 @@
         if (!f) return; var origf=f;
       // generate default options.
         options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot<4?Element.Scalar(1):new Element([0.7071067690849304, 0, 0, 0, 0, 0, 0, 0, 0, 0.7071067690849304, 0, 0, 0, 0, 0, 0]));
-        if (options.conformal && tot==4) var cga2d_ni = options.ni||this.Coeff(4,1,3,1), cga2d_no = options.no||this.Coeff(4,0.5,3,-0.5), cga2d_nno = cga2d_no.Scale(-1);
+        if (options.conformal && tot==4) var ni = options.ni||this.Coeff(4,1,3,1), no = options.no||this.Coeff(4,0.5,3,-0.5), minus_no = no.Scale(-1);
         var ww=options.width, hh=options.height, cvs=options.canvas, tpcam=new Element([0,0,0,0,0,0,0,0,0,0,0,-5,0,0,1,0]),tpy=this.Coeff(4,1),tp=new Element(),
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.
         project=(o)=>{ if (!o) return o; while (o.call) o=o(); return (tot==4 && (o.length==16))?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):(o.length==2**tot)?Element.sw(options.camera,o):o;};
@@ -640,29 +640,29 @@
                 return `${width} ${width}`;
               };
             // Arrays are rendered as segments or polygons. (2 or more elements)
-              if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o.Scale(-1/o.Dot(cga2d_ni).s); }); o.forEach((o)=>{lx+=sc*(o.e1);ly+=sc*(-o.e2)});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(sc*o.e1+','+(-o.e2*sc)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1*sc} y1=${-o[0].e2*sc} x2=${o[1].e1*sc} y2=${-o[1].e2*sc} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}"/>`; }
+              if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o.Scale(-1/o.Dot(ni).s); }); o.forEach((o)=>{lx+=sc*(o.e1);ly+=sc*(-o.e2)});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(sc*o.e1+','+(-o.e2*sc)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1*sc} y1=${-o[0].e2*sc} x2=${o[1].e1*sc} y2=${-o[1].e2*sc} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}"/>`; }
             // Strings are rendered at the current cursor position.
               if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize*0.1||0.1}" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly+=0.14; return res2; }
             // Numbers change the current color.
               if (typeof o =='number') { color='#'+(o+(1<<25)).toString(16).slice(-6); return ''; };
             // All other elements are rendered ..
-              var einf_part = o.Dot(cga2d_no.Scale(-1));  // O_i + n_o O_oi
-              var eo_part = cga2d_ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
-              if (einf_part.VLength * 1e-6 > eo_part.VLength) {
+              var ni_part = o.Dot(no.Scale(-1));  // O_i + n_o O_oi
+              var no_part = ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
+              if (ni_part.VLength * 1e-6 > no_part.VLength) {
                 // direction or dual - nothing to render
                 return "";
               }
-              var eo_einf_part = eo_part.Dot(cga2d_no.Scale(-1));  // O_oi
-              var eo_only_part = cga2d_ni.Wedge(eo_part).Dot(cga2d_no.Scale(-1));  // O_o
+              var no_ni_part = no_part.Dot(no.Scale(-1));  // O_oi
+              var no_only_part = ni.Wedge(no_part).Dot(no.Scale(-1));  // O_o
 
               /* Note: making 1e-6 smaller increases the maximum circle radius before they are drawn as lines */
-              if (eo_einf_part.VLength * 1e-6 > eo_only_part.VLength) {
+              if (no_ni_part.VLength * 1e-6 > no_only_part.VLength) {
                 var is_flat = true;
-                var direction = eo_einf_part;
+                var direction = no_ni_part;
               }
               else {
                 var is_flat = false;
-                var direction = eo_only_part;
+                var direction = no_only_part;
               }
               // normalize to make the direction unitary
               var dl = direction.Length;
@@ -676,17 +676,17 @@
                 lx=sc*(o.e1); ly=sc*(-o.e2); lr=0; return res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" fill="${color||'green'}"/>`;
               } else if (is_flat && !b0 && b1 && !b2) {
                 // Lines.
-                var loc=cga2d_nno.LDot(o).Div(o), att=cga2d_ni.Dot(o);
+                var loc=minus_no.LDot(o).Div(o), att=ni.Dot(o);
                 lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
               } else if (!is_flat && !b0 && !b1 && b2) {
                 // Circles
-                var loc=o.Div(cga2d_ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
+                var loc=o.Div(ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
                 var r2=o.Mul(o.Conjugate).s;
                 var r = Math.sqrt(Math.abs(r2))*sc;
                 return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
               } else if (!is_flat && !b0 && b1 && !b2) {
                 // Point Pairs.
-                lr=0; var ei=cga2d_ni,eo=cga2d_no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
+                lr=0; var ei=ni,eo=no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
                 if (nix==0) { pos = o.Dot(Element.Coeff(4,-1)); sqr=-1; }
                 lx=sc*(pos.e1); ly=sc*(-pos.e2);
                 if (sqr==0) return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" stroke-width="${lineWidth*0.01}" fill="none" stroke="${color||'green'}"/>`;
@@ -723,7 +723,7 @@
           };
         // Create the initial svg and install the mousehandlers.
           res=build(f); res.value=f; res.options=options;
-          res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return;var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);x/=options.scale;y/=options.scale; if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(cga2d_no).Add(cga2d_ni.Scale(0.5*(x*x+y*y))) ) } else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; } res.dispatchEvent(new CustomEvent('input')) };
+          res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return;var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);x/=options.scale;y/=options.scale; if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(no).Add(ni.Scale(0.5*(x*x+y*y))) ) } else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; } res.dispatchEvent(new CustomEvent('input')) };
           return res;
         }
       // 1d and 2d functions are rendered on a canvas.
@@ -994,16 +994,16 @@
                 `precision highp float; uniform vec3 color; varying vec4 Pos; varying vec2 tex;
                  uniform sampler2D texm; void main() { vec4 c = texture2D(texm,tex); if (c.a<0.01) discard; gl_FragColor = vec4(color,c.a);}`);
       // Conformal space needs a bit extra magic to extract euclidean parametric representations.
-        if (tot==5 && options.conformal) var ninf = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
+        if (tot==5 && options.conformal) var ni = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
         var interprete = (x)=>{
           if (!(x instanceof Element)) return { tp:0 };
           // tp = { 0:unknown 1:point 2:line, 3:plane, 4:circle, 5:sphere
-          var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ninf.Wedge(x), ipnix = ninf.LDot(x),
+          var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ni.Wedge(x), ipnix = ni.LDot(x),
               attitude, pos, normal, tg,btg,epsilon = 0.001/(options.scale||1), I3=Element.Coeff(16,-1);
           var x2zero = Math.abs(X2) < epsilon, ipnixzero = ipnix.VLength < epsilon, opnixzero = opnix.VLength < epsilon;
           if (opnixzero && ipnixzero) {                 // free flat
           } else if (opnixzero && !ipnixzero) {         // bound flat (lines)
-            attitude = no.Wedge(ninf).LDot(x);
+            attitude = no.Wedge(ni).LDot(x);
             weight2 = Math.abs(attitude.LDot(attitude).s)**.5;
             pos = attitude.LDot(x.Reverse); //Inverse);
             pos = [-pos.e15/pos.e45,-pos.e25/pos.e45,-pos.e34/pos.e45];
@@ -1020,14 +1020,14 @@
             }
           } else if (!opnixzero && ipnixzero) {         // dual bound flat
           } else if (x2zero) {                          // bound vec,biv,tri (points)
-            attitude = ninf.Wedge(no).LDot(ninf.Wedge(x));
-            pos = [...(Element.LDot(1/(ninf.LDot(x)).s,x)).slice(1,4)].map(x=>-x);
+            attitude = ni.Wedge(no).LDot(ni.Wedge(x));
+            pos = [...(Element.LDot(1/(ni.LDot(x)).s,x)).slice(1,4)].map(x=>-x);
             tp=1;
           } else if (!x2zero) {                          // round (point pair,circle,sphere)
             tp = x.Grade(3).VLength?4:x.Grade(2).VLength?6:5;
-            var nix  = ninf.Wedge(x), nix2 = (nix.Mul(nix)).s;
-            attitude = ninf.Wedge(no).LDot(nix);
-            pos = [...(x.Mul(ninf).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
+            var nix  = ni.Wedge(x), nix2 = (nix.Mul(nix)).s;
+            attitude = ni.Wedge(no).LDot(nix);
+            pos = [...(x.Mul(ni).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
             weight2 = Math.abs((x.LDot(x)).s / nix2)**.5;
             if (tp==4) {
               if (x.LDot(x).s < 0) { weight2 = -weight2; }
@@ -1285,7 +1285,7 @@
             if (sel==-3) { var ct = Math.cos(options.h||0), st= Math.sin(options.h||0), ct2 = Math.cos(options.p||0), st2 = Math.sin(options.p||0);
               if (e.shiftKey) { options.posy = (options.posy||0)+my; } else { options.posx = (options.posx||0)+mx*ct+my*st; options.posz = (options.posz||0)+mx*-st+my*ct*ct2; } if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));return; }; if (sel < 0) return;
             x.pos[0] += (e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my;
-            canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
+            canvas.value[sel].set(Element.Mul(ni,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
         }
