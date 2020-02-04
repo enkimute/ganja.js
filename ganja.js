@@ -1344,7 +1344,7 @@
            // unary - and + are handled seperately from syntax ..
            for (var ti=0,t,si; t=tokens[ti];ti++)
              if (t[1]=="-" && (left()<0 || (tokens[left()]||[4])[0]==4)) glue(ti,right(),5,["Element.Sub(",tokens[right()],")"]);   // unary minus works on all types.
-             else if (t[1]=="+" && (tokens[left()]||[0])[0]==4) glue(ti,ti+1);                                                      // unary plus is glued, only on scalars.
+             else if (t[1]=="+" && (tokens[left()]||[0])[0]==4 && (tokens[left()]||[0])[1][0]!=".") glue(ti,ti+1);                   // unary plus is glued, only on scalars.
            // now process all operators in the syntax list ..
            for (var si=0,s; s=syntax[si]; si++) for (var ti=s[0][3]?tokens.length-1:0,t; t=tokens[ti];s[0][3]?ti--:ti++) for (var opi=0,op; op=s[opi]; opi++) if (t[1]==op[0]) {
              // exception case .. ".Normalized" and ".Length" properties are re-routed (so they work on scalars etc ..)
