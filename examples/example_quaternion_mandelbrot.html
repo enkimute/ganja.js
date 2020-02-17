@@ -25,7 +25,7 @@ Algebra(0,2,()=>{
         rot=Math.cos(n/20) + Math.sin(n/20)*axis;
         
   // Rotate red around the 1,1,1 axis and return the resulting color      
-    return (rot>>>red).slice(1);
+    return (rot*red*rot.Conjugate).slice(1);
 
   }));
 
