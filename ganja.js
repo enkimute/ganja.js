@@ -500,7 +500,7 @@
       // Map elements in array
         if (b instanceof Array && !b.Add) return b.map(x=>Element.sw(a,x));
       // Call through. no specific generated code for it so just perform the muls.
-        a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b).Mul(a.Conjugate);
+        a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b).Mul(a.Reverse);
       }
 
     // Division - scalars or cal through to element method.
@@ -926,7 +926,7 @@
               if (clr){
                 var b3=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b3);
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(clr), gl.STATIC_DRAW);
-                gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(1);
+                gl.vertexAttribPointer(texc?2:1, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(texc?2:1);
               }
               if (idx) {
                 var b4=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, b4);
@@ -963,13 +963,14 @@
         }
       // Program for the geometry. Derivative based normals. Basic lambert shading.
         var program = compile(`attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
-                 void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; }`,
+                 void main() { gl_PointSize=12.0; Pos=mv*position; gl_Position = p*Pos; }`,
                 `#extension GL_OES_standard_derivatives : enable
                  precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos;
                  void main() { vec3 ldir = normalize(Pos.xyz - vec3(2.0,2.0,-4.0));
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
-                 gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+                 float distanceToCenter = length(gl_PointCoord - vec2(0.5)); if (distanceToCenter > 0.45) discard;
+                 gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0-max(0.0,distanceToCenter-0.4)*10.);  }`);
         var programcol = compile(`attribute vec4 position; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; Col=col; }`,
                 `#extension GL_OES_standard_derivatives : enable
@@ -978,6 +979,10 @@
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.3,l)*Col+vec3(pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+        var programmot = compile(`attribute vec4 position; attribute vec2 texc; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2;
+                 void main() { gl_PointSize=2.0; float blend=fract(color2.x+texc.r)*0.5; Pos=mv*(position*(1.0-blend) + (blend)*vec4(col,1.0)); gl_Position = p*Pos; Col=vec3(length(col-position.xyz)*4.); gl_PointSize = 8.0 -  Col.x; Col.y=sin(blend*2.*3.1415); }`,
+                `precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; varying vec3 Col; 
+                 void main() {  float distanceToCenter = length(gl_PointCoord - vec2(0.5));gl_FragColor = vec4(1.0-pow(Col.x,2.0),0.0,0.0,(.6-Col.x*0.05)*(distanceToCenter<0.5?1.0:0.0)*Col.y);  }`);
       // Create a font texture, lucida console or otherwise monospaced.
         var fw=33, font = Object.assign(document.createElement('canvas'),{width:(19+94)*fw,height:48}),
             ctx = Object.assign(font.getContext('2d'),{font:'bold 48px lucida console, monospace'}),
@@ -1120,7 +1125,7 @@
                 if (alpha) { gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-alpha); }
                 if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
                 if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
-                if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
+                if (p.length) { gl.enable(gl.BLEND); draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; gl.disable(gl.BLEND); }
                 // Motor orbits
                 // Motor orbits
                   if ( e.call && e.length==2 && !e.va3) { var countx=e.dx||32,county=e.dy||32;
@@ -1153,7 +1158,9 @@
                       e.va3 = createVA(et3,undefined); e.va3.tcount = tc*3;
                     }
                     // render the vertex array.
+                    gl.enable(gl.BLEND);
                     if (e.va  && e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
+                    gl.disable(gl.BLEND);
                     if (e.va2 && e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
                     if (e.va3 && e.va3.tcount) draw(program,gl.TRIANGLES,undefined,c,[0,0,0],r,undefined,e.va3);
                   }
@@ -1215,8 +1222,25 @@
               for (ii=0; ii<countx-1; ii++) for (var jj=0; jj<county; jj++) et.push((ii+0)*county+(jj+0),(ii+0)*county+(jj+1),(ii+1)*county+(jj+1),(ii+0)*county+(jj+0),(ii+1)*county+(jj+1),(ii+1)*county+(jj+0));
               e.va = createVA(temp,undefined,et.map(x=>x%(countx*county))); e.va.tcount = (countx-1)*county*2*3;
             }
+          // Experimental display of motors using particle systems.
+            if (e instanceof Object && e.motor) {
+              if (!e.va) {
+                 var vtx=[], tx=[], vtx2=[];
+                 for (var i=0; i<(e.zRange===0?10000:60000); i++) {
+                   var p  = Element.Trivector(Math.random()*2-1,Math.random()*2-1,(e.zRange===0?0:1)*(Math.random()*2-1),1);
+                   var p2 = Element.sw(e.motor,p);
+                   tx.push(Math.random(), Math.random());
+                   vtx.push(...p.slice(11,14).reverse()); vtx2.push(...p2.slice(11,14).reverse());
+                 }  
+                 e.va = createVA(vtx,tx,undefined,vtx2); e.va.tcount = vtx.length/3;
+              } 
+              var time = performance.now()/200;
+              gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.DEPTH_TEST);
+              draw(programmot, gl.POINTS,t,c,[time%1,0,0],r,undefined,e.va);
+              gl.disable(gl.BLEND); gl.enable(gl.DEPTH_TEST);
+            }
           // we could also be an object with cached vertex array of triangles ..
-            if (e.va || (e instanceof Object && e.data)) {
+            else if (e.va || (e instanceof Object && e.data)) {
               // Create the vertex array and store it for re-use.
               if (!e.va) {
                 if (e.idx) {
