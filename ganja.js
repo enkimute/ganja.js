@@ -980,7 +980,7 @@
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.3,l)*Col+vec3(pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
         var programmot = compile(`attribute vec4 position; attribute vec2 texc; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2;
-                 void main() { gl_PointSize=2.0; float blend=fract(color2.x+texc.r)*0.5; Pos=mv*(position*(1.0-blend) + (blend)*vec4(col,1.0)); gl_Position = p*Pos; Col=vec3(length(col-position.xyz)*4.); gl_PointSize = 8.0 -  Col.x; Col.y=sin(blend*2.*3.1415); }`,
+                 void main() { gl_PointSize=2.0; float blend=fract(color2.x+texc.r)*0.5; Pos=mv*(position*(1.0-blend) + (blend)*vec4(col,1.0)); gl_Position = p*Pos; Col=vec3(length(col-position.xyz)*1.); gl_PointSize = 8.0 -  Col.x; Col.y=sin(blend*2.*3.1415); }`,
                 `precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; varying vec3 Col; 
                  void main() {  float distanceToCenter = length(gl_PointCoord - vec2(0.5));gl_FragColor = vec4(1.0-pow(Col.x,2.0),0.0,0.0,(.6-Col.x*0.05)*(distanceToCenter<0.5?1.0:0.0)*Col.y);  }`);
       // Create a font texture, lucida console or otherwise monospaced.
@@ -1224,17 +1224,20 @@
             }
           // Experimental display of motors using particle systems.
             if (e instanceof Object && e.motor) {
-              if (!e.va) {
+              if (!e.va || e.recalc) {
+                 var seed = 1; function random() { var x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
+                 e.xRange = e.xRange === undefined ? 1:e.xRange; e.yRange = e.yRange === undefined ? 1:e.yRange; e.zRange = e.zRange === undefined ? 1:e.zRange;
                  var vtx=[], tx=[], vtx2=[];
-                 for (var i=0; i<(e.zRange===0?10000:60000); i++) {
-                   var p  = Element.Trivector(Math.random()*2-1,Math.random()*2-1,(e.zRange===0?0:1)*(Math.random()*2-1),1);
+                 for (var i=0; i<(e.zRange===0?5000:60000); i++) {
+                   var p  = Element.Trivector(random()*(2*e.xRange)-e.xRange,random()*2*e.yRange-e.yRange,random()*2*e.zRange-e.zRange,1);
                    var p2 = Element.sw(e.motor,p);
-                   tx.push(Math.random(), Math.random());
+                   tx.push(random(), random());
                    vtx.push(...p.slice(11,14).reverse()); vtx2.push(...p2.slice(11,14).reverse());
                  }  
                  e.va = createVA(vtx,tx,undefined,vtx2); e.va.tcount = vtx.length/3;
+                 e.recalc = false;
               } 
-              var time = performance.now()/200;
+              var time = performance.now()/1000;
               gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.DEPTH_TEST);
               draw(programmot, gl.POINTS,t,c,[time%1,0,0],r,undefined,e.va);
               gl.disable(gl.BLEND); gl.enable(gl.DEPTH_TEST);
