@@ -969,8 +969,9 @@
                  void main() { vec3 ldir = normalize(Pos.xyz - vec3(2.0,2.0,-4.0));
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
-                 float distanceToCenter = length(gl_PointCoord - vec2(0.5)); if (distanceToCenter > 0.45) discard;
-                 gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0-max(0.0,distanceToCenter-0.4)*10.);  }`);
+                 //float distanceToCenter = length(gl_PointCoord - vec2(0.5)); if (distanceToCenter > 0.45) discard;
+                 //gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0-max(0.0,distanceToCenter-0.4)*10.);  }`);
+                 gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
         var programcol = compile(`attribute vec4 position; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; Col=col; }`,
                 `#extension GL_OES_standard_derivatives : enable
