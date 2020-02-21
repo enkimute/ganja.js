@@ -1126,7 +1126,6 @@
                 if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
                 if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
                 // Motor orbits
-                // Motor orbits
                   if ( e.call && e.length==2 && !e.va3) { var countx=e.dx||32,county=e.dy||32;
                     var temp=new Float32Array(3*countx*county),o=new Float32Array(3),et=[];
                     for (var pp=0,ii=0; ii<countx; ii++) for (var jj=0; jj<county; jj++,pp+=3)
@@ -1140,8 +1139,31 @@
                     for (var ii=0; ii<countx; ii++) { temp.set(Element.sw(e(ii/(countx-1)),no).slice(1,4),ii*3); if (ii) et.push(ii-1,ii); }
                     e.va2 = createVA(temp,undefined,et); e.va2.tcount = et.length;
                   }
+                // Experimental display of motors using particle systems.
+                  if (e instanceof Object && e.motor) {
+                    if (!e.va || e.recalc) {
+                       var seed = 1; function random() { var x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
+                       e.xRange = e.xRange === undefined ? 1:e.xRange; e.yRange = e.yRange === undefined ? 1:e.yRange; e.zRange = e.zRange === undefined ? 1:e.zRange;
+                       var vtx=[], tx=[], vtx2=[];
+                       for (var i=0; i<(e.zRange*e.xRange*e.yRange===0?2500:Math.pow(e.zRange*e.xRange*e.yRange,1/3)*6000); i++) {
+                         var [x,y,z] = [random()*(2*e.xRange)-e.xRange,random()*2*e.yRange-e.yRange,random()*2*e.zRange-e.zRange];
+                         var xyz = (x*x+y*y+z*z)*0.5;
+                         var p  = Element.Vector(x,y,z,xyz-0.5,xyz+0.5);
+                         var p2 = Element.sw(e.motor,p);
+                         var d = p2[5]-p2[4]; p2[1]/=d; p2[2]/=d; p2[3]/=d;
+                         tx.push(random(), random());
+                         vtx.push(...p.slice(1,4)); vtx2.push(...p2.slice(1,4));
+                       }  
+                       e.va = createVA(vtx,tx,undefined,vtx2); e.va.tcount = vtx.length/3;
+                       e.recalc = false;
+                    } 
+                    var time = performance.now()/1000;
+                    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.DEPTH_TEST);
+                    draw(programmot, gl.POINTS,t,c,[time%1,0,0],r,undefined,e.va);
+                    gl.disable(gl.BLEND); gl.enable(gl.DEPTH_TEST);
+                  }
                 // we could also be an object with cached vertex array of triangles ..
-                  if (e.va || e.va2 || e.va3 || (e instanceof Object && e.data)) {
+                  else if (e.va || e.va2 || e.va3 || (e instanceof Object && e.data)) {
                     // Create the vertex array and store it for re-use.
                     if (!e.va3 && !e.va2) {
                       var et=[],et2=[],et3=[],lc=0,pc=0,tc=0; e.data.forEach(e=>{
