@@ -366,16 +366,28 @@
       Div  (b,res) { return this.Mul(b.Inverse,res); }
       LDiv (b,res) { return b.Inverse.Mul(this,res); }
 
-    // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.
+    // Taylor exp - for PGA bivectors in 2D and 3D closed form solution is used.
       Exp  ()      {
         if (options.dual) { var f=Math.exp(this.s); return this.map((x,i)=>i?x*f:f); }
-        if (r==1 && tot<=4 && this[0]==0 && !options.over) {
-          var sq = (tot==4)?-(this[8]**2+this[9]**2+this[10]**2):this.Mul(this).s;  if (sq==0) { var res = this.slice();res[0]+=1; return res; }
-          var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
-          var res = this.Scale( Math.sinh(l)/l ); res[0]=Math.cosh(l); return res;
+        if (r==1 && tot<=4 && Math.abs(this[0])<1E-9 && !options.over) {
+           var u = Math.sqrt(Math.abs(this.Dot(this).s)); if (Math.abs(u)<1E-5) return this.Add(Element.Scalar(1));
+           var v = this.Wedge(this).Scale(-1/(2*u)); 
+           var res2 = Element.Add(Element.Sub(Math.cos(u),v.Scale(Math.sin(u))),Element.Div(Element.Mul((Element.Add(Math.sin(u),v.Scale(Math.cos(u)))),this),(Element.Add(u,v))));
+           return res2;       
         }
         var res = Element.Scalar(1), y=1, M= this.Scale(1), N=this.Scale(1); for (var x=1; x<15; x++) { res=res.Add(M.Scale(1/y)); M=M.Mul(N); y=y*(x+1); }; return res;
       }
+      
+    // Log - only for up to 3D PGA for now
+      Log () {
+        if (r!=1 || tot>4 || options.over) return;
+        var b = this.Grade(2), bdb = Element.Dot(b,b);
+        if (Math.abs(bdb.s)<=1E-5) return this.s<0?b.Scale(-1):b;
+        var s = Math.sqrt(-bdb), bwb = Element.Wedge(b,b); 
+        if (Math.abs(bwb.e0123)<=1E-5) return b.Scale(Math.atan2(s,this.s)/s);
+        var p = bwb.Scale(-1/(2*s));
+        return Element.Div(Element.Mul(Element.Mul((Element.Add(Math.atan2(s,this.s),Element.Div(p,this.s))),b),(Element.Sub(s,p))),(Element.Mul(s,s)));        
+      }  
 
     // Helper for efficient inverses. (custom involutions - negates grades in arguments).
       Map () { var res=new Element(); return super.Map(res,...arguments); }
@@ -629,6 +641,7 @@
               if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; }
             // Resolve expressions passed in.
               while (o.call) o=o();
+              if (options.ipns && o instanceof Element) o = o.Dual;
               var sc = options.scale;
               var lineWidth = options.lineWidth || 1;
               var pointRadius = options.pointRadius || 1;
@@ -970,6 +983,11 @@
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+        var programPoint = compile(`attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
+                 void main() { gl_PointSize=${((options.pointRadius||1)*8.0).toFixed(2)}; Pos=mv*position; gl_Position = p*Pos; }`,
+                `precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos;
+                 void main() {  float distanceToCenter = length(gl_PointCoord - vec2(0.5)); if (distanceToCenter>0.5) discard; 
+                 gl_FragColor = vec4(color+color2, (distanceToCenter<0.5?1.0:0.0));  }`);
         var programcol = compile(`attribute vec4 position; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; Col=col; }`,
                 `#extension GL_OES_standard_derivatives : enable
@@ -982,6 +1000,7 @@
                  void main() { gl_PointSize=2.0; float blend=fract(color2.x+texc.r)*0.5; Pos=mv*(position*(1.0-blend) + (blend)*vec4(col,1.0)); gl_Position = p*Pos; Col=vec3(length(col-position.xyz)*1.); gl_PointSize = 8.0 -  Col.x; Col.y=sin(blend*2.*3.1415); }`,
                 `precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; varying vec3 Col; 
                  void main() {  float distanceToCenter = length(gl_PointCoord - vec2(0.5));gl_FragColor = vec4(1.0-pow(Col.x,2.0),0.0,0.0,(.6-Col.x*0.05)*(distanceToCenter<0.5?1.0:0.0)*Col.y);  }`);
+        gl.lineWidth(options.lineWidth||1); // doesn't work yet (nobody supports it)
       // Create a font texture, lucida console or otherwise monospaced.
         var fw=33, font = Object.assign(document.createElement('canvas'),{width:(19+94)*fw,height:48}),
             ctx = Object.assign(font.getContext('2d'),{font:'bold 48px lucida console, monospace'}),
@@ -1001,6 +1020,7 @@
         if (tot==5 && options.conformal) var ni = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
         var interprete = (x)=>{
           if (!(x instanceof Element)) return { tp:0 };
+          if (options.ipns) x=x.Dual;
           // tp = { 0:unknown 1:point 2:line, 3:plane, 4:circle, 5:sphere
           var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ni.Wedge(x), ipnix = ni.LDot(x),
               attitude, pos, normal, tg,btg,epsilon = 0.001/(options.scale||1), I3=Element.Coeff(16,-1);
@@ -1124,7 +1144,7 @@
                 if (alpha) { gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-alpha); }
                 if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
                 if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
-                if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
+                if (p.length) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); draw(programPoint,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; gl.disable(gl.BLEND); }
                 // Motor orbits
                   if ( e.call && e.length==2 && !e.va3) { var countx=e.dx||32,county=e.dy||32;
                     var temp=new Float32Array(3*countx*county),o=new Float32Array(3),et=[];
@@ -1179,7 +1199,7 @@
                       e.va3 = createVA(et3,undefined); e.va3.tcount = tc*3;
                     }
                     // render the vertex array.
-                    if (e.va  && e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
+                    if (e.va  && e.va.tcount) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); draw(programPoint,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va); gl.disable(gl.BLEND); };
                     if (e.va2 && e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
                     if (e.va3 && e.va3.tcount) draw(program,gl.TRIANGLES,undefined,c,[0,0,0],r,undefined,e.va3);
                   }
@@ -1285,7 +1305,7 @@
               if (alpha) { gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-alpha); }
               if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
               if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
-              if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
+              if (p.length) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); draw(programPoint,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[];gl.disable(gl.BLEND); }
               if (alpha) gl.disable(gl.BLEND);
             // setup a new color
               if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
