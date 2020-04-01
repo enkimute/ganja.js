@@ -649,7 +649,7 @@
               var make_arrow_marker_def = (color) => {
                 if (marker_defs[color]) return ''; marker_defs[color]=true;
                 return `<defs>
-                  <marker id="marker-${color}" orient="auto" markerWidth="10" markerHeight="10" refX="9" refY="5"><path d="M 1 1 L 9 5 L 1 10" stroke-width="1" stroke="${color||'#888'}" fill="none"/></marker>
+                  <marker id="marker-${color}" orient="auto" markerWidth="10" markerHeight="10" refX="9" refY="5"><path d="M 1 0 L 9 5 L 1 10" stroke-width="1" stroke="${color||'#888'}" fill="none"/></marker>
                 </defs>`;
               };
 
@@ -693,10 +693,12 @@
                 var loc=o.Div(cga2d_ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
                 var r2=o.Mul(o.Conjugate).s;
                 var r = Math.sqrt(Math.abs(r2))*sc;
-                return `${make_arrow_marker_def(color||'#888')}<path d="
+                // draw the markers separately, to avoid a chrome rendering bug with <path> (gh-73)
+                return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>
+                ${make_arrow_marker_def(color||'#888')}<path d="
                   M ${lx - r} ${ly}
                   a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${2*r} 0
-                  a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${-2*r} 0"  marker-mid="url(#marker-${color||'#888'})"  marker-end="url(#marker-${color||'#888'})" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
+                  a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${-2*r} 0"  marker-mid="url(#marker-${color||'#888'})"  marker-end="url(#marker-${color||'#888'})" fill="none" stroke="none" stroke-width="${lineWidth*0.005}"/>`;
               } else if (!is_flat && !b0 && b1 && !b2) {
                 // Point Pairs.
                 lr=0; var ei=cga2d_ni,eo=cga2d_no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
