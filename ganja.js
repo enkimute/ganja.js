@@ -649,7 +649,8 @@
               var make_arrow_marker_def = (color) => {
                 if (marker_defs[color]) return ''; marker_defs[color]=true;
                 return `<defs>
-                  <marker id="marker-${color}" orient="auto" markerWidth="10" markerHeight="10" refX="9" refY="5"><path d="M 1 0 L 9 5 L 1 10" stroke-width="1" stroke="${color||'#888'}" fill="none"/></marker>
+                  <marker id="marker-${color}" orient="auto" markerWidth="10" markerHeight="12" refX="9" refY="6">
+                  <path d="M 1 1 L 9 6 L 1 11" stroke-width="1" stroke="${color||'#888'}" stroke-linecap="round" fill="none"/></marker>
                 </defs>`;
               };
 
@@ -687,7 +688,7 @@
                 // Lines.
                 var loc=cga2d_nno.LDot(o).Div(o), att=cga2d_ni.Dot(o);
                 lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180;
-                return `${make_arrow_marker_def(color||'#888')}<path style="pointer-events:none" d="M ${[-10, -5, 0, 5, 10].map(xoff => `${lx+xoff} ${ly}`).join(' L ')}" stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})" marker-mid="url(#marker-${color||'#888'})" fill="none"/>`;
+                return `${make_arrow_marker_def(color||'#888')}<path style="pointer-events:none" d="M ${[...Array(21)].map((_, i) => i - 10).map(xoff => `${lx+xoff} ${ly}`).join(' L ')}" stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})" marker-mid="url(#marker-${color||'#888'})" fill="none"/>`;
               } else if (!is_flat && !b0 && !b1 && b2) {
                 // Circles
                 var loc=o.Div(cga2d_ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
