@@ -366,16 +366,28 @@
       Div  (b,res) { return this.Mul(b.Inverse,res); }
       LDiv (b,res) { return b.Inverse.Mul(this,res); }
 
-    // Taylor exp - I will replace this with something smarter for elements of the even subalgebra's and other pure blades.
+    // Taylor exp - for PGA bivectors in 2D and 3D closed form solution is used.
       Exp  ()      {
         if (options.dual) { var f=Math.exp(this.s); return this.map((x,i)=>i?x*f:f); }
-        if (r==1 && tot<=4 && this[0]==0 && !options.over) {
-          var sq = (tot==4)?-(this[8]**2+this[9]**2+this[10]**2):this.Mul(this).s;  if (sq==0) { var res = this.slice();res[0]+=1; return res; }
-          var l = Math.sqrt(Math.abs(sq)); if (sq<0)  { var res = this.Scale( Math.sin(l)/l ); res[0]=Math.cos(l); return res; }
-          var res = this.Scale( Math.sinh(l)/l ); res[0]=Math.cosh(l); return res;
+        if (r==1 && tot<=4 && Math.abs(this[0])<1E-9 && !options.over) {
+           var u = Math.sqrt(Math.abs(this.Dot(this).s)); if (Math.abs(u)<1E-5) return this.Add(Element.Scalar(1));
+           var v = this.Wedge(this).Scale(-1/(2*u)); 
+           var res2 = Element.Add(Element.Sub(Math.cos(u),v.Scale(Math.sin(u))),Element.Div(Element.Mul((Element.Add(Math.sin(u),v.Scale(Math.cos(u)))),this),(Element.Add(u,v))));
+           return res2;       
         }
         var res = Element.Scalar(1), y=1, M= this.Scale(1), N=this.Scale(1); for (var x=1; x<15; x++) { res=res.Add(M.Scale(1/y)); M=M.Mul(N); y=y*(x+1); }; return res;
       }
+      
+    // Log - only for up to 3D PGA for now
+      Log () {
+        if (r!=1 || tot>4 || options.over) return;
+        var b = this.Grade(2), bdb = Element.Dot(b,b);
+        if (Math.abs(bdb.s)<=1E-5) return this.s<0?b.Scale(-1):b;
+        var s = Math.sqrt(-bdb), bwb = Element.Wedge(b,b); 
+        if (Math.abs(bwb.e0123)<=1E-5) return b.Scale(Math.atan2(s,this.s)/s);
+        var p = bwb.Scale(-1/(2*s));
+        return Element.Div(Element.Mul(Element.Mul((Element.Add(Math.atan2(s,this.s),Element.Div(p,this.s))),b),(Element.Sub(s,p))),(Element.Mul(s,s)));        
+      }  
 
     // Helper for efficient inverses. (custom involutions - negates grades in arguments).
       Map () { var res=new Element(); return super.Map(res,...arguments); }
@@ -500,7 +512,7 @@
       // Map elements in array
         if (b instanceof Array && !b.Add) return b.map(x=>Element.sw(a,x));
       // Call through. no specific generated code for it so just perform the muls.
-        a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b).Mul(a.Conjugate);
+        a=Element.toEl(a); b=Element.toEl(b); return a.Mul(b).Mul(a.Reverse);
       }
 
     // Division - scalars or cal through to element method.
@@ -598,7 +610,7 @@
         if (!f) return; var origf=f,marker_defs={};
       // generate default options.
         options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot<4?Element.Scalar(1):new Element([0.7071067690849304, 0, 0, 0, 0, 0, 0, 0, 0, 0.7071067690849304, 0, 0, 0, 0, 0, 0]));
-        if (options.conformal && tot==4) var cga2d_ni = options.ni||this.Coeff(4,1,3,1), cga2d_no = options.no||this.Coeff(4,0.5,3,-0.5), cga2d_nno = cga2d_no.Scale(-1);
+        if (options.conformal && tot==4) var ni = options.ni||this.Coeff(4,1,3,1), no = options.no||this.Coeff(4,0.5,3,-0.5), minus_no = no.Scale(-1);
         var ww=options.width, hh=options.height, cvs=options.canvas, tpcam=new Element([0,0,0,0,0,0,0,0,0,0,0,-5,0,0,1,0]),tpy=this.Coeff(4,1),tp=new Element(),
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.
         project=(o)=>{ if (!o) return o; while (o.call) o=o(); return (tot==4 && (o.length==16))?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):(o.length==2**tot)?Element.sw(options.camera,o):o;};
@@ -629,6 +641,7 @@
               if((o==Element.graph && or!==false)||(oidx==0&&options.animate&&or!==false)) { anim=true; requestAnimationFrame(()=>{var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }); if (!options.animate) return; }
             // Resolve expressions passed in.
               while (o.call) o=o();
+              if (options.ipns && o instanceof Element) o = o.Dual;
               var sc = options.scale;
               var lineWidth = options.lineWidth || 1;
               var pointRadius = options.pointRadius || 1;
@@ -640,7 +653,7 @@
                 return `${width} ${width}`;
               };
             // Arrays are rendered as segments or polygons. (2 or more elements)
-              if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o.Scale(-1/o.Dot(cga2d_ni).s); }); o.forEach((o)=>{lx+=sc*(o.e1);ly+=sc*(-o.e2)});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(sc*o.e1+','+(-o.e2*sc)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1*sc} y1=${-o[0].e2*sc} x2=${o[1].e1*sc} y2=${-o[1].e2*sc} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}"/>`; }
+              if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o.Scale(-1/o.Dot(ni).s); }); o.forEach((o)=>{lx+=sc*(o.e1);ly+=sc*(-o.e2)});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(sc*o.e1+','+(-o.e2*sc)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1*sc} y1=${-o[0].e2*sc} x2=${o[1].e1*sc} y2=${-o[1].e2*sc} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}"/>`; }
             // Strings are rendered at the current cursor position.
               if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize*0.1||0.1}" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly+=0.14; return res2; }
             // Numbers change the current color.
@@ -655,23 +668,23 @@
               };
 
             // All other elements are rendered ..
-              var einf_part = o.Dot(cga2d_no.Scale(-1));  // O_i + n_o O_oi
-              var eo_part = cga2d_ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
-              if (einf_part.VLength * 1e-6 > eo_part.VLength) {
+              var ni_part = o.Dot(no.Scale(-1));  // O_i + n_o O_oi
+              var no_part = ni.Scale(-1).Dot(o);  // O_o + O_oi n_i
+              if (ni_part.VLength * 1e-6 > no_part.VLength) {
                 // direction or dual - nothing to render
                 return "";
               }
-              var eo_einf_part = eo_part.Dot(cga2d_no.Scale(-1));  // O_oi
-              var eo_only_part = cga2d_ni.Wedge(eo_part).Dot(cga2d_no.Scale(-1));  // O_o
+              var no_ni_part = no_part.Dot(no.Scale(-1));  // O_oi
+              var no_only_part = ni.Wedge(no_part).Dot(no.Scale(-1));  // O_o
 
               /* Note: making 1e-6 smaller increases the maximum circle radius before they are drawn as lines */
-              if (eo_einf_part.VLength * 1e-6 > eo_only_part.VLength) {
+              if (no_ni_part.VLength * 1e-6 > no_only_part.VLength) {
                 var is_flat = true;
-                var direction = eo_einf_part;
+                var direction = no_ni_part;
               }
               else {
                 var is_flat = false;
-                var direction = eo_only_part;
+                var direction = no_only_part;
               }
               // normalize to make the direction unitary
               var dl = direction.Length;
@@ -686,12 +699,12 @@
                 return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" fill="${color||'green'}"/>`;
               } else if (is_flat && !b0 && b1 && !b2) {
                 // Lines.
-                var loc=cga2d_nno.LDot(o).Div(o), att=cga2d_ni.Dot(o);
+                var loc=minus_no.LDot(o).Div(o), att=ni.Dot(o);
                 lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180;
                 return `${make_arrow_marker_def(color||'#888')}<path style="pointer-events:none" d="M ${[...Array(21)].map((_, i) => i - 10).map(xoff => `${lx+xoff} ${ly}`).join(' L ')}" stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})" marker-mid="url(#marker-${color||'#888'})" fill="none"/>`;
               } else if (!is_flat && !b0 && !b1 && b2) {
                 // Circles
-                var loc=o.Div(cga2d_ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
+                var loc=o.Div(ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
                 var r2=o.Mul(o.Conjugate).s;
                 var r = Math.sqrt(Math.abs(r2))*sc;
                 // draw the markers separately, to avoid a chrome rendering bug with <path> (gh-73)
@@ -702,7 +715,7 @@
                   a ${r} ${r} 0 0 ${+(direction.e12 < 0)} ${-2*r} 0"  marker-mid="url(#marker-${color||'#888'})"  marker-end="url(#marker-${color||'#888'})" fill="none" stroke="none" stroke-width="${lineWidth*0.005}"/>`;
               } else if (!is_flat && !b0 && b1 && !b2) {
                 // Point Pairs.
-                lr=0; var ei=cga2d_ni,eo=cga2d_no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
+                lr=0; var ei=ni,eo=no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
                 if (nix==0) { pos = o.Dot(Element.Coeff(4,-1)); sqr=-1; }
                 lx=sc*(pos.e1); ly=sc*(-pos.e2);
                 if (sqr==0) return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${pointRadius*0.03}" stroke-width="${lineWidth*0.01}" fill="none" stroke="${color||'green'}"/>`;
@@ -739,7 +752,7 @@
           };
         // Create the initial svg and install the mousehandlers.
           res=build(f); res.value=f; res.options=options;
-          res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return;var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);x/=options.scale;y/=options.scale; if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(cga2d_no).Add(cga2d_ni.Scale(0.5*(x*x+y*y))) ) } else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; } res.dispatchEvent(new CustomEvent('input')) };
+          res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return;var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);x/=options.scale;y/=options.scale; if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(no).Add(ni.Scale(0.5*(x*x+y*y))) ) } else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; } res.dispatchEvent(new CustomEvent('input')) };
           return res;
         }
       // 1d and 2d functions are rendered on a canvas.
@@ -942,7 +955,7 @@
               if (clr){
                 var b3=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b3);
                 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(clr), gl.STATIC_DRAW);
-                gl.vertexAttribPointer(1, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(1);
+                gl.vertexAttribPointer(texc?2:1, 3, gl.FLOAT, false, 0, 0); gl.enableVertexAttribArray(texc?2:1);
               }
               if (idx) {
                 var b4=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, b4);
@@ -979,13 +992,18 @@
         }
       // Program for the geometry. Derivative based normals. Basic lambert shading.
         var program = compile(`attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
-                 void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; }`,
+                 void main() { gl_PointSize=12.0; Pos=mv*position; gl_Position = p*Pos; }`,
                 `#extension GL_OES_standard_derivatives : enable
                  precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos;
                  void main() { vec3 ldir = normalize(Pos.xyz - vec3(2.0,2.0,-4.0));
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+        var programPoint = compile(`attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
+                 void main() { gl_PointSize=${((options.pointRadius||1)*8.0).toFixed(2)}; Pos=mv*position; gl_Position = p*Pos; }`,
+                `precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos;
+                 void main() {  float distanceToCenter = length(gl_PointCoord - vec2(0.5)); if (distanceToCenter>0.5) discard; 
+                 gl_FragColor = vec4(color+color2, (distanceToCenter<0.5?1.0:0.0));  }`);
         var programcol = compile(`attribute vec4 position; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; Col=col; }`,
                 `#extension GL_OES_standard_derivatives : enable
@@ -994,6 +1012,11 @@
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.3,l)*Col+vec3(pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+        var programmot = compile(`attribute vec4 position; attribute vec2 texc; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2;
+                 void main() { gl_PointSize=2.0; float blend=fract(color2.x+texc.r)*0.5; Pos=mv*(position*(1.0-blend) + (blend)*vec4(col,1.0)); gl_Position = p*Pos; Col=vec3(length(col-position.xyz)*1.); gl_PointSize = 8.0 -  Col.x; Col.y=sin(blend*2.*3.1415); }`,
+                `precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; varying vec3 Col; 
+                 void main() {  float distanceToCenter = length(gl_PointCoord - vec2(0.5));gl_FragColor = vec4(1.0-pow(Col.x,2.0),0.0,0.0,(.6-Col.x*0.05)*(distanceToCenter<0.5?1.0:0.0)*Col.y);  }`);
+        gl.lineWidth(options.lineWidth||1); // doesn't work yet (nobody supports it)
       // Create a font texture, lucida console or otherwise monospaced.
         var fw=33, font = Object.assign(document.createElement('canvas'),{width:(19+94)*fw,height:48}),
             ctx = Object.assign(font.getContext('2d'),{font:'bold 48px lucida console, monospace'}),
@@ -1010,16 +1033,17 @@
                 `precision highp float; uniform vec3 color; varying vec4 Pos; varying vec2 tex;
                  uniform sampler2D texm; void main() { vec4 c = texture2D(texm,tex); if (c.a<0.01) discard; gl_FragColor = vec4(color,c.a);}`);
       // Conformal space needs a bit extra magic to extract euclidean parametric representations.
-        if (tot==5 && options.conformal) var ninf = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
+        if (tot==5 && options.conformal) var ni = Element.Coeff(4,1).Add(Element.Coeff(5,1)), no = Element.Coeff(4,0.5).Sub(Element.Coeff(5,0.5));
         var interprete = (x)=>{
           if (!(x instanceof Element)) return { tp:0 };
+          if (options.ipns) x=x.Dual;
           // tp = { 0:unknown 1:point 2:line, 3:plane, 4:circle, 5:sphere
-          var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ninf.Wedge(x), ipnix = ninf.LDot(x),
+          var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ni.Wedge(x), ipnix = ni.LDot(x),
               attitude, pos, normal, tg,btg,epsilon = 0.001/(options.scale||1), I3=Element.Coeff(16,-1);
           var x2zero = Math.abs(X2) < epsilon, ipnixzero = ipnix.VLength < epsilon, opnixzero = opnix.VLength < epsilon;
           if (opnixzero && ipnixzero) {                 // free flat
           } else if (opnixzero && !ipnixzero) {         // bound flat (lines)
-            attitude = no.Wedge(ninf).LDot(x);
+            attitude = no.Wedge(ni).LDot(x);
             weight2 = Math.abs(attitude.LDot(attitude).s)**.5;
             pos = attitude.LDot(x.Reverse); //Inverse);
             pos = [-pos.e15/pos.e45,-pos.e25/pos.e45,-pos.e34/pos.e45];
@@ -1036,14 +1060,14 @@
             }
           } else if (!opnixzero && ipnixzero) {         // dual bound flat
           } else if (x2zero) {                          // bound vec,biv,tri (points)
-            attitude = ninf.Wedge(no).LDot(ninf.Wedge(x));
-            pos = [...(Element.LDot(1/(ninf.LDot(x)).s,x)).slice(1,4)].map(x=>-x);
+            attitude = ni.Wedge(no).LDot(ni.Wedge(x));
+            pos = [...(Element.LDot(1/(ni.LDot(x)).s,x)).slice(1,4)].map(x=>-x);
             tp=1;
           } else if (!x2zero) {                          // round (point pair,circle,sphere)
             tp = x.Grade(3).VLength?4:x.Grade(2).VLength?6:5;
-            var nix  = ninf.Wedge(x), nix2 = (nix.Mul(nix)).s;
-            attitude = ninf.Wedge(no).LDot(nix);
-            pos = [...(x.Mul(ninf).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
+            var nix  = ni.Wedge(x), nix2 = (nix.Mul(nix)).s;
+            attitude = ni.Wedge(no).LDot(nix);
+            pos = [...(x.Mul(ni).Mul(x)).slice(1,4)].map(x=>-x/(2.0*nix2));
             weight2 = Math.abs((x.LDot(x)).s / nix2)**.5;
             if (tp==4) {
               if (x.LDot(x).s < 0) { weight2 = -weight2; }
@@ -1136,8 +1160,7 @@
                 if (alpha) { gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-alpha); }
                 if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
                 if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
-                if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
-                // Motor orbits
+                if (p.length) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); draw(programPoint,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; gl.disable(gl.BLEND); }
                 // Motor orbits
                   if ( e.call && e.length==2 && !e.va3) { var countx=e.dx||32,county=e.dy||32;
                     var temp=new Float32Array(3*countx*county),o=new Float32Array(3),et=[];
@@ -1152,8 +1175,31 @@
                     for (var ii=0; ii<countx; ii++) { temp.set(Element.sw(e(ii/(countx-1)),no).slice(1,4),ii*3); if (ii) et.push(ii-1,ii); }
                     e.va2 = createVA(temp,undefined,et); e.va2.tcount = et.length;
                   }
+                // Experimental display of motors using particle systems.
+                  if (e instanceof Object && e.motor) {
+                    if (!e.va || e.recalc) {
+                       var seed = 1; function random() { var x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
+                       e.xRange = e.xRange === undefined ? 1:e.xRange; e.yRange = e.yRange === undefined ? 1:e.yRange; e.zRange = e.zRange === undefined ? 1:e.zRange;
+                       var vtx=[], tx=[], vtx2=[];
+                       for (var i=0; i<(e.zRange*e.xRange*e.yRange===0?2500:Math.pow(e.zRange*e.xRange*e.yRange,1/3)*6000); i++) {
+                         var [x,y,z] = [random()*(2*e.xRange)-e.xRange,random()*2*e.yRange-e.yRange,random()*2*e.zRange-e.zRange];
+                         var xyz = (x*x+y*y+z*z)*0.5;
+                         var p  = Element.Vector(x,y,z,xyz-0.5,xyz+0.5);
+                         var p2 = Element.sw(e.motor,p);
+                         var d = p2[5]-p2[4]; p2[1]/=d; p2[2]/=d; p2[3]/=d;
+                         tx.push(random(), random());
+                         vtx.push(...p.slice(1,4)); vtx2.push(...p2.slice(1,4));
+                       }  
+                       e.va = createVA(vtx,tx,undefined,vtx2); e.va.tcount = vtx.length/3;
+                       e.recalc = false;
+                    } 
+                    var time = performance.now()/1000;
+                    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.DEPTH_TEST);
+                    draw(programmot, gl.POINTS,t,c,[time%1,0,0],r,undefined,e.va);
+                    gl.disable(gl.BLEND); gl.enable(gl.DEPTH_TEST);
+                  }
                 // we could also be an object with cached vertex array of triangles ..
-                  if (e.va || e.va2 || e.va3 || (e instanceof Object && e.data)) {
+                  else if (e.va || e.va2 || e.va3 || (e instanceof Object && e.data)) {
                     // Create the vertex array and store it for re-use.
                     if (!e.va3 && !e.va2) {
                       var et=[],et2=[],et3=[],lc=0,pc=0,tc=0; e.data.forEach(e=>{
@@ -1169,7 +1215,7 @@
                       e.va3 = createVA(et3,undefined); e.va3.tcount = tc*3;
                     }
                     // render the vertex array.
-                    if (e.va  && e.va.tcount) draw(program,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va);
+                    if (e.va  && e.va.tcount) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); draw(programPoint,gl.POINTS,undefined,[0,0,0],c,r,undefined,e.va); gl.disable(gl.BLEND); };
                     if (e.va2 && e.va2.tcount) draw(program,gl.LINES,undefined,[0,0,0],c,r,undefined,e.va2);
                     if (e.va3 && e.va3.tcount) draw(program,gl.TRIANGLES,undefined,c,[0,0,0],r,undefined,e.va3);
                   }
@@ -1231,8 +1277,28 @@
               for (ii=0; ii<countx-1; ii++) for (var jj=0; jj<county; jj++) et.push((ii+0)*county+(jj+0),(ii+0)*county+(jj+1),(ii+1)*county+(jj+1),(ii+0)*county+(jj+0),(ii+1)*county+(jj+1),(ii+1)*county+(jj+0));
               e.va = createVA(temp,undefined,et.map(x=>x%(countx*county))); e.va.tcount = (countx-1)*county*2*3;
             }
+          // Experimental display of motors using particle systems.
+            if (e instanceof Object && e.motor) {
+              if (!e.va || e.recalc) {
+                 var seed = 1; function random() { var x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
+                 e.xRange = e.xRange === undefined ? 1:e.xRange; e.yRange = e.yRange === undefined ? 1:e.yRange; e.zRange = e.zRange === undefined ? 1:e.zRange;
+                 var vtx=[], tx=[], vtx2=[];
+                 for (var i=0; i<(e.zRange===0?5000:60000); i++) {
+                   var p  = Element.Trivector(random()*(2*e.xRange)-e.xRange,random()*2*e.yRange-e.yRange,random()*2*e.zRange-e.zRange,1);
+                   var p2 = Element.sw(e.motor,p);
+                   tx.push(random(), random());
+                   vtx.push(...p.slice(11,14).reverse()); vtx2.push(...p2.slice(11,14).reverse());
+                 }  
+                 e.va = createVA(vtx,tx,undefined,vtx2); e.va.tcount = vtx.length/3;
+                 e.recalc = false;
+              } 
+              var time = performance.now()/1000;
+              gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.DEPTH_TEST);
+              draw(programmot, gl.POINTS,t,c,[time%1,0,0],r,undefined,e.va);
+              gl.disable(gl.BLEND); gl.enable(gl.DEPTH_TEST);
+            }
           // we could also be an object with cached vertex array of triangles ..
-            if (e.va || (e instanceof Object && e.data)) {
+            else if (e.va || (e instanceof Object && e.data)) {
               // Create the vertex array and store it for re-use.
               if (!e.va) {
                 if (e.idx) {
@@ -1255,17 +1321,26 @@
               if (alpha) { gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-alpha); }
               if (t.length) { draw(program,gl.TRIANGLES,t,c,[0,0,0],r); t.forEach((x,i)=>{ if (i%9==0) lastpos=[0,0,0]; lastpos[i%3]+=x/3; }); t=[];  }
               if (l.length) { draw(program,gl.LINES,l,[0,0,0],c,r); var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; }
-              if (p.length) { draw(program,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; }
+              if (p.length) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); draw(programPoint,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[];gl.disable(gl.BLEND); }
               if (alpha) gl.disable(gl.BLEND);
             // setup a new color
               if (typeof e == "number") { alpha=((e>>>24)&0xff)/255; c[0]=((e>>>16)&0xff)/255; c[1]=((e>>>8)&0xff)/255; c[2]=(e&0xff)/255; }
             // render a label
               if (typeof(e)=='string') {
-                gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
-                var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
-                draw(program2,gl.TRIANGLES,
-                     [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
-                     [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                if (options.htmlText) { 
+                  if (!canvas['_'+i]) { console.log('creating div'); Object.defineProperty(canvas,'_'+i, {value: document.body.appendChild(document.createElement('div')), enumerable:false }) };
+                  var rc = canvas.getBoundingClientRect(), div = canvas['_'+i];
+                  var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...lastpos,1]).map(x=>x.s);
+                  pos2 = Element.Mul( [[5,0,0,0],[0,5*(r||2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
+                  Object.assign(div.style,{position:'fixed',pointerEvents:'none',left:rc.left + (rc.right-rc.left)*(pos2[0]/2+0.5),top: rc.top + (rc.bottom-rc.top)*(-pos2[1]/2+0.5) - 20});
+                  if (div.last != e) { div.innerHTML = e; div.last = e; if (self.renderMathInElement) self.renderMathInElement(div,{output:'html'});  }
+                } else { 
+                  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+                  var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
+                  draw(program2,gl.TRIANGLES,
+                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
+                       [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                }
               }
             }
           };
@@ -1301,7 +1376,7 @@
             if (sel==-3) { var ct = Math.cos(options.h||0), st= Math.sin(options.h||0), ct2 = Math.cos(options.p||0), st2 = Math.sin(options.p||0);
               if (e.shiftKey) { options.posy = (options.posy||0)+my; } else { options.posx = (options.posx||0)+mx*ct+my*st; options.posz = (options.posz||0)+mx*-st+my*ct*ct2; } if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));return; }; if (sel < 0) return;
             x.pos[0] += (e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my;
-            canvas.value[sel].set(Element.Mul(ninf,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
+            canvas.value[sel].set(Element.Mul(ni,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
         }
@@ -1331,8 +1406,10 @@
         while (txt.length) for(t in tokens) if(resi=txt.match(tokens[t])){ tok.push([t|0,resi[0]]); txt=txt.slice(resi[0].length); break;} // tokenise
       // Translate algebraic literals. (scientific e-notation to "this.Coeff"
         tok=tok.map(t=>(t[0]==2)?[2,'Element.Coeff('+basis.indexOf((!options.Cayley?simplify:(x)=>x)('e'+t[1].split(/e_|e|i/)[1]||1).replace('-',''))+','+(simplify(t[1].split(/e_|e|i/)[1]||1).match('-')?"-1*":"")+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
+      // String templates (limited support - needs fundamental changes.).
+        tok=tok.map(t=>(t[0]==1 && t[1][0]=='`')?[1,t[1].replace(/\$\{(.*?)\}/g,a=>"${"+Element.inline(a.slice(2,-1)).toString().match(/return \((.*)\)/)[1]+"}")]:t);  
       // We support two syntaxes, standard js or if you pass in a text, asciimath.
-        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['^','Wedge'],['&','Vee'],['<<','LDot']],[['*','Mul'],['/','Div']],[['|','Dot']],[['>>>','sw',0,1]],[['-','Sub'],['+','Add']],[['==','eq'],['!=','neq'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
+        var syntax = (intxt instanceof Function)?[[['.Normalized','Normalize',2],['.Length','Length',2]],[['~','Conjugate',1],['!','Dual',1]],[['**','Pow',0,1]],[['^','Wedge'],['&','Vee'],['<<','LDot']],[['*','Mul'],['/','Div']],[['|','Dot']],[['>>>','sw',0,1]],[['-','Sub'],['+','Add']],[['%','%']],[['==','eq'],['!=','neq'],['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]]
                                                 :[[['pi','Math.PI'],['sin','Math.sin']],[['ddot','this.Reverse'],['tilde','this.Involute'],['hat','this.Conjugate'],['bar','this.Dual']],[['^','Pow',0,1]],[['^^','Wedge'],['*','LDot']],[['**','Mul'],['/','Div']],[['-','Sub'],['+','Add']],[['<','lt'],['>','gt'],['<=','lte'],['>=','gte']]];
       // For asciimath, some fixed translations apply (like pi->Math.PI) etc ..
         tok=tok.map(t=>(t[0]!=5)?t:[].concat.apply([],syntax).filter(x=>x[0]==t[1]).length?[5,[].concat.apply([],syntax).filter(x=>x[0]==t[1])[0][1]]:t);
@@ -1360,7 +1437,7 @@
            // unary - and + are handled seperately from syntax ..
            for (var ti=0,t,si; t=tokens[ti];ti++)
              if (t[1]=="-" && (left()<0 || (tokens[left()]||[4])[0]==4)) glue(ti,right(),5,["Element.Sub(",tokens[right()],")"]);   // unary minus works on all types.
-             else if (t[1]=="+" && (tokens[left()]||[0])[0]==4) glue(ti,ti+1);                                                      // unary plus is glued, only on scalars.
+             else if (t[1]=="+" && (tokens[left()]||[0])[0]==4 && (tokens[left()]||[0])[1][0]!=".") glue(ti,ti+1);                   // unary plus is glued, only on scalars.
            // now process all operators in the syntax list ..
            for (var si=0,s; s=syntax[si]; si++) for (var ti=s[0][3]?tokens.length-1:0,t; t=tokens[ti];s[0][3]?ti--:ti++) for (var opi=0,op; op=s[opi]; opi++) if (t[1]==op[0]) {
              // exception case .. ".Normalized" and ".Length" properties are re-routed (so they work on scalars etc ..)
@@ -1368,7 +1445,7 @@
              // unary operators (all are to the left)
                else if (op[2])    { var arg=tokens[right()]; glue(ti, right(), 5, ["Element."+op[1],"(",arg,")"]); }
              // binary operators
-                             else { var l=left(),r=right(),a1=tokens[l],a2=tokens[r]; glue(l,r,5,["Element."+op[1],"(",a1,",",a2,")"]); ti--; }
+                             else { var l=left(),r=right(),a1=tokens[l],a2=tokens[r]; if (op[0]==op[1]) glue(l,r,5,[a1,op[1],a2]); else glue(l,r,5,["Element."+op[1],"(",a1,",",a2,")"]); ti--; }
            }
            return tokens;
         }
