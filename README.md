@@ -159,7 +159,7 @@ var CGA3D = Algebra(4,1);       // Conformal 3D space.
 
 // High-Dimensional GA
 var DCGA3D = Algebra(6,2);      // Double Conformal 3D Space.
-var TCGA3D = Algebra(9,3);      // Tripple Conformal 3D Space.
+var TCGA3D = Algebra(9,3);      // Triple Conformal 3D Space.
 var DCGSTA = Algebra(4,8);      // Double Conformal Geometric Space Time Algebra.
 var QCGA   = Algebra(9,6);      // Quadric Conformal Geometric Algebra.  
 ```
