@@ -1023,7 +1023,7 @@
           if (options.ipns) x=x.Dual;
           // tp = { 0:unknown 1:point 2:line, 3:plane, 4:circle, 5:sphere
           var X2 = (x.Mul(x)).s, tp=0, weight2, opnix = ni.Wedge(x), ipnix = ni.LDot(x),
-              attitude, pos, normal, tg,btg,epsilon = 0.001/(options.scale||1), I3=Element.Coeff(16,-1);
+              attitude, pos, normal, tg,btg,epsilon = 0.000001/(options.scale||1), I3=Element.Coeff(16,-1);
           var x2zero = Math.abs(X2) < epsilon, ipnixzero = ipnix.VLength < epsilon, opnixzero = opnix.VLength < epsilon;
           if (opnixzero && ipnixzero) {                 // free flat
           } else if (opnixzero && !ipnixzero) {         // bound flat (lines)
@@ -1044,6 +1044,7 @@
             }
           } else if (!opnixzero && ipnixzero) {         // dual bound flat
           } else if (x2zero) {                          // bound vec,biv,tri (points)
+            if (options.ipns) x=x.Dual;
             attitude = ni.Wedge(no).LDot(ni.Wedge(x));
             pos = [...(Element.LDot(1/(ni.LDot(x)).s,x)).slice(1,4)].map(x=>-x);
             tp=1;
