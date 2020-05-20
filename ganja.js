@@ -1457,7 +1457,7 @@
     if (options.over) {
      // experimental. do not use.
       res.over = options.over;
-      ["Mul","Add","Sub","Scale","Dot","Wedge","LDot"].forEach(x=>res.prototype[x] = options.over.inline(res.prototype[x]));
+      ["Mul","Add","Sub","Scale","Dot","Wedge","LDot","Vee"].forEach(x=>res.prototype[x] = options.over.inline(res.prototype[x]));
       res.prototype.Coeff   = function() { for (var i=0,l=arguments.length; i<l; i+=2) this[arguments[i]]=(arguments[i+1] instanceof options.over)?arguments[i+1]:options.over.Scalar(arguments[i+1]); return this; }
       res.prototype.upgrade = function () { for (var i=0; i<this.length; i++) this[i] = options.over.Scalar(0); }
       Object.defineProperty(res.prototype, 'Conjugate', {configurable:true,get(){var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i].slice().Scale([1,-1,-1,1][grades[i]%4]); return res; }});
