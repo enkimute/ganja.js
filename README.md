@@ -904,7 +904,7 @@ Algebra(3,0,1,()=>{
     // exactly what is needed to represent translations and rotations in euclidean space.
     
     // In dual projectivized space, the origin is represented by the e12 bivector.
-    var origin=1e123, EX=-1e012, EY=1e013, EZ=-1e023;
+    var origin=1e123, EX=-1e023, EY=1e013, EZ=-1e012;
     
     // Points and planes can be specified directly.
     var point = (x,y,z)=>origin+x*EX+y*EY+z*EZ,
