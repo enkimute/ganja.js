@@ -1,0 +1,83 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+Algebra({p:3,r:1,baseType:Float64Array},()=>{
+    
+  // define points dually : independent of choice of basis order.    
+  var pt = (x,y,z)=> !(1e0 + x*1e1 + y*1e2 + z*1e3);
+  
+  // three points A,B and C
+  var A = pt(0.8,-0.1,0);
+  var B = pt(0,1,0.1);
+  var C = pt(0,0.1,1);
+  
+  // the rotor we'll reconstruct later
+  var GT = Math.E**(Math.random()*2e13+Math.random()*1e02);
+  
+  // the rotated points At,Bt,Ct
+  var [At,Bt,Ct] = GT>>>[A,B,C];
+  
+  // IDEA .. demonstrate the three types of alighment
+  // * first find a translator that moves A to At (using points)
+  // * next find a rotation that keeps A but moves B to Bt (using lines)
+  // * next find a rototion that keeps A and B, moving C to Ct (using planes) 
+  
+  // for the three steps, formulas are exactly the same .. 
+  // -> the ratio of two elements is a simple motor that 
+  //    represents twice the isometry between them
+  // -> the square root of a simple motor x is (1+x).Normalized
+  
+  // start by taking A to At
+  var  pApB = (1+ At/A).Normalized; // assumes the same normalization of At and A
+
+  // now make lines between two corresponding points
+  var L1 = (At & Bt),            // ultimate target
+      L2 = (At & (pApB>>>B));    // current state
+  
+  // add in the rotation that keeps a and fixes b 
+     pApB = (1 +  L1/L2).Normalized * pApB;
+  
+  // now make two planes for the remaining point.
+  var P1 = (L1 & Ct),            // ultimate target
+      P2 = (L1 & (pApB>>>C));    // current state
+      
+  // and add in the rotation around L1 that fixes c
+     pApB = (1 + P1/P2).Normalized * pApB
+  
+  // The final points using our guess
+  var [A2,B2,C2] = pApB >>> [A,B,C];
+  
+  // The accumulated estimation error.
+  var Err = ((At&A2).Length + (Bt&B2).Length + (Ct&C2).Length)/3;
+  
+  // Rendering a motor orbit.
+  var orbit = (motor, point)=>[...Array(32)]
+                              .map((x,i)=>((1-i/31)+i/31*motor)>>>point)
+                              .map((x,i,a)=>[x,i?a[i-1]:x])
+                              
+  // The three orbits.
+  var oA = orbit(pApB,A), oB = orbit(pApB,B), oC = orbit(pApB,C);
+  
+  // Graph it.
+  var camera = 1e13, canvas = this.graph(()=>{
+      var anim = Math.sin(performance.now()/750)*0.5+0.5;
+      var motor = ((1-anim)+anim*pApB);
+      var [mA,mB,mC] = (motor >>> [A,B,C]).map(x=>x.Grade(3));
+      camera.set(Math.E**(.1e23) * Math.E**((performance.now()*0.0003+1.35)*1e13))
+      return [
+        0xEEEEEE,(~camera*(1e123-1.2e013+1.5e023-1e012)*camera).Grade(3),
+        0,"Err = "+Err,
+        0xFF0000, A,"A", B,"B", C,"C",
+        0xEEFF0000, [A,B,C],
+        0x0000FF, At, "At", Bt, "Bt", Ct, "Ct", ...oA, ...oB, ...oC,
+        0xEE0000FF, [At,Bt,Ct],
+        0xFF00FF, mA, "A'", mB, "B'", mC, "C'",
+        0xEEFF00FF, motor >>> [A,B,C], 0xFF00FF, ...(motor >>> [[A,B],[B,C],[C,A]])
+      ]
+  },{gl:1,animate:1, grid:1, noZ:1, camera});
+    
+  // Append graph to document. (html stuff)
+  document.body.appendChild(canvas);
+})
+</SCRIPT></BODY>
