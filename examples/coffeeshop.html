@@ -662,10 +662,17 @@
     }  
     
   // Premade examples.   
-    if (~examples.indexOf(hashurl)) {
-      els.sample.src = 'example_'+hashurl+'.html';
+    if (~examples.indexOf(hashurl.split('&')[0])) {
+      els.sample.src = 'example_'+hashurl.split('&')[0]+'.html';
       els.tab1.click();
       document.body.style.display='flex';
+      if (hashurl.split('&')[1] == 'fullscreen') {
+        els.left.style.with=els.left.style.minWidth=els.left.style.maxWidth=0;
+        els.right.style.width = els.right.style.minWidth = els.right.style.maxWidth = 0;
+        [...document.querySelectorAll(".group")].forEach(x=>x.style.display="none");
+        [...document.querySelectorAll(".sampleGroup")].forEach(x=>x.style.display="none");
+        closeBar();
+      }
     }
     
   // User shared.
