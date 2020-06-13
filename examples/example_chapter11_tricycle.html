@@ -1,0 +1,132 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// for latex labels..
+var link = document.createElement('link');
+link.href = "https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css";
+link.rel = "stylesheet";
+document.head.appendChild(link);
+var style = document.createElement('style');
+style.innerHTML="div {z-index:-100; font-size:150%}";
+document.head.appendChild(style);
+self.renderMathInElement = top.renderMathInElement;
+self.toTex = x=>x.toString().replace(/([\d\.]+)e/g,(a,b)=>(1*b).toFixed(2)+'e');
+
+// Create a Clifford Algebra with 3,0,1 metric. 
+Algebra(3,0,1,()=>{ 
+    
+  // a slider for the controls defined using a standard html.
+  var slider_html=`<INPUT STYLE="position:fixed; width: 400px; zDepth:1" TYPE="range" MIN="-90" MAX="90" STEP="1" dlist="steplist">
+                   <datalist id="steplist"><option>-90</option><option>-45</option><option>0</option><option>45</option><option>90</option></datalist>`;
+  
+  // we add the html to the document body
+  document.body.innerHTML += slider_html;
+  
+  // now we find the element that was created.
+  var slider = document.body.querySelector('input');  
+
+  // Specify a point directly (trivectors specified with overloaded e-notation.)
+  var point = (x,y,z)=>1e123-x*1e012-y*1e013+z*1e023;
+  var rotor = (P,a)=>Math.E**(P*a*0.5);
+  
+  // Load a wavefront 3D OBJ file. Just paste this if needed.
+  var obj = (url,complete)=>{
+    var req = new XMLHttpRequest(); req.onload=e=>{
+      var t = req.response.split('\n'), v=t.filter(x=>x.match(/^v /i)), f=t.filter(x=>x.match(/^f /i)).map(x=>x.split(/\s+/).slice(1,4).map(x=>parseInt(x))), p;
+      complete(p=v.map(x=>point.apply(this,x.split(/\s+/).slice(1).map(x=>13*parseFloat(x)))),                                                // points
+               [],f.map(x=>x.map(x=>p[x-1])));                                                                                                   // faces
+    }; req.open("GET",url,false); req.send();
+  }
+  
+  // Our camera position and orientation
+  var  time=0, camera=0e1;
+  var rlabel=(1e1+10e0)^(1e2-10e0)^1e3;
+  var flabel=(1e1+5e0)^(1e2-20e0)^1e3;
+  var rflabel=(1e1+5e0)^(1e2-30e0)^1e3;
+    
+  // Read the two obj files. (this is nested, we're waiting for both)
+  obj("https://enkimute.github.io/ganja.js/examples/trike_steer.obj",(points2,edges2,faces2)=>{
+  obj("https://enkimute.github.io/ganja.js/examples/trike_body.obj",(points,edges,faces)=>{
+      
+      // Store the faces as a rigid body - this optimizes the GL path.
+      // we can setup a transform per object.
+      var body={data:faces,transform:0e1};
+      var steer={data:faces2,transform:0e1};
+  
+      
+      // Now graph (animated) the cut .. 
+      var canvas= document.body.appendChild(this.graph(()=>{
+
+        // Set the camera
+        camera.set( ((0.5+35e03-5e02) * rotor(1e23,0.8)).Normalized )
+        
+        // Fetch the slider value and update the steering while transform.
+        var turn = -slider.value/180*Math.PI;
+        steer.transform.set(  (1+6e03)*rotor(1e13,turn)*(1+.2e03) )
+        
+        // The plane at the height of the axis
+        var ground = 1e2 + 2.3e0;
+
+        // front and back axis as planes.
+        var Back  = 1e3;
+        var Front = (steer.transform >>> Back); 
+        
+        // calculate intersection point.
+        var center = Front^Back;
+        var centerpoint = center^ground;   
+        
+        var baseline = 1e3^ground;
+      
+        // render the blue path as a motor orbit.
+        var path = (s)=>rotor(1e1*center*1e1, -s*2*Math.PI)*(1+1.15e02);
+        path.dx=256;
+        
+        // render the green path. (the endpoint over the slider range.)
+        var path2 = s=>{
+            var Back = 1e3, Front = (1+6e03)*rotor(1e13,(s-0.5)*Math.PI)*(1+.2e03) >>> Back, center = Front^Back;
+            return rotor(1e1*center*1e1, -1*2*Math.PI)*(1+1.15e02);
+        };
+        path2.dx=256;
+      
+        // Get the current time, and move the trike along the path.
+        var time=performance.now()/1000;    
+        body.transform.set(rotor(center,(Math.sin(time)+1)*Math.PI%6.29));
+        steer.transform.set( rotor(center,(Math.sin(time)+1)*Math.PI%6.29)* (1+6e03)*rotor(1e13,turn) )
+        
+        // Render everything, hex numbers are colors.
+        return [0xffffff,
+                body,
+                0xffffff,
+                steer,
+                 0xff0000,
+                centerpoint," $${r \\wedge f_\\phi} $$",
+                body.transform>>>Back^(1e2+2.3e0),
+                "$$ M r \\tilde{M} $$",
+                body.transform>>>Front^(1e2+2.3e0),
+                "$$ M f_\\phi \\tilde{M}$$",
+                0xfff000,
+                baseline, 
+                "$$ r $$",
+                Front^ground,
+                "$$ f_\\phi $$",
+                0x0000ff,
+                path, 
+                0x008800,
+                path2,
+                0xff000000,
+                [rlabel,rlabel],
+                 "$$\\begin{aligned} r &=  \\mathbf e_1 \\\\ f_\\phi &= \\mathbf e_1 \\cos \\phi   +  \\mathbf e_2 \\sin \\phi + e \\cos \\phi \\\\ r \\wedge f_\\phi &=  \\mathbf e_1 \\mathbf e_2 \\sin \\phi + \\mathbf e_1 e \\cos \\phi \\\\ M &= e^{r \\wedge f_\\phi} \\end{aligned}$$",
+                 0xff000000,
+                //flabel,
+                //"$$ f = e^{- (\\mathbf e_1+e) \\mathbf e_2 \\phi/2} \\enskip r  \\enskip  e^{ (\\mathbf e_1+e) \\mathbf e_2 \\phi/2} $$"];
+                //"$$ f = \\mathbf e_1 \\cos \\phi   +  \\mathbf e_2 \\sin \\phi + e \\cos \\phi $$",
+                //rflabel,
+                //"$$ r \\wedge f_\\phi =  \\mathbf e_1 \\mathbf e_2 \\sin \\phi + \\mathbf e_1 e \\cos \\phi $$"
+                ];
+      },{animate:true,htmlText:true,alpha:true,gl:true,camera}));
+      canvas.style.zIndex = 400000;canvas.style.background='transparent';
+  });
+  });
+});
+</SCRIPT></BODY>
