@@ -17,8 +17,7 @@ self.toTex = x=>x.toString().replace(/([\d\.]+)e/g,(a,b)=>(1*b).toFixed(2)+'e');
 Algebra(3,0,1,()=>{ 
     
   // a slider for the controls defined using a standard html.
-  var slider_html=`<INPUT STYLE="position:fixed; width: 400px; zDepth:1" TYPE="range" MIN="-90" MAX="90" STEP="1" dlist="steplist">
-                   <datalist id="steplist"><option>-90</option><option>-45</option><option>0</option><option>45</option><option>90</option></datalist>`;
+  var slider_html=`set <BIG><BIG>&Phi; :</BIG></BIG> <INPUT STYLE="position:fixed; width: 400px; zDepth:1" TYPE="range" MIN="-90" MAX="90" STEP="1">`;
   
   // we add the html to the document body
   document.body.innerHTML += slider_html;
