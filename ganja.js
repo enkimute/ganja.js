@@ -959,7 +959,10 @@
           if (tot==5) return [ct,st*-st2,st*ct2,0,0,ct2,st2,0,-st,ct*-st2,ct*ct2,0,xx*ct+z*-st,y*ct2+(xx*st+z*ct)*-st2,y*st2+xx*st+z*ct*ct2+zoom,1];
           x=x.Normalized; var y=x.Mul(x.Dual),X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=Array(16);
           var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W, yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
-          return [ 1-2*(yy+zz), 2*(xy+zw), 2*(xz-yw), 0, 2*(xy-zw), 1-2*(xx+zz), 2*(yz+xw), 0, 2*(xz+yw), 2*(yz-xw), 1-2*(xx+yy), 0, -2*y.e23, -2*y.e13, 2*y.e12+5, 1];
+          var mtx = [ 1-2*(yy+zz), 2*(xy+zw), 2*(xz-yw), 0, 2*(xy-zw), 1-2*(xx+zz), 2*(yz+xw), 0, 2*(xz+yw), 2*(yz-xw), 1-2*(xx+yy), 0, -2*y.e23, -2*y.e13, 2*y.e12+5, 1];
+          var mtx2 = [ct,st*-st2,st*ct2,0,0,ct2,st2,0,-st,ct*-st2,ct*ct2,0,0,0,0,1], mtx3=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+          for (var i=0; i<4; ++i) for (var j=0; j<4; ++j) for (var k=0; k<4; ++k) mtx3[i+k*4] += mtx[i+j*4]*mtx2[j+k*4]; return mtx3;
+          return mtx;
         }
       // Render the given vertices. (autocreates/destroys vertex array if not supplied).
         var draw=function(p, tp, vtx, color, color2, ratio, texc, va){
@@ -1344,10 +1347,16 @@
         var sel=-1; canvas.oncontextmenu = canvas.onmousedown = (e)=>{e.preventDefault(); e.stopPropagation();  if (e.detail===0) return;
           var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*-4+2)*canvas.height/canvas.width;
           sel = (e.button==2)?-3:-2; canvas.value.forEach((x,i)=>{
-            x = interprete(x); if (x.tp==1) {
-              var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...x.pos,1]).map(x=>x.s);
-              pos2 = Element.Mul( [[5,0,0,0],[0,5*(r||2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
-              if ((mx-pos2[0])**2 + (my-pos2[1])**2 < 0.01) sel=i;
+            if (tot != 5) { if (x[14]) {
+              var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [-x[13]/x[14],-x[12]/x[14],x[11]/x[14],1]).map(x=>x.s);
+              pos2 = Element.Mul( [[5,0,0,0],[0,5*(2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
+              if ((mx-pos2[0])**2 + ((my)-pos2[1])**2 < 0.01) sel=i;
+            }} else {
+              x = interprete(x); if (x.tp==1) {
+                var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...x.pos,1]).map(x=>x.s);
+                pos2 = Element.Mul( [[5,0,0,0],[0,5*(r||2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
+                if ((mx-pos2[0])**2 + (my-pos2[1])**2 < 0.01) sel=i;
+              }
             }
           });
           canvas.onwheel=e=>{e.preventDefault(); e.stopPropagation(); options.z = (options.z||5)+e.deltaY/100; if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));}
@@ -1358,13 +1367,18 @@
              options.h = (options.h||0)+mx; options.p = Math.max(-Math.PI/2,Math.min(Math.PI/2, (options.p||0)+my)); if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return;
           };
           canvas.onmousemove=(e)=>{
-            var rc = canvas.getBoundingClientRect(), x=interprete(canvas.value[sel]);
+            var rc = canvas.getBoundingClientRect(),x; if (sel>=0) { if (tot==5) x=interprete(canvas.value[sel]); else { x=canvas.value[sel]; x={pos:[-x[13]/x[14],-x[12]/x[14],x[11]/x[14]]};  }}
             var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*-2)*canvas.height/canvas.width;
             if (sel==-2) { options.h =  (options.h||0)+mx; options.p = Math.max(-Math.PI/2,Math.min(Math.PI/2, (options.p||0)+my)); if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; };
             if (sel==-3) { var ct = Math.cos(options.h||0), st= Math.sin(options.h||0), ct2 = Math.cos(options.p||0), st2 = Math.sin(options.p||0);
               if (e.shiftKey) { options.posy = (options.posy||0)+my; } else { options.posx = (options.posx||0)+mx*ct+my*st; options.posz = (options.posz||0)+mx*-st+my*ct*ct2; } if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));return; }; if (sel < 0) return;
-            x.pos[0] += (e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my;
-            canvas.value[sel].set(Element.Mul(ni,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1);
+            if (tot==5) { 
+               x.pos[0] += (e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my;
+               canvas.value[sel].set(Element.Mul(ni,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1); }
+            else if (x) { 
+               x.pos[2] += (e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[0]+=(e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my;
+               canvas.value[sel].set([x.pos[2],-x.pos[1],-x.pos[0],1],11); console.log(x.pos); 
+            }
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
         }

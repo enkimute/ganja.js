@@ -9,43 +9,40 @@ Algebra(3,0,1,()=>{
   var up = (x)=>!(1e0 + x);
   
   // Create the three points of our triangle.
-  var p1 = up(.2e1 + .4e3 + .2e2), p2 = up(.5e2 + .2e3), p3 = up(.2e3);
+  var p1 = up(.2e1 + .4e3 - .5e2), p2 = up(-1e2 + .2e3), p3 = up(-.5e2+.2e3);
   
   // Create a triangle from the three points.
   var tri = [p1, p2, p3];
   
-  // Create a plane
-  var p = 1e2 - 1e0;
+  // Create a plane through a point.
+  var orig = 1e123;
+  var p = ()=>((orig|1e2)/orig).Normalized;
   
   // Create a line by joining two points.
   var l1 = up(-.3e1), l2 = up(-.4e1-.5e2),
-      Line = ()=>l1 & l2;
+      Line = ()=>(l1 & l2).Normalized;
 
   // The orbit of the triangle around the line.
   var Orbit = [];
   for (let i=0; i<32; i++) { 
-     let M    = ()=>Math.E**(-i/10*Line); 
-     Orbit[i] = ()=>M * tri * ~M;
+     let M    = ()=>Math.E**(-i/32*Line); 
+     Orbit[i] = ()=>(M * tri * ~M);
   }     
 
-  // Select a camera position (also a motor..)
-  var camera = Math.E**(.4e02) *    // move up
-               Math.E**(.2e23) *    // pitch
-               Math.E**(.4e13);     // yaw
-  
   // Render our graph
   var canvas = this.graph(()=>[
       // points and triangle in green, line in black
         0x00008800, p1, "p1", p2, "p2", p3, "p3",
-        0x80008800, tri,
+        0x80008800, tri, 0, "T",
         0x00000000, Line, l1, l2,
       // The orbit, the mirrored line and the mirrored orbit.    
-        0xE0008800, ...Orbit,
+        0xE0008800, ...Orbit, 0, "MT~M",
         0xC0000000, -p*Line*p,
-        0xC0000088, ...-p*Orbit*p,
+        0xC0000000, -p*tri*p, 0, "-pTp",
+        0xC0000088, ...-p*Orbit*p, 0, "-pMT~Mp",
       // The yellow plane.    
-        0xC0FFFF00, p, 0, "plane",
-      ],{gl:true, noZ:true, camera});
+        0xC0FFFF00, p, orig, 0, "p",
+      ],{gl:true,camera:1+0e1, noZ:true, p:-0.3, h:Math.PI/4});
       
   // Add the graph to the webpage.
   document.body.appendChild(canvas);
