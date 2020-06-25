@@ -1276,7 +1276,8 @@
                  var vtx=[], tx=[], vtx2=[];
                  for (var i=0; i<(e.zRange===0?5000:60000); i++) {
                    var p  = Element.Trivector(random()*(2*e.xRange)-e.xRange,random()*2*e.yRange-e.yRange,random()*2*e.zRange-e.zRange,1);
-                   var p2 = Element.sw(e.motor,p);
+//                   var p2 = Element.sw(e.motor,p);
+                   var p2 = e.motor.Mul(p).Mul(e.motor.Inverse);
                    tx.push(random(), random());
                    vtx.push(...p.slice(11,14).reverse()); vtx2.push(...p2.slice(11,14).reverse());
                  }  
@@ -1377,7 +1378,7 @@
                canvas.value[sel].set(Element.Mul(ni,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1); }
             else if (x) { 
                x.pos[2] += (e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[0]+=(e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my;
-               canvas.value[sel].set([x.pos[2],-x.pos[1],-x.pos[0],1],11); console.log(x.pos); 
+               canvas.value[sel].set([x.pos[2],-x.pos[1],-x.pos[0],1],11);
             }
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
