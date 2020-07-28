@@ -607,7 +607,7 @@
     // An optional second parameter is an options object { width, height, animate, camera, scale, grid, canvas }
       static graph(f,options) {
       // Store the original input
-        if (!f) return; var origf=f,marker_defs={};
+        if (!f) return; var origf=f;
       // generate default options.
         options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot<4?Element.Scalar(1):new Element([0.7071067690849304, 0, 0, 0, 0, 0, 0, 0, 0, 0.7071067690849304, 0, 0, 0, 0, 0, 0]));
         if (options.conformal && tot==4) var ni = options.ni||this.Coeff(4,1,3,1), no = options.no||this.Coeff(4,0.5,3,-0.5), minus_no = no.Scale(-1);
@@ -624,6 +624,7 @@
           if (f instanceof Function) f=f(); if (!(f instanceof Array)) f=[].concat.apply([],Object.keys(f).map((k)=>typeof f[k]=='number'?[f[k]]:[f[k],k]));
         // The build function generates the actual SVG. It will be called everytime the user interacts or the anim flag is set.
           function build(f,or) {
+            var marker_defs={};
           // Make sure we have an aray.
             if (or && f && f instanceof Function) f=f();
           // Reset position and color for cursor.
