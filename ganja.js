@@ -1002,7 +1002,7 @@
                  void main() { vec3 ldir = normalize(Pos.xyz - vec3(1.0,1.0,2.0));
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
-                 gl_FragColor = vec4(max(0.3,l)*Col+vec3(pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+                 gl_FragColor = vec4(max(0.3,l)*Col+vec3(pow(max(dot(R,E),0.0),20.0))+color2, 1.0); ${options.shader||''}  }`);
         var programmot = compile(`attribute vec4 position; attribute vec2 texc; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p; uniform vec3 color2;
                  void main() { gl_PointSize=2.0; float blend=fract(color2.x+texc.r)*0.5; Pos=mv*(position*(1.0-blend) + (blend)*vec4(col,1.0)); gl_Position = p*Pos; Col=vec3(length(col-position.xyz)*1.); gl_PointSize = 8.0 -  Col.x; Col.y=sin(blend*2.*3.1415); }`,
                 `precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; varying vec3 Col; 
