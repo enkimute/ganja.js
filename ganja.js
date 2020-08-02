@@ -521,6 +521,26 @@
       static Div(a,b,res) {
       // Expressions
         while(a.call)a=a(); while(b.call)b=b();
+      // For DDG experiments, I'll include a quick cholesky on matrices here. (vector/matrix)
+        if ((a instanceof Array) && (b instanceof Array) && (b[0] instanceof Array)) {
+          // factor
+          var R = b.flat(), i, j, k, sum, i_n, j_n, n=b[0].length, s=new Array(n), x=new Array(n), yi;
+          for (i=0;i<n;i++) { i_n = i*n;
+            for (j=0; j<i; j++) { j_n=j*n;
+              s[j] = R[i_n+j];
+              for (k=0;k<j;k++) s[j] -= s[k]*R[j_n+k];
+              if (R[j_n+j] == 0) return null;
+              R[i_n+j] = s[j]/R[j_n+j];
+            }
+            sum = R[i_n+i];
+            for (k=0;k<i; k++)  sum -= s[k]*R[i_n+k];
+            R[i_n+i] = sum;
+          }        
+          // subst
+          for (i=0; i<n; i++) for (x[i]=a[i],j=0;j<=i-1;j++) x[i]-=R[i*n+j]*x[j];
+          for (i=n-1; i>=0; i--) for (x[i] /= R[i*n+i], j=i+1; j<n; j++) x[i] -= R[j*n+i]*x[j];
+          return x;
+        }
       // js or call through to element divide.
         if (!(a instanceof Element || b instanceof Element)) return a/b;
         a=Element.toEl(a);
