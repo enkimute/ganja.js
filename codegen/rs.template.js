@@ -7,7 +7,7 @@ var preamble = (basis, classname) =>
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
-#![feature(const_slice_len)]
+//#![feature(const_slice_len)]
 
 use std::fmt;
 use std::ops::{Index,IndexMut,Add,Sub,Mul,BitAnd,BitOr,BitXor,Not};
@@ -196,7 +196,7 @@ define_binary_op_all!(
     [ref ref] => {
         let mut ${name_ret} = ${classname}::zero();
         let ${name_a} = self;
-        ${code.replace(/^ */g, '').replace(/\n */g, '\n		')}
+        ${code.replace(/^ */g, '').replace(/\n */g, '\n		').replace(/1\*/g,'').replace(/\*-1/g,'*-1.0')}
         ${name_ret}
     };
 );
