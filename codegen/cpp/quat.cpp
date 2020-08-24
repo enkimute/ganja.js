@@ -109,10 +109,10 @@ inline QUAT operator ^ (const QUAT &a, const QUAT &b) {
 //***********************
 inline QUAT operator & (const QUAT &a, const QUAT &b) {
   QUAT res;
-  res[3]=b[3]*a[3];
-  res[2]=b[2]*a[3]+b[3]*a[2];
-  res[1]=b[1]*a[3]+b[3]*a[1];
-  res[0]=b[0]*a[3]+b[1]*a[2]-b[2]*a[1]+b[3]*a[0];
+  res[3]=1*(a[3]*b[3]);
+  res[2]=-1*(a[2]*-1*b[3]+a[3]*b[2]*-1);
+  res[1]=1*(a[1]*b[3]+a[3]*b[1]);
+  res[0]=1*(a[0]*b[3]+a[1]*b[2]*-1-a[2]*-1*b[1]+a[3]*b[0]);
   return res;
 };
 
@@ -201,6 +201,32 @@ inline QUAT operator + (const float &a, const QUAT &b) {
 inline QUAT operator + (const QUAT &a, const float &b) {
   QUAT res;
     res[0] = a[0]+b;
+      res[1] = a[1];
+    res[2] = a[2];
+    res[3] = a[3];
+  return res;
+};
+
+//***********************
+// QUAT.ssub : res = a - b 
+// scalar/multivector subtraction
+//***********************
+inline QUAT operator - (const float &a, const QUAT &b) {
+  QUAT res;
+    res[0] = a-b[0];
+      res[1] = -b[1];
+    res[2] = -b[2];
+    res[3] = -b[3];
+  return res;
+};
+
+//***********************
+// QUAT.subs : res = a - b 
+// multivector/scalar subtraction
+//***********************
+inline QUAT operator - (const QUAT &a, const float &b) {
+  QUAT res;
+    res[0] = a[0]-b;
       res[1] = a[1];
     res[2] = a[2];
     res[3] = a[3];

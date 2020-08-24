@@ -97,8 +97,8 @@ inline HYPERBOLIC operator ^ (const HYPERBOLIC &a, const HYPERBOLIC &b) {
 //***********************
 inline HYPERBOLIC operator & (const HYPERBOLIC &a, const HYPERBOLIC &b) {
   HYPERBOLIC res;
-  res[1]=b[1]*a[1];
-  res[0]=b[0]*a[1]+b[1]*a[0];
+  res[1]=1*(a[1]*b[1]);
+  res[0]=1*(a[0]*b[1]+a[1]*b[0]);
   return res;
 };
 
@@ -175,6 +175,28 @@ inline HYPERBOLIC operator + (const float &a, const HYPERBOLIC &b) {
 inline HYPERBOLIC operator + (const HYPERBOLIC &a, const float &b) {
   HYPERBOLIC res;
     res[0] = a[0]+b;
+      res[1] = a[1];
+  return res;
+};
+
+//***********************
+// HYPERBOLIC.ssub : res = a - b 
+// scalar/multivector subtraction
+//***********************
+inline HYPERBOLIC operator - (const float &a, const HYPERBOLIC &b) {
+  HYPERBOLIC res;
+    res[0] = a-b[0];
+      res[1] = -b[1];
+  return res;
+};
+
+//***********************
+// HYPERBOLIC.subs : res = a - b 
+// multivector/scalar subtraction
+//***********************
+inline HYPERBOLIC operator - (const HYPERBOLIC &a, const float &b) {
+  HYPERBOLIC res;
+    res[0] = a[0]-b;
       res[1] = a[1];
   return res;
 };

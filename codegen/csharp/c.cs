@@ -112,8 +112,8 @@ namespace C
 		public static C operator & (C a, C b)
 		{
 			C res = new C();
-			res[1]=b[1]*a[1];
-			res[0]=b[0]*a[1]+b[1]*a[0];
+			res[1]=1*(a[1]*b[1]);
+			res[0]=1*(a[0]*b[1]+a[1]*b[0]);
 			return res;
 		}
 
@@ -197,6 +197,30 @@ namespace C
 		{
 			C res = new C();
 			res[0] = a[0]+b;
+			res[1] = a[1];
+			return res;
+		}
+
+		/// <summary>
+		/// C.ssub : res = a - b
+		/// scalar/multivector subtraction
+		/// </summary>
+		public static C operator - (float a, C b)
+		{
+			C res = new C();
+			res[0] = a-b[0];
+			res[1] = -b[1];
+			return res;
+		}
+
+		/// <summary>
+		/// C.subs : res = a - b
+		/// multivector/scalar subtraction
+		/// </summary>
+		public static C operator - (C a, float b)
+		{
+			C res = new C();
+			res[0] = a[0]-b;
 			res[1] = a[1];
 			return res;
 		}

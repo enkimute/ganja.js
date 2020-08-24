@@ -5,7 +5,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
-#![feature(const_slice_len)]
+//#![feature(const_slice_len)]
 
 use std::fmt;
 use std::ops::{Index,IndexMut,Add,Sub,Mul,BitAnd,BitOr,BitXor,Not};
@@ -365,22 +365,22 @@ define_binary_op_all!(
     [ref ref] => {
         let mut res = SPACETIME::zero();
         let a = self;
-        res[15]=b[15]*a[15];
-		res[14]=b[14]*a[15]+b[15]*a[14];
-		res[13]=b[13]*a[15]+b[15]*a[13];
-		res[12]=b[12]*a[15]+b[15]*a[12];
-		res[11]=b[11]*a[15]+b[15]*a[11];
-		res[10]=b[10]*a[15]+b[13]*a[14]-b[14]*a[13]+b[15]*a[10];
-		res[9]=b[9]*a[15]+b[12]*a[14]-b[14]*a[12]+b[15]*a[9];
-		res[8]=b[8]*a[15]+b[11]*a[14]-b[14]*a[11]+b[15]*a[8];
-		res[7]=b[7]*a[15]+b[12]*a[13]-b[13]*a[12]+b[15]*a[7];
-		res[6]=b[6]*a[15]+b[11]*a[13]-b[13]*a[11]+b[15]*a[6];
-		res[5]=b[5]*a[15]+b[11]*a[12]-b[12]*a[11]+b[15]*a[5];
-		res[4]=b[4]*a[15]+b[7]*a[14]-b[9]*a[13]+b[10]*a[12]+b[12]*a[10]-b[13]*a[9]+b[14]*a[7]+b[15]*a[4];
-		res[3]=b[3]*a[15]+b[6]*a[14]-b[8]*a[13]+b[10]*a[11]+b[11]*a[10]-b[13]*a[8]+b[14]*a[6]+b[15]*a[3];
-		res[2]=b[2]*a[15]+b[5]*a[14]-b[8]*a[12]+b[9]*a[11]+b[11]*a[9]-b[12]*a[8]+b[14]*a[5]+b[15]*a[2];
-		res[1]=b[1]*a[15]+b[5]*a[13]-b[6]*a[12]+b[7]*a[11]+b[11]*a[7]-b[12]*a[6]+b[13]*a[5]+b[15]*a[1];
-		res[0]=b[0]*a[15]+b[1]*a[14]-b[2]*a[13]+b[3]*a[12]-b[4]*a[11]+b[5]*a[10]-b[6]*a[9]+b[7]*a[8]+b[8]*a[7]-b[9]*a[6]+b[10]*a[5]+b[11]*a[4]-b[12]*a[3]+b[13]*a[2]-b[14]*a[1]+b[15]*a[0];
+        res[15]=(a[15]*b[15]);
+		res[14]=-(a[14]*-b[15]+a[15]*b[14]*-1.0);
+		res[13]=(a[13]*b[15]+a[15]*b[13]);
+		res[12]=-(a[12]*-b[15]+a[15]*b[12]*-1.0);
+		res[11]=(a[11]*b[15]+a[15]*b[11]);
+		res[10]=(a[10]*b[15]+a[13]*b[14]*-1.0-a[14]*-b[13]+a[15]*b[10]);
+		res[9]=-(a[9]*-b[15]+a[12]*-b[14]*-1.0-a[14]*-b[12]*-1.0+a[15]*b[9]*-1.0);
+		res[8]=(a[8]*b[15]+a[11]*b[14]*-1.0-a[14]*-b[11]+a[15]*b[8]);
+		res[7]=(a[7]*b[15]+a[12]*-b[13]-a[13]*b[12]*-1.0+a[15]*b[7]);
+		res[6]=-(a[6]*-b[15]+a[11]*b[13]-a[13]*b[11]+a[15]*b[6]*-1.0);
+		res[5]=(a[5]*b[15]+a[11]*b[12]*-1.0-a[12]*-b[11]+a[15]*b[5]);
+		res[4]=-(a[4]*-b[15]+a[7]*b[14]*-1.0-a[9]*-b[13]+a[10]*b[12]*-1.0+a[12]*-b[10]-a[13]*b[9]*-1.0+a[14]*-b[7]+a[15]*b[4]*-1.0);
+		res[3]=(a[3]*b[15]+a[6]*-b[14]*-1.0-a[8]*b[13]+a[10]*b[11]+a[11]*b[10]-a[13]*b[8]+a[14]*-b[6]*-1.0+a[15]*b[3]);
+		res[2]=-(a[2]*-b[15]+a[5]*b[14]*-1.0-a[8]*b[12]*-1.0+a[9]*-b[11]+a[11]*b[9]*-1.0-a[12]*-b[8]+a[14]*-b[5]+a[15]*b[2]*-1.0);
+		res[1]=(a[1]*b[15]+a[5]*b[13]-a[6]*-b[12]*-1.0+a[7]*b[11]+a[11]*b[7]-a[12]*-b[6]*-1.0+a[13]*b[5]+a[15]*b[1]);
+		res[0]=(a[0]*b[15]+a[1]*b[14]*-1.0-a[2]*-b[13]+a[3]*b[12]*-1.0-a[4]*-b[11]+a[5]*b[10]-a[6]*-b[9]*-1.0+a[7]*b[8]+a[8]*b[7]-a[9]*-b[6]*-1.0+a[10]*b[5]+a[11]*b[4]*-1.0-a[12]*-b[3]+a[13]*b[2]*-1.0-a[14]*-b[1]+a[15]*b[0]);
         res
     };
 );
@@ -604,6 +604,74 @@ define_binary_op_all!(
         let mut res = SPACETIME::zero();
         let a = self;
         res[0] = a[0]+b;
+        res[1] = a[1];
+        res[2] = a[2];
+        res[3] = a[3];
+        res[4] = a[4];
+        res[5] = a[5];
+        res[6] = a[6];
+        res[7] = a[7];
+        res[8] = a[8];
+        res[9] = a[9];
+        res[10] = a[10];
+        res[11] = a[11];
+        res[12] = a[12];
+        res[13] = a[13];
+        res[14] = a[14];
+        res[15] = a[15];
+        res
+    };
+);
+
+
+// ssub
+// scalar/multivector subtraction
+
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: float_t, b: SPACETIME, Output = SPACETIME;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
+        let mut res = SPACETIME::zero();
+        let a = self;
+        res[0] = a-b[0];
+        res[1] = -b[1];
+        res[2] = -b[2];
+        res[3] = -b[3];
+        res[4] = -b[4];
+        res[5] = -b[5];
+        res[6] = -b[6];
+        res[7] = -b[7];
+        res[8] = -b[8];
+        res[9] = -b[9];
+        res[10] = -b[10];
+        res[11] = -b[11];
+        res[12] = -b[12];
+        res[13] = -b[13];
+        res[14] = -b[14];
+        res[15] = -b[15];
+        res
+    };
+);
+
+
+// subs
+// multivector/scalar subtraction
+
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: SPACETIME, b: float_t, Output = SPACETIME;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
+        let mut res = SPACETIME::zero();
+        let a = self;
+        res[0] = a[0]-b;
         res[1] = a[1];
         res[2] = a[2];
         res[3] = a[3];

@@ -130,10 +130,10 @@ class MINK:
 
     def __and__(a,b):
         res = a.mvec.copy()
-        res[3]=b[3]*a[3]
-        res[2]=b[2]*a[3]+b[3]*a[2]
-        res[1]=b[1]*a[3]+b[3]*a[1]
-        res[0]=b[0]*a[3]+b[1]*a[2]-b[2]*a[1]+b[3]*a[0]
+        res[3]=1*(a[3]*b[3])
+        res[2]=-1*(a[2]*-1*b[3]+a[3]*b[2]*-1)
+        res[1]=1*(a[1]*b[3]+a[3]*b[1])
+        res[0]=1*(a[0]*b[3]+a[1]*b[2]*-1-a[2]*-1*b[1]+a[3]*b[0])
         return MINK.fromarray(res)
 
 
@@ -174,7 +174,14 @@ class MINK:
         res[2] = a[2]-b[2]
         res[3] = a[3]-b[3]
         return MINK.fromarray(res)
-    __rsub__=__sub__
+
+    def __rsub__(a,b):
+        """MINK.Sub
+                
+        Multivector subtraction
+        """
+        return b + -1 * a
+
 
     def smul(a,b):
         res = a.mvec.copy()
@@ -206,6 +213,24 @@ class MINK:
     def adds(a,b):
         res = a.mvec.copy()
         res[0] = a[0]+b
+        res[1] = a[1]
+        res[2] = a[2]
+        res[3] = a[3]
+        return MINK.fromarray(res)
+
+
+    def ssub(a,b):
+        res = a.mvec.copy()
+        res[0] = a-b[0]
+        res[1] = -b[1]
+        res[2] = -b[2]
+        res[3] = -b[3]
+        return MINK.fromarray(res)
+
+
+    def subs(a,b):
+        res = a.mvec.copy()
+        res[0] = a[0]-b
         res[1] = a[1]
         res[2] = a[2]
         res[3] = a[3]

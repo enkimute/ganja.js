@@ -5,7 +5,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
-#![feature(const_slice_len)]
+//#![feature(const_slice_len)]
 
 use std::fmt;
 use std::ops::{Index,IndexMut,Add,Sub,Mul,BitAnd,BitOr,BitXor,Not};
@@ -253,8 +253,8 @@ define_binary_op_all!(
     [ref ref] => {
         let mut res = C::zero();
         let a = self;
-        res[1]=b[1]*a[1];
-		res[0]=b[0]*a[1]+b[1]*a[0];
+        res[1]=(a[1]*b[1]);
+		res[0]=(a[0]*b[1]+a[1]*b[0]);
         res
     };
 );
@@ -394,6 +394,46 @@ define_binary_op_all!(
         let mut res = C::zero();
         let a = self;
         res[0] = a[0]+b;
+        res[1] = a[1];
+        res
+    };
+);
+
+
+// ssub
+// scalar/multivector subtraction
+
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: float_t, b: C, Output = C;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
+        let mut res = C::zero();
+        let a = self;
+        res[0] = a-b[0];
+        res[1] = -b[1];
+        res
+    };
+);
+
+
+// subs
+// multivector/scalar subtraction
+
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: C, b: float_t, Output = C;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
+        let mut res = C::zero();
+        let a = self;
+        res[0] = a[0]-b;
         res[1] = a[1];
         res
     };

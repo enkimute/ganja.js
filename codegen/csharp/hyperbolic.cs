@@ -112,8 +112,8 @@ namespace HYP
 		public static HYPERBOLIC operator & (HYPERBOLIC a, HYPERBOLIC b)
 		{
 			HYPERBOLIC res = new HYPERBOLIC();
-			res[1]=b[1]*a[1];
-			res[0]=b[0]*a[1]+b[1]*a[0];
+			res[1]=1*(a[1]*b[1]);
+			res[0]=1*(a[0]*b[1]+a[1]*b[0]);
 			return res;
 		}
 
@@ -197,6 +197,30 @@ namespace HYP
 		{
 			HYPERBOLIC res = new HYPERBOLIC();
 			res[0] = a[0]+b;
+			res[1] = a[1];
+			return res;
+		}
+
+		/// <summary>
+		/// HYPERBOLIC.ssub : res = a - b
+		/// scalar/multivector subtraction
+		/// </summary>
+		public static HYPERBOLIC operator - (float a, HYPERBOLIC b)
+		{
+			HYPERBOLIC res = new HYPERBOLIC();
+			res[0] = a-b[0];
+			res[1] = -b[1];
+			return res;
+		}
+
+		/// <summary>
+		/// HYPERBOLIC.subs : res = a - b
+		/// multivector/scalar subtraction
+		/// </summary>
+		public static HYPERBOLIC operator - (HYPERBOLIC a, float b)
+		{
+			HYPERBOLIC res = new HYPERBOLIC();
+			res[0] = a[0]-b;
 			res[1] = a[1];
 			return res;
 		}

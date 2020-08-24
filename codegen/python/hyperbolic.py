@@ -118,8 +118,8 @@ class HYPERBOLIC:
 
     def __and__(a,b):
         res = a.mvec.copy()
-        res[1]=b[1]*a[1]
-        res[0]=b[0]*a[1]+b[1]*a[0]
+        res[1]=1*(a[1]*b[1])
+        res[0]=1*(a[0]*b[1]+a[1]*b[0])
         return HYPERBOLIC.fromarray(res)
 
 
@@ -154,7 +154,14 @@ class HYPERBOLIC:
         res[0] = a[0]-b[0]
         res[1] = a[1]-b[1]
         return HYPERBOLIC.fromarray(res)
-    __rsub__=__sub__
+
+    def __rsub__(a,b):
+        """HYPERBOLIC.Sub
+                
+        Multivector subtraction
+        """
+        return b + -1 * a
+
 
     def smul(a,b):
         res = a.mvec.copy()
@@ -180,6 +187,20 @@ class HYPERBOLIC:
     def adds(a,b):
         res = a.mvec.copy()
         res[0] = a[0]+b
+        res[1] = a[1]
+        return HYPERBOLIC.fromarray(res)
+
+
+    def ssub(a,b):
+        res = a.mvec.copy()
+        res[0] = a-b[0]
+        res[1] = -b[1]
+        return HYPERBOLIC.fromarray(res)
+
+
+    def subs(a,b):
+        res = a.mvec.copy()
+        res[0] = a[0]-b
         res[1] = a[1]
         return HYPERBOLIC.fromarray(res)
 

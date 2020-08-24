@@ -97,8 +97,8 @@ inline C operator ^ (const C &a, const C &b) {
 //***********************
 inline C operator & (const C &a, const C &b) {
   C res;
-  res[1]=b[1]*a[1];
-  res[0]=b[0]*a[1]+b[1]*a[0];
+  res[1]=1*(a[1]*b[1]);
+  res[0]=1*(a[0]*b[1]+a[1]*b[0]);
   return res;
 };
 
@@ -175,6 +175,28 @@ inline C operator + (const float &a, const C &b) {
 inline C operator + (const C &a, const float &b) {
   C res;
     res[0] = a[0]+b;
+      res[1] = a[1];
+  return res;
+};
+
+//***********************
+// C.ssub : res = a - b 
+// scalar/multivector subtraction
+//***********************
+inline C operator - (const float &a, const C &b) {
+  C res;
+    res[0] = a-b[0];
+      res[1] = -b[1];
+  return res;
+};
+
+//***********************
+// C.subs : res = a - b 
+// multivector/scalar subtraction
+//***********************
+inline C operator - (const C &a, const float &b) {
+  C res;
+    res[0] = a[0]-b;
       res[1] = a[1];
   return res;
 };

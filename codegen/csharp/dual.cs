@@ -112,8 +112,8 @@ namespace DUA
 		public static DUAL operator & (DUAL a, DUAL b)
 		{
 			DUAL res = new DUAL();
-			res[1]=b[1]*a[1];
-			res[0]=b[0]*a[1]+b[1]*a[0];
+			res[1]=1*(a[1]*b[1]);
+			res[0]=1*(a[0]*b[1]+a[1]*b[0]);
 			return res;
 		}
 
@@ -197,6 +197,30 @@ namespace DUA
 		{
 			DUAL res = new DUAL();
 			res[0] = a[0]+b;
+			res[1] = a[1];
+			return res;
+		}
+
+		/// <summary>
+		/// DUAL.ssub : res = a - b
+		/// scalar/multivector subtraction
+		/// </summary>
+		public static DUAL operator - (float a, DUAL b)
+		{
+			DUAL res = new DUAL();
+			res[0] = a-b[0];
+			res[1] = -b[1];
+			return res;
+		}
+
+		/// <summary>
+		/// DUAL.subs : res = a - b
+		/// multivector/scalar subtraction
+		/// </summary>
+		public static DUAL operator - (DUAL a, float b)
+		{
+			DUAL res = new DUAL();
+			res[0] = a[0]-b;
 			res[1] = a[1];
 			return res;
 		}

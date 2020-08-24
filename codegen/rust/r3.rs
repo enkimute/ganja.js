@@ -5,7 +5,7 @@
 #![allow(non_upper_case_globals)]
 #![allow(non_snake_case)]
 #![allow(non_camel_case_types)]
-#![feature(const_slice_len)]
+//#![feature(const_slice_len)]
 
 use std::fmt;
 use std::ops::{Index,IndexMut,Add,Sub,Mul,BitAnd,BitOr,BitXor,Not};
@@ -301,14 +301,14 @@ define_binary_op_all!(
     [ref ref] => {
         let mut res = R3::zero();
         let a = self;
-        res[7]=b[7]*a[7];
-		res[6]=b[6]*a[7]+b[7]*a[6];
-		res[5]=b[5]*a[7]+b[7]*a[5];
-		res[4]=b[4]*a[7]+b[7]*a[4];
-		res[3]=b[3]*a[7]+b[5]*a[6]-b[6]*a[5]+b[7]*a[3];
-		res[2]=b[2]*a[7]+b[4]*a[6]-b[6]*a[4]+b[7]*a[2];
-		res[1]=b[1]*a[7]+b[4]*a[5]-b[5]*a[4]+b[7]*a[1];
-		res[0]=b[0]*a[7]+b[1]*a[6]-b[2]*a[5]+b[3]*a[4]+b[4]*a[3]-b[5]*a[2]+b[6]*a[1]+b[7]*a[0];
+        res[7]=(a[7]*b[7]);
+		res[6]=(a[6]*b[7]+a[7]*b[6]);
+		res[5]=-(a[5]*-b[7]+a[7]*b[5]*-1.0);
+		res[4]=(a[4]*b[7]+a[7]*b[4]);
+		res[3]=(a[3]*b[7]+a[5]*-b[6]-a[6]*b[5]*-1.0+a[7]*b[3]);
+		res[2]=-(a[2]*-b[7]+a[4]*b[6]-a[6]*b[4]+a[7]*b[2]*-1.0);
+		res[1]=(a[1]*b[7]+a[4]*b[5]*-1.0-a[5]*-b[4]+a[7]*b[1]);
+		res[0]=(a[0]*b[7]+a[1]*b[6]-a[2]*-b[5]*-1.0+a[3]*b[4]+a[4]*b[3]-a[5]*-b[2]*-1.0+a[6]*b[1]+a[7]*b[0]);
         res
     };
 );
@@ -484,6 +484,58 @@ define_binary_op_all!(
         let mut res = R3::zero();
         let a = self;
         res[0] = a[0]+b;
+        res[1] = a[1];
+        res[2] = a[2];
+        res[3] = a[3];
+        res[4] = a[4];
+        res[5] = a[5];
+        res[6] = a[6];
+        res[7] = a[7];
+        res
+    };
+);
+
+
+// ssub
+// scalar/multivector subtraction
+
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: float_t, b: R3, Output = R3;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
+        let mut res = R3::zero();
+        let a = self;
+        res[0] = a-b[0];
+        res[1] = -b[1];
+        res[2] = -b[2];
+        res[3] = -b[3];
+        res[4] = -b[4];
+        res[5] = -b[5];
+        res[6] = -b[6];
+        res[7] = -b[7];
+        res
+    };
+);
+
+
+// subs
+// multivector/scalar subtraction
+
+define_binary_op_all!(
+    Sub,
+    sub;
+    self: R3, b: float_t, Output = R3;
+    [val val] => &self - &b;
+    [ref val] =>  self - &b;
+    [val ref] => &self -  b;
+    [ref ref] => {
+        let mut res = R3::zero();
+        let a = self;
+        res[0] = a[0]-b;
         res[1] = a[1];
         res[2] = a[2];
         res[3] = a[3];

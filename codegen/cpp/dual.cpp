@@ -97,8 +97,8 @@ inline DUAL operator ^ (const DUAL &a, const DUAL &b) {
 //***********************
 inline DUAL operator & (const DUAL &a, const DUAL &b) {
   DUAL res;
-  res[1]=b[1]*a[1];
-  res[0]=b[0]*a[1]+b[1]*a[0];
+  res[1]=1*(a[1]*b[1]);
+  res[0]=1*(a[0]*b[1]+a[1]*b[0]);
   return res;
 };
 
@@ -175,6 +175,28 @@ inline DUAL operator + (const float &a, const DUAL &b) {
 inline DUAL operator + (const DUAL &a, const float &b) {
   DUAL res;
     res[0] = a[0]+b;
+      res[1] = a[1];
+  return res;
+};
+
+//***********************
+// DUAL.ssub : res = a - b 
+// scalar/multivector subtraction
+//***********************
+inline DUAL operator - (const float &a, const DUAL &b) {
+  DUAL res;
+    res[0] = a-b[0];
+      res[1] = -b[1];
+  return res;
+};
+
+//***********************
+// DUAL.subs : res = a - b 
+// multivector/scalar subtraction
+//***********************
+inline DUAL operator - (const DUAL &a, const float &b) {
+  DUAL res;
+    res[0] = a[0]-b;
       res[1] = a[1];
   return res;
 };
