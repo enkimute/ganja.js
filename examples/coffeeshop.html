@@ -166,7 +166,11 @@
           <P>Stash Info</P>
           <INPUT ID="titleInput" TYPE="text" PLACEHOLDER="title goes here"></INPUT>
           <TEXTAREA ID="descriptionInput" ROWS=4 PLACEHOLDER="description goes here"></TEXTAREA>
-          <P>Stash URL <span>click to copy</span></P>
+          <P>Image Options</P>
+          <INPUT ID="widthInput" TYPE="text" PLACEHOLDER="width in pixels"></INPUT>
+          <INPUT ID="heightInput" TYPE="text" PLACEHOLDER="height in pixels"></INPUT>
+          <INPUT TYPE="button" VALUE="download SVG/PNG" ONCLICK="saveImage()" STYLE="cursor:pointer"></INPUT>
+          <P>Stash URL <span STYLE="cursor:pointer">click to copy</span></P>
           <INPUT ID="urlInput" TYPE="text" VALUE="http://"></INPUT>
           <!--
           <P>Stash Data <span>js : "data"</span></P>
@@ -677,6 +681,40 @@
     
   // User shared.
     else loadStash();
+    
+  // image options
+    function saveImage() {
+      var imgC = els.sample.contentDocument.querySelector('canvas');
+      var imgS = els.sample.contentDocument.querySelector('svg');
+      if (imgS) {
+        imgS.style.width  =  (widthInput.value|0)||'100%';
+        imgS.style.height =  (heightInput.value|0)||'100%';
+        var a = Object.assign(els.sample.contentDocument.createElement('a'),{
+                  download:"image.svg",
+                  href: 'data:image/svg+xml;utf8,' + new XMLSerializer()
+                        .serializeToString(imgS)
+                        .replace(/ +\/\/.*?\n/g,'')
+                        .replace(/onmousedown=".*?"/g,'')
+                        .replace(/#/g,'%23')
+                });
+        els.sample.contentDocument.body.appendChild(a).click(); els.sample.contentDocument.body.removeChild(a);
+        imgS.style.width  =  '100%';
+        imgS.style.height =  '100%';
+      }
+      if (imgC) {
+        imgC.width = imgC.style.width  =  (widthInput.value|0)||'100%';
+        imgC.height = imgC.style.height =  (heightInput.value|0)||'100%';
+        imgC.update(imgC.value);
+          var a = Object.assign(els.sample.contentDocument.createElement('a'),{
+                    download:"image.png",
+                    href: imgC.toDataURL('image/png',1.0)
+                  });
+          els.sample.contentDocument.body.appendChild(a).click(); els.sample.contentDocument.body.removeChild(a);
+          imgC.style.width  =  '100%';
+          imgC.style.height =  '100%';
+      }
+    }
+      
     
       
   </SCRIPT>
