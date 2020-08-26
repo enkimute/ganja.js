@@ -116,7 +116,7 @@
         drms=drm.map((x,i)=>(x==0||i==0)?1:simplify(basis[x]+basis[i])[0]=='-'?-1:1);
 
   /// Store the full metric (also for bivectors etc ..)
-    var metric = options.Cayley&&options.Cayley.map((x,i)=>x[i]) || basis.map((x,xi)=>simplify(x+x,p,q,r)|0);
+    var metric = options.Cayley&&options.Cayley.map((x,i)=>x[i]) || basis.map((x,xi)=>simplify(x+x,p,q,r)|0); metric[0]=1;
 
   /// Generate multiplication tables for the outer and geometric products.
     var mulTable   = options.Cayley||basis.map(x=>basis.map(y=>(x==1)?y:(y==1)?x:simplify(x+y,p,q,r)));
