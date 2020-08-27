@@ -172,7 +172,7 @@ amble:`
 // c++ Template for the postamble
 var postamble = (basis, classname, example)=>
 `
-inline float ${classname}::norm() { return sqrt(abs(((*this)*Conjugate()).mvec[0])); }
+inline float ${classname}::norm() { return sqrt(std::abs(((*this)*Conjugate()).mvec[0])); }
 inline float ${classname}::inorm() { return (!(*this)).norm(); }
 inline ${classname} ${classname}::normalized() { return (*this) * (1/norm()); }
 
