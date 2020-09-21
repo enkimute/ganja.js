@@ -1,0 +1,67 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// An algebra for conic sections.
+// https://link.springer.com/article/10.1007/s00006-018-0879-2
+
+Algebra(5,3,()=>{
+
+  // Shorthand for common Math functions.
+  var {random,sin,cos,PI} = Math;
+
+  // the positive and negative basis vectors. (just for handy naming)
+  var [p1,p2,p3] = [1e3,1e4,1e5],
+      [n1,n2,n3] = [1e6,1e7,1e8];
+  
+  // infinity (i) and origin (o) : plus (p), minus (m), times (t). 
+  var [ip,im,it] = [n1-p1,n2-p2,n3-p3],
+      [op,om,ot] = 0.5*[n1+p1,n2+p2,n3+p3];
+  
+  // Now the 'up' (C) function that takes a euclidean point and casts it into R5,3
+  var up = (x,y)=> op + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ip + 0.5*(x*x-y*y)*im + x*y*it;
+  
+  // Generate 3 random points on a circle
+  var [P0,P1,P2] = [0,1,2].map(i=>random()*2*PI)
+                          .map(r=>up(sin(r), cos(r)))
+  
+  // Wedge them together in our circle.
+  var circle_opns = (P0^P1^P2^im^it^om^ot).Normalized;
+  
+  // Do a line to
+  var line_opns = (P0^P1^ip^im^it^om^ot).Normalized;
+  
+  // Axis aligned Conic (with one point missing) (we'll aninmate that last point)
+  var conic_minus_one_point_opns = P0^P1^P2^it^om^ot;
+
+  // Now graph the elements.
+  document.body.appendChild(this.graph(()=>{
+    // this function is called each frame, update the elements we want animated..
+    var time = performance.now()/1000;
+    
+    // animation parameter
+    var last_point = up( 0.7*sin(time),  0.7*cos(time) );
+    
+    // add that last point into the conic.
+    var conic_opns = (conic_minus_one_point_opns ^ last_point).Normalized;
+    
+    // The circle and line cut in a pointpair:
+    var pair = (line_opns&circle_opns).Normalized;
+    
+    // Return a list of elements to graph.
+    return [
+      0x00FF00,pair*2,     
+      0xFF0000,circle_opns*10,
+      0x0000FF,line_opns*10,
+      0x000000,conic_opns*4,
+      0xFF0000,last_point*100,
+    ]
+  
+  },{
+     animate:1, 
+     width:'800px',
+     height:'600px',
+     up:up(Element.Scalar("x"),Element.Scalar("y")).Vector.map(x=>x.replace(new RegExp("-1","g"),"-1.0"))
+  }))
+  
+})</SCRIPT></BODY>
