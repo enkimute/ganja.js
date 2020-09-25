@@ -96,7 +96,7 @@
           var sign=1,c,l,t=[],f=true,ss=s.match(tot>9?/(\d\d)/g:/(\d)/g);if (!ss) return s; s=ss; l=s.length;
           while (f) { f=false;
           // implement Ex*Ex = metric.
-            for (var i=0; i<l;) if (s[i]===s[i+1]) { if (options.metric) sign*=options.metric[s[i]]; else if ((s[i]-low)>=(p+r)) sign*=-1; else if ((s[i]-low)<r) sign=0;i+=2; f=true; } else t.push(s[i++]);
+            for (var i=0; i<l;) if (s[i]===s[i+1]) { if (options.metric) sign*=options.metric[s[i]-basis[1][1]]; else if ((s[i]-low)>=(p+r)) sign*=-1; else if ((s[i]-low)<r) sign=0;i+=2; f=true; } else t.push(s[i++]);
           // implement Ex*Ey = -Ey*Ex while sorting basis vectors.
             for (var i=0; i<t.length-1; i++) if (t[i]>t[i+1]) { c=t[i];t[i]=t[i+1];t[i+1]=c;sign*=-1;f=true; break;} if (f) { s=t;t=[];l=s.length; }
           }
