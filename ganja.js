@@ -675,7 +675,9 @@
                 return `${width} ${width}`;
               };
             // Arrays are rendered as segments or polygons. (2 or more elements)
-              if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o.Scale(-1/o.Dot(ni).s); }); o.forEach((o)=>{lx+=sc*(o.e1);ly+=sc*(-o.e2)});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(sc*o.e1+','+(-o.e2*sc)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1*sc} y1=${-o[0].e2*sc} x2=${o[1].e1*sc} y2=${-o[1].e2*sc} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}"/>`; }
+              if (o instanceof Array)  { lx=ly=lr=0; o=o.map(o=>{ while(o.call)o=o(); return o.Scale(-1/o.Dot(ni).s); }); o.forEach((o)=>{lx+=sc*(o.e1);ly+=sc*(-o.e2)});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>(sc*o.e1+','+(-o.e2*sc)+' '))}"/>`:`<LINE style="pointer-events:none" x1=${o[0].e1*sc} y1=${-o[0].e2*sc} x2=${o[1].e1*sc} y2=${-o[1].e2*sc} stroke="${color||'#888'}"/>`; }
+            // Allow insertion of literal svg strings.
+              if (typeof o =='string' && o[0]=='<') { return o; }
             // Strings are rendered at the current cursor position.
               if (typeof o =='string') { var res2=(o[0]=='_')?'':`<text x="${lx}" y="${ly}" font-family="Verdana" font-size="${options.fontSize*0.1||0.1}" style="pointer-events:none" fill="${color||'#333'}" transform="rotate(${lr},${lx},${ly})">&nbsp;${o}&nbsp;</text>`; ly+=0.14; return res2; }
             // Numbers change the current color.
@@ -712,13 +714,13 @@
               } else if (is_flat && !b0 && b1 && !b2) {
                 // Lines.
                 var loc=minus_no.LDot(o).Div(o), att=ni.Dot(o);
-                lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke-width="${lineWidth*0.005}" stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
+                lx=sc*(-loc.e1); ly=sc*(loc.e2); lr=Math.atan2(-o[14],o[13])/Math.PI*180; return `<LINE style="pointer-events:none" x1=${lx-10} y1=${ly} x2=${lx+10} y2=${ly} stroke="${color||'#888'}" transform="rotate(${lr},${lx},${ly})"/>`;
               } else if (!is_flat && !b0 && !b1 && b2) {
                 // Circles
                 var loc=o.Div(ni.LDot(o)); lx=sc*(-loc.e1); ly=sc*(loc.e2);
                 var r2=o.Mul(o.Conjugate).s;
                 var r = Math.sqrt(Math.abs(r2))*sc;
-                return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" stroke-width="${lineWidth*0.005}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
+                return `<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${r}" fill="none" stroke="${color||'green'}" stroke-dasharray="${dash_for_r2(r2, r, lineWidth*0.020)}"/>`;
               } else if (!is_flat && !b0 && b1 && !b2) {
                 // Point Pairs.
                 lr=0; var ei=ni,eo=no, nix=o.Wedge(ei), sqr=o.LDot(o).s/nix.LDot(nix).s, r=Math.sqrt(Math.abs(sqr)), attitude=((ei.Wedge(eo)).LDot(nix)).Normalized.Mul(Element.Scalar(r)), pos=o.Div(nix); pos=pos.Div( pos.LDot(Element.Sub(ei)));
@@ -741,7 +743,7 @@
             // dual option dualizes before render
               if (options.dual && o instanceof Element) o = o.Dual;
             // line segments and polygons
-              if (o instanceof Array && o.length)  { lx=ly=lr=0; o.forEach((o)=>{while (o.call) o=o(); lx+=options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]];ly+=options.scale*o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6||drm[1]==14)?-1:1)*options.scale*o[drm[2]]/o[drm[1]]+','+options.scale*o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${options.scale*o[0][drm[3]]/o[0][drm[1]]} x2=${options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${options.scale*o[1][drm[3]]/o[1][drm[1]]} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}"/>`; }
+              if (o instanceof Array && o.length)  { lx=ly=lr=0; o.forEach((o)=>{while (o.call) o=o(); lx+=options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[drm[2]]/o[drm[1]];ly+=options.scale*o[drm[3]]/o[drm[1]]});lx/=o.length;ly/=o.length; return o.length>2?`<POLYGON STYLE="pointer-events:none; fill:${color};opacity:0.7" points="${o.map(o=>((drm[1]==6||drm[1]==14)?-1:1)*options.scale*o[drm[2]]/o[drm[1]]+','+options.scale*o[drm[3]]/o[drm[1]]+' ')}"/>`:`<LINE style="pointer-events:none" x1=${options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[0][drm[2]]/o[0][drm[1]]} y1=${options.scale*o[0][drm[3]]/o[0][drm[1]]} x2=${options.scale*((drm[1]==6||drm[1]==14)?-1:1)*o[1][drm[2]]/o[1][drm[1]]} y2=${options.scale*o[1][drm[3]]/o[1][drm[1]]} stroke="${color||'#888'}"/>`; }
             // svg
               if (typeof o =='string' && o[0]=='<') { return o; }
             // Labels
@@ -751,15 +753,15 @@
             // Points
               if (o[to2d[6]]**2        >0.0001) { lx=options.scale*o[drm[2]]/o[drm[1]]; if (drm[1]==6||drm[1]==14) lx*=-1; ly=options.scale*o[drm[3]]/o[drm[1]]; lr=0;  var res2=`<CIRCLE onmousedown="this.parentElement.sel=${oidx}" cx="${lx}" cy="${ly}" r="${options.pointRadius*0.03||0.03}" fill="${color||'green'}"/>`; ly-=0.05; lx-=0.1; return res2; }
             // Lines
-              if (o[to2d[2]]**2+o[to2d[3]]**2>0.0001) { var l=Math.sqrt(o[to2d[2]]**2+o[to2d[3]]**2); o[to2d[2]]/=l; o[to2d[3]]/=l; o[to2d[1]]/=l; lx=0.5; ly=options.scale*((drm[1]==6)?-1:-1)*o[to2d[1]]; lr=-Math.atan2(o[to2d[2]],o[to2d[3]])/Math.PI*180; var res2=`<LINE style="pointer-events:none" x1=-10 y1=${ly} x2=10 y2=${ly} stroke-width="${options.lineWidth*0.005||0.005}" stroke="${color||'#888'}" transform="rotate(${lr},0,0)"/>`; ly-=0.05; return res2; }
+              if (o[to2d[2]]**2+o[to2d[3]]**2>0.0001) { var l=Math.sqrt(o[to2d[2]]**2+o[to2d[3]]**2); o[to2d[2]]/=l; o[to2d[3]]/=l; o[to2d[1]]/=l; lx=0.5; ly=options.scale*((drm[1]==6)?-1:-1)*o[to2d[1]]; lr=-Math.atan2(o[to2d[2]],o[to2d[3]])/Math.PI*180; var res2=`<LINE style="pointer-events:none" x1=-10 y1=${ly} x2=10 y2=${ly} stroke="${color||'#888'}" transform="rotate(${lr},0,0)"/>`; ly-=0.05; return res2; }
             // Vectors
-              if (o[to2d[4]]**2+o[to2d[5]]**2>0.0001) { lr=0; ly+=0.05; lx+=0.1; var res2=`<LINE style="pointer-events:none" x1=${lx} y1=${ly} x2=${lx-o.e02} y2=${ly+o.e01} stroke-width="0.005" stroke="${color||'#888'}"/>`; ly=ly+o.e01/4*3-0.05; lx=lx-o.e02/4*3; return res2; }
+              if (o[to2d[4]]**2+o[to2d[5]]**2>0.0001) { lr=0; ly+=0.05; lx+=0.1; var res2=`<LINE style="pointer-events:none" x1=${lx} y1=${ly} x2=${lx-o.e02} y2=${ly+o.e01} stroke="${color||'#888'}"/>`; ly=ly+o.e01/4*3-0.05; lx=lx-o.e02/4*3; return res2; }
             }).join()}`,'text/html').body;
           // return the inside of the created svg element.
             return svg.removeChild(svg.firstChild);
           };
         // Create the initial svg and install the mousehandlers.
-          res=build(f); res.value=f; res.options=options;
+          res=build(f); res.value=f; res.options=options; res.setAttribute("stroke-width",options.lineWidth*0.005||0.005);
           res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return;var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);x/=options.scale;y/=options.scale; if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(no).Add(ni.Scale(0.5*(x*x+y*y))) ) } else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; } res.dispatchEvent(new CustomEvent('input')) };
           return res;
         }
