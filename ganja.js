@@ -651,7 +651,7 @@
           // Reset position and color for cursor.
             lx=-2;ly=-1.85;lr=0;color='#444';
           // Create the svg element. (master template string till end of function)
-            var svg=new DOMParser().parseFromString(`<SVG onmousedown="if(evt.target==this)this.sel=undefined" viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none">
+            var svg=new DOMParser().parseFromString(`<SVG viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none">
             // Add a grid (option)
             ${options.grid?(()=>{
               var n = Math.floor(10 / options.scale);
@@ -762,7 +762,29 @@
           };
         // Create the initial svg and install the mousehandlers.
           res=build(f); res.value=f; res.options=options; res.setAttribute("stroke-width",options.lineWidth*0.005||0.005);
-          res.onmousemove=(e)=>{ if (res.sel===undefined || !e.buttons) return;var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);x/=options.scale;y/=options.scale; if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(no).Add(ni.Scale(0.5*(x*x+y*y))) ) } else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; } res.dispatchEvent(new CustomEvent('input')) };
+          //onmousedown="if(evt.target==this)this.sel=undefined" 
+          var mousex,mousey,cammove=false;
+          res.onmousedown=(e)=>{ if (e.target == res) res.sel=undefined; mousex = e.clientX; mousey = e.clientY; cammove = true;  }
+          res.onmousemove=(e)=>{ 
+            if (cammove && tot==4) { 
+              if (!e.buttons) { cammove=false; return; };
+              var [dx,dy] = [e.clientX - mousex, e.clientY - mousey];
+              [mousex,mousey] = [e.clientX,e.clientY];
+              if (res.sel) {
+                f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/500,-dy/500,0,0,0,0).Exp()),f[res.sel]) );
+              } else {
+                if (options.camera) options.camera.set( options.camera.Mul( Element.Bivector(0,0,0,1,0,0).Scale(dy/600).Exp() ).Mul( Element.Bivector(0,0,0,0,1,0).Scale(dx/300).Exp() ) )
+              }
+              return;
+            }
+            if (res.sel===undefined || !e.buttons) return;
+            var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,
+                x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);
+            x/=options.scale;y/=options.scale; 
+            if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(no).Add(ni.Scale(0.5*(x*x+y*y))) ) } 
+                              else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} 
+            if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }
+            res.dispatchEvent(new CustomEvent('input')) };
           return res;
         }
       // 1d and 2d functions are rendered on a canvas.
