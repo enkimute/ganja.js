@@ -766,7 +766,7 @@
           var mousex,mousey,cammove=false;
           res.onmousedown=(e)=>{ if (e.target == res) res.sel=undefined; mousex = e.clientX; mousey = e.clientY; cammove = true;  }
           res.onmousemove=(e)=>{ 
-            if (cammove && tot==4) { 
+            if (cammove && tot==4 && !options.conformal) { 
               if (!e.buttons) { cammove=false; return; };
               var [dx,dy] = [e.clientX - mousex, e.clientY - mousey];
               [mousex,mousey] = [e.clientX,e.clientY];
