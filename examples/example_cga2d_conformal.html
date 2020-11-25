@@ -1,0 +1,53 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Create a Clifford Algebra with 3,1 metric for 2D CGA. 
+Algebra(3,1,()=>{ 
+    
+// two null vectors to work with (called origin and infinite)
+  const ni = 1e4+1e3,           // n-infinite
+        no = .5e4-.5e3;         // n-origin
+  
+// Define points, lines, circles using the null basis.  
+  const point  = (x,y)=>no + x*1e1 + y*1e2 + 0.5*(x*x+y*y)*ni;
+  
+// Define three points
+  var p4 = point(0.7,-0.2),
+      p1 = point(0,-0.4);
+  
+// Define two circles, one by wedging 3 points, one directly.
+  var C1 = ()=>!(p1 - 0.5*ni),        // a function so it updates live.
+      C2 = ()=>!(p4 - 0.3*ni);
+  
+// Helpers to make a nice subdivided grid.
+   const makeGridPoints = (s) => [...Array(s+1)].map((x,i)=>[...Array(s+1)].map((y,j)=>point(i/s+0.5,j/s+0.5)))
+   const makeGridLines  = (p,skip) => p.map((x,i)=>i%skip==0?x.map((x,j,a)=>[x,j?a[j-1]:x]):0).filter(x=>x).concat(
+                                      p.map((x,i,a)=>i%skip==0?x.map((y,j)=>[a[j][i],j?a[j-1][i]:a[j][i] ]):0).filter(x=>x)).flat();
+
+// Grid of points. .. more detail = slower. (subd should be a divisor of 20:2,4,5,10,20)
+
+   var DETAIL = 1, SUBD = 4, TOT = 20*DETAIL, skip = (TOT/SUBD)|0;
+
+   var [points1,points2,points3] = [1,2,3].map(x=>makeGridPoints(TOT));
+   var [lines1,lines2,lines3]    = [points1,points2,points3].map(p=>makeGridLines(p,TOT));
+   var [lines1b,linesb2,linesb3] = [points1,points2,points3].map(p=>makeGridLines(p,skip));
+   
+// Graph these items.
+  document.body.appendChild(this.graph(()=>{
+
+    var M = C1.Normalized;
+    points2.forEach((x,i)=>x.forEach((x,j)=>{if (i%skip==0 || j%skip==0) x.set(M>>>points1[i][j])}));
+    
+    var M = C2.Normalized*C1.Normalized;
+    points3.forEach((x,i)=>x.forEach((x,j)=>{if (i%skip==0 || j%skip==0) x.set(M>>>points1[i][j])}));   
+ 
+  return [
+    0x224488, "Conformal transformations as reflection in circles.",
+    0x224488, ...lines1, '<G stroke-width=0.002>',...lines1b,'</G>',
+    0x88BBBB, ...lines2, '<G stroke-width=0.002>',...linesb2,'</G>', C1, "C1", p1,
+    0xBB88BB, ...lines3, '<G stroke-width=0.002>',...linesb3,'</G>', C2, "C2", p4
+  ]},{conformal:true, lineWidth:2}));                 // conformal flag!  
+
+});
+</SCRIPT></BODY>
