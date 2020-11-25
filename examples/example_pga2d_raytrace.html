@@ -1,0 +1,223 @@
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+</HEAD>
+<BODY><SCRIPT>
+// Miniature Raytracer - following "Paraxial Optics for PGA" by Ted Corcovilos and Katelyn Spadavecchia  
+
+// in 2D PGA
+var app = Algebra(2,0,1).inline(helpers=>{
+
+  const {PI,E,abs} = Math;
+  const point = (x=0,y=0)=>!(1e0 + x*1e1 + y*1e2);
+  
+  var render = [0], renderLength = 1, sources = [], elements = [];
+  
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Add a light source.
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const addLight = ()=>{
+    var light = {
+          position : point(-1.5,0),
+          handle   : point(-1,0),
+          rays     : function(){ 
+              this.handle.set( this.position + (0.5*((this.handle-this.position).Dual.Normalized.Dual)) );
+              return [[(this.position & this.handle).Normalized, this.position]] 
+          },
+          render   : function(){ return [
+              0x664444, '<G stroke-width=0.06>', [this.position, this.handle], '</G>', 0xFFFFFF, this.position,  0xFF0000, this.handle, 
+          ]},
+        }
+    sources.push(light); render.splice(renderLength,1000,...light.render()); renderLength = render.length;  
+  }
+  
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Add a light bundle.
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const addLightBundle = ()=>{
+    var light = {
+          position : point(-1.5,0),
+          handle   : point(-1,0),
+          rays     : function(){ 
+              this.handle.set( this.position + (0.5*((this.handle-this.position).Dual.Normalized.Dual)) );
+              return [...Array(5)].map((x,i)=>[
+                        Math.E**(this.position*(i-2)*0.02)>>>(this.position & this.handle).Normalized, 
+                        this.position
+                     ]); 
+          },
+          render   : function(){ return [
+              0xAA4444, '<G stroke-width=0.06>', [this.position, this.handle], '</G>', 0xFFFFFF, this.position,  0xFF0000, this.handle, 
+          ]},
+        }
+    sources.push(light); render.splice(renderLength,1000,...light.render()); renderLength = render.length;  
+  }
+  
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Add a planar mirror.
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const addMirrorPlane = ()=>{
+    var mirror = {
+          point1    : point (1,0.5),
+          point2    : point (1.2,-0.5),
+          intersect : function([ray,point]) {
+            // The mirror line.  
+            var mirror    = (this.point1 & this.point2);
+            // Intersect ray with mirror line.
+            var ipoint    = (ray ^ mirror).Normalized;
+            ipoint = ipoint*ipoint.e12; // make sure its positive.
+            // The center of the mirror
+            var midpoint  = (this.point1 + this.point2)/2;
+            // The length of the mirror
+            var length    = (this.point1 & this.point2).Length;
+            // See if we're less then half the length away from the midpoint
+            var intersect = (midpoint & ipoint).Length < length/2;
+            // Make sure the ray has the same direction as the ray origin to our intersection point
+            var sameside  = (ray|(point&ipoint)).s > 0;
+            // If so, return the distance, intersection point and new ray
+            return [ intersect&&sameside, (point & ipoint).Length, ipoint, mirror >>> ray ];
+          },
+          render    : function() { return [
+            0x0000FF, this.point1, this.point2, '<G stroke-width="0.02">', [this.point1,this.point2], '</G>',
+          ]}
+        }
+    elements.push(mirror); render.splice(renderLength,1000,...mirror.render()); renderLength = render.length;    
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Add a planar mirror.
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const circle = (p, radius, subd=64)=>[...Array(subd)].map((x,i)=>E**(i/(subd-1)*PI*p)>>>(p+radius*!1e1));
+  const addMirrorSphere = ()=>{
+    var mirror = {
+          point1    : point (0,-0.7),
+          point2    : point (0,-0.2),
+          intersect : function([ray,point]) {
+            // The radius between the two dragable points.  
+            var radius    = (this.point1 & this.point2).Length;
+            // The distance of the center to the ray.
+            var dist      = Math.abs(!(this.point1 ^ ray));
+            // See if that is within the radius.
+            var intersect = dist < radius;
+            // Temporary point where the ray cuts the line orthogonal to the ray, through the point.
+            var temp1     = ((ray * this.point1) ^ ray).Normalized;
+            temp1 = temp1 * temp1.e12;
+            // The intersection point, using pythagoras and a translator
+            var i_point   = (1-abs(radius**2 - dist**2)**.5*ray*.5e012) >>> temp1;
+            // The normal ray from the center to the intersection point
+            var n_ray     = (i_point & this.point1).Normalized;
+            // The outputray is the ray reflected along this normal
+            var out_ray   = -n_ray * ray * n_ray;
+            // Check if the sphere is cutting the ray past the origin.
+            var sameside  = (ray | (point&i_point)).s > 0;  
+            // Return distance, intersection point and new ray.
+            return [ intersect&&sameside, (point & i_point).Length, i_point, out_ray ];
+          },
+          render    : function() { return [
+            0x0000FF, this.point1, this.point2, ()=>circle(this.point1, (this.point1 & this.point2).Length)    
+          ]}
+        }
+    elements.push(mirror); render.splice(renderLength,1000,...mirror.render()); renderLength = render.length;    
+  }
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Add a thin lens.
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  const addThinLens = ()=>{
+    var lens = {
+          point1    : point (0.8,0.6),
+          point2    : point (0.8,-0.4),
+          point3    : ()=>(1 + (lens.point1 & lens.point2)*.125e0) >>> (lens.point1 + lens.point2),
+          backplane : ()=>(1 - (lens.point1 & lens.point2)*.125e0) >>> lens.point1&lens.point2,
+          intersect : function([ray,point]) {
+            // The plane of the lens
+            var lens    = (this.point1 & this.point2);
+            // The intersection point with the ray
+            var p         = (ray ^ lens).Normalized;
+            p = p*p.e12; // make sure its positive.
+            // The midpoint, length, and intersection check.
+            var midpoint  = (this.point1 + this.point2)/2;
+            var length    = (this.point1 & this.point2).Length;
+            var intersect = (midpoint & p).Length < length/2;
+            var sameside  = (ray|(point&p)).s > 0;
+            // The ray projected to the focal point.
+            var r_through_f = (ray|this.point3)*this.point3;
+            // Calculate output ray.
+            var out_ray   = p&((r_through_f ^ lens | lens) ^ this.backplane).Normalized;
+            return [ intersect&&sameside, (point & p).Length, p, out_ray ];
+          },
+          render    : function() { return [
+            0x008800, this.backplane, "image plane", this.point1, this.point2, this.point3, "F", '<G stroke-width="0.02">', [this.point1,this.point2], '</G>'    
+          ]}
+        }
+    elements.push(lens); render.splice(renderLength,1000,...lens.render()); renderLength = render.length;    
+  }
+
+  
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Buttons.
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  document.body.appendChild(helpers.block(
+      helpers.button('clear',()=>{ render.splice(1,1000); sources=[]; elements=[]; renderLength = 1; }),
+      helpers.button('add light',addLight),
+      helpers.button('add light bundle',addLightBundle),
+      helpers.button('add mirror plane',addMirrorPlane),
+      helpers.button('add mirror sphere',addMirrorSphere),
+      helpers.button('add thin lens',addThinLens),
+  ));
+  addLightBundle();
+  addThinLens();
+  
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Trace the rays ..
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////
+  window.svg = document.body.appendChild(this.graph(()=>{
+    var rays = [];
+    // For each lightsource .. create a ray, max 50 bounces.
+    sources.map(s=>s.rays()).flat().forEach((ray,si)=>{
+        rays.push([0xFF0000,0x00FF00,0xFFFF00,0xFF00FF,0x00FFFF][si%5])
+        var bounce=0, laste = -1;
+        while (bounce++<50) {
+            var min = 0, mine = -1;
+            // Find the nearest element on the ray.
+            elements.forEach((element,ei)=>{
+                var cur=element.intersect(ray)
+                if (laste != ei && cur[0] && (min==0 || min[1]>cur[1])) { min=cur; mine = ei; }
+            }); laste = mine;
+            // If we hit something, add segment, create new ray
+            if (min && min[0]) {
+              rays.push([ray[1],min[2]]);
+              ray = [min[3].Normalized, min[2]];
+            // else we're done, add outgoing segment  
+            } else {
+              rays.push([ray[1],(1+ray[0]*10e012)>>>ray[1]])
+              break;
+            }
+        }
+    });
+    render.splice(renderLength,1000,
+       0xFF0000,'<G stroke-dasharray="0.01,0.02" stroke-width="0.005" >',
+       ...rays,
+       '</G>');
+    return render;
+  },{animate:1,camera:1+0e1,grid:0}));
+  
+  svg.style.background='black';
+  setInterval(()=>{ svg.setAttribute("stroke-dashoffset", -performance.now()/5000); },1000/30);
+    
+})
+
+
+// Some helpers for UI etc.
+
+const helpers = {
+  button : (name, func)=>Object.assign(document.createElement('input'),{type:'button', value:name, onclick:func}),
+  block  : (...els)=>{ 
+              div = document.createElement('div'); 
+              Object.assign(div.style,{position:'fixed',display:'flex',flexDirection:'column'}); 
+              els.forEach(e=>div.appendChild(e)); 
+              return div; 
+            },
+}
+
+// Startup.
+app(helpers);
+</SCRIPT></BODY>
