@@ -106,7 +106,7 @@
 
   // As an alternative to the string fiddling, one can also bit-fiddle. In this case the basisvectors are represented by integers with 1 bit per generator set.
     var simplify_bits = (A,B,p2)=>{ var n=p2||(p+q+r),t=0,ab=A&B,res=A^B; if (ab&((1<<r)-1)) return [0,0]; while (n--) t^=(A=A>>1); t&=B; t^=ab>>(p+r); t^=t>>16; t^=t>>8; t^=t>>4; return [1-2*(27030>>(t&15)&1),res]; },
-        bc = (v)=>{ v=v-((v>>1)& 0x55555555); v=(v&0x33333333)+((v>>2)&0x33333333); c=((v+(v>>4)&0xF0F0F0F)*0x1010101)>>24; return c };
+        bc = (v)=>{ v=v-((v>>1)& 0x55555555); v=(v&0x33333333)+((v>>2)&0x33333333); var c=((v+(v>>4)&0xF0F0F0F)*0x1010101)>>24; return c };
 
   if (!options.graded && tot <= 6 || options.graded===false || options.Cayley) {
   // Faster and degenerate-metric-resistant dualization. (a remapping table that maps items into their duals).
