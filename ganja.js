@@ -509,6 +509,8 @@
 
     // The sandwich product. Provided for convenience (>>> operator)
       static sw(a,b) {
+      // Skip strings/colors
+        if (typeof b == "string" || typeof b =="number") return b;
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); if (a.sw) return a.sw(b);
       // Map elements in array
