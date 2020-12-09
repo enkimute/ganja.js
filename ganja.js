@@ -783,7 +783,8 @@
               return;
             var sel = f[res.sel];
             if (sel instanceof Function) {
-              console.trace("Functions can't be dragged");
+              res.sel = undefined; // Prevent further spam
+              console.trace("Functions can't be dragged: ", sel);
               return;
             }
             var {width: resx, height: resy, left: resl, top: rest} = res.getBoundingClientRect();
