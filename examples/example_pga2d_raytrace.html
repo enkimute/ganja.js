@@ -190,12 +190,14 @@ var app = Algebra(2,0,1).inline(helpers=>{
             // The intersection point, using pythagoras and a translator
             var i_point    = (1+(inside?1:-1)*abs(radius**2 - dist**2)**.5*ray*.5e012) >>> temp1;
             var i_point2   = (1+(inside?1:-1)*abs(radius**2 - dist2**2)**.5*ray*.5e012) >>> temp2;
+            var [s1,s2] = [((i_point&point)|ray).s, ((i_point2&point)|ray).s ];
+            var [l1,l2] = [s1<0?(i_point&point).Length:-1,s2<0?(i_point2&point).Length:-1];
             if (inside) {
-              var ip         = (i_point&point).Length<=(i_point2&point).Length?i_point:i_point2;
-              var cp         = (i_point&point).Length<=(i_point2&point).Length?this.point1:this.point2;
+              var ip         = l1<=l2?i_point:i_point2;
+              var cp         = l1<=l2?this.point1:this.point2;
             } else {
-              var ip         = (i_point&point).Length>=(i_point2&point).Length?i_point:i_point2;
-              var cp         = (i_point&point).Length>=(i_point2&point).Length?this.point1:this.point2;
+              var ip         = l1>=l2?i_point:i_point2;
+              var cp         = l1>=l2?this.point1:this.point2;
             }
             intersect = ((ip & this.point1).Length < radius+0.001) && ((ip&this.point2).Length < radius+0.001);
             if (intersect) {
@@ -223,10 +225,10 @@ var app = Algebra(2,0,1).inline(helpers=>{
           render    : function() { 
             this.edit = document.getElementById('UI').appendChild(helpers.input('n2',1.47));  
             return [
-            ()=>this.edit.value<1?0xFF0000:0x0000FF, this.point1, this.point2, 
+            ()=>this.edit.value<1?0xFF0000:0x0000FF, this.point1, this.point2,0x0FFFF, 
             ()=>'<G stroke="'+(this.edit.value<1?'red':'blue')+'" fill-opacity="0.3">',
-              ()=>(1+(this.point1&this.point2).Normalized*(1e2|this.point1)).Normalized >>> circle(this.point1, (this.point1 & this.point2).Length,64,0.339,16 ), 
-              ()=>(1+(this.point1&this.point2).Normalized*(1e2|this.point2)).Normalized >>> circle(this.point2, (this.point1 & this.point2).Length,64,0.339,-16 ), 
+              ()=>[...(1+(this.point1&this.point2).Normalized*(1e2|this.point1)).Normalized >>> circle(this.point1, (this.point1 & this.point2).Length,64,0.339,16 ), 
+              ...(1+(this.point1&this.point2).Normalized*(1e2|this.point2)).Normalized >>> circle(this.point2, (this.point1 & this.point2).Length,64,0.339,-16 )], 
             '</G>'  
           ]}
         }
