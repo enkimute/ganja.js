@@ -779,13 +779,29 @@
               }
               return;
             }
-            if (res.sel===undefined || !e.buttons) return;
-            var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,
-                x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);
-            x/=options.scale;y/=options.scale; 
-            if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(no).Add(ni.Scale(0.5*(x*x+y*y))) ) } 
-                              else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} 
-            if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }
+            if (res.sel===undefined || !e.buttons)
+              return;
+            var sel = f[res.sel];
+            if (sel instanceof Function) {
+              console.trace("Functions can't be dragged");
+              return;
+            }
+            var {width: resx, height: resy, left: resl, top: rest} = res.getBoundingClientRect();
+            var x=((e.clientX-resl)/(resx/4||128)-2)*(resx>resy?resx/resy:1);
+            var y=((e.clientY-rest)/(resy/4||128)-2)*(resy>resx?resy/resx:1);
+            x/=options.scale;
+            y/=options.scale; 
+            if (options.conformal) {
+              sel.set(this.Coeff(1,x,2,-y).Add(no).Add(ni.Scale(0.5*(x*x+y*y))) )
+            } else {
+              sel[drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0);
+              sel[drm[3]]=y+((tot<4)?2*options.camera.e02:0);
+              sel[drm[1]]=1;
+              sel.set(sel.Normalized)
+            }
+            if (!anim) {
+              var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r;
+            }
             res.dispatchEvent(new CustomEvent('input')) };
           return res;
         }
