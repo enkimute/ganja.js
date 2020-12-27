@@ -791,11 +791,61 @@
         }
       // 1d and 2d functions are rendered on a canvas.
         cvs=cvs||document.createElement('canvas'); if(ww)cvs.width=ww; if(hh)cvs.height=hh; var w=cvs.width,h=cvs.height,context=cvs.getContext('2d'), data=context.getImageData(0,0,w,h);
+      // Convert x to canvas left/right
+        var X = (x) => (x + 1) * w /  2;
+      // Convert y to canvas top/bottom
+        var Y = (y) => (-y + 1) * h / 2; // - to flip "top"
+        function drawGrid() {
+          var real_from = -1;
+          var real_to = 1;
+          var imag_from = -1;
+          var imag_to = 1;
+          context.beginPath();
+          // Draw real axis
+          context.moveTo(X(real_from), Y(0));
+          context.lineTo(X(real_to  ), Y(0));
+          context.strokeStyle = "green";
+          context.lineWidth = 3;
+          context.stroke();
+          // Draw imaginary axis
+          context.beginPath();
+          context.moveTo(X(0), Y(imag_from));
+          context.lineTo(X(0), Y(imag_to  ));
+          context.strokeStyle = "green";
+          context.lineWidth = 3;
+          context.stroke();
+          // Draw real axis ticks
+          for (var i=real_from; i<=real_to; i+=0.2) {
+              context.beginPath();
+              context.moveTo(X(i), Y( 0.01));
+              context.lineTo(X(i), Y(-0.01));
+              context.strokeStyle = "lime";
+              context.lineWidth = 2;
+              context.stroke();
+              context.font = "10px Arial";
+              context.fillStyle = "lime"
+              context.fillText(i.toFixed(1), X(i-0.02), Y(-0.04));
+          }
+          // Draw imaginary axis ticks
+          for (var i=imag_from; i<=imag_to; i+=0.2) {
+              context.beginPath();
+              context.moveTo(X( 0.01), Y(i));
+              context.lineTo(X(-0.01), Y(i));
+              context.strokeStyle = "lime";
+              context.lineWidth = 2;
+              context.stroke();
+              context.font = "10px Arial";
+              context.fillStyle = "lime"
+              context.fillText(i.toFixed(1), X(-0.06), Y(i));
+          }
+      }
       // two parameter functions .. evaluate for both and set resulting color.
         if (f.length==2) for (var px=0; px<w; px++) for (var py=0; py<h; py++) { var res=f(px/w*2-1, py/h*2-1); res=res.buffer?[].slice.call(res):res.slice?res:[res,res,res]; data.data.set(res.map(x=>x*255).concat([255]),py*w*4+px*4); }
       // one parameter function.. go over x range, use result as y.
         else if (f.length==1) for (var px=0; px<w; px++) { var res=f(px/w*2-1); res=Math.round((res/2+0.5)*h); if (res > 0 && res < h-1) data.data.set([0,0,0,255],res*w*4+px*4); }
-        return context.putImageData(data,0,0),cvs;
+        context.putImageData(data,0,0);
+        if (f.length == 1 || f.length == 2) if (options.grid) drawGrid();
+        return cvs;
       }
 
     // webGL2 Graphing function. (for OPNS/IPNS implicit 2D and 1D surfaces in 3D space).
