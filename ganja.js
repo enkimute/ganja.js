@@ -489,6 +489,8 @@
 
     // The outer product. (Grassman product - no use of metric)
       static Wedge(a,b,res) {
+      // normal behavior for booleans/numbers
+        if (typeof a in {boolean:1,number:1} && typeof b in {boolean:1,number:1}) return a^b;
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); if (a.Wedge) return a.Wedge(Element.toEl(b),res);
       // The outer product of two vectors is a matrix .. internally Mul not Wedge !
@@ -500,6 +502,8 @@
 
     // The regressive product. (Dual of the outer product of the duals).
       static Vee(a,b,res) {
+      // normal behavior for booleans/numbers
+        if (typeof a in {boolean:1,number:1} && typeof b in {boolean:1,number:1}) return a&b;
       // Expressions
         while(a.call)a=a(); while(b.call)b=b(); if (a.Vee) return a.Vee(Element.toEl(b),res);
       // js, else generated vee product. (shortcut for dual of wedge of duals)
@@ -576,7 +580,7 @@
       }
 
     // Dual, Involute, Reverse, Conjugate, Normalize and length, all direct call through. Conjugate handles matrices.
-      static Dual(a)      { return Element.toEl(a).Dual; };
+      static Dual(a)      { if (typeof a=='boolean') return !a; return Element.toEl(a).Dual; };
       static Involute(a)  { return Element.toEl(a).Involute; };
       static Reverse(a)   { return Element.toEl(a).Reverse; };
       static Conjugate(a) { if (a.Conjugate) return a.Conjugate; if (a instanceof Array) return a[0].map((c,ci)=>a.map((r,ri)=>Element.Conjugate(a[ri][ci]))); return Element.toEl(a).Conjugate; }
