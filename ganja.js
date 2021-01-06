@@ -796,7 +796,7 @@
       // 1d and 2d functions are rendered on a canvas.
         cvs=cvs||document.createElement('canvas'); if(ww)cvs.width=ww; if(hh)cvs.height=hh; var w=cvs.width,h=cvs.height,context=cvs.getContext('2d'), data=context.getImageData(0,0,w,h);
       // Grid support for the canvas.  
-        const [x_from,x_to,y_from,y_to]=options.range||[-1,1,-1,1];
+        const [x_from,x_to,y_from,y_to]=options.range||[-1,1,1,-1];
         function drawGrid() {
           const [X,Y]=[x=>(x-x_from)*w/(x_to-x_from),y=>(y-y_from)*h/(y_to-y_from)]
           context.strokeStyle = "#008800"; context.lineWidth = 1;
@@ -806,18 +806,18 @@
           context.moveTo(X(0), Y(y_from)); context.lineTo(X(0), Y(y_to  )); context.stroke();
           // Draw ticks
           context.strokeStyle = "#00FF00"; context.lineWidth = 2; context.font = "10px Arial"; context.fillStyle = "#448844";
-          for (var i=x_from,j=y_from; i<=x_to; i+=(x_to-x_from)/10) {
-              context.beginPath(); j+= (y_to-y_from)/10;
-              context.moveTo(X(i), Y( 0.01)); context.lineTo(X(i), Y(-0.01)); context.stroke();
-              if(i.toFixed(1)!=0) context.fillText(i.toFixed(1), X(i-0.02), Y(-0.04));
-              context.moveTo(X( 0.01), Y(j)); context.lineTo(X(-0.01), Y(j)); context.stroke();
-              if(j.toFixed(1)!=0) context.fillText(j.toFixed(1), X(0.02), Y(j));
+          for (var i=x_from,j=y_from,ii=0; ii<=10; ++ii) {
+              context.beginPath(); j+= (y_to-y_from)/10; i+=(x_to-x_from)/10;
+              context.moveTo(X(i), Y(-(y_to - y_from)/200)); context.lineTo(X(i), Y((y_to - y_from)/200)); context.stroke();
+              if(i.toFixed(1)!=0) context.fillText(i.toFixed(1), X(i-(x_to-x_from)/100), Y(-(y_to-y_from)/40));
+              context.moveTo(X((x_to-x_from)/200), Y(j)); context.lineTo(X(-(x_to-x_from)/200), Y(j)); context.stroke();
+              if(j.toFixed(1)!=0) context.fillText(j.toFixed(1), X((x_to-x_from)/100), Y(j));
           }
         }
       // two parameter functions .. evaluate for both and set resulting color.
         if (f.length==2) for (var px=0; px<w; px++) for (var py=0; py<h; py++) { var res=f(px/w*(x_to-x_from)+x_from, py/h*(y_to-y_from)+y_from); res=res.buffer?[].slice.call(res):res.slice?res:[res,res,res]; data.data.set(res.map(x=>x*255).concat([255]),py*w*4+px*4); }
       // one parameter function.. go over x range, use result as y.
-        else if (f.length==1) for (var px=0; px<w; px++) { var res=f(px/w*(x_to-x_from)+x_from); res=Math.round((res/(y_to-y_from)+0.5)*h); if (res > 0 && res < h-1) data.data.set([0,0,0,255],res*w*4+px*4); }
+        else if (f.length==1) for (var px=0; px<w; px++) { var res=f(px/w*(x_to-x_from)+x_from); res=Math.round((res/(y_to-y_from)+(-y_from/(y_to-y_from)))*h); if (res > 0 && res < h-1) data.data.set([0,0,0,255],res*w*4+px*4); }
         context.putImageData(data,0,0);
         if (f.length == 1 || f.length == 2) if (options.grid) drawGrid();
         return cvs;
