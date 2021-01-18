@@ -275,11 +275,11 @@
              var rn=simplify_bits(basis_bits[gsx+a],basis_bits[gsy+bb]), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g];
              if (!r[g])r[g]=[];
                if (typeof r[g][e]=="string"||typeof x[a]=="string"||typeof y[bb]=="string") {
-                 r[g][e] = (r[g][e]?r[g][e]+"+":"") + (rn[0]!=1?rn[0]+"*":"")+ x[a]+(y[bb]!=1?"*"+y[bb]:""); gotstring=true;
+                 r[g][e] = (r[g][e]?r[g][e]+"+":"") + (rn[0]!=1?rn[0]==-1?"-":rn[0]+"*":"")+ x[a]+(y[bb]!=1?"*"+y[bb]:""); gotstring=true;
                } else r[g][e] = (r[g][e]||0) + rn[0]*x[a]*y[bb];
           }
         }
-        if (gotstring) return r.map(g=>g.map(e=>e&&'('+e+')'))
+        if (gotstring) return r.map(g=>g.map(e=>e&&(!(e+'').match(/-{0,1}\w+/))?'('+e+')':e))
         return r;
       }
     // outer product.
@@ -299,18 +299,36 @@
         for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<counts[i]; a++) for (var bb=0; bb<counts[j]; bb++) {
           if (i!=j || a!=bb) {
              var n1=basis_bits[gsx+a], n2=basis_bits[gsy+bb], rn=simplify_bits(n1,n2,tot), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g];
-             if (g == i+j) { curg=g; r += `res[${e}]${rn[0]=='1'?"+=":"-="}(${point_source[a]})*b[${bb}]; //${count++}\n`;  }
+             if (g == i+j) { curg=g; r += `res[${e}]${rn[0]=='1'?"+=":"-="}(${(point_source[a]+'').replace(/1([^.\d])|1$/g,"1.0$1")})*b[${bb}]; //${count++}\n`;  }
           }
         }
         r=r.split('\n').filter(x=>x).sort((a,b)=>((a.match(/\d+/)[0]|0)-(b.match(/\d+/)[0]|0))||((a.match(/\d+$/)[0]|0)-(b.match(/\d+$/)[0]|0))).map(x=>x.replace(/\/\/\d+$/,''));
         var r2 = 'float sum=0.0; float res=0.0;\n', g=0;
         r.forEach(x=>{
           var cg = x.match(/\d+/)[0]|0;
-          if (cg != g) r2 += "sum "+(((metric[curg][g]==-1))?"-=":"+=")+" res*res;\nres = 0.0;\n";
+          if (cg != g) r2 += "sum += res*res;\nres = 0.0;\n";
           r2 += x.replace(/\[\d+\]/,'') + '\n';
           g=cg;
         });
-        r2+= "sum "+((metric[curg][g]==-1)?"-=":"+=")+" res*res;\n";
+        r2+= "sum += res*res;\n";
+        return r2;
+      }
+    // Inner product glsl output.  
+      IPNS_GLSL(b,point_source) {
+        var r='',count=0,curg;
+        for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<counts[i]; a++) for (var bb=0; bb<counts[j]; bb++) {
+           var n1=basis_bits[gsx+a], n2=basis_bits[gsy+bb], rn=simplify_bits(n1,n2,tot), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g];
+           if (g == Math.abs(i-j)) { curg=g; r += `res[${e}]${rn[0]=='1'?"+=":"-="}(${(point_source[a]+'').replace(/1([^.\d])|1$/g,"1.0$1")})*b[${bb}]; //${count++}\n`;  }
+        }
+        r=r.split('\n').filter(x=>x).sort((a,b)=>((a.match(/\d+/)[0]|0)-(b.match(/\d+/)[0]|0))||((a.match(/\d+$/)[0]|0)-(b.match(/\d+$/)[0]|0))).map(x=>x.replace(/\/\/\d+$/,''));
+        var r2 = 'float sum=0.0; float res=0.0;\n', g=0;
+        r.forEach(x=>{
+          var cg = x.match(/\d+/)[0]|0;
+          if (cg != g) r2 += "sum += res*res;\nres = 0.0;\n";
+          r2 += x.replace(/\[\d+\]/,'') + '\n';
+          g=cg;
+        });
+        r2+= "sum += res*res;\n";
         return r2;
       }
     // Left contraction.
@@ -340,7 +358,7 @@
     // Should be optimized..
       Vee(b,r)          { return (this.Dual.Wedge(b.Dual)).Dual; }
     // Output, lengths, involutions, normalized, dual.
-      toString()        { return [...this].map((g,gi)=>g&&g.map((c,ci)=>!c?undefined:c+basisg[gi][ci]).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-'); }
+      toString()        { return [...this].map((g,gi)=>g&&g.map((c,ci)=>!c?undefined:((c+'').match(/[\+\-\*]/)?'('+c+')':c)+(gi==0?"":basisg[gi][ci])).filter(x=>x).join('+')).filter(x=>x).join('+').replace(/\+\-/g,'-')||"0"; }
       get s ()          { if (this[0]) return this[0][0]||0; return 0; }
       get Length ()     { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2*metric[gi][ei])); return Math.abs(res)**.5; }
       get VLength ()    { var res=0; this.forEach((g,gi)=>g&&g.forEach((e,ei)=>res+=(e||0)**2)); return Math.abs(res)**.5; }
@@ -879,17 +897,19 @@
              uniform vec3 color3; uniform float b[${counts[grade]}];
              uniform float ratio; ${gl2?"out vec4 col;":""}
              ${gl2?"in":"varying"} vec4 Pos;
-             float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
-                ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
-                return ${grade!=tot-1?"sign(sum)*sqrt(abs(sum))":"res"};
+             float product_len (in float z, in float y, in float x, in float[${counts[grade]}] b) {
+                ${this.nVector(1,[])[options.IPNS?"IPNS_GLSL":"OPNS_GLSL"](this.nVector(grade,[]), options.up)}
+                return sqrt(abs(sum));
              }
-             vec3 trace_depth (in vec3 start, vec3 dir, in float thresh) {
-                vec3 orig=start; float lastd = 1000.0; const int count=${(options.maxSteps||64)};
-                float s =  sign(dist(start[0],start[1],start[2],b));
+             vec3 find_root (in vec3 start, vec3 dir, in float thresh) {
+                vec3 orig=start; 
+                float lastd = 1000.0; 
+                const int count=${(options.maxSteps||80)};
                 for (int i=0; i<count; i++) {
-                  float d = s*dist(start[0],start[1],start[2],b);
-                  if (d < thresh) return start - lastd*${(options.stepSize||0.25)}*dir*(thresh-d)/(lastd-d);
-                  lastd = d; start += dir*${(options.stepSize||0.25)}*d;
+                  float d = product_len(start[0],start[1],start[2],b);
+                  float diff = ${(options.stepSize||0.0001)}*(1.0+2000.0*d);
+                  if (d < thresh) return start + dir*(lastd-thresh)/(lastd-d)*diff;
+                  lastd = d; start += dir*diff;
                 }
                 return orig;
              }
@@ -897,13 +917,13 @@
                vec3 p = -5.0*normalize(color2);
                vec3 dir = normalize((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0));  p += 1.0*dir;
                vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
-               vec3 d2 = trace_depth( p , dir, ${grade!=tot-1?(options.thresh||0.2):"0.0075"} );
-               float dl2 = dot(d2-p,d2-p); const float h=0.1;
+               vec3 d2 = find_root( p , dir, ${grade!=tot-1?(options.thresh||0.2):"0.0075"} );
+               float dl2 = dot(d2-p,d2-p); const float h=0.0001;
                if (dl2>0.0) {
                  vec3 n = normalize(vec3(
-                        dist(d2[0]+h,d2[1],d2[2],b)-dist(d2[0]-h,d2[1],d2[2],b),
-                        dist(d2[0],d2[1]+h,d2[2],b)-dist(d2[0],d2[1]-h,d2[2],b),
-                        dist(d2[0],d2[1],d2[2]+h,b)-dist(d2[0],d2[1],d2[2]-h,b)
+                        product_len(d2[0]+h,d2[1],d2[2],b)-product_len(d2[0]-h,d2[1],d2[2],b),
+                        product_len(d2[0],d2[1]+h,d2[2],b)-product_len(d2[0],d2[1]-h,d2[2],b),
+                        product_len(d2[0],d2[1],d2[2]+h,b)-product_len(d2[0],d2[1],d2[2]-h,b)
                       ));
                  ${gl2?"gl_FragDepth":"gl_FragDepthEXT"} = dl2/50.0;
                  ${gl2?"col":"gl_FragColor"} = vec4(max(0.2,abs(dot(n,normalize(L-d2))))*color3 + pow(abs(dot(n,normalize(normalize(L-d2)+dir))),100.0),1.0);
@@ -917,24 +937,15 @@
              uniform vec3 color3; uniform float b[${counts[grade]}];
              uniform float ratio; ${gl2?"out vec4 col;":""}
              ${gl2?"in":"varying"} vec4 Pos;
-             float dist (in float z, in float y, in float x, in float[${counts[grade]}] b) {
-                ${this.nVector(1,[]).OPNS_GLSL(this.nVector(grade,[]), options.up)}
-                return ${grade!=tot-1?"sqrt(abs(sum))":"res"};
-             }
-             float trace_depth (in vec3 start, vec3 dir, in float thresh) {
-                vec3 orig=start; float lastd = 1000.0; const int count=${(options.maxSteps||64)};
-                float s = dist(start[0]*5.0,start[1]*5.0,start[2]*5.0,b);
-                s=s*s;
-                return 1.0-s*150.0;
+             float product_len (in float z, in float y, in float x, in float[${counts[grade]}] b) {
+                ${this.nVector(1,[])[options.IPNS?"IPNS_GLSL":"OPNS_GLSL"](this.nVector(grade,[]), options.up)}
+                return sqrt(abs(sum));
              }
              void main() {
-               vec3 p = -5.0*normalize(color2);
-               vec3 dir = normalize((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0));  p += 1.0*dir;
-               vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
-               float d2 = trace_depth( p , dir, ${grade!=tot-1?(options.thresh||0.2):"0.0075"} );
+               vec3 p = -5.0*normalize(color2) -Pos[0]/5.0*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0); 
+               float d2 = 1.0 - 150.0*pow(product_len( p[0]*5.0, p[1]*5.0, p[2]*5.0, b),2.0);
                if (d2>0.0) {
-                 ${gl2?"gl_FragDepth":"gl_FragDepthEXT"} = d2/50.0;
-                 ${gl2?"col":"gl_FragColor"} = vec4(d2*color3,d2);
+                 ${gl2?"col":"gl_FragColor"} = vec4(color3,d2);
                } else discard;
              }`)
       // canvas update will (re)render the content.
