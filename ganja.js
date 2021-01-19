@@ -318,7 +318,7 @@
         var r='',count=0,curg;
         for (var i=0,x,gsx; gsx=grade_start[i],x=this[i],i<this.length; i++) if (x) for (var j=0,y,gsy;gsy=grade_start[j],y=b[j],j<b.length; j++) if (y) for (var a=0; a<counts[i]; a++) for (var bb=0; bb<counts[j]; bb++) {
            var n1=basis_bits[gsx+a], n2=basis_bits[gsy+bb], rn=simplify_bits(n1,n2,tot), g=bc(rn[1]), e=bits_basis[rn[1]]-grade_start[g];
-           if (g == Math.abs(i-j)) { curg=g; r += `res[${e}]${rn[0]=='1'?"+=":"-="}(${(point_source[a]+'').replace(/1([^.\d])|1$/g,"1.0$1")})*b[${bb}]; //${count++}\n`;  }
+           if (g == Math.abs(i-j) && point_source[a]) { curg=g; r += `res[${e}]${rn[0]=='1'?"+=":"-="}(${(point_source[a]+'').replace(/1([^.\d])|1$/g,"1.0$1")})*b[${bb}]; //${count++}\n`;  }
         }
         r=r.split('\n').filter(x=>x).sort((a,b)=>((a.match(/\d+/)[0]|0)-(b.match(/\d+/)[0]|0))||((a.match(/\d+$/)[0]|0)-(b.match(/\d+$/)[0]|0))).map(x=>x.replace(/\/\/\d+$/,''));
         var r2 = 'float sum=0.0; float res=0.0;\n', g=0;
@@ -676,10 +676,13 @@
             lx=-2;ly=-1.85;lr=0;color='#444';
           // Create the svg element. (master template string till end of function)
             var svg=new DOMParser().parseFromString(`<SVG viewBox="-2 -${2*(hh/ww||1)} 4 ${4*(hh/ww||1)}" style="width:${ww||512}px; height:${hh||512}px; background-color:#eee; -webkit-user-select:none; -moz-user-select:none; -ms-user-select:none; user-select:none">
-            // Add a grid (option)
-            ${options.grid?(()=>{
-              var n = Math.floor(10 / options.scale);
-              return n>50?'':[...Array(2*n + 1)].map((x,xi)=>`<line x1="-10" y1="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" x2="10" y2="${((xi-n)/2-(tot<4?2*options.camera.e02:0))*options.scale}" stroke-width="0.005" stroke="#CCC"/><line y1="-10" x1="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}" y2="10" x2="${((xi-n)/2-(tot<4?2*options.camera.e01:0))*options.scale}"  stroke-width="0.005" stroke="#CCC"/>`);
+            ${// Add a grid (option)
+              options.grid?(()=>{
+                const s = options.scale, n = (10/s)|0, cx = options.camera.e02, cy = options.camera.e01, alpha = Math.min(1,(s-0.2)*10);
+                const lines = (n,dir,space,width,color)=>[...Array(2*n+1)].map((x,xi)=>`<line x1="${dir?-10:((xi-n)*space-(tot<4?2*cy:0))*s}" y1="${dir?((xi-n)*space-(tot<4?2*cx:0))*s:-10}" x2="${dir?10:((xi-n)*space-(tot<4?2*cy:0))*s}" y2="${dir?((xi-n)*space-(tot<4?2*cx:0))*s:10}" stroke-width="${width}" stroke="${color}"/>`)
+                return [`<G stroke-opacity='${alpha}' fill-opacity='${alpha}'>`,...lines(n*2,0,0.2,0.005,'#DDD'),...lines(n*2,1,0.2,0.005,'#DDD'),...lines(n,0,1,0.005,'#AAA'),...lines(n,1,1,0.005,'#AAA'),...lines(n,0,5,0.005,'#444'),...lines(n,1,5,0.005,'#444')]
+                       .concat(options.labels?[...Array(4*n+1)].map((x,xi)=>(xi-n*2==0)?``:`<text text-anchor="middle" font-size="0.05" x="${((xi-n*2)*0.2-(tot<4?2*cy:0))*s}" y="0.06" >${((xi-n*2)*0.2).toFixed(1)}</text>`):[])
+                       .concat(options.labels?[...Array(4*n+1)].map((x,xi)=>`<text text-anchor="end" font-size="0.05" y="${((xi-n*2)*0.2-(tot<4?2*cx:0))*s-0.01}" x="-0.01" >${((xi-n*2)*-0.2).toFixed(1)}</text>`):[]).join('')+'</G>';
             })():''}
             // Handle conformal 2D elements.
             ${options.conformal?f.map&&f.map((o,oidx)=>{
@@ -788,6 +791,7 @@
           res=build(f); res.value=f; res.options=options; res.setAttribute("stroke-width",options.lineWidth*0.005||0.005);
           //onmousedown="if(evt.target==this)this.sel=undefined" 
           var mousex,mousey,cammove=false;
+          res.onwheel=(e)=>{ e.preventDefault(); options.scale = Math.min(5,Math.max(0.1,(options.scale||1)-e.deltaY*0.0001)); if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; } }
           res.onmousedown=(e)=>{ if (e.target == res) res.sel=undefined; mousex = e.clientX; mousey = e.clientY; cammove = true;  }
           res.onmousemove=(e)=>{ 
             if (cammove && tot==4 && !options.conformal) { 
@@ -898,7 +902,7 @@
              uniform float ratio; ${gl2?"out vec4 col;":""}
              ${gl2?"in":"varying"} vec4 Pos;
              float product_len (in float z, in float y, in float x, in float[${counts[grade]}] b) {
-                ${this.nVector(1,[])[options.IPNS?"IPNS_GLSL":"OPNS_GLSL"](this.nVector(grade,[]), options.up)}
+                ${this.nVector(options.up.length>tot?2:1,[])[options.IPNS?"IPNS_GLSL":"OPNS_GLSL"](this.nVector(grade,[]), options.up)}
                 return sqrt(abs(sum));
              }
              vec3 find_root (in vec3 start, vec3 dir, in float thresh) {
@@ -914,8 +918,8 @@
                 return orig;
              }
              void main() {
-               vec3 p = -5.0*normalize(color2);
-               vec3 dir = normalize((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0));  p += 1.0*dir;
+               vec3 dir = ((-Pos[0]/5.0)*color + color2 + vec3(0.0,Pos[1]/5.0*ratio,0.0)); 
+               vec3 p = -5.0*normalize(color2) + dir+vec3(0.0,0.0,1.0); dir = normalize(dir);
                vec3 L = 5.0*normalize( -0.5*color + 0.85*color2 + vec3(0.0,-0.5,0.0) );
                vec3 d2 = find_root( p , dir, ${grade!=tot-1?(options.thresh||0.2):"0.0075"} );
                float dl2 = dot(d2-p,d2-p); const float h=0.0001;
