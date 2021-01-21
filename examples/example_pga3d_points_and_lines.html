@@ -4,48 +4,48 @@
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 3,0,1 metric. 
 Algebra(3,0,1,()=>{ 
-    
-    // We work in dual space. Our 1-blade's are dual-vectors (aka functionals of the form ax + by + cz + dw = 0).
-    // The four basis functionals are thus (x=0, y=0, z=0, w=0). In three dimensions these represent the yz, xz, xy and
-    // ideal plane. 
-    
-    // Specify a point directly (trivectors specified with overloaded e-notation.)
-    var point = (x,y,z)=>1e123-x*1e012+y*1e013+z*1e023;
-    
-    // Lines can be defined using plucker coordinates
-    var line = (px,py,pz,dx,dy,dz)=>px*1e01+py&1e02+pz*1e03+dx*1e12+dy*1e13+dz*1e23;
+  
+  // We work in dual space. Our 1-blade's are dual-vectors (aka functionals of the form ax + by + cz + dw = 0).
+  // The four basis functionals are thus (x=0, y=0, z=0, w=0). In three dimensions these represent the yz, xz, xy and
+  // ideal plane. 
+  
+  // Specify a point directly (trivectors specified with overloaded e-notation.)
+  var point = (x,y,z)=>!(1e0 + x*1e1 + y*1e2 + z*1e3);
+  
+  // Lines can be defined using plucker coordinates
+  var line = (px,py,pz,dx,dy,dz)=>px*1e01+py&1e02+pz*1e03+dx*1e12+dy*1e13+dz*1e23;
 
-    // Planes can be defined directly using e0,e1,e2,e3
-    var plane = (a,b,c,d)=>d*1e0+a*1e1+b*1e2+c*1e3;
-    
-    // Useful joins
-    var line_from_points  = (P1,P2)=>P1.Normalized&P2.Normalized,
-        plane_from_points = (P1,P2,P3)=>P1&P2&P3,
-        plane_from_point_and_line = (P,L)=>P&L;
-        
-    // Usefull meets
-    var line_from_planes  = (p1,p2)=>p1^p2,
-        point_from_planes = (p1,p2,p3)=>p1^p2^p3,
-        point_from_line_and_plane = (L,P)=>L^P;
-    
-    // Create 5 points and some joining lines.
-    var A=point(0,-1,0), B=point(1,1,-1), C=point(-1,1,-1), D=point(1,1,1), E=point(-1,1,1), 
-        centroid=A+B+C+D+E,
-        camera=0e0;
-    
-    // Graph the 3D items
-    document.body.appendChild(this.graph(()=>{
-      var time=performance.now()/4000;    
-      camera.set(Math.cos(time)+Math.sin(time)*1e13);                      // rotate around Y 
-      return [0xddaaff,[A,B,C],                                            // graph on face
-              0xAA88FF,[A,B],[A,C],[A,D],[B,C],[B,D],[C,E],[A,E],[E,D],    // graph all edges
-              0x444444,A,"A",B,"B",C,"C",D,"D",E,"E",                      // graph all vertices
-              0xFF8888,C+E,centroid,"sum of points",
-              0x8888FF,line_from_points(centroid,C+E),"line from points ..",
-              0x44AA44,line_from_planes(A&B&C,B&C&D),"line from planes ..",
-              0x4488FF,point_from_line_and_plane(line_from_points(centroid,C+E),A&D&B),"point from line and plane ..",
-              0xFFAA66,(B&D)+(C&E),"sum of lines"
-             ];
-    },{animate:true,camera})); 
+  // Planes can be defined directly using e0,e1,e2,e3
+  var plane = (a,b,c,d)=>d*1e0+a*1e1+b*1e2+c*1e3;
+  
+  // Useful joins
+  var line_from_points  = (P1,P2)=>P1.Normalized&P2.Normalized,
+      plane_from_points = (P1,P2,P3)=>P1&P2&P3,
+      plane_from_point_and_line = (P,L)=>P&L;
+      
+  // Usefull meets
+  var line_from_planes  = (p1,p2)=>p1^p2,
+      point_from_planes = (p1,p2,p3)=>p1^p2^p3,
+      point_from_line_and_plane = (L,P)=>L^P;
+  
+  // Create 5 points and some joining lines.
+  var A=point(0,.8,0), B=point(.8,-1,-.8), C=point(-.8,-1,-.8), D=point(.8,-1,.8), E=point(-.8,-1,.8), 
+      centroid=()=>A+B+C+D+E,
+      camera=0e0;
+  
+  // Graph the 3D items
+  document.body.appendChild(this.graph(()=>{
+    var time=performance.now()/4000;    
+    camera.set(Math.E ** (time * 1e13));                                 // rotate around Y 
+    return [0xD0FFE1,[A,B,C],                                            // graph on face
+            0x00AA88,[A,B],[A,C],[A,D],[B,C],[B,D],[C,E],[A,E],[E,D],    // graph all edges
+            0x224488,A,"A",B,"B",C,"C",D,"D",E,"E",                      // graph all vertices
+            0x884488,C+E,centroid,"sum of points",
+            0x884488,line_from_points(centroid,C+E),"line from points ",
+            0x00AA88,line_from_planes(A&B&C,B&C&D),"line from planes ",
+            0x00AA88,point_from_line_and_plane(line_from_points(centroid,C+E),A&D&B),"point from line and plane",
+            0xFF8844,(B&D)+(C&E),"sum of lines",
+           ];
+  },{animate:true,camera,gl:0,grid:1,labels:1,lineWidth:3})); 
 });
 </SCRIPT></BODY>

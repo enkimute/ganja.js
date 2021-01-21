@@ -8,32 +8,42 @@ Algebra(2,0,1,()=>{
   // The Euler line connects several important points in any non equilateral triangle.
 
   // Not many identities needed..
-  var point      = (x,y)=>1e12-x*1e02+y*1e01;
+  var point = (x,y)=>!(1e0 + x*1e1 + y*1e2);
   
   // Three points.
-  var A=point(-1.5,0.5), B=point(0.5,-1.5), C=point(1,0.5),
+  var A = point(-1.5, -0.5), B = point(0.5, 1.5), C = point(1, -0.5),
   
   // The edges
-      a=()=>B&C,b=()=>C&A,c=()=>A&B,
+      a = ()=>B & C, 
+      b = ()=>C & A, 
+      c = ()=>A & B,
 
   // The orthocenter
-     oa=()=>a<<A, ob=()=>b<<B, oc=()=>c<<C, ortho=()=>oa^ob,
+     oa = ()=>a | A, 
+     ob = ()=>b | B, 
+     oc = ()=>c | C, 
+     ortho = ()=>oa ^ ob,
   
   // The circumcenter
-      ca=()=>c<<(A+B), cb=()=>a<<(B+C), cc=()=>b<<(C+A), circum=()=>ca^cb,
+      ca = ()=>c | (A + B), 
+      cb = ()=>a | (B + C), 
+      cc = ()=>b | (C + A), 
+      circum = ()=>ca ^ cb,
       
   // The centroid      
-      centroid = ()=>A+B+C,
+      centroid = ()=>A + B + C,
   
   // The Euler line      
-      line = ()=>ortho&circum;
+      line = ()=>ortho & circum;
    
   document.body.appendChild(this.graph([
-      0xFFFFEE,[A,B,C],                        // triangle
-      0xFFAAAA,oa,ob,oc,ortho,                 // orthocenter
-      0x88AA88,ca,cb,cc,circum,                // circumcenter
-      0x8888FF,centroid,line,"Euler Line",     // centroid and euler line
-      0x444444,A,B,C                           // triangle vertices
-      ],{grid:true}));
+      "Euler's Line","Drag the points",
+      0xD0FFE1,[A,B,C],                        // triangle
+      0x00AA88,[A,B],[B,C],[A,C],              // triangle edges
+      0x882288,oa,ob,oc,ortho,"o",             // orthocenter
+      0x224488,ca,cb,cc,circum,"c",            // circumcenter
+      0x448844,centroid,line,"Euler Line",     // centroid and euler line
+      0x224488,A,"A",B,"B",C,"C"               // triangle vertices
+      ],{grid:true, lineWidth:2}));
 });
 </SCRIPT></BODY>

@@ -6,7 +6,7 @@
 Algebra(3,0,1,()=>{ 
 
   // Specify a point directly (trivectors specified with overloaded e-notation.)
-  var point = (x,y,z)=>1e123-x*1e012-y*1e013+z*1e023;
+  var point = (x,y,z)=>!(1e0 + x*1e1 + y*1e2 + z*1e3);
   var rotor = (P,a)=>Math.cos(a/2)+Math.sin(a/2)*P.Normalized;
   
   // Load a wavefront 3D OBJ file.
@@ -20,7 +20,7 @@ Algebra(3,0,1,()=>{
   }
   
   // Our camera position and orientation
-  var  time=0, camera=(1-1e02+1e13-1.2e03+0.9e01).Normalized, cut=-0.57*1.3e0+1e2, mini=camera*(1-1.3e03+3e02-5.5e01)*rotor(1e12,Math.PI/2);
+  var  time=0, camera=(1-1e02+1e13-1.2e03+0.9e01).Normalized, cut=-0.57*1.3e0+1e2, mini=camera*(1-1.3e03-3e02-5.5e01)*rotor(1e12,Math.PI/2);
     
   // Read obj
   obj("https://enkimute.github.io/ganja.js/examples/bunny.obj",(points,edges,faces)=>{
@@ -34,7 +34,7 @@ Algebra(3,0,1,()=>{
       document.body.appendChild(this.graph(()=>{
         // Animate cutting plane and camera
         var time=performance.now()/25000;    
-        cut.set( (1.43+ Math.sin(time*3))*1e0+1e2);
+        cut.set( (1.43+ Math.sin(time*3))*1e0-1e2);
         camera.set( ((1-1e03-.75e02)* (Math.cos(time*5)+Math.sin(time*5)*1e13)).Normalized )
         
         // recalculate the contour. (cuts of all polies with cutting plane)

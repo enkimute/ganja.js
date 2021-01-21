@@ -4,39 +4,60 @@
 <BODY><SCRIPT>
 // Create a Clifford Algebra with 2,0,1 metric. 
 Algebra(2,0,1,()=>{
-    
-    // We work in dual space so we define our points to be bivectors. Ganja.js overloads scientific notation to specify basis blades.
-    // For readability we create a function that converts 2D euclidean coordinates to their 3D bivector representation.
-    var point = (x,y)=>1e12-x*1e02+y*1e01;    
-    
-    // Similarly, we can define lines directly. The euclidean line ax + by + c can be specified so :
-    var line = (a,b,c)=>a*1e1+b*1e2+c*1e0;
-    
-    // Define 3 points.
-    var A=point(-1,1), B=point(-1,-1), C=point(1,-1); 
-    
-    // Define the line y=x-0.5
-    var L=line(-1,1,0.5)
-    
-    // Or by joining two points. We define M as a function so it will update when C or A are dragged.
-    var M=()=>C&A;
-    
-    // Points can also be found by intersecting two lines. We similarly define D as a function for interactive updates. 
-    var D=()=>L^M;
-    
-    // We now use the graph function to create an SVG object that visualises our algebraic elements. The graph function accepts
-    // an array of items that it will render in order. It can render points, lines, labels, colors, line segments and polygons.
-    document.body.appendChild(this.graph([
-        A, "A",         // Render point A and label it.
-        B, "B",         // Render point B and label it.
-        C, "C",         // Render point C and label them.
-        L, "L", M, "M", // Render and label lines.
-        D, "D",         // Intersection point of L and M
-        0xff0000,       // Set the color to red.
-        [B,C],          // Render line segment from B to C. 
-        0xffcccc,       // Set the color to light red.
-        [A,B,C]         // render polygon ABC.
-    ],{grid:true}));
-
+  
+  // in 2D PGA, grade-1 elements or vectors (e0,e1,e2) represent
+  // reflections AND lines (the invariant of a reflection)
+  // Ganja.js overloads scientific notation to specify basis blades.
+  var line = (a,b,c)=>a*1e1 + b*1e2 + c*1e0;
+  
+  // grade-2 elements or bivectors (e01,e02,e12) represent 
+  // rotations/translations AND points/infinite points (the invariant
+  // of a rotation/translation). We define them using the dualisation
+  // operator (!) to be independent of choice of basis (e12 vs e21) 
+  var point = (x,y)=>!(1e0 + x*1e1 + y*1e2);  
+  
+  // Define 3 points in the plane.
+  var A = point(-1, -1), B = point(-1, 1), C = point(1, 1); 
+  
+  // Define the line y = 0.5 - x <=> x + y - 0.5 = 0
+  var L = line(1, 1, -0.5)
+  
+  // A line can also be defined by JOINING (&) two points. 
+  // We define M as a function '()=>' so it will update when C or A 
+  // are dragged.
+  var M = ()=>C & A;
+  
+  // Similarly a point can be defined by MEETING (^) two lines.
+  // Again, we define point D as a function so it will update when
+  // L or M change. 
+  var D = ()=>L ^ M;
+  
+  // We now use the graph function to create an SVG object that visualises 
+  // our algebraic elements. The graph function accepts an array of items 
+  // that it will render in order. It can render points, lines, labels, 
+  // colors, line segments and polygons.
+  document.body.appendChild(this.graph([
+    "Drag A,B,C",   // First label is used as title.
+    0xD0FFE1,       // Numbers are colors - use hex!
+    [A,B,C],        // render polygon ABC.
+    0x882288,       // Set the color to purple.
+    [B,C],          // Render line segment from B to C. 
+    0x00AA88,       // Medium green.
+    L, "L", M, "M", // Render and label lines.
+    0x224488,       // Set color blue.
+    D, "D",         // Intersection point of L and M
+    0x008844,       // Set darker green
+    A, "A",         // Render point A and label it.
+    B, "B",         // Render point B and label it.
+    C, "C",         // Render point C and label it.
+  ],{
+    grid        : true, // Display a grid
+    labels      : true, // Label the grid
+    lineWidth   : 3,    // Custom lineWidth (default=1)
+    pointRadius : 1,    // Custon point radius (default=1)
+    fontSize    : 1,    // Custom font size (default=1)
+    scale       : 1,    // Custom scale (default=1), mousewheel.
+  }));
+  
 });
 </SCRIPT></BODY>

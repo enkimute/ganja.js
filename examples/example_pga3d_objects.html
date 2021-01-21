@@ -31,7 +31,7 @@ var rot = (a,P)=>Math.cos(a)+Math.sin(a)*P.Normalized,
 // Render and rotate them using the webGL2 previewer.      
   document.body.appendChild( this.graph(()=>{
     var time = performance.now()/1000;
-    objs.forEach((obj,i)=>obj.transform = (1+1e0-3e01-((i%3)-1)*1.5e03-((i/3|0)-1.5)*1.5e02)*rot(time,1e12)*rot(time*0.331,1e13));
+    objs.forEach((obj,i)=>obj.transform = (1+1e0+3e03-((i%3)-1)*1.5e01-((i/3|0)-1.5)*1.5e02)*rot(time,1e12)*rot(time*0.331,1e13));
     return [0xFF0088,...objs]
   },{gl:1,animate:1}));    
     

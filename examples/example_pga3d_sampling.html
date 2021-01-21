@@ -46,7 +46,7 @@ Algebra(3,0,1,()=>{
         
       // visualise the different patterns with increasing samplecount.   
         return [pat.name+' [n='+n+']'].concat([...Array(Math.max(10,n))].map((x,i)=>pat(i,n))) 
-      }, {animate:true,camera}    
+      }, {animate:true,grid:1,labels:1,camera}    
     ));
 
 });

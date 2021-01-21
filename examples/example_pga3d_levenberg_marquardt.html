@@ -51,10 +51,10 @@ var start_points = [...Array(400)].map((x,i)=>f([100,5,0.001],i));
 
 // render
 Algebra(2,0,1).inline((t,s,s2,s3,s4)=>{
-  s = s.map((y,x)=>!(1e0+.008e1*(x-200)-.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
-  s2 = s2.map((y,x)=>!(1e0+.008e1*(x-200)-.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
-  s3 = s3.map((y,x)=>!(1e0+.008e1*(x-200)-.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
-  s4 = s4.map((y,x)=>!(1e0+.008e1*(x-200)-.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
+  s = s.map((y,x)=>!(1e0+.008e1*(x-200)+.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
+  s2 = s2.map((y,x)=>!(1e0+.008e1*(x-200)+.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
+  s3 = s3.map((y,x)=>!(1e0+.008e1*(x-200)+.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
+  s4 = s4.map((y,x)=>!(1e0+.008e1*(x-200)+.06e2*(y-50))).map((x,i,a)=>[x,a[i-1]||x]);
   document.body.appendChild(this.graph([...t,...s,0x008800,...s3,0xff0000,...s2,0xaaaaaa,...s4],{grid:1}));
 })([
   "Levenberg Marquardt steps : "+est.it,

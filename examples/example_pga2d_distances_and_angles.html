@@ -5,40 +5,47 @@
 // Create a Clifford Algebra with 2,0,1 metric. 
 Algebra(2,0,1,()=>{
   
-  // The identities we already established.
-  var point = (x,y)=>1e12-x*1e02+y*1e01,    
-      line  = (a,b,c)=>a*1e1+b*1e2+c*1e0;
+  // As in the previous example, points and lines
+  // are bivectors and vectors respectively.
+  var point = (x,y)=>!(1e0 + x*1e1 + y*1e2),    
+      line  = (a,b,c)=>a*1e1 + b*1e2 + c*1e0;
       
-  // Distances and angles
-  var dist_pp = (X,Y)=>(X&Y).Length,
-      dist_pl = (P,l)=>(P.Normalized^l.Normalized).e012,
-      angle   = (x,y)=>Math.acos(x.Normalized<<y.Normalized);
-
-  var A=()=>point(-1,0.5*Math.sin(0.0005*performance.now())),  // expression on time
-      B=point(-1,-1), C=point(1,-1); 
+  // Distances between elements in 2D PGA (point to point, point to line)
+  // Are always calculated as the length of their join. (assuming normalization) 
+  var dist = (x,y)=>(x & y).Length;
   
-  // Define some algebraic expressions as functions of these points.
-  var AB=()=>B&A, BC =()=>C&B, CA=()=>C&A;
+  // Angles between lines in 2D PGA are calculated using the inner product.
+  // Again normalized elements are assumed.
+  var angle = (x,y)=>Math.acos(x | y);
+
+  // Create three points, one as a function to animate it.
+  var A = ()=>point(-1, -0.5*Math.sin(0.0005*performance.now())),  
+      B = point(-1, 1), 
+      C = point(1, 1); 
+  
+  // Create the three lines connecting these points and normalize them
+  var AB = ()=>(B & A).Normalized, 
+      BC = ()=>(C & B).Normalized, 
+      CA = ()=>(C & A).Normalized;
 
   // Distances between points as functions that return labels (strings);
-  var AtoB   =()=>dist_pp(A,B).toFixed(3),  
-      BtoC   =()=>dist_pp(C,B).toFixed(3),     
-      CtoA   =()=>dist_pp(C,A).toFixed(3);
+  var AtoB  = ()=>dist(A, B).toFixed(3),  
+      BtoC  = ()=>dist(C, B).toFixed(3),     
+      CtoA  = ()=>dist(C, A).toFixed(3),
+      BtoCA = ()=>dist(B, CA).toFixed(3);
 
   // Angles between lines as strings (labels for the points)
-  var  CAtoAB =()=>((angle(CA,AB)*180/Math.PI)|0)+'&deg;', 
-       ABtoBC =()=>((angle(AB,-BC)*180/Math.PI)|0)+'&deg;',
-       CAtoBC =()=>((angle(CA,BC)*180/Math.PI)|0)+'&deg;';
-
-  // Distance between point and line.
-  var BtoCA  =()=>dist_pl(B,CA).toFixed(3);
+  var  CAtoAB =()=>angle(CA, AB) * 180 / Math.PI |0 + '&deg;', 
+       ABtoBC =()=>angle(BC, AB) * 180 / Math.PI |0 + '&deg;',
+       CAtoBC =()=>angle(CA, BC) * 180 / Math.PI |0 + '&deg;';
 
   // Graph the triangle, its angles and side lengths.
   document.body.appendChild(this.graph([
-    0xffcccc, [A,B,C],                              // render the triangle
-    0xff4444, AB, AtoB, BC, BtoC, CA, CtoA,         // render edges and lengths.
-    0x444444, A, CAtoAB, B, ABtoBC, C, CAtoBC,      // render verts and angles
-    0x8888ff, [B,()=>(CA<<B)*CA], BtoCA, 
-  ],{grid:true,animate:true}));
+    "Distances and Angles","Drag the points",       // render title
+    0xD0FFE1, [A,B,C],                              // render the triangle
+    0x00AA88, AB, AtoB, BC, BtoC, CA, CtoA,         // render edges and lengths.
+    0x882288, [B,()=>(B|CA)*CA], BtoCA,             // render projection and dist
+    0x224488, A, CAtoAB, B, ABtoBC, C, CAtoBC,      // render verts and angles
+  ],{grid:true,lineWidth:3,labels:true,animate:true}));
 });
 </SCRIPT></BODY>
