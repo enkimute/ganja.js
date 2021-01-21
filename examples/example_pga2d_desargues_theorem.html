@@ -6,26 +6,33 @@
 Algebra(2,0,1,()=>{
 
   // Just the point identity needed.
-  var point      = (x,y)=>1e12-x*1e02+y*1e01;
+  var point = (x,y)=>!(1e0 + x*1e1 + y*1e2);
 
   // The origin and points of big triangle.
-  var O=point(-1.4,0.5), X=point(1,-1), Y=point(0.2,-1.2), Z=point(0.75,-0.5);
+  var O = point(-1.4, -0.5), 
+      X = point(1, 1), 
+      Y = point(0.2, 1.2), 
+      Z = point(0.75, 0.5);
   
   // Derived points of small triangle
-  var x=()=>0.55*O+0.45*X, y=()=>0.4*O+0.6*Y, z=()=>0.7*O+0.3*Z;
+  var x = ()=>0.5 * O + 0.4 * X, 
+      y = ()=>0.4 * O + 0.6 * Y, 
+      z = ()=>0.7 * O + 0.3 * Z;
 
   // All Edges.
-  var YX=()=>Y&X, YZ=()=>Y&Z, XZ=()=>X&Z,
-      OX=()=>O&X, OY=()=>O&Y, OZ=()=>O&Z,
-      yx=()=>y&x, yz=()=>y&z, xz=()=>x&z;
+  var YX = ()=>Y & X, YZ = ()=>Y & Z, XZ = ()=>X & Z,
+      OX = ()=>O & X, OY = ()=>O & Y, OZ = ()=>O & Z,
+      yx = ()=>y & x, yz = ()=>y & z, xz = ()=>x & z;
 
   document.body.appendChild(this.graph([
-    0x4444ff, OX, OY, OZ,                                               // Blue lines through triangle vertices.
-    0xcccccc, YX, YZ, XZ, yx, yz, xz, ()=>YX^yx, ()=>YZ^yz, ()=>xz^XZ,  // Grey lines through edges
-    0x76cc82, [X,Y,Z], 0xffeb57, ()=>[x,y,z],                           // Render both triangles.
-    0xaaaaaa, x, "x", y, "y", z, "z",                                   // Light Grey Derived points small triangle.
-    0xff0000, ()=>(YX^yx)&(xz^XZ), "Axis of perspectivity",             // Red axis of perspectivity
-    0x444444, X, "X", Y, "Y", Z, "Z", O, "Center of perspectivity",     // Points and center of perspectivity
-  ],{grid:true}));
+    0xD0FFE1, [X,Y,Z], [x,y,z],                                         // Render both triangles.
+    0xC3A1C3, YX, YZ, XZ, yx, yz, xz, ()=>YX^yx, ()=>YZ^yz, ()=>xz^XZ,  // Grey lines through edges
+    0x884488, [X,Y],[Y,Z],[Z,X], ...[[x,y],[x,z],[y,z]],                // Render triangle edges.
+    0x884488, ()=>(YX^yx)&(xz^XZ), "Axis of perspectivity",             // purple axis of perspectivity
+    0x90a1c3, OX, OY, OZ,                                               // blue lines through triangle vertices.
+    0x448844, x, "x", y, "y", z, "z",                                   // green Derived points small triangle.
+    0x224488, X, "X", Y, "Y", Z, "Z", O, "Center of perspectivity",     // Points and center of perspectivity
+  ],{grid:true, lineWidth:2}));
+  
 });
 </SCRIPT></BODY>

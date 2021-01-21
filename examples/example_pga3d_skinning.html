@@ -14,7 +14,7 @@ Algebra(3,0,1,()=>{
   var motor = (d,V)=>(1+d*V);
   
   // our point and edge lists
-  var  sides=4, points=[], points_orig, items=[''];
+  var  sides=4, points=[], points_orig, items=['',0x224488];
 
   // vertices and edges for a square rod.
   for (var i=0;i<15;i++) for (var j=0;j<sides;j++) points.push(rotor(1e13,(Math.PI*2/sides)*j)>>>point(-0.5,-1+i/7.5,0));
@@ -45,7 +45,7 @@ Algebra(3,0,1,()=>{
       }
     }
     return items;
-  },{animate:true})); 
+  },{animate:true, lineWidth:3, grid:1, labels:1})); 
   
 });
 </SCRIPT></BODY>

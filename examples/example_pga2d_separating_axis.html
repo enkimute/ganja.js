@@ -16,7 +16,7 @@ Algebra(2,0,1,()=>{
       ngon       = (p,n,d,a)=>[...Array(n)].map((x,i)=>rotor(p,(a||0)+2*Math.PI*i/n)>>>(p+d*1e01));
 
   // the shapes can be moved around.
-  var pa=point(0,-0.2), pb=point(-0.8,-1);
+  var pa=point(0,0.2), pb=point(-0.8,1);
   
   var sat=(a,b)=>{
   // Collect potential axis candidates (all poly edges or half of them for symmetric polys)
@@ -27,15 +27,32 @@ Algebra(2,0,1,()=>{
     var check=(axis)=>{
       for (var i=0; i<al; i++) da[i]=dist_pl(a[i],axis);
       for (var i=0; i<bl; i++) db[i]=dist_pl(b[i],axis);
-      return (Math.min.apply(Math,da)>Math.max.apply(Math,db))||(Math.min.apply(Math,db)>Math.max.apply(Math,da));
+      return Math.min(...da)>Math.max(...db)||Math.min(...db)>Math.max(...da);
     }
   // Test all edges. Return the separating axis if found.
     for (i=0; i<e.length; i++) if (check(e[i])) return e[i];
   }
   
   document.body.appendChild(this.graph(()=>{
-    pa[4] = -0.2+(0.3-(performance.now()*0.0001%2));
-    var a=ngon(pa,3,0.65,pa.e01*10), b=ngon(pb,6,0.5), h=sat(b,a);
-    return [0xcccccc,h,h?0x88ff88:0xffaaaa,a,b,0x444444,pa,pb]},{animate:true, grid:true}));
+    // Animate point A
+    pa[4] = 0.2-(0.3-(performance.now()*0.0001%2));
+
+    // Create our polygons.
+    var a=ngon(pa,3,0.65,pa.e01*10), b=ngon(pb,6,0.5);
+
+    // Perform the SAT test.
+    var h=sat(b,a);
+    
+    // Return the elements to display.
+    return [
+       0x224488, "Seperating Axis",                     // Title
+       0x884488, h,                                     // Last axis
+       h?0xB0FFD1:0xffB099, a, b,                       // ngons a,b
+       0x448844, ...a.map((x,i,a)=>[x,a[i+1]||a[0]]),   // outline a
+       0x448844, ...b.map((x,i,a)=>[x,a[i+1]||a[0]]),   // outline b
+       0x224488, pa, pb                                 // center points
+    ];   
+  },{animate:true, lineWidth:3, labels:true, grid:true}));
+  
 });
 </SCRIPT></BODY>

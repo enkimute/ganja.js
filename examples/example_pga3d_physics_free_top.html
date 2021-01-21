@@ -25,7 +25,7 @@ Algebra(3,0,1,()=>{
       Ai = (x)=>(0e0+x).map((x,i)=>x/(I[i]||1)).Dual;
       
   // our physics state. [position/orientation, linear/angular velocity in body frame]
-  var State  = [1+1e03, -.035e03-0.35e13-.27e12],
+  var State  = [1+1e01, -.035e01-0.35e13-.27e12],
       dState = ([g,v])=>[g*v,Ai(A(v)*v-v*A(v))];
 
   // Graph the 3D items

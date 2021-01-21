@@ -1,15 +1,15 @@
 <HEAD>
   <SCRIPT SRC="../ganja.js"></SCRIPT>
 </HEAD>
-<BODY STYLE="display:flex; flex-direction:column; max-height:100%;"><center style="padding:10px">
+<BODY STYLE="display:flex; flex-direction:column; max-height:100%;"><center style="padding:10px; position:fixed; top:0; left:0; background: white; z-index:10; width:100%">
 This example was contributed by Yao Liu. See <A TARGET="blank" HREF="https://beta.observablehq.com/@liuyao12/poncelets-porism">his original post on observableHQ</A> for more details !<BR>
 </center>
 <SCRIPT>
 // Example by Yao Liu on ObservableHQ (https://beta.observablehq.com/@liuyao12/poncelets-porism)
 Algebra(2,0,1,()=>{
   // Using Geometric/Clifford algebra with signature (2,0,1), based on the work of Charles Gunn
-  var pt    = (x,y)=>1e12-x*1e02+y*1e01,
-      vec   = (x,y)=>-x*1e02+y*1e01,
+  var pt    = (x,y)=>!(1e0 + x*1e1 + y*1e2),
+      vec   = (x,y)=>!(x*1e1 + y*1e2),
       dist  = (P,Q)=>((P.Normalized)&(Q.Normalized)).Length,
       refl  = (l,m)=>(l.Normalized<<m.Normalized)*2*(m.Normalized)-l.Normalized
   
@@ -49,10 +49,12 @@ Algebra(2,0,1,()=>{
       poncelet_lines.push(l)
     }
     let polygon=poncelet_pts.slice(1).map((pt,i)=>[poncelet_pts[i], pt])
-    return ["Poncelet's porism", 0xff0000].concat(conic).concat(circle).concat([
-      0x444444, A,'A', B,'B', C,'C', D,'D', E,'E', P,'P',
-      O,'O', F,'F']).concat(polygon)
-    }, {animate:true,grid:true}));
+    return [
+      "Poncelet's porism", 
+      0x00AA88, ...conic, ...circle,
+      0x444444, A,'A', B,'B', C,'C', D,'D', E,'E', P,'P', O,'O', F,'F', ...polygon
+    ]}, {animate:true, grid:true, lineWidth:4}));
+    
 })
 </SCRIPT>
 </BODY>

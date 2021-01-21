@@ -15,31 +15,34 @@ Algebra(2,0,1,()=>{
   // received by artists in a cg animation context.
   
   // Translate dist along line.
-  var translator = (line,dist)=>1+0.5*dist*(line.Normalized*1e012);
+  var translator = (line,dist)=>1+0.5*dist*(line.Normalized*!1);
 
   // Create chain of points. (l = number of segments in chain)
-  var l=6, d=3/l, points=[...Array(l+1)].map((x,i)=>1e12+(1.5-i*d)*1e02);
+  var l=6, d=3/l, points=[...Array(l+1)].map((x,i)=>!(1e0 + (i * d - 1.5) * 1e1));
 
   // solver. Last point in chain is the target. Set tip to target, then cycle to base and back
   // restoring original lengths.
   var IK=(c)=>{
   // Run four relaxation steps
-    for (var i,j=0;j<4; j++) { 
+    for (var i, j=0; j<4; ++j) { 
     // Set the tip to the target. (this will change the length of the last segment.)
       c[l-1].set(c[l]); 
     // Run backwards to the base and restore the lengths along the chain.  
-      for (i=l-2; i>0; i--) c[i].set(translator(c[i]&c[i+1],-d)>>>(c[i+1])); 
+      for (i=l-2; i>0; --i) c[i].set(translator(c[i]&c[i+1],-d)>>>(c[i+1])); 
     // Loop the other way from base to tip again restoring all lengths.  
-      for (i=1; i<l; i++) c[i].set(translator(c[i-1]&c[i],d)>>>(c[i-1])); 
+      for (i=1; i<l; ++i) c[i].set(translator(c[i-1]&c[i],d)>>>(c[i-1])); 
   }};
 
   // Evaluate IK, render points and lines, target last (so its on top)
-  document.body.appendChild(this.graph([].concat(
-    ()=>IK(points), points[0], "Base",                  // run IK and render base
-    0x0000ff,points.slice(1,l),                         // render joint points. [A,B,C,..]
-    points.map((x,i,a)=>[a[i-1],x]).slice(1,l),         // render line segments. [[A,B],[B,C],..]
-    0x000000,points[l],"Target"                         // render target in black
-  ),{grid:true}));
+  document.body.appendChild(this.graph(()=>{
+    IK(points);
+    return [
+      0x224488,"Inverse Kinematics",
+      0x008844,...points.map((x,i,a)=>[a[i-1],x]).slice(1,l), // render line segments. [[A,B],[B,C],..]
+      0x880088,points[0], "Base",                             // render base
+      0x00DD88,...points.slice(1,l),                          // render joint points. [A,B,C,..]  
+      0x880088,points[l],"Target"                             // render target in purple
+  ]},{grid:true,lineWidth:6}));
   
 });
 </SCRIPT></BODY>

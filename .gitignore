@@ -2,3 +2,4 @@ codegen/out*
 codegen/rust/*_rust
 codegen/cpp/*_cpp
 codegen/rust/*_rust.pdb
+package.json
