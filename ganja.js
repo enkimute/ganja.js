@@ -655,19 +655,25 @@
       // Store the original input
         if (!f) return; var origf=f;
       // generate default options.
-        options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot<4?Element.Scalar(1):new Element([1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+        options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot<4?Element.Scalar(1): ( Element.Bivector(0,0,0,0,0,options.p||0).Exp() ).Mul( Element.Bivector(0,0,0,0,options.h||0,0).Exp()) );
         if (options.conformal && tot==4) var ni = options.ni||this.Coeff(4,1,3,1), no = options.no||this.Coeff(4,0.5,3,-0.5), minus_no = no.Scale(-1);
         var ww=options.width, hh=options.height, cvs=options.canvas, tpcam=new Element([0,0,0,0,0,0,0,0,0,0,0,-5,0,0,1,0]),tpy=this.Coeff(4,1),tp=new Element(),
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.
         project=(o)=>{ if (!o) return o; while (o.call) o=o(); 
           // Clip 3D lines so they don't go past infinity.
-          if (tot == 4 && o.length == 16 && o[8]**2+o[9]**2+o[10]**2>0.0001) {
+          if (tot == 4 && o instanceof Element && o.length == 16 && o[8]**2+o[9]**2+o[10]**2>0.0001) {
             o = [[2,1,0,0],[-2,1,0,0],[2,0,1,0],[-2,0,1,0],[2,0,0,1],[-2,0,0,1]].map(v=>{
               var r = Element.Vector(...v).Wedge(o); return r[14]?r.Scale(1/r[14], r):undefined;
             }).filter(x=>x && Math.abs(x[13])<=2.001 && Math.abs(x[12]) <= 2.001 && Math.abs(x[11]) <= 2.001);
             return o.map(o=>(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy));
           } 
-          return (tot==4 && o.length==16)?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):(o.length==2**tot)?Element.sw(options.camera,o):o;
+          // Convert 3D planes to polies.
+          if (tot == 4 && o instanceof Element && o.length == 16 && o.Grade(1).Length>0.01) {
+            var m = Element.Add(1, Element.Mul(o.Normalized, Element.Coeff(3,1))).Normalized, e0 = 0;
+            o=Element.sw(m,[[-1,-1],[-1,1],[1,1],[-1,-1],[1,1],[1,-1]].map(([x,z])=>Element.Trivector(x*o.Length,e0,z*o.Length,1)));
+            return o.map(o=>(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy));
+          }
+          return (tot==4 && o instanceof Element && o.length==16)?(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy):(o.length==2**tot)?Element.sw(options.camera,o):o;
         };
       // gl escape.
         if (options.gl && !(tot==4 && options.conformal)) return Element.graphGL(f,options); if (options.up) return Element.graphGL2(f,options);
@@ -832,7 +838,9 @@
               if (res.sel) {
                 f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/500,dy/500,0,0,0,0).Exp()),f[res.sel]) );
               } else {
-                if (options.camera) options.camera.set( ( Element.Bivector(0,0,0,0,dx/300,0).Exp() ).Mul( Element.Bivector(0,0,0,0,0,-dy/600).Exp() ).Mul(options.camera) )
+                options.h = (options.h||0) + dx/300;
+                options.p = (options.p||0) - dy/600;
+                if (options.camera) options.camera.set( ( Element.Bivector(0,0,0,0,0,options.p).Exp() ).Mul( Element.Bivector(0,0,0,0,options.h,0).Exp() )/*.Mul(options.camera)*/ )
                 if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }
               }
               return;
@@ -1354,7 +1362,7 @@
           // PGA
             if (options.dual && e instanceof Element) e = e.Dual;
           // Convert planes to polygons.
-            if (e instanceof Element && e.Grade(1).Length) {
+            if (e instanceof Element && e.Grade(1).Length > 0.001) {
               var m = Element.Add(1, Element.Mul(e.Normalized, Element.Coeff(3,1))).Normalized, e0 = 0;
               e=Element.sw(m,[[-1,-1],[-1,1],[1,1],[-1,-1],[1,1],[1,-1]].map(([x,z])=>Element.Trivector(x,e0,z,1)));
             }
