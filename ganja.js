@@ -835,14 +835,14 @@
               if (!e.buttons) { cammove=false; return; };
               var [dx,dy] = [e.clientX - mousex, e.clientY - mousey];
               [mousex,mousey] = [e.clientX,e.clientY];
-              if (res.sel) {
+              if (res.sel && f[res.sel].set) {
                 f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/500,dy/500,0,0,0,0).Exp()),f[res.sel]) );
               } else {
                 options.h = (options.h||0) + dx/300;
                 options.p = (options.p||0) - dy/600;
                 if (options.camera) options.camera.set( ( Element.Bivector(0,0,0,0,0,options.p).Exp() ).Mul( Element.Bivector(0,0,0,0,options.h,0).Exp() )/*.Mul(options.camera)*/ )
-                if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }
               }
+              if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }
               return;
             }
             if (res.sel===undefined || !e.buttons) return;
