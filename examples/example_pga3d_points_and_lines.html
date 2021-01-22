@@ -2,50 +2,67 @@
   <SCRIPT SRC="../ganja.js"></SCRIPT>
 </HEAD>
 <BODY><SCRIPT>
-// Create a Clifford Algebra with 3,0,1 metric. 
-Algebra(3,0,1,()=>{ 
+// Create a Clifford Algebra with 2,0,1 metric. 
+Algebra(3,0,1,()=>{
   
-  // We work in dual space. Our 1-blade's are dual-vectors (aka functionals of the form ax + by + cz + dw = 0).
-  // The four basis functionals are thus (x=0, y=0, z=0, w=0). In three dimensions these represent the yz, xz, xy and
-  // ideal plane. 
+  // in 3D PGA, grade-1 elements or vectors (e0,e1,e2) represent
+  // reflections AND planes (the invariant of a reflection)
+  var plane = (a,b,c,d)=>a*1e1 + b*1e2 + c*1e3 + d*1e0;
   
-  // Specify a point directly (trivectors specified with overloaded e-notation.)
+  // grade-2 elements or bivectors (e01,e02,e03,e12,e13,e23) represent 
+  // rotations/translations AND lines/infinite lines (the invariant
+  // of a rotation/translation). 
+  var line = (...plucker)=>plucker*[1e01,1e02,1e03,1e12,1e13,1e23];  
+  
+  // grade-3 elements or trivectors (e012,e013,e023,e123) represent
+  // point/glide/roto reflections AND points (the invariants ..)
+  // Again, we use dualisation for basis independent definition.
   var point = (x,y,z)=>!(1e0 + x*1e1 + y*1e2 + z*1e3);
   
-  // Lines can be defined using plucker coordinates
-  var line = (px,py,pz,dx,dy,dz)=>px*1e01+py&1e02+pz*1e03+dx*1e12+dy*1e13+dz*1e23;
-
-  // Planes can be defined directly using e0,e1,e2,e3
-  var plane = (a,b,c,d)=>d*1e0+a*1e1+b*1e2+c*1e3;
+  // Lets define some points to demonstrate basic incidence and rendering.
+  var A=point(0,.8,0), B=point(.8,-1,-.8), C=point(-.8,-1,-.8), D=point(.8,-1,.8), E=point(-.8,-1,.8);
   
-  // Useful joins
-  var line_from_points  = (P1,P2)=>P1.Normalized&P2.Normalized,
-      plane_from_points = (P1,P2,P3)=>P1&P2&P3,
-      plane_from_point_and_line = (P,L)=>P&L;
-      
-  // Usefull meets
-  var line_from_planes  = (p1,p2)=>p1^p2,
-      point_from_planes = (p1,p2,p3)=>p1^p2^p3,
-      point_from_line_and_plane = (L,P)=>L^P;
-  
-  // Create 5 points and some joining lines.
-  var A=point(0,.8,0), B=point(.8,-1,-.8), C=point(-.8,-1,-.8), D=point(.8,-1,.8), E=point(-.8,-1,.8), 
-      centroid=()=>A+B+C+D+E,
-      camera=0e0;
-  
-  // Graph the 3D items
+  // As in 2D, we can simply graph the elements. We pass a function so that
+  // all derived elements can be recalculated as the user drags points.
   document.body.appendChild(this.graph(()=>{
-    var time=performance.now()/4000;    
-    camera.set(Math.E ** (time * 1e13));                                 // rotate around Y 
-    return [0xD0FFE1,[A,B,C],                                            // graph on face
-            0x00AA88,[A,B],[A,C],[A,D],[B,C],[B,D],[C,E],[A,E],[E,D],    // graph all edges
-            0x224488,A,"A",B,"B",C,"C",D,"D",E,"E",                      // graph all vertices
-            0x884488,C+E,centroid,"sum of points",
-            0x884488,line_from_points(centroid,C+E),"line from points ",
-            0x00AA88,line_from_planes(A&B&C,B&C&D),"line from planes ",
-            0x00AA88,point_from_line_and_plane(line_from_points(centroid,C+E),A&D&B),"point from line and plane",
-            0xFF8844,(B&D)+(C&E),"sum of lines",
-           ];
-  },{animate:true,camera,gl:0,grid:1,labels:1,lineWidth:3})); 
+    
+    // Points can be joined into lines and planes
+    var ec = E & C,
+        p  = A & B & C;
+    
+    // Sum points to get the average position.
+    var avg = A+B+E
+        bc  = B+C;
+    
+    // Join (&) points into lines
+    var l = avg & bc;
+    
+    // Intersect a line and a plane into a point.
+    var intersect = l ^ (A & E & D);
+    
+    // Sum lines to get average lines.
+    var l2 = l.Normalized + ec.Normalized;
+  
+    return [
+      "Drag A,B,C,D,E",                                            // title.
+      0xD0FFE1, [A,B,D],                                           // polygons
+      0x00AA88, [A,B],[A,C],[A,D],[A,E],[B,C],[C,E],[E,D],[D,B],   // edges
+      0x224488, A,"A",B,"B",C,"C",D,"D",E,"E",                     // points
+      0x884488, ec,"E&C", p*0.1,"A&B&C",                           // join of points
+      0x884488, bc, "B+C", avg, "A+B+E", l,                        // sum of points
+      0x00AA88, intersect, "line ^ plane",                         // meets
+      0xFF8844, l2, "sum of lines",                                // sum of lines.
+    ]
+  },{
+    grid        : true, // Display a grid
+    labels      : true, // Label the grid
+    h           : 0.6,  // Heading
+    p           : -0.15,// Pitching
+    lineWidth   : 3,    // Custom lineWidth (default=1)
+    pointRadius : 1,    // Custon point radius (default=1)
+    fontSize    : 1,    // Custom font size (default=1)
+    scale       : 1,    // Custom scale (default=1), mousewheel.
+  }));
+  
 });
 </SCRIPT></BODY>
