@@ -688,7 +688,7 @@
             ${// Add a grid (option)
               options.grid?(()=>{
                 if (tot==4 && !options.conformal) {
-                  const lines3d = (n,from,to,j,l=0, ox=0, oy=0)=>[...Array(n+1)].map((x,i)=>{
+                  const lines3d = (n,from,to,j,l=0, ox=0, oy=0, alpha=1)=>[`<G stroke-opacity="${alpha}" fill-opacity="${alpha}">`,...[...Array(n+1)].map((x,i)=>{
                     var f=from.slice(), t=to.slice(); f[j] = t[j] = (i-(n/2))/(n/2); 
                     var D3a = Element.Trivector(...f), D2a = project(D3a), D3b = Element.Trivector(...t), D2b = project(D3b);
                     var lx=options.scale*D2a[drm[2]]/D2a[drm[1]]; if (drm[1]==6||drm[1]==14) lx*=-1; var ly=-options.scale*D2a[drm[3]]/D2a[drm[1]];
@@ -696,16 +696,17 @@
                     var r = `<line x1="${lx}" y1="${ly}" x2="${lx2}" y2="${ly2}" stroke="black" stroke-width="${i%10==0?0.005:i%5==0?0.002:0.0005}" />`;
                     if (l && i && i!= n) r += `<text text-anchor="middle" font-size="0.04" fill="black" x="${l==1?lx+ox:lx2+ox}" y="${oy+(l==1?ly:ly2)}" >${((from[j]<0?-1:1)*(i-(n/2))/(n/2)).toFixed(1)}</text>`
                     return r;
-                  });
-                  var front = Element.sw(options.camera,Element.Trivector(0,0,1,0))[13]>0?1:-1;
-                  var left  = Element.sw(options.camera,Element.Trivector(1,0,0,0))[13]>0?-1:1;
+                  }),'</G>'];
+                  var front = Element.sw(options.camera,Element.Trivector(1,0,0,0)).Dual.Dot(Element.Vector(0,0,0,1)).s, ff = front>0?1:-1;
+                  var left  = Element.sw(options.camera,Element.Trivector(0,0,1,0)).Dual.Dot(Element.Vector(0,0,0,1)).s, ll = left>0?1:-1;
+                  var fa = Math.max(0,Math.min(1,5*Math.abs(left))), la = Math.max(0,Math.min(1,5*Math.abs(front)));
                   return [
-                    ...lines3d(20,[-1,-1,-1,1],[1,-1,1,1],2,options.labels?front:0, 0, 0.05),
-                    ...lines3d(20,[-1,-1,-1,1],[1,-1,1,1],0,options.labels?left:0, 0, 0.05),
-                    ...lines3d(20,[-1,-1,left,1],[1,1,left,1],0),
-                    ...lines3d(20,[-1,1,left,1],[1,-1,left,1],1,!options.labels?0:(front!=-1)?1:2, left*front*-0.05, 0),
-                    ...lines3d(20,[front,1,-1,1],[front,-1,1,1],1,!options.labels?0:(left!=-1)?1:2, left*front*0.05, 0),
-                    ...lines3d(20,[front,-1,-1,1],[front,1,1,1],2),
+                    ...lines3d(20,[-1,-1,-1,1],[1,-1,1,1],2,options.labels?ff:0, 0, 0.05),
+                    ...lines3d(20,[-1,-1,-1,1],[1,-1,1,1],0,options.labels?ll:0, 0, 0.05),
+                    ...lines3d(20,[-1,-1,ll,1],[1,1,ll,1],0,0,0,0,fa),
+                    ...lines3d(20,[-1,1,ll,1],[1,-1,ll,1],1,!options.labels?0:(ff!=-1)?1:2, ll*ff*-0.05, 0, fa),
+                    ...lines3d(20,[ff,1,-1,1],[ff,-1,1,1],1,!options.labels?0:(ll!=-1)?1:2, ll*ff*0.05, 0, la),
+                    ...lines3d(20,[ff,-1,-1,1],[ff,1,1,1],2,0,0,0,la),
                   ].join('');
                 }
                 const s = options.scale, n = (10/s)|0, cx = options.camera.e02, cy = options.camera.e01, alpha = Math.min(1,(s-0.2)*10); if (options.scale<0.1) return;
@@ -832,6 +833,7 @@
                 f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/500,dy/500,0,0,0,0).Exp()),f[res.sel]) );
               } else {
                 if (options.camera) options.camera.set( ( Element.Bivector(0,0,0,0,dx/300,0).Exp() ).Mul( Element.Bivector(0,0,0,0,0,-dy/600).Exp() ).Mul(options.camera) )
+                if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }
               }
               return;
             }
