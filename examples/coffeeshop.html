@@ -488,6 +488,7 @@
   
   // Link run handler.
     els.run.onclick=(e)=>{
+      editor.getSession().clearAnnotations();
       var f = els.sample.contentDocument.body.firstChild; while (f && !(f instanceof els.sample.contentWindow.HTMLScriptElement)) f = f.nextElementSibling; f = f&&f.nextElementSibling;
       if (f) while (true) { var g=f.nextSibling; els.sample.contentDocument.body.removeChild(f); if (!g) break; f=g; }
       try { 
@@ -520,6 +521,27 @@
     // setup iframe props.
       els.sample.contentDocument.body.style = "margin:0; padding:0;";
       postRun();
+      els.sample.contentWindow.addEventListener('error', function(e) {
+        // show error in HTML
+        els.sample.contentDocument.body.innerHTML+=`<PRE>${e.message}</PRE>`;
+        // show error in ace editor
+        var row = e.lineno;
+        // e.lineno is one off in same cases... fixing that, otherwise it looks strange
+        // Chrome
+        if (e.message.includes("Unexpected identifier")) {
+          row--;
+        }
+        // Mozilla
+        if (e.message.includes("unexpected token: identifier")) {
+          row--;
+        }
+        editor.getSession().setAnnotations([{
+          row,
+          column: e.colno,
+          text: e.message,
+          type: "error" // or "warning"
+        }]);
+      });
     // Grab the source and update the editor.  
       var scr = [...els.sample.contentDocument.querySelectorAll("script")].pop();
       if (window.editor && scr) {
