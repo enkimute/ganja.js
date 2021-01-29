@@ -655,7 +655,7 @@
       // Store the original input
         if (!f) return; var origf=f;
       // generate default options.
-        options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot<4?Element.Scalar(1): ( Element.Bivector(0,0,0,0,0,options.p||0).Exp() ).Mul( Element.Bivector(0,0,0,0,options.h||0,0).Exp()) );
+        options=options||{}; options.scale=options.scale||1; options.camera=options.camera||(tot!=4?Element.Scalar(1): ( Element.Bivector(0,0,0,0,0,options.p||0).Exp() ).Mul( Element.Bivector(0,0,0,0,options.h||0,0).Exp()) );
         if (options.conformal && tot==4) var ni = options.ni||this.Coeff(4,1,3,1), no = options.no||this.Coeff(4,0.5,3,-0.5), minus_no = no.Scale(-1);
         var ww=options.width, hh=options.height, cvs=options.canvas, tpcam=new Element([0,0,0,0,0,0,0,0,0,0,0,-5,0,0,1,0]),tpy=this.Coeff(4,1),tp=new Element(),
       // project 3D to 2D. This allows to render 3D and 2D PGA with the same code.
@@ -695,12 +695,12 @@
               options.grid?(()=>{
                 if (tot==4 && !options.conformal) {
                   const lines3d = (n,from,to,j,l=0, ox=0, oy=0, alpha=1)=>[`<G stroke-opacity="${alpha}" fill-opacity="${alpha}">`,...[...Array(n+1)].map((x,i)=>{
-                    var f=from.slice(), t=to.slice(); f[j] = t[j] = (i-(n/2))/(n/2); 
+                    var f=from.map((x,i)=>x*(i==3?1:(options.gridSize||1))), t=to.map((x,i)=>x*(i==3?1:(options.gridSize||1))); f[j] = t[j] = (i-(n/2))/(n/2) * (options.gridSize||1); 
                     var D3a = Element.Trivector(...f), D2a = project(D3a), D3b = Element.Trivector(...t), D2b = project(D3b);
                     var lx=options.scale*D2a[drm[2]]/D2a[drm[1]]; if (drm[1]==6||drm[1]==14) lx*=-1; var ly=-options.scale*D2a[drm[3]]/D2a[drm[1]];
                     var lx2=options.scale*D2b[drm[2]]/D2b[drm[1]]; if (drm[1]==6||drm[1]==14) lx2*=-1; var ly2=-options.scale*D2b[drm[3]]/D2b[drm[1]];
                     var r = `<line x1="${lx}" y1="${ly}" x2="${lx2}" y2="${ly2}" stroke="black" stroke-width="${i%10==0?0.005:i%5==0?0.002:0.0005}" />`;
-                    if (l && i && i!= n) r += `<text text-anchor="middle" font-size="0.04" fill="black" x="${l==1?lx+ox:lx2+ox}" y="${oy+(l==1?ly:ly2)}" >${((from[j]<0?-1:1)*(i-(n/2))/(n/2)).toFixed(1)}</text>`
+                    if (l && i && i!= n) r += `<text text-anchor="middle" font-size="0.04" fill="black" x="${l==1?lx+ox:lx2+ox}" y="${oy+(l==1?ly:ly2)}" >${((from[j]<0?-1:1)*(i-(n/2))/(n/2)*(options.gridSize||1)).toFixed(1)}</text>`
                     return r;
                   }),'</G>'];
                   var front = Element.sw(options.camera,Element.Trivector(1,0,0,0)).Dual.Dot(Element.Vector(0,0,0,1)).s, ff = front>0?1:-1;
@@ -845,12 +845,12 @@
               if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }
               return;
             }
-            if (res.sel===undefined || !e.buttons) return;
+            if (res.sel===undefined || f[res.sel] == undefined || f[res.sel].set == undefined || !e.buttons) return;
             var resx=res.getBoundingClientRect().width,resy=res.getBoundingClientRect().height,
                 x=((e.clientX-res.getBoundingClientRect().left)/(resx/4||128)-2)*(resx>resy?resx/resy:1),y=((e.clientY-res.getBoundingClientRect().top)/(resy/4||128)-2)*(resy>resx?resy/resx:1);
             x/=options.scale;y/=options.scale; 
             if (options.conformal) { f[res.sel].set(this.Coeff(1,x,2,-y).Add(no).Add(ni.Scale(0.5*(x*x+y*y))) ) } 
-                              else {f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=-y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} 
+                              else { f[res.sel][drm[2]]=((drm[1]==6)?-x:x)-((tot<4)?2*options.camera.e01:0); f[res.sel][drm[3]]=-y+((tot<4)?2*options.camera.e02:0); f[res.sel][drm[1]]=1; f[res.sel].set(f[res.sel].Normalized)} 
             if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }
             res.dispatchEvent(new CustomEvent('input')) };
           return res;
@@ -1082,14 +1082,12 @@
               [va.b,va.b2,va.b4,va.b3].forEach(x=>{if(x) gl.deleteBuffer(x)}); if (va.r) gl.va.deleteVertexArrayOES(va.r);
             }
       // Default modelview matrix, convert camera to matrix (biquaternion->matrix)
-        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.spin?performance.now()*options.spin/1000:options.h||0, t2=options.p||0;
+        var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1], mtx = x=>{ var t=options.spin?performance.now()*options.spin/1000:-options.h||0, t2=options.p||0;
           var ct = Math.cos(t), st= Math.sin(t), ct2 = Math.cos(t2), st2 = Math.sin(t2), xx=options.posx||0, y=options.posy||0, z=options.posz||0, zoom=options.z||5;
           if (tot==5) return [ct,st*-st2,st*ct2,0,0,ct2,st2,0,-st,ct*-st2,ct*ct2,0,xx*ct+z*-st,y*ct2+(xx*st+z*ct)*-st2,y*st2+xx*st+z*ct*ct2+zoom,1];
-          x=x.Normalized; var y=x.Mul(x.Dual),X=-x.e23,Y=-x.e13,Z=x.e12,W=x.s,m=Array(16);
+          x=x.Normalized; var y=x.Mul(x.Dual),X=x.e23,Y=-x.e13,Z=-x.e12,W=x.s,m=Array(16);
           var xx = X*X, xy = X*Y, xz = X*Z, xw = X*W, yy = Y*Y, yz = Y*Z, yw = Y*W, zz = Z*Z, zw = Z*W;
           var mtx = [ 1-2*(yy+zz), 2*(xy+zw), 2*(xz-yw), 0, 2*(xy-zw), 1-2*(xx+zz), 2*(yz+xw), 0, 2*(xz+yw), 2*(yz-xw), 1-2*(xx+yy), 0, -2*y.e23, -2*y.e13, 2*y.e12+5, 1];
-          var mtx2 = [ct,st*-st2,st*ct2,0,0,ct2,st2,0,-st,ct*-st2,ct*ct2,0,0,0,0,1], mtx3=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
-          for (var i=0; i<4; ++i) for (var j=0; j<4; ++j) for (var k=0; k<4; ++k) mtx3[i+k*4] += mtx[i+j*4]*mtx2[j+k*4]; return mtx3;
           return mtx;
         }
       // Render the given vertices. (autocreates/destroys vertex array if not supplied).
@@ -1206,23 +1204,27 @@
       // canvas update will (re)render the content.
         var armed=0,sphere,e14 = Element.Coeff(14,1);
         canvas.update = (x)=>{
+          if (!canvas.parentElement) return;
         // restore from still..
           if (options && !options.still && canvas.im && canvas.im.parentElement) { canvas.im.parentElement.insertBefore(canvas,canvas.im); canvas.im.parentElement.removeChild(canvas.im); }
         // Start by updating canvas size if needed and viewport.
           var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width)*(options.devicePixelRatio||1); canvas.height = parseFloat(s.height)*(options.devicePixelRatio||1); }
           gl.viewport(0,0, canvas.width|0,canvas.height|0); var r=canvas.width/canvas.height;
         // Defaults, resolve function input
-          var a,p=[],l=[],t=[],c=[.5,.5,.5],alpha=0,lastpos=[-2,2,0.2]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x();
+          var a,p=[],l=[],t=[],c=[.5,.5,.5],alpha=0,lastpos=[-2,2,0.2,1]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x();
         // Create default camera matrix and initial lastposition (contra-compensated for camera)
-          M = mtx(options.camera); lastpos = options.camera.Normalized.Conjugate.Mul(((a=new this()).set(lastpos,11),a)).Mul(options.camera.Normalized).slice(11,14);
+          M = mtx(options.camera); lastpos = options.camera.Conjugate.Mul(((a=new this()).set(lastpos,11),a)).Mul(options.camera).slice(11,14);
         // Grid.
           if (options.grid) {
-            if (!options.gridLines) { options.gridLines=[[],[],[]]; for (var i=-5; i<=5; i++) {
-                options.gridLines[0].push(i,0,5, i,0,-5, 5,0,i, -5,0,i); options.gridLines[1].push(i,5,0, i,-5,0, 5,i,0, -5,i,0); options.gridLines[2].push(0,i,5, 0,i,-5, 0,5,i, 0,-5,i);
+            const gr = options.gridSize||1;
+            if (!options.gridLines) { options.gridLines=[[],[],[]]; for (var i=-gr; i<=gr; i+=gr/5) {
+                options.gridLines[0].push(i,-gr,gr, i,-gr,-gr, gr,-gr,i, -gr,-gr,i); 
+                options.gridLines[1].push(i,gr,gr, i,-gr,gr, gr,i,gr, -gr,i,gr); 
+                options.gridLines[2].push(-gr,i,gr, -gr,i,-gr, -gr,gr,i, -gr,-gr,i);
             }}
-            gl.depthMask(false);
-              draw(program,gl.LINES,options.gridLines[0],[0,0,0],[.6,1,.6],r); draw(program,gl.LINES,options.gridLines[1],[0,0,0],[1,.8,.8],r); draw(program,gl.LINES,options.gridLines[2],[0,0,0],[.8,.8,1],r);
-            gl.depthMask(true);
+            gl.depthMask(false); gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,0.2); 
+              draw(program,gl.LINES,options.gridLines[0],[0,0,0],[.2,.4,.2],r); draw(program,gl.LINES,options.gridLines[1],[0,0,0],[.4,.2,.2],r); draw(program,gl.LINES,options.gridLines[2],[0,0,0],[.2,.2,.4],r);
+            gl.depthMask(true); gl.disable(gl.BLEND);
           }
         // Z-buffer override.
           if (options.noZ) gl.depthMask(false);
@@ -1364,7 +1366,7 @@
           // Convert planes to polygons.
             if (e instanceof Element && e.Grade(1).Length > 0.001) {
               var m = Element.Add(1, Element.Mul(e.Normalized, Element.Coeff(3,1))).Normalized, e0 = 0;
-              e=Element.sw(m,[[-1,-1],[-1,1],[1,1],[-1,-1],[1,1],[1,-1]].map(([x,z])=>Element.Trivector(x,e0,z,1)));
+              e=Element.sw(m,[[-1,-1],[-1,1],[1,1],[-1,-1],[1,1],[1,-1]].map(([x,z])=>Element.Trivector(x*e.Length,e0,z*e.Length,1)));
             }
           // Convert lines to line segments.
             if (e instanceof Element && e.Grade(2).Length)
@@ -1455,11 +1457,12 @@
                   Object.assign(div.style,{position:'fixed',pointerEvents:'none',left:rc.left + (rc.right-rc.left)*(pos2[0]/2+0.5),top: rc.top + (rc.bottom-rc.top)*(-pos2[1]/2+0.5) - 20});
                   if (div.last != e) { div.innerHTML = e; div.last = e; if (self.renderMathInElement) self.renderMathInElement(div,{output:'html'});  }
                 } else { 
-                  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+                  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.DEPTH_TEST);
                   var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
                   draw(program2,gl.TRIANGLES,
                        [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
                        [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                  if (!options.noZ) gl.enable(gl.DEPTH_TEST);     
                 }
               }
             }
@@ -1479,12 +1482,12 @@
             if (tot != 5) { if (x[14]) {
               var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [-x[13]/x[14],-x[12]/x[14],x[11]/x[14],1]).map(x=>x.s);
               pos2 = Element.Mul( [[5,0,0,0],[0,5*(2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
-              if ((mx-pos2[0])**2 + ((my)-pos2[1])**2 < 0.01) sel=i;
+              if ((mx-pos2[0])**2 + ((my)-pos2[1])**2 < 0.02) sel=i;
             }} else {
               x = interprete(x); if (x.tp==1) {
                 var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...x.pos,1]).map(x=>x.s);
                 pos2 = Element.Mul( [[5,0,0,0],[0,5*(r||2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
-                if ((mx-pos2[0])**2 + (my-pos2[1])**2 < 0.01) sel=i;
+                if ((mx-pos2[0])**2 + ((-my)-pos2[1])**2 < 0.01) sel=i;
               }
             }
           });
@@ -1498,15 +1501,14 @@
           canvas.onmousemove=(e)=>{
             var rc = canvas.getBoundingClientRect(),x; if (sel>=0) { if (tot==5) x=interprete(canvas.value[sel]); else { x=canvas.value[sel]; x={pos:[-x[13]/x[14],-x[12]/x[14],x[11]/x[14]]};  }}
             var mx =(e.movementX)/(rc.right-rc.left)*2, my=((e.movementY)/(rc.bottom-rc.top)*2)*canvas.height/canvas.width;
-            if (sel==-2) { options.h =  (options.h||0)+mx; options.p = Math.max(-Math.PI/2,Math.min(Math.PI/2, (options.p||0)+my)); if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; };
+            if (sel==-2) { options.h = (options.h||0)+(options.conformal?-1:1)*mx/2; options.p = Math.max(-Math.PI/2,Math.min(Math.PI/2, (options.p||0)-my/2)); if (options.camera) options.camera.set( ( Element.Bivector(0,0,0,0,0,options.p).Exp() ).Mul( Element.Bivector(0,0,0,0,options.h,0).Exp() )); if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options)); return; };
             if (sel==-3) { var ct = Math.cos(options.h||0), st= Math.sin(options.h||0), ct2 = Math.cos(options.p||0), st2 = Math.sin(options.p||0);
               if (e.shiftKey) { options.posy = (options.posy||0)+my; } else { options.posx = (options.posx||0)+mx*ct+my*st; options.posz = (options.posz||0)+mx*-st+my*ct*ct2; } if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));return; }; if (sel < 0) return;
             if (tot==5) { 
-               x.pos[0] += (e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[2]+=(e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my;
+               x.pos[0] += (e.buttons!=2)?Math.cos((options.h||0))*mx:Math.sin(-(options.h||0))*-my; x.pos[1]+=(e.buttons!=2)?-my:0; x.pos[2]+=(e.buttons!=2)?Math.sin((options.h||0))*mx:Math.cos(-(options.h||0))*-my;
                canvas.value[sel].set(Element.Mul(ni,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1); }
             else if (x) { 
-               x.pos[2] += (e.buttons!=2)?Math.sin(-(options.h||0))*mx:Math.cos((options.h||0))*my; x.pos[1]+=(e.buttons!=2)?my:0; x.pos[0]+=(e.buttons!=2)?Math.cos(-(options.h||0))*mx:Math.sin((options.h||0))*my;
-               canvas.value[sel].set([x.pos[2],-x.pos[1],-x.pos[0],1],11);
+               canvas.value[sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-mx/2,my/2,0,0,0,0).Exp()),canvas.value[sel]) );
             }
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
