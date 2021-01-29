@@ -321,6 +321,62 @@
       editor.session.setOptions({tabSize: 2,useSoftTabs: true});
       // Body scroll lock for iOs
 //      bodyScrollLock.disableBodyScroll();
+
+      // Sliders for selected numerical values.
+      var lock = false, _slider, _color, timeout;
+      editor.getSession().selection.on('changeSelection', function(e) {
+        if (lock) return;
+        // Get the selection plus two extra chars.
+        var range = editor.getSelectionRange();
+        range.end.column += 1; range.start.column -= 1;
+        var t = editor.getSession().getTextRange(range);
+        // Remove old slider.
+        if (_slider) {
+          document.getElementById('source').removeChild(_slider);
+          _slider = undefined;
+        } 
+        if (_color) {
+          document.getElementById('source').removeChild(_color);
+          _color = undefined;
+        }
+        if (range.start.column == range.end.column-2) return;
+        // If its a hex number, setup the color thingie
+        var color = t.match(/^[^\d]0x([0-9a-fA-F]+)[^0-9a-fA-F]$/);
+        if (color) {
+          _color = document.createElement('input');
+          Object.assign(_color,{type:'color', value:'#'+color[1]});
+          var pos = editor.renderer.textToScreenCoordinates(range.start)
+          Object.assign(_color.style, {position:'fixed', top:pos.pageY-30+'px', left:pos.pageX+5+'px'});
+          document.getElementById('source').appendChild(_color);
+          _color.oninput = function(e) {
+            lock = true;
+            var range = editor.selection.getRange();
+            range.end = editor.session.replace(editor.selection.getRange(), '0x'+this.value.slice(1));
+            editor.selection.setRange(range);
+            lock = false;
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(()=>els.run.click(),1000/60);
+          }
+        }
+        // If its a number, setup the slider.
+        var number = t.match(/^[^\d\.\-x]([+-]{0,1}\d*\.{0,1}\d*)[^\d\.x]$/); 
+        if (number) {
+          _slider = document.createElement('input');
+          Object.assign(_slider,{type:'range',min:-1,max:+1,step:0.01, value:number[1]*1});
+          var pos = editor.renderer.textToScreenCoordinates(range.start)
+          Object.assign(_slider.style, {position:'fixed', top:pos.pageY-30+'px', left:pos.pageX+5+'px'});
+          document.getElementById('source').appendChild(_slider);
+          _slider.oninput = function(e) {
+            lock = true;
+            var range = editor.selection.getRange();
+            range.end = editor.session.replace(editor.selection.getRange(), this.value+'');
+            editor.selection.setRange(range);
+            lock = false;
+            if (timeout) clearTimeout(timeout);
+            timeout = setTimeout(()=>els.run.click(),1000/60);
+          }
+        } 
+      });
     } else { // can't load editor.
       Object.assign(els.right.style,{width:0,maxWidth:0,minWidth:0});
     }
@@ -489,15 +545,15 @@
   // Link run handler.
     els.run.onclick=(e)=>{
       editor.getSession().clearAnnotations();
-      var f = els.sample.contentDocument.body.firstChild; while (f && !(f instanceof els.sample.contentWindow.HTMLScriptElement)) f = f.nextElementSibling; f = f&&f.nextElementSibling;
-      if (f) while (true) { var g=f.nextSibling; els.sample.contentDocument.body.removeChild(f); if (!g) break; f=g; }
+//      var f = els.sample.contentDocument.body.firstChild; while (f && !(f instanceof els.sample.contentWindow.HTMLScriptElement)) f = f.nextElementSibling; f = f&&f.nextElementSibling;
+//      if (f) while (true) { var g=f.nextSibling; els.sample.contentDocument.body.removeChild(f); if (!g) break; f=g; }
       try { 
         //els.sample.contentWindow.eval( editor.getValue() ); 
         var script = document.createElement("script");
         script.type = "module";
-        script.textContent = editor.getValue();
-        els.sample.contentDocument.head.appendChild(script);
-        setTimeout(()=>postRun(),1); // for fox.
+        script.textContent = 'while(document.body.firstChild) document.body.removeChild(document.body.firstChild);' + editor.getValue() + '\ntop.postRun();';
+        els.sample.contentDocument.body.appendChild(script);
+//        setTimeout(()=>postRun(),1); // for fox.
       } catch (e) {
         var line = e.stack.toString().match(/\, <anonymous>:(\d+)/);
         if (line && line[1]) {
