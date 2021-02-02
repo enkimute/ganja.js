@@ -584,12 +584,22 @@
         var row = e.lineno;
         // e.lineno is one off in same cases... fixing that, otherwise it looks strange
         // Chrome
-        if (e.message.includes("Unexpected identifier")) {
+        if (
+          e.message.includes("Unexpected identifier") ||
+          e.message.includes("Uncaught SyntaxError:")
+        ) {
           row--;
         }
         // Mozilla
-        if (e.message.includes("unexpected token: identifier")) {
+        if (
+          e.message.includes("unexpected token: identifier") ||
+          e.message.includes("SyntaxError: unexpected token: '") ||
+          e.message.includes("SyntaxError: invalid arrow-function arguments") // var D = asd ()=>L ^ M;
+        ) {
           row--;
+        }
+        if (e.message.includes("ReferenceError:")) {
+          row++;
         }
         editor.getSession().setAnnotations([{
           row,
