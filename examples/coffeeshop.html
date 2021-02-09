@@ -578,10 +578,27 @@
       els.sample.contentDocument.body.style = "margin:0; padding:0;";
       postRun();
       els.sample.contentWindow.addEventListener('error', function(e) {
+        //console.log(e);
+        var rowOffset = 0;
+        if (e.filename == "") {
+          // Figure out line where `Algebra(..., ()=>{...}` starts in ACE Editor (because error is offsetted from there)
+          var lines = editor.getValue().split("\n");
+          rowOffset = -1;
+          for (var line of lines) {
+              if (line.match(/Algebra\s?\(/)) {
+                break;
+              }
+              rowOffset++;
+          }
+          if (rowOffset == -1) {
+            rowOffset = 0;
+          }
+        }
         // show error in HTML
         els.sample.contentDocument.body.innerHTML+=`<PRE>${e.message}</PRE>`;
         // show error in ace editor
-        var row = e.lineno;
+        var row = rowOffset + e.lineno;
+        //console.log("rowOffset", rowOffset, "e.lineno", e.lineno)
         // e.lineno is one off in same cases... fixing that, otherwise it looks strange
         // Chrome
         if (
@@ -597,9 +614,6 @@
           e.message.includes("SyntaxError: invalid arrow-function arguments") // var D = asd ()=>L ^ M;
         ) {
           row--;
-        }
-        if (e.message.includes("ReferenceError:")) {
-          row++;
         }
         editor.getSession().setAnnotations([{
           row,
