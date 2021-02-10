@@ -582,7 +582,6 @@
         if (e.filename == "") {
           // Figure out line where `Algebra(..., ()=>{...}` starts in ACE Editor (because error is offsetted from there)
           var lines = editor.getValue().split("\n");
-          rowOffset = 0;
           for (var line of lines) {
               if (line.match(/\bAlgebra\s*\(/)) {
                 break;
