@@ -400,13 +400,13 @@
       
     // Log - only for up to 3D PGA for now
       Log () {
-        if (r!=1 || tot>4 || options.over) return;
-        var b = this.Grade(2), bdb = Element.Dot(b,b);
-        if (Math.abs(bdb.s)<=1E-5) return this.s<0?b.Scale(-1):b;
+        if (tot>5 || options.over) return;
+        var b = this.Grade(2), bdb = Element.Dot(b,b).s;
+        if (Math.abs(bdb)<=1E-5) return this.s<0?b.Scale(-1):b;
         var s = Math.sqrt(-bdb), bwb = Element.Wedge(b,b); 
-        if (Math.abs(bwb.e0123)<=1E-5) return b.Scale(Math.atan2(s,this.s)/s);
+        if (Math.abs(bwb[bwb.length-1])<=1E-5 || Math.abs(this.s)<=1E-5) return b.Scale(Math.atan2(s,this.s)/s);
         var p = bwb.Scale(-1/(2*s));
-        return Element.Div(Element.Mul(Element.Mul((Element.Add(Math.atan2(s,this.s),Element.Div(p,this.s))),b),(Element.Sub(s,p))),(Element.Mul(s,s)));        
+        return Element.Mul(Element.Mul((Element.Add(Math.atan2(s,this.s),p.Scale(1/this.s))),b),Element.Sub(s,p)).Scale(1/(s*s));        
       }  
 
     // Helper for efficient inverses. (custom involutions - negates grades in arguments).
@@ -1587,12 +1587,29 @@
       }
     }
 
+    if ((p==2 || p==3) && (r==1)) {
+      res.arrow = res.inline(( from_point, to_point, w=0.03, aspect=0.8 )=>{
+        from_point = from_point/(-from_point|!1e0); to_point = to_point/(-to_point|!1e0);
+        var line = ( to_point & from_point ), l = line.Length;
+        var shape = [[0,w],[l-5*w,w],[l-5*w,aspect*5*w],[l,0],[l-5*w,-aspect*5*w],[l-5*w,-w],[0,-w]].map(([x,y])=>!(1e0+x*1e1+y*1e2));
+        return (1+from_point/!1e0).Normalized*(1+(((to_point) - from_point) & !1e0).Normalized/(!1e1 & !1e0)).Normalized >>> shape;
+      })    
+    }
+
     if (options.dual) {
       Object.defineProperty(res.prototype, 'Inverse', {configurable:true, get(){ var s = 1/this.s**2; return this.map((x,i)=>i?-x*s:1/x ); }});
     } else {
     // Matrix-free inverses up to 5D. Should translate this to an inline call for readability.
     // http://repository.essex.ac.uk/17282/1/TechReport_CES-534.pdf
       Object.defineProperty(res.prototype, 'Inverse', {configurable: true, get(){
+        // Shirokov inverse ..
+        if (tot > 5) {
+          for (var N=2**(((tot+1)/2)|0), Uk=this.Scale(1), k=1; k<N; ++k) {
+            var adjU = Uk.Sub(this.constructor.Scalar((N/k) * Uk.s));
+            Uk = this.Mul(adjU);
+          }
+          return Uk.s == 0 ? 0:adjU.Scale( 1/Uk.s );
+        }
         return (tot==0)?new this.constructor.Scalar([1/this[0]]):
                (tot==1)?this.Involute.Mul(this.constructor.Scalar(1/this.Mul(this.Involute)[0])):
                (tot==2)?this.Conjugate.Mul(this.constructor.Scalar(1/this.Mul(this.Conjugate)[0])):
