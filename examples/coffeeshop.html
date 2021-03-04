@@ -717,6 +717,12 @@
         })
       });
     }    
+  // warn before exit
+    window.onbeforeunload = (e)=>{
+      if(!els.save.classList.contains('active')) return;
+      e.preventDefault(); // firefox
+      e.returnValue = ''; // chrome
+    };
     
   // load custom stash
     function loadStash(closeAll){
