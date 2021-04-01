@@ -890,7 +890,7 @@
       static graphGL2(f,options) {
       // Create canvas, get webGL2 context.
         var canvas=document.createElement('canvas'); canvas.style.width=options.width||''; canvas.style.height=options.height||''; canvas.style.backgroundColor='#EEE';
-        if (options.width && options.width.match && options.width.match(/px/i)) canvas.width = parseFloat(options.width)*(options.devicePixelRatio||decivePixelRatio||1); if (options.height && options.height.match && options.height.match(/px/i)) canvas.height = parseFloat(options.height)*(options.devicePixelRatio||devicePixelRatio||1);
+        if (options.width && options.width.match && options.width.match(/px/i)) canvas.width = parseFloat(options.width)*(options.devicePixelRatio||devicePixelRatio||1); if (options.height && options.height.match && options.height.match(/px/i)) canvas.height = parseFloat(options.height)*(options.devicePixelRatio||devicePixelRatio||1);
         var gl=canvas.getContext('webgl2',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'});
         var gl2=!!gl; if (!gl) gl=canvas.getContext('webgl',{alpha:options.alpha||false,preserveDrawingBuffer:true,antialias:true,powerPreference:'high-performance'});
         gl.clearColor(240/255,240/255,240/255,1.0); gl.enable(gl.DEPTH_TEST); if (!gl2) { gl.getExtension("EXT_frag_depth"); gl.va = gl.getExtension('OES_vertex_array_object'); }
@@ -1116,7 +1116,7 @@
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
         var programPoint = compile(`attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
-                 void main() { gl_PointSize=${((options.pointRadius||1)*16.0).toFixed(2)}; Pos=mv*position; gl_Position = p*Pos; }`,
+                 void main() { gl_PointSize=${((options.pointRadius||1)*(options.devicePixelRatio||devicePixelRatio||1)*8.0).toFixed(2)}; Pos=mv*position; gl_Position = p*Pos; }`,
                 `precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos;
                  void main() {  float distanceToCenter = length(gl_PointCoord - vec2(0.5)); if (distanceToCenter>0.5) discard; 
                  gl_FragColor = vec4(color+color2, (distanceToCenter<0.5?1.0:0.0));  }`);
