@@ -550,8 +550,11 @@
       if (window.localStorage) {
         var id = document.location.hash.slice(1);
         var backups = JSON.parse(localStorage.ganjaBackup||'{}');
-        backups[id] = [{id,data:editor.getValue()}].concat(backups[id]||[]).slice(0,3);
-        localStorage.ganjaBackup = JSON.stringify(backups);
+        var data = editor.getValue();
+        if(!backups[id] || backups[id][0].data != data){
+          backups[id] = [{id,data}].concat(backups[id]||[]).slice(0,3);
+          localStorage.ganjaBackup = JSON.stringify(backups);
+        }
       }
       try { 
         //els.sample.contentWindow.eval( editor.getValue() ); 
