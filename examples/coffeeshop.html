@@ -356,6 +356,7 @@
             lock = false;
             if (timeout) clearTimeout(timeout);
             timeout = setTimeout(()=>els.run.click(),1000/60);
+            inspect(true);
           }
         }
         // If its a number, setup the slider.
@@ -374,6 +375,7 @@
             lock = false;
             if (timeout) clearTimeout(timeout);
             timeout = setTimeout(()=>els.run.click(),1000/60);
+            inspect(true);
           }
         } 
       });
@@ -570,6 +572,7 @@
     // See if we have a canvas.  
       var doc = els.sample.contentDocument||document, disp = doc.querySelector("svg")||doc.querySelector("canvas");
       if (disp && disp.value) { disp.style.width=disp.style.height='100%'; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); }
+      inspect();
     }
     
   // on iframe load..
