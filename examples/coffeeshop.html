@@ -399,7 +399,13 @@
     }
 
   // inspect
+    var lastUpdate = 0;
     function inspect(skip) {
+       // don't update too often, because it can slow down 
+       if (Date.now() - lastUpdate < 50) {
+         return;
+       }
+       lastUpdate = Date.now();
        var disp = els.sample.contentDocument.querySelector("svg")||els.sample.contentDocument.querySelector("canvas");
        if (!disp || !disp.value) { els.inspectTable.innerHTML=''; return; }
        var count=1, el;
