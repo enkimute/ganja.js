@@ -551,7 +551,7 @@
         //els.sample.contentWindow.eval( editor.getValue() ); 
         var script = document.createElement("script");
         script.type = "module";
-        script.textContent = 'while(document.body.firstChild) document.body.removeChild(document.body.firstChild);' + editor.getValue() + '\ntop.postRun();';
+        script.textContent = 'while(document.body.firstChild) document.body.removeChild(document.body.firstChild); var _Algebra = Algebra; Algebra = function(...args) { var r = _Algebra(...args); if (r instanceof SVGElement || r instanceof HTMLCanvasElement) document.body.appendChild(r); else if (r) document.body.innerHTML = `<PRE style="margin:5; font-size:120%">${r}</PRE>`; Algebra=_Algebra; return r; }; ' + editor.getValue() + '\ntop.postRun();';
         els.sample.contentDocument.body.appendChild(script);
 //        setTimeout(()=>postRun(),1); // for fox.
       } catch (e) {
@@ -566,7 +566,7 @@
     }  
 
   // helper to resize loaded content  
-    function postRun() {
+    function postRun(disp_in) {
     // See if we have a canvas.  
       var doc = els.sample.contentDocument||document, disp = doc.querySelector("svg")||doc.querySelector("canvas");
       if (disp && disp.value) { disp.style.width=disp.style.height='100%'; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); }
@@ -631,7 +631,7 @@
     els.new.onclick = function newStash() {
     // Clear the editor, set the source to empty.
       editor&&editor.setValue("");
-      var src = '<HTML><HEAD><TITLE>My Stash</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>\n\n</'+'SCRIPT></BODY></HTML>';
+      var src = '<HTML><HEAD><TITLE>My Stash</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>var _Algebra = Algebra; Algebra = function(...args) { var r = _Algebra(...args); if (r instanceof SVGElement || r instanceof HTMLCanvasElement) document.body.appendChild(r); return r; };</SCR'+'IPT><SC'+'RIPT>\n\n</'+'SCRIPT></BODY></HTML>';
       var blob = new Blob([src],{type:"text/html"});
       els.sample.src = URL.createObjectURL(blob);
     // Remove the samples, show the properties.  
@@ -728,7 +728,7 @@
     function loadStash(closeAll){
       var stashURL = document.location.hash.slice(1).split('&');
       fetch("https://ganja.enki.ws/"+stashURL[0]).then(x=>x.json()).then(data=>{
-        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE><STYLE>body {width:100%; height:100%; margin:0; }</STYLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>try{\n'+data.data+'\n; disp=document.querySelector("svg")||document.querySelector("canvas"); if (disp && disp.value) { disp.style.width=disp.style.height="100%"; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); } } catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
+        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE><STYLE>body {width:100%; height:100%; margin:0; }</STYLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>var _Algebra = Algebra; Algebra = function(...args) { var r = _Algebra(...args); if (r instanceof SVGElement || r instanceof HTMLCanvasElement) document.body.appendChild(r); return r; };</SCR'+'IPT><SC'+'RIPT>try{\n'+data.data+'\n; disp=document.querySelector("svg")||document.querySelector("canvas"); if (disp && disp.value) { disp.style.width=disp.style.height="100%"; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); } } catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
         document.body.style.display='flex';
       // if full-screen, overload everything .. 
         if (stashURL.find(x=>x.match(/fullscreen/i))) return document.clear(),document.write(src),document.close();
