@@ -551,7 +551,7 @@
         //els.sample.contentWindow.eval( editor.getValue() ); 
         var script = document.createElement("script");
         script.type = "module";
-        script.textContent = 'while(document.body.firstChild) document.body.removeChild(document.body.firstChild); var _Algebra = Algebra; Algebra = function(...args) { var r = _Algebra(...args); if (r instanceof SVGElement || r instanceof HTMLCanvasElement) document.body.appendChild(r); else if (r) document.body.innerHTML = `<PRE style="margin:5; font-size:120%">${r}</PRE>`; Algebra=_Algebra; return r; }; ' + editor.getValue() + '\ntop.postRun();';
+        script.textContent = 'while(document.body.firstChild) document.body.removeChild(document.body.firstChild); var _Algebra = Algebra; Algebra = function(...args) { var r = _Algebra(...args); if (r instanceof SVGElement || r instanceof HTMLCanvasElement) document.body.appendChild(r); else if (r && !(r instanceof Object)) document.body.innerHTML = `<PRE style="margin:5; font-size:120%">${r}</PRE>`; Algebra=_Algebra; return r; }; ' + editor.getValue() + '\ntop.postRun();';
         els.sample.contentDocument.body.appendChild(script);
 //        setTimeout(()=>postRun(),1); // for fox.
       } catch (e) {
