@@ -356,6 +356,7 @@
             lock = false;
             if (timeout) clearTimeout(timeout);
             timeout = setTimeout(()=>els.run.click(),1000/60);
+            inspect(true);
           }
         }
         // If its a number, setup the slider.
@@ -374,6 +375,7 @@
             lock = false;
             if (timeout) clearTimeout(timeout);
             timeout = setTimeout(()=>els.run.click(),1000/60);
+            inspect(true);
           }
         } 
       });
@@ -397,7 +399,13 @@
     }
 
   // inspect
+    var lastUpdate = 0;
     function inspect(skip) {
+       // don't update too often, because it can slow down 
+       if (Date.now() - lastUpdate < 50) {
+         return;
+       }
+       lastUpdate = Date.now();
        var disp = els.sample.contentDocument.querySelector("svg")||els.sample.contentDocument.querySelector("canvas");
        if (!disp || !disp.value) { els.inspectTable.innerHTML=''; return; }
        var count=1, el;
@@ -570,6 +578,7 @@
     // See if we have a canvas.  
       var doc = els.sample.contentDocument||document, disp = doc.querySelector("svg")||doc.querySelector("canvas");
       if (disp && disp.value) { disp.style.width=disp.style.height='100%'; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); }
+      inspect();
     }
     
   // on iframe load..

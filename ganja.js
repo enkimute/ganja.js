@@ -619,7 +619,7 @@
     // Direct sum of algebras - experimental
       static sum(B){
         var A = Element;
-        // Get the multiplication tabe and basis.
+        // Get the multiplication table and basis.
         var T1 = A.describe().mulTable, T2 = B.describe().mulTable;
         var B1 = A.describe().basis, B2 = B.describe().basis;
         // Get the maximum index of T1, minimum of T2 and rename T2 if needed.
@@ -822,6 +822,10 @@
             // Vectors
               if (o[to2d[4]]**2+o[to2d[5]]**2>0.0001) { lr=0; ly+=0.05; lx+=0.1; var res2=`<LINE style="pointer-events:none" x1=${lx} y1=${-ly} x2=${lx-o.e02} y2=${-(ly+o.e01)} stroke="${color||'#888'}"/>`; ly=ly+o.e01/4*3-0.05; lx=lx-o.e02/4*3; return res2; }
             }).join()}`,'text/html').body;
+            if (res) {
+              res.value = f;
+              res.options = options;
+            }
           // return the inside of the created svg element.
             return svg.removeChild(svg.firstChild);
           };
