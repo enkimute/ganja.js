@@ -1,0 +1,92 @@
+* {
+  box-sizing : border-box;
+}
+
+body.notebook {
+  width          : 100%;
+  margin         : auto;
+  margin-top     : 0px;
+  margin-bottom  : 0px;
+  background     : white;
+  border         : 1px solid #888;
+  padding        : 20px;
+  box-shadow     : 0px 0px 50px #000;
+  font-size      : 110%;
+  font-family    : sans-serif;
+  transition     : all 0.5s linear;
+  text-align     : justify;
+  line-height    : 150%;
+  counter-set    : section subsection; 
+}
+
+body.notebook pre {
+  padding: 10px;
+  border : 1px solid #AAA;
+  background : #FAFFFA;
+  font-size : 110%;
+
+}
+
+h2:before {
+  counter-set : subsection;
+  counter-increment : section;
+  content : counter(section) ". ";
+}
+h2 {
+  margin-top : 40px;
+}
+h3:before {
+  counter-increment : subsection;
+  content : counter(section) "." counter(subsection) ". ";
+}
+
+html.notebook {
+  background     : #666;
+}
+
+.notebook table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+    width : 100%;
+}
+
+.notebook thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.notebook th, .notebook td {
+    padding: 12px 15px;
+}
+
+.notebook tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.notebook tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+.notebook tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+
+@media only screen and (min-width: 1080px) {
+  body.notebook {
+    width          : 1024px;
+    margin-top     : 40px;
+    margin-bottom  : 40px;
+    padding-left   : 60px;
+    padding-right  : 60px;
+  }
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 3) { 
+  .katex {
+    font-size : 180% !important;
+  }
+}

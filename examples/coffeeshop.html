@@ -96,7 +96,6 @@
   </style>
   <!-- ganja -->
   <SCRIPT SRC="../ganja.js"></SCRIPT>
-  <!-- ace editor -->
   <SCRIPT SRC="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></SCRIPT>
   <!-- katex math typesetting -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
@@ -514,7 +513,7 @@
     updateStash();  
     
   // Close the introbar
-    function closeBar() { document.querySelector('.hider').style.height='0px'; postRun(); editor&&editor.resize(); }  
+    function closeBar() { document.querySelector('.hider').style.height='0px'; /*postRun();*/ editor&&editor.resize(); }  
     
   // Setup sample group handlers
     [...document.querySelectorAll(".sampleGroup")].forEach(s=>{
@@ -551,7 +550,7 @@
         //els.sample.contentWindow.eval( editor.getValue() ); 
         var script = document.createElement("script");
         script.type = "module";
-        script.textContent = 'while(document.body.firstChild) document.body.removeChild(document.body.firstChild); var _Algebra = Algebra; Algebra = function(...args) { var r = _Algebra(...args); if (r instanceof SVGElement || r instanceof HTMLCanvasElement) document.body.appendChild(r); else if (r && !(r instanceof Object)) document.body.innerHTML = `<PRE style="margin:5; font-size:120%">${r}</PRE>`; Algebra=_Algebra; return r; }; ' + editor.getValue() + '\ntop.postRun();';
+        script.textContent = 'while(document.body.firstChild) document.body.removeChild(document.body.firstChild);' + editor.getValue() + '\ntop.postRun();';
         els.sample.contentDocument.body.appendChild(script);
 //        setTimeout(()=>postRun(),1); // for fox.
       } catch (e) {
@@ -569,13 +568,17 @@
     function postRun(disp_in) {
     // See if we have a canvas.  
       var doc = els.sample.contentDocument||document, disp = doc.querySelector("svg")||doc.querySelector("canvas");
-      if (disp && disp.value) { disp.style.width=disp.style.height='100%'; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); }
+      if (disp && disp.value) { 
+        disp.style.width=disp.style.height='100%'; 
+        Object.assign(doc.body.parentElement.style,{width:'100%', height:'100%'});
+        if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); 
+      }
     }
     
   // on iframe load..
     els.sample.onload = (e)=>{
     // setup iframe props.
-      els.sample.contentDocument.body.style = "margin:0; padding:0;";
+      // els.sample.contentDocument.body.style = "margin:0; padding:0;";
       postRun();
       els.sample.contentWindow.addEventListener('error', function(e) {
         // show error in HTML
@@ -626,12 +629,27 @@
       this.blur();
     }  
     els.urlInput.onkeydown = (e)=>{e.preventDefault(); }; // prevent typing in URL field, keep click event working .. DISABLED wont work ..
+
+
+  // External scripts.
+    var lscripts = [
+      document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js'),
+      document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/examples/coffeeshop.js'),
+      'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+      'https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js',
+      'https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js',
+      'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js'
+      
+    ].map(x=>'<SCR'+'IPT SRC="'+x+'"></SC'+'RIPT>').join('');
+    
+  // Add katex stylesheet
+    lscripts += '<link rel="stylesheet" href="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/examples/coffeeshop.css')+'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous"><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/styles/default.min.css">'  
   
   // new stash
     els.new.onclick = function newStash() {
     // Clear the editor, set the source to empty.
       editor&&editor.setValue("");
-      var src = '<HTML><HEAD><TITLE>My Stash</TITLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>var _Algebra = Algebra; Algebra = function(...args) { var r = _Algebra(...args); if (r instanceof SVGElement || r instanceof HTMLCanvasElement) document.body.appendChild(r); return r; };</SCR'+'IPT><SC'+'RIPT>\n\n</'+'SCRIPT></BODY></HTML>';
+      var src = '<!DOCTYPE html><HTML><HEAD><TITLE>My Stash</TITLE>'+lscripts+'</HEAD><BODY><SC'+'RIPT>\n\n</'+'SCRIPT></BODY></HTML>';
       var blob = new Blob([src],{type:"text/html"});
       els.sample.src = URL.createObjectURL(blob);
     // Remove the samples, show the properties.  
@@ -728,7 +746,7 @@
     function loadStash(closeAll){
       var stashURL = document.location.hash.slice(1).split('&');
       fetch("https://ganja.enki.ws/"+stashURL[0]).then(x=>x.json()).then(data=>{
-        var src = '<HTML><HEAD><TITLE>'+data.title+'</TITLE><STYLE>body {width:100%; height:100%; margin:0; }</STYLE></HEAD><BODY><SCR'+'IPT SRC="'+document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js')+'"></SCR'+'IPT><SC'+'RIPT>var _Algebra = Algebra; Algebra = function(...args) { var r = _Algebra(...args); if (r instanceof SVGElement || r instanceof HTMLCanvasElement) document.body.appendChild(r); return r; };</SCR'+'IPT><SC'+'RIPT>try{\n'+data.data+'\n; disp=document.querySelector("svg")||document.querySelector("canvas"); if (disp && disp.value) { disp.style.width=disp.style.height="100%"; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); } } catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
+        var src = '<!DOCTYPE html><HTML><HEAD><TITLE>'+data.title+'</TITLE><STYLE>body {width:100%; height:100%; margin:0; }</STYLE>'+lscripts+'</HEAD><BODY><SC'+'RIPT>try{\n'+data.data+'\n; disp=document.querySelector("svg")||document.querySelector("canvas"); if (disp && disp.value) { disp.style.width=disp.style.height="100%"; if (disp.update && (!disp.options || !disp.options.animate)) disp.update(disp.value); } } catch(e) { document.body.innerHTML+="<PRE>"+e+"</PRE>"; }</'+'SCRIPT></BODY></HTML>';
         document.body.style.display='flex';
       // if full-screen, overload everything .. 
         if (stashURL.find(x=>x.match(/fullscreen/i))) return document.clear(),document.write(src),document.close();
