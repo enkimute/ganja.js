@@ -635,11 +635,10 @@
     var lscripts = [
       document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/ganja.js'),
       document.URL.replace(/\/.[^/]*\/.[^/]*$/,'/examples/coffeeshop.js'),
-      'https://cdn.jsdelivr.net/npm/marked/marked.min.js',
+      'https://cdn.jsdelivr.net/gh/markedjs/marked/marked.min.js',
       'https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js',
       'https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js',
-      'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js'
-      
+      'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js',
     ].map(x=>'<SCR'+'IPT SRC="'+x+'"></SC'+'RIPT>').join('');
     
   // Add katex stylesheet
