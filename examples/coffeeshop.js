@@ -5,7 +5,7 @@
 //
 // This script should be loaded _after_ ganja.js
 
-if (window.Algebra === undefined) console.warning("coffeeshop.js hould be loaded after ganja.js");
+if (window.Algebra === undefined) console.warn("coffeeshop.js should be loaded after ganja.js");
 else (function (){
 
   // Overload Algebra call.
@@ -26,25 +26,43 @@ else (function (){
     return res;  
   }
 
+  window.applyKatex = function() {
+    if (!window.renderMathInElement) {
+      console.warn('window.renderMathInElement not defined');
+      return;
+    }
+    renderMathInElement(document.body, {
+      // customised options
+      // • auto-render specific keys, e.g.:
+      delimiters: [
+        {left: '$$', right: '$$', display: true},
+        {left: '$', right: '$', display: false},
+        {left: '\\(', right: '\\)', display: false},
+        {left: '\\[', right: '\\]', display: true}
+      ],
+      // • rendering keys, e.g.:
+      throwOnError : false
+    });
+  }
+
   // Install MD and Katex handlers.
   window.md = function(...args) {
-    var div = document.createElement('div');
-    div.innerHTML = marked.parse(...args);
-    document.body.appendChild(div);
-    if (window.renderMathInElement) renderMathInElement(document.body, {
-          // customised options
-          // • auto-render specific keys, e.g.:
-          delimiters: [
-              {left: '$$', right: '$$', display: true},
-              {left: '$', right: '$', display: false},
-              {left: '\\(', right: '\\)', display: false},
-              {left: '\\[', right: '\\]', display: true}
-          ],
-          // • rendering keys, e.g.:
-          throwOnError : false
-        });
+    var div;
+    var lambda = args[0];
+    if (lambda instanceof Function) {
+      div = md(lambda());
+      divLambdas.push([div, lambda]);
+    } else {
+      div = document.createElement('div');
+      div.innerHTML = marked.parse(...args);
+      document.body.appendChild(div);
+      applyKatex();
+    }
+    return div;
   }
   
+  window.divLambdas = [];
+
   // Notebook option
   window.notebook = function(title) {
     window.title = title;
@@ -55,7 +73,37 @@ else (function (){
         return hljs.highlight("javascript",code).value;
       }
     });
+    divLambdas.length = 0;
   }
   
+  window.reEval = function() {
+    for (var [div, lambda] of divLambdas) {
+      var val = lambda();
+      div.innerHTML = marked.parse(val);
+    }
+    applyKatex();
+  }
+
+  window.Button = function(text, onclick) {
+    var button = document.createElement("button");
+    button.innerText = text;
+    button.onclick = () => {
+      onclick();
+      reEval();
+    };
+    document.body.appendChild(button);
+    return button;
+  }
+
+  window.Input = function(str, lambda) {
+    var input = document.createElement("input");
+    document.body.appendChild(input);
+    input.value = str;
+    input.oninput = () => {
+      lambda(input.value);
+      reEval();
+    }
+    return input;
+  }
 
 })()
