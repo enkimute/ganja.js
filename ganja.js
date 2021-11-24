@@ -1610,7 +1610,7 @@
         while (txt.length) for (t in tokens) {
           if (t == 4 && !possibleRegex) continue;
           if (resi = txt.match(tokens[t])) {
-            c = resi[0]; if (t!=0) {possibleRegex = c == '(' || c == '=' || c == '[' || c == ',' || c == ';';} tok.push([t | 0, c]); txt = txt.slice(c.length); break;
+            c = resi[0]; if (t!=0) {possibleRegex = c == '(' || c == '=' || c == '[' || c == ',' || c == ';' || c == ':';} tok.push([t | 0, c]); txt = txt.slice(c.length); break;
           }} // tokenise
       // Translate algebraic literals. (scientific e-notation to "this.Coeff"
         tok=tok.map(t=>(t[0]==2)?[2,'Element.Coeff('+basis.indexOf((!options.Cayley?simplify:(x)=>x)('e'+t[1].split(/e_|e|i/)[1]||1).replace('-',''))+','+(simplify(t[1].split(/e_|e|i/)[1]||1).match('-')?"-1*":"")+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
