@@ -578,7 +578,8 @@
   // on iframe load..
     els.sample.onload = (e)=>{
     // setup iframe props.
-      // els.sample.contentDocument.body.style = "margin:0; padding:0;";
+      if (!els.sample.src.match(/blob/))
+        els.sample.contentDocument.body.style = "margin:0; padding:0;";
       postRun();
       els.sample.contentWindow.addEventListener('error', function(e) {
         // show error in HTML
@@ -639,6 +640,8 @@
       'https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js',
       'https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js',
       'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js',
+      'https://cdn.jsdelivr.net/npm/in-view@0.6.1/dist/in-view.min.js',
+      'https://enki.ws/GAmphetamine.js'
     ].map(x=>'<SCR'+'IPT SRC="'+x+'"></SC'+'RIPT>').join('');
     
   // Add katex stylesheet

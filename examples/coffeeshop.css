@@ -2,6 +2,23 @@
   box-sizing : border-box;
 }
 
+body {
+  margin : 0px;
+  width  : 100%;
+  height : 100%;
+  position: absolute;
+}
+
+body > canvas {
+  width : 100%;
+  height: 100%;
+}
+
+body > svg {
+  width : 100%;
+  height: 100%;
+}
+
 body.notebook {
   width          : 100%;
   margin         : auto;
@@ -41,6 +58,7 @@ h3:before {
 }
 
 html.notebook {
+  height         : initial !important;
   background     : #666;
 }
 
