@@ -70,7 +70,7 @@ html.notebook {
 }
 
 .notebook th, .notebook td {
-    padding: 12px 15px;
+    padding: 3px 4px;
 }
 
 .notebook tbody tr {

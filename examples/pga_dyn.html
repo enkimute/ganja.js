@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+
+<HEAD>
+  <SCRIPT SRC="../ganja.js"></SCRIPT>
+  <SCRIPT SRC="coffeeshop.js"></SCRIPT>
+  <SCRIPT SRC='https://cdn.jsdelivr.net/gh/markedjs/marked/marked.min.js'></SCRIPT>
+  <SCRIPT SRC='https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js'></SCRIPT>
+  <SCRIPT SRC='https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/contrib/auto-render.min.js'></SCRIPT>
+  <SCRIPT SRC='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/highlight.min.js'></SCRIPT>
+  <SCRIPT SRC='https://cdn.jsdelivr.net/npm/in-view@0.6.1/dist/in-view.min.js'></SCRIPT>
+  <SCRIPT SRC='https://enki.ws/GAmphetamine.js'></SCRIPT>
+  <LINK REL="stylesheet" HREF="coffeeshop.css">
+  <LINK REL="stylesheet" HREF="https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css" integrity="sha384-R4558gYOUz8mP9YWpZJjofhk+zx0AS11p36HnD2ZKj/6JR5z27gSSULCNHIRReVs" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.3.1/build/styles/default.min.css">
+</HEAD>
+<BODY><SCRIPT>
+
+notebook();
+
+md(`
+<center> 
+
+# May The Forque Be With You
+
+Leo Dorst & Steven De Keninck 
+
+*In this guide we discuss the implementation details for an n-dimensional rigid body dynamics simulation.*
+
+</center>
+
+---
+
+## Introductions
+
+Hopefuly we have been able to convince you that considering a problem in a dimension-agnostic
+way is of great value, and in fact provides a unique guide to the geometry.
+With the ability to formulate the mathematics in n-d comes the desire to have a true
+dimension agnostic implementation. There are several practical hurdles to be taken and we'll
+provide a short overview that should allow you to build your own dimension agnostic rigid body
+dynamics solver.
+
+In the next section, we will go over the details of such an implementation, requiring nothing
+but a geometric algebra library. In the section after that, we focus on the three dimensional
+case and provide some details for an efficient implementation. We will use the 
+[ganja.js](https://github.com/enkimute/ganja.js)
+library for our implementation. It offers a syntax that is compatible with most other popular
+GA libraries when it comes to mathematical expressions - so you should have no trouble replacing
+it with the library [of your choice](https://bivector.net/lib.html).
+
+### Syntax
+
+The examples in this text are all available as [ganja.js coffeeshop stash](https://enkimute.github.io/ganja.js/examples/coffeeshop.html#pga2d_points_and_lines).
+They require no installation and you can easily edit them and save your own versions. Playing around with
+the existing examples is a great starting point to get a feel and we strongly encourage you to do so.
+
+For those not accustomed to a geometric algebra library, here's a short overview of
+operators that should come in handy.
+
+| syntax          | operator      | description                       |
+|:---------------:|:-------------:|:----------------------------------|
+| \`a * b\`       | $ab$          | Geometric Product                 |
+| \`a ^ b\`       | $a \\wedge b$ | "Wedge" or Outer Product          |
+| \`a & b\`       | $a \\vee b$   | "Vee" or Regressive Product       |
+| \`a \\| b\`     | $a \\cdot b$  | "Dot" or Inner Product            |
+| \`~R\`          | $\\tilde R$   | Reverse. (i.e. inverse for rotor) |
+| \`!a\`          | $a^*$         | Hodge Dual                        |
+| \`a.Grade(n)\`  | $\\langle a \\rangle_n$ | Grade selection         |
+| \`a.Normalized\`| $\\bar a$     | Normalization                     |
+| \`E**a\`        | $e^a$         | Exponential                       |
+| \`a.Log()\`     | $\\log a$     | Logarithm                         |
+| \`R >>> x\`     | $RxR^{-1}$    | Sandwich product                  |
+
+Other operators like addition work as one would expect on arbitrary multivectors, with division
+defined w.r.t. the geometric product. Note that the \`&\`,\`\|\`,\`^\` operators keep their original
+bitwise functionality when both arguments are integers - we'll use that fact below.
+
+### Simulation setup
+
+Rigid body simulators, or physics simulators in general are often complex pieces of code, and
+properly handling collision detection, integration errors, and large numbers of objects requires
+a lot of infrastructure that is not relevant to our current exploration. We refer the reader to
+the vast body of literature available on the subject and instead focus our attention on the geometric
+representations of forques, momenta, accelerations and velocities.
+
+For anything not related to the representation we have tried to pick the simplest and most
+common solution. For collision detection this means a simple SAT algorithm is used, while for
+integration we pick the trivial forward Euler scheme. (Its problems are well understood).
+
+#### SAT collision detection.
+
+Adopted to be dimension agnostic, a Separating Axis Test (SAT) algorithm tries to find a
+hyperplane that divides the space into two halves, each containing only points of one of
+the objects being tested for collision. It requires both objects to be convex, and considers
+each of the hyperplanes on the objects boundary as a potential separating axis. In our
+example, we are only testing for collisions between a moving object $a$ and a fixed floor
+plane $f$. We can thus simply state that $a$ is in collision with $f$ if for any of the
+points $a_i$ of $a$ we have
+
+$$ a_i \\vee f < 0 $$
+
+Hence we can test if an object $a$ that consists of a number of vertices $a_i$ collides
+with our floor by finding at least one point for which the above expression is true
+
+\`\`\`
+// Find a point on the wrong side of the plane and return it.
+function is_colliding(plane, points) {
+  return points.find(point=>(point & plane)<0)
+}
+\`\`\`
+
+#### Euler Integration
+
+The simple Euler integration scheme predicts a future state $S_{t+h}$ by taking small steps
+$h$ in the direction of the derivative $\\dot S_t$ at time $t$. 
+
+$$ S_{t+h} = S_t + h \\dot S_t$$
+
+The simplicity of this technique is its main advantage, it is not particularly good at
+energy conservation and misbehaves in the presence of stiff differential equations.
+Despite these disadvantages it is still widely used and allows us again to focus
+on the representation while keeping an integrator that is easy to implement
+in an environment that offers operator overloading. In our demonstrations we will
+each frame take a number of fixed stpes $n$ of stepsize $h$ into the future:
+
+\`\`\`
+// Euler Integration
+for (var i=0, h=0.01; i<n; ++i)
+  state = state + h * dState(state);
+\`\`\`
+
+## N-Dimensional case
+
+Before we can focus on dynamics in n-dimensions, we'll need some tooling to create and visualize
+nD meshes. We'll go over the techniques used in our demos in enough detail for you to recreate them
+in your favorite programming environment. Keep in mind that adding visualisations for the various
+elements of PGA is a must-have to debug and understand any algorithms you implement.
+
+### The Hypercube
+
+The 'hyper' adjective is used to generalize 3D nomenclature to an arbitrary number of dimensions.
+A hyperplane is a plane in 3D, but a line in 2D and a volume in 4D. Similarly, a hypercube is a
+cube in 3D, a square in 2D and a tesseract in 3D. It is probably the easiest shape to generate in
+an arbitrary number of dimensions, so the ideal candidate for our toy examples.
+
+#### Vertices
+
+To visualize our cube we will, at a minimum, need to generate its vertices and edges. A hypercube
+in $n$-d has $2^n$ vertices $v_i$. (a square has 4, a cube 8, a tesseract 16, etc ..). The individual
+coordinates can easily be deduced from the binary representation of the index $i$ of each vertex $v_i$
+
+`);
+
+Algebra(2,0,1,()=>{
+  
+  var p = [...Array(4)]
+          .map((x,i)=>('000'+i.toString(2)).slice(-2))
+          .map(x=>x.split('').map(v=>v-0.5))
+          .map(x=>!(1e0 + x*[1e1,1e2]));
+          
+  var e = p.map((a,i)=>p.map((b,j)=>i<=j||(i^j)&(i^j-1)?0:[a,b])).flat().filter(x=>x)
+  
+  var c = this.graph([
+    0x009977,
+    ...e,
+    ...p.map((p,i)=>[p,'&nbsp;'+('0'+i.toString(2)).slice(-2)]).flat()
+    
+    
+  ],{lineWidth:6, scale:3, pointRadius:.1, fontSize:2})
+  
+  c.style.background='white';
+  c.style.maxHeight='300px';
+  c.style.width= '100%';
+  c.onwheel = undefined
+  
+  
+  return c;
+  
+});
+
+md(`
+We can simply treat the first bit as the 'x' coordinate, the second as the 'y' and so on. With
+the number of dimensions expressed as \`'d'\`, the following piece of code will generate all the points
+of a d-dimensional hypercube
+
+\`\`\`
+var p = [...Array(2**d)]                                        // correct number of points
+        .map((x,i)=>('000000'+i.toString(2)).slice(-d))         // convert to binary
+        .map(x=>x.split('').map(v=>v-0.5))                      // split and center
+        .map(x=>!(1e0 + x*[1e1,1e2,1e3,1e4,1e5].slice(0,d)));   // convert to PGA points
+\`\`\`
+
+#### Edges
+
+Equiped with the points, we still have to generate a list of edges. The edges we
+are interested in are the straight edges, and using the same encoding as above it
+is easy to see that those are the edges that differ only in one bit. We can
+use the binary AND \`&\` and XOR \`^\` operators to easily detect if two indices
+\`i,j\` differ in just one bit
+
+\`\`\`
+function is_edge(i,j) {
+  var x = i^j;             // xor both together, all differing bits will be '1'
+  return (x & (x-1)) == 0  // only if x has one bit, this returns true.
+}
+\`\`\`
+
+#### Visualizing
+
+To visualize a cube in 3D, we typically use a perspective transformation. While
+ganja.js will default to an orthogonal projection for spaces >3D, it is still quite
+easy to do a perspective transformation for your own visualisation purposes.
+To do so, consider a camera at point $c$, and a screen $s$, then the projections of
+our hypercube points $a_i$ are given by 
+
+$$ a_i' = (a_i \\vee c) \\wedge s$$
+
+If the projection screen $s$ aligns with the coordinate axes, the resulting points
+$a_i'$ will have all but two coefficients zero, trivially enabling you to render
+them as 2D elements:
+`);
+
+Algebra(4,0,1,()=>{
+
+  var {E,PI} = Math;
+  
+  var p = [...Array(2**4)]
+          .map((x,i)=>('0000'+i.toString(2)).slice(-4))
+          .map(x=>x.split('').map(v=>v-0.5))
+          .map(x=>!(1e0 + x*[1e1,1e2,1e3,1e4].slice(0,4)));
+          
+  var e = p.map((a,i)=>p.map((b,j)=>i<=j||(i^j)&(i^j-1)?0:[a,b])).flat().filter(x=>x)
+
+  var c = this.graph(()=>{
+    var t = performance.now()/3000;
+    var m = E**(t*PI/6*1e13) * E**(PI/6*1e24) * E**(.5e34) * E**(t*1e12) ;
+    var te = (1+1.5e03)*m>>>e;
+    te=te.map(s=>s.map(p=>((p & !1e0)^(1e3+1.4e0))))
+    
+    return [0x009977, ...te]
+  },{lineWidth:6, scale:3, animate:1, pointRadius:.1, fontSize:2})
+  
+  c.style.background='white';
+  c.style.maxHeight='300px';
+  c.style.width = '100%';
+  c.onwheel = undefined
+  
+  
+  return c;
+  
+});
+
+md(`
+
+### Motors in n dimensions
+
+As we've learned, isometries in any number of dimensions can all be called $k$-reflections. $2k$-
+reflections thus represent the continuous (handedness preserving) transformations,
+and they can easily be generated using the exponential map.
+
+$$ M = e^{\\alpha \\bar B}$$
+
+While this function is well defined for arbitrary $B = \\alpha \\bar B$ in arbitrary algebras, for our purposes
+we will only need to consider the exponential of a simple $B$ (so that $B \\wedge B = 0$), in
+this case the exponential map is particularly trivial
+
+$$e^{\\alpha \\bar B} = \\begin{cases}
+   1 + \\alpha \\bar B &\\text{if } \\bar B^2 = 0 \\\\\\\\
+   \\cos \\alpha + \\bar B \\sin \\alpha &\\text{if } \\bar B^2 = -1 \\\\\\\\
+   \\cosh \\alpha + \\bar B \\sinh \\alpha &\\text{if } \\bar B^2 = 1 \\\\\\\\
+\\end{cases}
+$$
+
+This allows us to easily generate translations (with pure ideal bivectors $e_{0i},\\\\,0<i$), and rotations
+(with pure Euclidean bivectors $e_{ij},\\\\, 0 < i \\neq j$).
+The current position of our
+object will always be represented by a motor $M$, that transforms elements in the body frame $x_b$
+of our object to its place in the world frame $x_w$
+
+$$ x_w = M x_b \\widetilde M$$ 
+
+The origin itself is always the $n-1$ vector dual to the projective hyperplane $\\mathbf e_0$,
+and so we can specify it in a dimension independent fashion as $\\mathbf {e_0}^*$. Similarly a
+point at euclidean position $\\begin{bmatrix}x_1, x_2, x_3, ... \\end{bmatrix}$ can always be written
+as $(\\mathbf e_0 + x^i\\mathbf e_i)^*$ - a formulation independent
+of both the number of dimensions and the particular choice of basis.
+
+\`\`\`
+// Convert array of point coordinates x=[x1, x2, x3, ...] to a PGA point 
+function point(x) {
+  return !(1e0 + x*[1e1, 1e2, 1e3, ...]); 
+}
+\`\`\`
+
+### Kinematics
+
+To verify our simulation setup let us simulate the kinematics of a unit mass hypercube.
+A hypercube is a rotationally symmetric object, reducing our inertial duality to
+the standard Hodge dual. The current kinematic state is stored as a pair of
+multivectors \`[M,B]\`, where \`M\` is the motor that represents our current
+position and orientation and \`B\` is the bivector representing our current velocity.
+
+In the absence of external forces, the derivatives of these state variables are:
+
+$$\\dot M = -\\frac 1 2 MB,\\quad \\dot B = -(B^\\star \\times B)^{-\\star}$$
+
+Here the $\\times$ is the geometric algebra commutator product.
+
+$$a \\times b = \\frac 1 2 (ab - ba) $$ 
+
+This translates to a remarkably simple state update
+
+\`\`\`
+function dState([M,B]) {
+  return  [
+    -0.5 * M * B,
+    -0.5 * (B.Dual*B - B*B.Dual).UnDual
+  ]
+}
+\`\`\`
+
+Putting everything together we can simulate the kinematics of our hypercube.
+
+Play with <A HREF="https://enki.ws/ganja.js/examples/coffeeshop.html#irAoiHVhn" target="blank">this example</A> in the ganja.js coffeeshop
+
+`);
+
+// Set the number of dimensions. 
+window.d = 4;
+
+// Create a d-dimensional geometric algebra over the reals.
+Algebra(d, 0, 1, ()=>{
+  
+  // Create a hypercube (square in 2D, cube in 3D, ...)
+  // Start by defining its vertices.
+  var p = [...Array(2**d)]                         
+          .map((x,i)=>i.toString(2))              // [0, 1, 10, 11, 100, ...]
+          .map(x=>('00000'+x).slice(-d))          // [000, 001, 010, 011, ...]
+          .map(x=>x.split('').map(x=>x-0.5))      // [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], ...]
+          .map(x=>!(1e0 + x*[1e1,1e2,1e3,1e4]))   // PGA points are dual vectors.
+  
+  // Now consider all vertex pairs and create edges for those
+  // pairs that differ only in one coordinate.
+  var e = p.map((a,i)=>p.map((b,j)=>
+            i<=j||(i^j)&(i^j-1)?0:[a,b]   // note that &,^ here are bitwise ops since i,j are integer
+          )).flat().filter(x=>x);   
+          
+  // Physics state.    
+  var state  = [Math.E**(.1e12), 1e12 + 1.3e13 + 0.5e24];
+  
+  // The derivative of the state.    
+  var dS = ([M,B])=>[
+             -0.5*M*B, 
+             -0.5*(B.Dual*B-B*B.Dual).UnDual
+           ];
+  
+  // Render
+  var c = this.graph(()=>{
+    // Update the state  
+    for (var i=0; i<10; ++i) 
+      state = state + 1/600 * dS(state);
+    return [ 0x009977, ...state[0] >>> e ];
+  },{lineWidth:6,animate:1,scale:1.75});
+
+  
+  c.style.background='white';
+  c.style.maxHeight='300px';
+  c.style.width = '100%';
+  c.onwheel = undefined
+  
+  
+  return c;
+
+})
+
+md(`
+
+\`\`\`
+// Set the number of dimensions. 
+window.d = 4;
+
+// Create a d-dimensional geometric algebra over the reals.
+Algebra(d, 0, 1, ()=>{
+  
+  // Create a hypercube (square in 2D, cube in 3D, ...)
+  // Start by defining its vertices.
+  var p = [...Array(2**d)]                         
+          .map((x,i)=>i.toString(2))              // [0, 1, 10, 11, 100, ...]
+          .map(x=>('00000'+x).slice(-d))          // [000, 001, 010, 011, ...]
+          .map(x=>x.split('').map(x=>x-0.5))      // [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], ...]
+          .map(x=>!(1e0 + x*[1e1,1e2,1e3,1e4]))   // PGA points are dual vectors.
+  
+  // Now consider all vertex pairs and create edges for those
+  // pairs that differ only in one coordinate.
+  var e = p.map((a,i)=>p.map((b,j)=>
+            i<=j||(i^j)&(i^j-1)?0:[a,b]   // note that &,^ here are bitwise ops since i,j are integer
+          )).flat();   
+          
+  // Physics state.    
+  var state  = [Math.E**(.1e12), 1e12 + 1.3e13 + 0.5e24];
+  
+  // The derivative of the state.    
+  var dS = ([M,B])=>[
+             -0.5*M*B, 
+             -0.5*(B.Dual*B-B*B.Dual).UnDual
+           ];
+  
+  // Render
+  return this.graph(()=>{
+    // Update the state  
+    for (var i=0; i<10; ++i) 
+      state = state + 1/600 * dS(state);
+    return [ 0x007799, ...state[0] >>> e ];
+  },{lineWidth:6,animate:1,scale:1.75});
+
+})
+\`\`\`
+
+### Dynamics : Forques
+
+When we consider external forces (forques!), we move into the field of Dynamics.
+In our PGA setup, forques are always along lines, and expressed in the body frame.
+Let us consider some simple cases.
+
+#### Gravity
+
+The easiest way to describe gravity in a dimension independent fashion is to describe
+the acceleration it causes to a body in the world frame. Such an acceleration is always
+a bivector, and assuming gravity is acting along the negative Y direction, it simply is
+
+$$-9.81 \\mathbf e_{02}$$
+
+All we need to do to find the associated force in the body frame is to first move this
+ideal bivector to the bodyframe, and then dualize it to find the associated force line.
+(The resulting force line will be purely Eucliean, a line through the center of mass of
+our object.)
+
+$$ F_g = - (\\widetilde M 9.81\\mathbf e_{02} M)^\\star$$
+
+\`\`\`
+function Forques(M,B) {
+  var Gravity = !(~M >>> -9.81e02);
+  return Gravity;
+}
+\`\`\`
+
+#### Hooke's law
+
+Hooke's law can be formulated in a similarly easy way. It is a line from a point on
+the body $p_b$ to an attachment point $a_w$ in the world frame, scaled with a spring
+constant $k$.
+
+$$ F_H = k(p_b \\vee \\widetilde M a_w M ) $$
+
+\`\`\`
+function Forques(M,B) {
+  var Gravity = !(~M >>> -9.81e02);
+  var Hooke   = k*((~M >>> attach) & point_in_body);
+  return Gravity + Hooke;
+}
+\`\`\`
+
+#### Damping
+
+The Euler integrator we are using is notoriously bad in energy preservation and tends
+to blow up in the presence of external forces. To mitigate we simply dissipate some of
+the energy by creating a force inverse proportional to the current velocity bivector.
+
+$$ F_d = (-\\alpha B)^\\star $$
+
+\`\`\`
+function Forques(M,B) {
+  var Gravity = !(~M >>> -9.81e02);
+  var Hooke   = k*((~M >>> attach) & point_in_body);
+  var Damping = !(-0.25 * B)
+  return Gravity + Hooke + Damping;
+}
+\`\`\`
+
+Putting all this together, we can attach our hypercube to a string.
+
+Play with <A HREF="https://enki.ws/ganja.js/examples/coffeeshop.html#o0ZAc21EF" target="blank">this example</A> in the ganja.js coffeeshop
+
+
+
+`);
+
+/** May The Forque Be With You **/
+
+/* A dimension independent approach to dynamics */
+/* Leo Dorst & Steven De Keninck.               */
+
+// Set the number of dimensions. 
+window.d = 4;
+
+// Create a d-dimensional geometric algebra over the reals.
+Algebra(d, 0, 1, ()=>{
+  
+  // Create a hypercube (square in 2D, cube in 3D, ...)
+  // Start by defining its vertices.
+  var p = [...Array(2**d)]                         
+          .map((x,i)=>i.toString(2))              // [0, 1, 10, 11, 100, ...]
+          .map(x=>('00000'+x).slice(-d))          // [000, 001, 010, 011, ...]
+          .map(x=>x.split('').map(x=>x-0.5))      // [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], ...]
+          .map(x=>!(1e0 + x*[1e1,1e2,1e3,1e4]))   // PGA points are dual vectors.
+  
+  // Our forques
+  var attach = (1-0.5e02) >>> p[2**d-1];
+  var F = (M,B)=>{
+    var Gravity = !(~M >>> -9.81e02);
+    var Hooke   = 12*( (~M >>> attach) & p[2**d-1] );
+    var Damping = !(-0.5 * B);
+    return Gravity + Hooke + Damping;
+  }
+  
+  // Now consider all vertex pairs and create edges for those
+  // pairs that differ only in one coordinate.
+  var e = p.map((a,i)=>p.map((b,j)=>
+            i<=j||(i^j)&(i^j-1)?0:[a,b]   // note that &,^ here are bitwise ops since i,j are integer
+          )).flat().filter(x=>x);   
+          
+  // Physics state.    
+  var state  = [1-0.5e02, 1e12 + 1.3e13 + 0.5e24];
+  
+  // The derivative of the state.    
+  var dS = ([M,B])=>[
+             -0.5*M*B, 
+             (F(M,B) - 0.5*(B.Dual*B-B*B.Dual)).UnDual
+           ];
+  
+  // Render
+  var c= this.graph(()=>{
+    // Update the state  
+    for (var i=0; i<10; ++i) 
+      state = state + 1/600 * dS(state);
+    return [ 0x009977, ...state[0] >>> e, attach, [attach, state[0]>>>p[2**d-1]] ];
+  },{lineWidth:6,animate:1,scale:1.5});
+
+  c.style.background='white';
+  c.style.maxHeight='300px';
+  c.style.width = '100%';
+  c.onwheel = undefined
+  
+
+  return c;
+})
+
+md(`
+
+\`\`\`
+// Set the number of dimensions. 
+window.d = 4;
+
+// Create a d-dimensional geometric algebra over the reals.
+Algebra(d, 0, 1, ()=>{
+  
+  // Create a hypercube (square in 2D, cube in 3D, ...)
+  // Start by defining its vertices.
+  var p = [...Array(2**d)]                         
+          .map((x,i)=>i.toString(2))              // [0, 1, 10, 11, 100, ...]
+          .map(x=>('00000'+x).slice(-d))          // [000, 001, 010, 011, ...]
+          .map(x=>x.split('').map(x=>x-0.5))      // [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], ...]
+          .map(x=>!(1e0 + x*[1e1,1e2,1e3,1e4]))   // PGA points are dual vectors.
+  
+  // Now consider all vertex pairs and create edges for those
+  // pairs that differ only in one coordinate.
+  var e = p.map((a,i)=>p.map((b,j)=>
+            i<=j||(i^j)&(i^j-1)?0:[a,b]   // note that &,^ here are bitwise ops since i,j are integer
+          )).flat().filter(x=>x);   
+          
+  // Physics state.    
+  var state  = [1, 1e12 + 1.3e13 + 0.5e24];
+
+  // Our forques
+  var attach = (1-0.5e02) * p[2**d-1];
+  var F = (M,B)=>{
+    var Gravity = !(~M >>> -9.81e02);
+    var Hooke   = 12*( (~M >>> attach) & p[2**d-1] );
+    var Damping = !(-0.25 * B);
+    return (Gravity + Hooke + Damping);
+  }
+  
+  // The derivative of the state.    
+  var dS = ([M,B])=>[
+             -0.5*M*B, 
+             (F(M,B) - 0.5*(B.Dual*B-B*B.Dual)).UnDual
+           ];
+  
+  // Render
+  return this.graph(()=>{
+    // Update the state  
+    for (var i=0; i<10; ++i) 
+      state = state + 1/600 * dS(state);
+    return [ 0x007799, ...state[0] >>> e, attach, [attach, state[0]>>>p[2**d-1]] ];
+  },{lineWidth:6,animate:1,scale:1.75});
+
+})
+\`\`\`
+
+### Collision Response
+
+The forces we have modeled so far are being integrated numerically, and so they are
+bound to the time steps of the integration. This makes them not suited for modelling
+instant responses such as those required by Newton's third law. One option to resolve
+the issue is to model instantaneous collision response forces known as impulses explicitely,
+and allowing these to bypass the integrator and update the velocity state directly.
+
+It is also the missing piece of our puzzle, drag the attachment point below or
+play with <A HREF="https://enki.ws/ganja.js/examples/coffeeshop.html#MENlArRp0" target="blank">this example</A> in the ganja.js coffeeshop
+
+
+`)
+
+
+
+
+/** May The Forque Be With You **/
+
+/* A dimension independent approach to dynamics */
+/* Leo Dorst & Steven De Keninck.               */
+/* 20220102                                     */
+
+// Set the number of dimensions. 
+window.d = 3;
+
+// Create a d-dimensional geometric algebra over the reals.
+Algebra(d, 0, 1, ()=>{
+  
+  // Create a hypercube (square in 2D, cube in 3D, ...)
+  // Start by defining its vertices.
+  var p = [...Array(2**d)]                         
+          .map((x,i)=>i.toString(2))              // [0, 1, 10, 11, 100, ...]
+          .map(x=>('00000'+x).slice(-d))          // [000, 001, 010, 011, ...]
+          .map(x=>x.split('').map(x=>x-0.5))      // [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], ...]
+          .map(x=>!(1e0 + x*[1e1,1e2,1e3,1e4]))   // PGA points are dual vectors.
+  
+  // Now consider all vertex pairs and create edges for those
+  // pairs that differ only in one coordinate.
+  var e = p.map((a,i)=>p.map((b,j)=>
+            i<=j||(i^j)&(i^j-1)?0:[a,b]   // note that &,^ here are bitwise ops since i,j are integer
+          )).flat();   
+          
+  // Center of Mass, floor, attachement point for Hooke's law.
+  var com    = !1e0,                                     // the origin.
+      floor  = (1e2 + 0.1e3 ).Normalized+ 1e0,           // tilted hyperplane
+      attach = p[2**d-1]+0e013;                        // last point of hypercube moved up.
+     
+  // Physics state.    
+  var state  = [Math.E**(.1e12)*(1-1.5e02),0e1];
+  
+  // Our forces (expressed in the body frame, as forque lines)
+  var F = ([M,B])=>{
+        var Gravity = !(~M >>> -9.81e02);
+        var Damping = -0.25*!B;
+        var Hooke = 8*( (~M>>>attach) & p[2**d-1] )
+        return Gravity + Damping + Hooke;
+      };
+      
+  // The derivative of the state.    
+  var dS = ([M,B])=>[
+             -0.5*M*B, 
+             (F(state)-0.5*(B.Dual*B-B*B.Dual)).UnDual
+           ];
+  
+  // Check for collisions.
+  var colliding = (s)=>p.find(x=>((s>>>x)&floor).s<-0.001)
+
+  // Commutator product
+  var comm = (A,B)=>0.5*(A*B-B*A);
+
+  // Render
+  var c= this.graph(()=>{
+    var Q, N, Vm, rho=0.5, j;
+    for (var i=0; i<10; ++i) {
+    // Update the state  
+      var diff = 1/600 * dS(state);
+      state = state + diff;
+    // Resolve collisions  
+      while (Q = colliding(state[0])) {
+        state = state - diff; 
+        var [M,B] = state;          // shortcuts M and B for the state
+        N = ((~M >>> floor) | Q);   // line at contact in body frame
+        Vm = Q & comm(Q,B);         // Local velocity rate.
+        j = -(1+rho) * (Vm | N) / ((Q & comm(Q, N.UnDual))|N);  // calculate impulse strenth j
+        B.set( B + j*N.UnDual );    // update the velocity bivector.
+        state = state + 1/600 * dS(state);
+      }
+    // Renormalize the state.  
+      state[0] = state[0].Normalized;
+      state[1] = state[1].Grade(2);
+    }
+    return [
+      0x009977, floor*2,
+      0xccccff, ...p.map(x=>state[0] >>> [x,x-0.05*(x*state[1]-state[1]*x)]),
+      0,        ...state[0] >>> e,
+      0x007799, attach, [attach, state[0]>>>p[2**d-1]],
+      ]
+  
+  },{lineWidth:3,pointRadius:2,animate:1,scale:0.75});
+  c.style.background='white';
+  c.style.maxHeight='500px';
+  c.style.width = '100%';
+  c.onwheel = undefined
+  return c;  
+
+});
+
+md(`
+\`\`\`
+// Set the number of dimensions. 
+window.d = 3;
+
+// Create a d-dimensional geometric algebra over the reals.
+Algebra(d, 0, 1, ()=>{
+  
+  // Create a hypercube (square in 2D, cube in 3D, ...)
+  // Start by defining its vertices.
+  var p = [...Array(2**d)]                         
+          .map((x,i)=>i.toString(2))              // [0, 1, 10, 11, 100, ...]
+          .map(x=>('00000'+x).slice(-d))          // [000, 001, 010, 011, ...]
+          .map(x=>x.split('').map(x=>x-0.5))      // [[-0.5, -0.5, -0.5], [-0.5, -0.5, 0.5], ...]
+          .map(x=>!(1e0 + x*[1e1,1e2,1e3,1e4]))   // PGA points are dual vectors.
+  
+  // Now consider all vertex pairs and create edges for those
+  // pairs that differ only in one coordinate.
+  var e = p.map((a,i)=>p.map((b,j)=>
+            i<=j||(i^j)&(i^j-1)?0:[a,b]   // note that &,^ here are bitwise ops since i,j are integer
+          )).flat();   
+          
+  // Center of Mass, floor, attachement point for Hooke's law.
+  var com    = !1e0,                                     // the origin.
+      floor  = (1e2 + 0.1e3 ).Normalized+ 1e0,           // tilted hyperplane
+      attach = p[2**d-1]+0e013;                        // last point of hypercube moved up.
+     
+  // Physics state.    
+  var state  = [Math.E**(.1e12)*(1-1.5e02),0e01];
+  
+  // Our forces (expressed in the body frame, as forque lines)
+  var F = ([M,B])=>{
+        var Gravity = !(~M >>> -9.81e02);
+        var Damping = -.5*!B;
+        var Hooke = 8*( (~M>>>attach) & p[2**d-1] )
+        return Gravity + Damping + Hooke;
+      };
+      
+  // The derivative of the state.    
+  var dS = ([M,B])=>[
+             -0.5*M*B, 
+             (F(state)-0.5*(B.Dual*B-B*B.Dual)).UnDual
+           ];
+  
+  // Check for collisions.
+  var colliding = (s)=>p.find(x=>((s>>>x)&floor).s<-0.001)
+
+  // Commutator product
+  var comm = (A,B)=>0.5*(A*B-B*A);
+
+  // Render
+  return this.graph(()=>{
+    var Q, N, Vm, rho=0.5, j;
+    for (var i=0; i<10; ++i) {
+    // Update the state  
+      var diff = 1/600 * dS(state);
+      state = state + diff;
+    // Resolve collisions  
+      while (Q = colliding(state[0])) {
+        state = state - diff; 
+        var [M,B] = state;          // shortcuts M and B for the state
+        N = ((~M >>> floor) | Q);   // line at contact in body frame
+        Vm = Q & comm(Q,B);         // Local velocity rate.
+        j = -(1+rho) * (Vm | N) / ((Q & comm(Q, N.UnDual))|N);  // calculate impulse strenth j
+        B.set( B + j*N.UnDual );    // update the velocity bivector.
+        var diff = 1/600 * dS(state);
+        state = state + diff;
+      }
+    // Renormalize the state.  
+      state[0] = state[0].Normalized;
+      state[1] = state[1].Grade(2);
+    }
+    return [
+      0x009977, floor*2,
+      0xccccff, ...p.map(x=>state[0] >>> [x,x-0.05*(x*state[1]-state[1]*x)]),
+      0,        ...state[0] >>> e,
+      0x007799, attach, [attach, state[0]>>>p[2**d-1]],
+      ]
+  
+  },{lineWidth:3,pointRadius:2,animate:1,scale:0.75});
+})
+\`\`\`
+
+## The 3d case
+
+The examples above are, as far as we are aware, the first truly dimension independent
+implementations of rigid body dynamics. While this requirement is exactly what enabled
+this concise description, and provided a clear view on the requirements imposed by the
+geometry on the algebra (e.g. forces must be (d-1)-vectors), it is not a requirement that
+carries a lot of practical value. The special case of $d=3$, and its representation of
+the Euclidean group is the one Nature selected, so it pays to take a closer look at the
+formulas in this particular case.
+
+That's exactly what we will do in this section, focusing first on the normalisation of
+motors that, due to the nature of numerical integration, tend to drift away from the
+motor manifold. Additionally we show how the concise formulas above work out at a
+coefficient level to produce automatically exactly those scalar operations we used
+to handcraft in a not too distant past. Finally we show how to setup the inertial map
+and convert existing known inertia tensors to their bivector equivalent.
+
+### Basis
+
+For the 3D case, we pick our basis so that it matches conventions from computer graphics,
+making it easier to integrate PGA methods in existing codebases. The basis we use for 
+3DPGA is the following : 
+
+$$ ${(GAmphetamine("3DPGA").basis+'').replace(/e(\d+)/g,'\\mathbf e_{$1}')} $$
+
+In this basis a general rotor $R$ takes the form
+
+$$ R =  ${GAmphetamine("3DPGA",{printFormat:"latex"},()=>Element.rotor("r_{"))} $$
+
+And we will write a general bivector as
+
+$$ B =  ${GAmphetamine("3DPGA",{printFormat:"latex"},()=>Element.bivector("b_{"))} $$
+
+### Renormalizing a motor.
+
+A motor in PGA needs to satisfy the normalization condition $R\\widetilde R = 1$, working
+this out in coefficients gives us the conditions on a coefficient level :
+
+$$ R\\widetilde R =  ${GAmphetamine("3DPGA",{printFormat:"latex"},()=>Element.rotor("r_{")*~Element.rotor("r_{"))}  $$
+
+We see that the normalization condition in 3DPGA results in two conditions for the coefficients
+
+$$\\begin{cases}
+r_{0}r_{0}+r_{4}r_{4}+r_{5}r_{5}+r_{6}r_{6} = 1 \\\\\\\\
+r_{0}r_{7}-r_{1}r_{6}-r_{2}r_{5}-r_{3}r_{4} = 0 \\\\\\\\
+\\end{cases}$$
+
+A multivector that has only scalar and quadvector parts is called a Study number, in our
+case isomorphic to the dual numbers with an inverse and square root that is well defined.
+A general Study number has a square root and inverse
+
+<!--
+$$ c = \\sqrt{ \\cfrac {a + \\sqrt{a^2 - b^2I^2}} {2}},\\quad \\sqrt {a + bI} = c + \\cfrac {bI} {2c} $$
+
+
+ 
+
+-->
+
+$$ S = \\langle S \\rangle + \\langle S \\rangle_4, \\quad \\ddot S = \\langle S \\rangle - \\langle S \\rangle_4,\\quad \\lVert S \\rVert = \\sqrt{S\\ddot S} = \\sqrt{{\\langle S \\rangle}^2 - {\\langle S \\rangle_4}^2}$$
+$$ a = \\sqrt{ \\cfrac {\\langle S \\rangle + \\lVert S \\rVert } {2}},\\quad \\sqrt {S} = a + \\cfrac {\\langle S \\rangle_4} {2a},\\quad \\cfrac 1 S = \\cfrac {\\ddot S}{S\\ddot S} = \\frac {\\langle S \\rangle - \\langle S \\rangle_4} {{\\langle S \\rangle}^2 - {\\langle S \\rangle_4}^2} $$
+
+trivially verifiable by direct calculation. We can use this to renormalize our 
+motor using the same formula we would use if $R\\widetilde R$ were scalar.
+
+$$ \\overline R = \\cfrac {R} {\\sqrt{R \\widetilde R}}  $$
+
+Setting 
+
+$$ a = \\langle R \\widetilde R\\rangle_0,\\quad b\\epsilon = \\langle R \\widetilde R\\rangle_4$$
+
+the inverse and square root simplify in PGA to
+
+$$ \\sqrt {a + b\\epsilon} = \\sqrt a + \\cfrac {b\\epsilon} {2\\sqrt a} ,
+\\quad \\quad \\cfrac {1} {a + b\\epsilon} = \\cfrac 1 a - \\cfrac {b\\epsilon} {a^2} $$
+
+Hence,
+
+$$ \\cfrac {1} {\\sqrt{R \\widetilde R}} = \\cfrac {1} {\\sqrt{a + b\\epsilon}} = \\cfrac 1 {\\sqrt a} - \\cfrac {b\\epsilon} {2\\sqrt{a}^3} $$
+
+Putting everything together, we can work out a concise procedure for the normalization
+of any PGA motor:
+
+$$ 
+s = \\cfrac {1} {\\sqrt{r_0^2 + r_4^2 + r_5^2 + r_6^2}},\\quad d = s^2(r_{0}r_{7}-r_{1}r_{6}-r_{2}r_{5}-r_{3}r_{4}) 
+$$
+$$
+\\overline R = s(R + d(r_6\\mathbf e_{01} + r_5\\mathbf e_{02} + r_4\\mathbf e_{03} - r_0\\mathbf e_{0123}))
+$$
+
+Resulting in the following implementation
+
+\`\`\`
+function normalize(R) {
+  var s = 1/Math.sqrt((R[0]*R[0] + R[4]*R[4] + R[5]*R[5] + R[6]*R[6]));
+  var d = (R[7]*R[0] - (R[1]*R[6] + R[2]*R[5] + R[3]*R[4]))*s*s;
+  R = R*s; R[1] += R[6]*d; R[2] += R[5]*d; R[3] += R[4]*d; R[7] -= R[0]*d;
+  return R;
+}
+\`\`\`
+
+Armed with this efficient re-ortho-normalization, we are guaranteed to stay on the motor manifold
+even in the presence of numerical error.
+
+### Optimizing GA expressions
+
+To obtain optimal coefficient expressions from the concise and elegant mathematics above, an algebraic
+optimization (which can be automated using e.g. GAL [?], Grassmann.wl [?] or GAALOP [?]) is required. We illustrate
+the process for the derivative of the velocity bivector for the symmetric top. The GA formula we want to optimize is
+
+$$ \\dot B = -(B^\\star \\times B)^{-\\star} $$
+
+Substituting the commutator product we find
+
+$$ \\dot B = -\\Big(\\frac {B^\\star B - BB^\\star} {2} \\Big)^{-\\star} $$
+
+
+For a general bivector B.
+
+$$ B =  ${GAmphetamine("3DPGA",{printFormat:"latex"},()=>Element.bivector("b_{"))} $$
+
+We'll illustrate this using the (soon to be released) GAmphetamine.js library.
+
+\`\`\`
+GAmphetamine("3DPGA",{printFormat:"latex"},()=>{
+  var B = Element.bivector("b_")
+  return (B.dual()*B - B*B.dual()).undual() * -0.5;
+})
+\`\`\`
+
+This produces the following expression
+
+$$ \\dot B =  ${GAmphetamine("3DPGA",{printFormat:"latex"},()=>{
+  var B = Element.bivector("b_")
+  return (B.dual()*B - B*B.dual()).undual() * -0.5;
+})}, $$
+
+showing how two geometric products on a general bivector, several dualisations etc simplify
+to just 6 multiplications and three subtractions of scalar coefficients. 
+
+As a second example let us consider the implementation of Gravity. It required us to move
+a single fixed force in the global $\\mathbf e_{02}$ direction into the body frame. We
+calculate the optimal expression using the same technique as above.
+
+$$ M = ${(GAmphetamine("3DPGA",{printFormat:"latex"},()=>{
+  var M = Element.rotor("m_");
+  return M;
+})+'')} $$
+
+$$ F_g = (\\widetilde M \\mathbf e_{02} M)^{-\\star}  $$
+
+\`\`\`
+GAmphetamine("3DPGA",{printFormat:"latex"},()=>{
+  var M = Element.rotor("m_");
+  return (~M*1e02*M).undual();
+})
+\`\`\`
+
+Which results in the following
+
+$$ ${(GAmphetamine("3DPGA",{printFormat:"latex"},()=>{
+  var M = Element.rotor("m_");
+  return (~M*1e02*M).undual();
+})+'').replace(/m_0m_0/g,'m_0^2').replace(/m_4m_4/g,'m_4^2').replace(/m_5m_5/g,'m_5^2').replace(/m_6m_6/g,'m_6^2')} $$
+
+With some minimal manual tweaking (and using the first normalisation condition):
+
+$$ 2(m_0m_6 + m_4m_5) \\mathbf e_{12} + (1 - 2(m_4^2 + m_6^2)) \\mathbf e_{31} + 2(m_5m_6 - m_0m_4) \\mathbf e_{23}$$
+
+Where again we are left with just 9 multiplications and 4 additions.
+
+It seems that with the right tooling, we can both have our lunch (geometric, concise, elegant, dimension-, metric- and basis-independent math),
+and eat it (optimal and efficient coefficient level expressions in all spaces).
+
+### Converting Inertia tensors
+
+We have so far focused on inertially symmetric objects of unit mass, which simplified
+our inertia tensor to the standard PGA Hodge duality map. Luckily, modifying our setup
+to properly incorporate full inertia is trivial.
+
+To convert a standard 3D inertia tensor to our inertial duality operator, we start
+from the diagonalized version of the inertia tensor. A list of 3D inertia tensors
+for a series of common shapes can be found on <A TARGET="blank" HREF="https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors">
+wikipedia</A>.
+
+Let us take the inertia tensor of a solid cuboid of width $w$, height $h$, depth $d$, and mass $m$ as
+example.
+
+$$\\frac m {12} \\begin{bmatrix}
+h^2 + d^2 && 0 && 0 \\\\\\\\
+0 && w^2 + d^2 && 0 \\\\\\\\
+0 && 0 && w^2 + h^2 \\\\\\\\
+\\end{bmatrix}$$
+
+We will represent this as a 3D PGA bivector
+
+$$C = m\\Big(\\frac {h^2 +d^2}{12}\\mathbf e_{03} + \\frac{w^2+d^2}{12}\\mathbf e_{02} + \\frac{w^2+h^2}{12}\\mathbf e_{01} + \\mathbf e_{12} + \\mathbf e_{31} + \\mathbf e_{23} \\Big)$$
+
+After which our inertial duality can be implemented using per coefficient multiplication
+
+\`\`\`
+  var C = 1/12*mass*( (size[0]**2+size[1]**2)*1e01 
+                    + (size[0]**2+size[2]**2)*1e02 
+                    + (size[1]**2+size[2]**2)*1e03 + 12e12 + 12e13 + 12e23 ),
+      A  = (x)=>x.Dual.map((x,i)=>x*C[i]),
+      Ai = (x)=>x.map((x,i)=>x/C[i]).UnDual;
+
+\`\`\`
+
+After which we simply make sure to use these maps for our inertial duality.
+
+`)
+// Create a Clifford Algebra with 3,0,1 metric. 
+Algebra(3,0,1,()=>{
+
+  // We store position/orientation and linear/angular momentum in a single bivector.
+  // This is isomorph to dual quaternion rigid body physics. 
+ 
+  // Helper : points and RK4 integrator.
+  var point = (x,y,z)=>!(1e0+x*1e1+y*1e2+z*1e3),
+      RK4 = (f,y,h)=>{ var k1=f(y), k2=f(y+0.5*h*k1), k3=f(y+0.5*h*k2), k4=f(y+h*k3); return  y+(h/3)*(k2+k3+(k1+k4)*0.5); };
+
+  // Our box definition, its vertices and faces in body coordinates. Its object.
+  var mass  = 1 , size  = [0.2,1,0.2],
+      cubeB = [...Array(8)].map((x,i)=>point.apply(this,size.map((s,j)=>s*(((i>>j)%2)-0.5)))),
+      cubeF = [0xCC00FF,[0,1,2],[1,2,3],
+               0x0400ff,[4,5,6],[5,6,7],
+               0xfbff00,[0,1,4],[4,5,1],
+               0xffa200,[2,6,7],[2,3,7],
+               0x44ff00,[0,4,2],[4,2,6],
+               0x00aaff,[1,5,7],[1,3,7]].map(x=>x.map?x.map(i=>cubeB[i]):x);
+ 
+  // Inertia tensor and a map to apply it on a momentum bivector. (and the inverse map).
+  // see https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors (diagonals)      
+  var I = 1/12*mass*( (size[0]**2+size[1]**2)*1e01 + (size[0]**2+size[2]**2)*1e02 + (size[1]**2+size[2]**2)*1e03 + 12e12 + 12e13 + 12e23 ),
+      A  = (x)=>x.Dual.map((x,i)=>x*(I[i]||1)),
+      Ai = (x)=>x.map((x,i)=>x/(I[i]||1)).UnDual;
+      
+      
+  var attach = cubeB[5]+!1e2;    
+  var attach2 = cubeB[1]+!1e2+!.5e1;    
+  var forques = (m,b)=>{
+    var Gravity = !(~m >>> -9.81e02)
+    var Damping = -0.25 * !b.Grade(2);
+    var Hooke = 8*(~m >>> attach) & cubeB[5];
+    var Hooke2 = 8*(~m >>> attach2) & cubeB[1];
+    return Gravity + Hooke + Hooke2 + Damping;
+  }    
+ 
+  // our physics state. [position/orientation, linear/angular velocity in body frame]
+  var State  = [1-0.5e02,38.35e13+35.27e12-5e01],
+      dState = ([g,v])=>[-0.5*g*v,Ai(forques(g,v)-0.5*(A(v)*v-v*A(v)))];
+
+  // Graph the 3D items
+  var camera = 1+0e1;
+  var c = (this.graph(()=>{
+    if (c) c.onwheel = undefined; camera.set(1+0e1);
+  // Advance the state one time step of 0.05 and renormalize.  
+    State = RK4(dState,State,0.01);
+    State[0] = State[0].Normalized;
+  // Render the cube    
+    return [0xCC00FF,  ...State[0] >>> cubeF, 
+    0,attach, attach2, [attach, State[0]>>>cubeB[5]], [attach2, State[0]>>>cubeB[1]]];
+  },{animate:true,gl:true, pointRadius:2, alpha:1, camera, lineWidth:2}));
+  
+  c.style.width = '100%';
+  c.style.height = '600px';
+  c.style.background = 'white';
+  c.onwheel = undefined;
+  
+  return c;
+});
+
+md(`
+\`\`\`
+// Create a Clifford Algebra with 3,0,1 metric. 
+Algebra(3,0,1,()=>{
+
+  // We store position/orientation and linear/angular momentum in a single bivector.
+  // This is isomorph to dual quaternion rigid body physics. 
+ 
+  // Helper : points and RK4 integrator.
+  var point = (x,y,z)=>!(1e0+x*1e1+y*1e2+z*1e3),
+      RK4 = (f,y,h)=>{ 
+        var k1=f(y), k2=f(y+0.5*h*k1), k3=f(y+0.5*h*k2), k4=f(y+h*k3); 
+        return  y+(h/3)*(k2+k3+(k1+k4)*0.5); 
+      };
+
+  // Our box definition, its vertices and faces in body coordinates. Its object.
+  var mass  = 1, size  = [0.2,1,0.2],
+      cubeB = [...Array(8)].map((x,i)=>point.apply(this,size.map((s,j)=>s*(((i>>j)%2)-0.5)))),
+      cubeF = [0xCC00FF,[0,1,2],[1,2,3],
+               0x0400ff,[4,5,6],[5,6,7],
+               0xfbff00,[0,1,4],[4,5,1],
+               0xffa200,[2,6,7],[2,3,7],
+               0x44ff00,[0,4,2],[4,2,6],
+               0x00aaff,[1,5,7],[1,3,7]].map(x=>x.map?x.map(i=>cubeB[i]):x);
+ 
+  // Inertia tensor and a map to apply it on a momentum bivector. (and the inverse map).
+  // see https://en.wikipedia.org/wiki/List_of_moments_of_inertia#List_of_3D_inertia_tensors      
+  var I = 1/12*mass*( (size[0]**2+size[1]**2)*1e01 
+                    + (size[0]**2+size[2]**2)*1e02 + 
+                      (size[1]**2+size[2]**2)*1e03 + 12e12 + 12e13 + 12e23 ),
+      A  = (x)=>x.Dual.map((x,i)=>x*(I[i]||1)),
+      Ai = (x)=>x.map((x,i)=>x/(I[i]||1)).UnDual;
+      
+  var attach = cubeB[5]+!1e2, attach2 = cubeB[1]+!1e2+!.5e1;    
+  
+  var forques = (m,b)=>{
+    var Gravity = !(~m >>> -9.81e02)
+    var Damping = -0.25 * !b.Grade(2);
+    var Hooke = 8*(~m >>> attach) & cubeB[5];
+    var Hooke2 = 8*(~m >>> attach2) & cubeB[1];
+    return Gravity + Hooke + Hooke2 + Damping;
+  }    
+ 
+  // our physics state. [position/orientation, linear/angular velocity in body frame]
+  var State  = [1-0.5e02,38.35e13+35.27e12-5e01],
+      dState = ([g,v])=>[-0.5*g*v,Ai(forques(g,v)-0.5*(A(v)*v-v*A(v)))];
+
+  // Graph the 3D items
+  var c = (this.graph(()=>{
+  // Advance the state one time step of 0.05 and renormalize.  
+    State = RK4(dState,State,0.01);
+    State[0] = State[0].Normalized;
+  // Render the cube    
+    return [0xCC00FF,  ...State[0] >>> cubeF, 
+    0,attach, attach2, [attach, State[0]>>>cubeB[5]], [attach2, State[0]>>>cubeB[1]]];
+  },{animate:true,gl:true, pointRadius:2, alpha:1, lineWidth:2}));
+
+  
+  return c;
+});
+
+\`\`\`
+
+`)
+
+
+</SCRIPT></BODY>
