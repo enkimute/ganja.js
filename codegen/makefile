@@ -6,7 +6,7 @@ ALL: c hyperbolic dual r2 r3 mink quat r111 spacetime cga pga3d
 	@echo "done !"
 
 ## Generate all languages by default
-GEN_LANG="csharp cpp python rust"
+GEN_LANG="csharp cpp python rust elm"
 
 %:
 	@node generate `echo $*| tr "[a-z]" "[A-Z]"`
@@ -24,6 +24,6 @@ GEN_LANG="csharp cpp python rust"
 ## rough clean generated files	
 clean:
 	@echo "cleaning .."
-	-@rm {csharp,cpp,python,rust}/*{.exe,_cpp,_rust}  -f
-	-@rm {csharp,cpp,python,rust}/r111*  -f
+	-@rm {csharp,cpp,python,rust,elm}/*{.exe,_cpp,_rust}  -f
+	-@rm {csharp,cpp,python,rust,elm}/{r,R}111*  -f
 	-@rm *~ -f

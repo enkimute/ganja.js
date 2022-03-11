@@ -12,7 +12,8 @@ var lang = [
       { name: 'csharp', ext: "cs",  template: require('./cs.template.js') },
       { name: 'cpp', ext: "cpp", template: require('./cpp.template.js') },
       { name: 'python', ext: "py",  template: require('./py.template.js') },
-      { name: 'rust', ext: "rs",  template: require('./rs.template.js') }
+      { name: 'rust', ext: "rs",  template: require('./rs.template.js') },
+      { name: 'elm', ext: "elm",  template: require('./elm.template.js') }
     ];
 
 //***********************************************//
@@ -163,7 +164,8 @@ lang.filter(should_generate_lang).forEach(lang => {
     fs.mkdirSync(lang.name);
   }
   
-  var file_name = path.join(lang.name, `${name.toLowerCase()}.${lang.ext}`);
+  var base_name = lang.name == 'elm' ? name[0].toUpperCase() + name.substring(1).toLowerCase() : name.toLowerCase();
+  var file_name = path.join(lang.name, `${base_name}.${lang.ext}`);
   fs.writeFileSync(file_name,[lang.template.preamble(basis,name),
                ...unops_code,
                ...binops_code,
@@ -171,5 +173,3 @@ lang.filter(should_generate_lang).forEach(lang => {
               ].join("\n\n"));
 });              
   console.log('['+name.toUpperCase()+'] Generated '+lang.filter(should_generate_lang).map(x=>x.template.desc).join(', '));
-
-
