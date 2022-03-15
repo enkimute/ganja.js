@@ -1,12 +1,15 @@
 // elm Template for the preamble
-let getIndex = (str) => str.match(/res\[(\d+)\] ?=/g)[1]*1;
-let getElmExprs = (code) => code.split('\n').sort((a, b) => getIndex(b) - getIndex(a)).map(x=>'(' + x.replace(/^.*=\ ?/g,'').replace(/[;\[\]]/g,'').replace(/\*/g,' * ').replace(/\+/g,' + ').replace(/(?<=.)\-/g,' - ').replace(/ \- 1/g, '-1') + ')')
+let getIndex = (str) => str.match(/res\[(\d+)\]\ ?=/)[1]*1
+let getElmExprs = (code) => code.split('\n').sort((a, b) => getIndex(a) - getIndex(b)).map(x=>'(' + x.replace(/^.*=\ ?/g,'').replace(/[;\[\]]/g,'').replace(/\*/g,' * ').replace(/\+/g,' + ').replace(/(?<=.)\-/g,' - ').replace(/ \- 1/g, '-1') + ')')
 
 let preamble = (basis, classname) => {
 let typename = classname[0].toUpperCase() + classname.substring(1).toLowerCase();
 let basisCases = basis.map(x=>x == '1' ? 'Scalar' : x.toUpperCase())
-return `module Ganja.${typename} exposing (${typename}Basis(..), basisList, basisCount, basisName, ${typename}(..), zero, get, set, new, toString, fromList, toList, reverse, dual, conjugate, involute, mul, wedge, vee, dot, add, sub, smul, muls, sadd, adds, ssub, subs, norm, inorm, normalized)
+let valName = (x) => (x == "Scalar" ? "unitScalar" : x.toLowerCase())
+
+return `module Ganja.${typename} exposing (${typename}Basis(..), basisList, basisCount, basisName, ${typename}(..), zero, get, set, new, toString, fromList, toList, reverse, dual, conjugate, involute, mul, wedge, vee, dot, add, sub, smul, muls, sadd, adds, ssub, subs, norm, inorm, normalized, ${basisCases.map((x,i)=>valName(x)).join(', ')})
 {-| Clifford Algebra: ${typename}
+
 Generated with ganja.js written by enki.
 
 # Basis
@@ -14,6 +17,9 @@ Generated with ganja.js written by enki.
 
 # Multivector
 @docs ${typename}, zero, get, set, new
+
+# Basis multivectors
+@docs  ${basisCases.map((x,i)=>valName(x)).join(', ')}
 
 # Conversion
 @docs toString, fromList, toList
@@ -93,8 +99,11 @@ toString a =
         basisNames =
             basisList |> List.map basisName |> List.map (\\x -> if x == "1" then "" else x)
         
+        roundFloat x =
+            toFloat (round (x * 10000000)) / 10000000
+
         formatCoefficient v b =
-            if (abs v > 0.000001) then (String.fromFloat v ++ b) else ""
+            if (abs v > 0.000001) then (String.fromFloat (roundFloat v) ++ b) else ""
     in
         List.map2 formatCoefficient values basisNames 
             |> List.filter ((/=) "")
@@ -164,12 +173,16 @@ ${funName} (${typename} ${code.split('\n').map((x, i) => name_a + i).join(' ')})
 let GENERIC = (basis,classname)=>{
 let typename = classname[0].toUpperCase() + classname.substring(1).toLowerCase();
 let basisCases = basis.map(x=>x == '1' ? 'Scalar' : x.toUpperCase())
+let valName = (x) => (x == "Scalar" ? "unitScalar" : x.toLowerCase())
 return {
 preamble:`
 `,
-amble:`
-${basisCases.map((x,i)=> '{-| Basis multivector -}\n' + x.toLowerCase() + ' : ' + typename + '\n' + x.toLowerCase() + ' =\n    set ' + x + ' 1 zero').join('\n\n\n')}
-`
+amble: basisCases.map((x,i)=>`
+{-| Basis multivector -}
+${valName(x)} : ${typename}
+${valName(x)} =
+    set ${x} 1 zero
+`).join('\n')
 }}
 
 // elm Template for the postamble

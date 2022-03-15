@@ -164,7 +164,11 @@ lang.filter(should_generate_lang).forEach(lang => {
     fs.mkdirSync(lang.name);
   }
   
-  var base_name = lang.name == 'elm' ? name[0].toUpperCase() + name.substring(1).toLowerCase() : name.toLowerCase();
+  if (lang.name == 'elm' && !fs.existsSync('elm/Ganja')) {
+    fs.makeDirSync('elm/Ganja')
+  }
+
+  var base_name = lang.name == 'elm' ? "Ganja/" + name[0].toUpperCase() + name.substring(1).toLowerCase() : name.toLowerCase();
   var file_name = path.join(lang.name, `${base_name}.${lang.ext}`);
   fs.writeFileSync(file_name,[lang.template.preamble(basis,name),
                ...unops_code,
