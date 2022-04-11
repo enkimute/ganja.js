@@ -920,8 +920,9 @@
       // Drawing function
         var M=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,5,1];
         var draw=function(p, tp, vtx, color, color2, ratio, texc, va, b,color3,r,g){
+            canvas.options.mv = M; const proj = canvas.options.proj = [5,0,0,0,0,5*(ratio||2),0,0,0,0,1,2,0,0,-1,0];
             gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M);
-            gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||1),0,0,0,0,1,2,0,0,-1,0])
+            gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, proj);
             gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
             gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
             if (color3) gl.uniform3fv(gl.getUniformLocation(p, "color3"),new Float32Array(color3));
@@ -1093,8 +1094,9 @@
         }
       // Render the given vertices. (autocreates/destroys vertex array if not supplied).
         var draw=function(p, tp, vtx, color, color2, ratio, texc, va, cbuf){
+          canvas.options.mv = M; const proj = canvas.options.proj = [5,0,0,0,0,5*(ratio||2),0,0,0,0,1,2,0,0,-1,0];
           gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M);
-          gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||2),0,0,0,0,1,2,0,0,-1,0])
+          gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, proj);
           gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
           gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
           //if (texc) gl.uniform1i(gl.getAttribLocation(p, "texc"),0);
