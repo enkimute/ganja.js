@@ -40,6 +40,54 @@
   else context[name] = definition();
 }('Algebra', this, function () {
 
+/** Some helpers for eigenvalues for bivector split in high-d spaces **/
+  function QR(M) {
+    // helpers
+    const {abs,sqrt} = Math;
+    const hyp = (a,b)=>abs(a)>abs(b)?abs(a)*sqrt(1+(b/a)**2):b==0?0:abs(b)*sqrt(1+(a/b)**2);
+    const [m,n] = [M.length, M[0].length];
+    var qr = M.map(r=>r.map(c=>c)), Q = M.map(r=>r.map(c=>0)), R = M.map(r=>r.map(c=>0)), d = [], k, i, j, nrm;
+    // helper matrix
+    for (k=0; k<n; ++k) {
+      for (i=k, nrm=0; i<m; ++i) nrm = hyp(nrm,qr[i][k]);
+      if (nrm) {
+        if (qr[k][k] < 0) nrm = -nrm;
+        for (i=k; i<m; ++i) qr[i][k] = qr[i][k]/nrm;
+        qr[k][k] = qr[k][k]+1;
+        for (j=k+1; j<n; ++j) {
+            for (i=k, s=0; i<m; ++i) s += qr[i][k] * qr[i][j];
+            s = -s / qr[k][k];
+            for (i=k; i<m; ++i) qr[i][j] += s*qr[i][k];
+        }
+      }
+      d[k] = -nrm;     
+    }
+    // extract Q
+    for (k=n-1; k>=0; --k) {
+        for (i=0; i<m; ++i) Q[i][k] = 0;
+        Q[k][k] = 1;
+        for (j=k; j<n; ++j) if (qr[k][k]) {
+          for(i=k, s=0; i<m; ++i) s+= qr[i][k]*Q[i][j]; 
+          s = -s/qr[k][k];
+          for (i=k; i<m; ++i) Q[i][j] += s*qr[i][k];      
+        }
+    }
+    // extract R
+    for (i=0; i<n; ++i) for (j=0; j<n; ++j) R[i][j] = i<j?qr[i][j]:i==j?d[i]:0;
+    return [Q,R]
+  }
+
+  function eigenValues(A,iter=50) {
+    const mul = (A,B)=>{
+        var res = A.map(r=>r.map(c=>0));
+        for(let i=0;i<A.length;++i) for(let j=0;j<B.length;++j) for(let k=0;k<B[0].length;++k)
+        res[i][k] += A[i][j] * B[j][k];
+        return res;
+    }
+    for (var i=0; i<iter; ++i) { var [Q,R] = QR(A); A = mul(R,Q); }
+    return A.map((x,i)=>A[i][i]);
+  }
+
 /** The Algebra class generator. Possible calling signatures :
   *   Algebra([func])                      => algebra with no dimensions, i.e. R. Optional function for the translator.
   *   Algebra(p,[func])                    => 'p' positive dimensions and an optional function to pass to the translator.
@@ -172,7 +220,8 @@
       get Conjugate (){ var res = new this.constructor(); for (var i=0; i<this.length; i++) res[i]= this[i]*[1,-1,-1,1][grades[i]%4]; return res; };
 
     /// The Dual, Length, non-metric length and normalized getters.
-      get Dual (){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[i]); var res = new this.constructor(); res[res.length-1]=1; return res.Mul(this); };
+      get Dual (){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[i]); var res = new this.constructor(); res[res.length-1]=1; return this.Mul(res); };
+      get UnDual (){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[a.length-i-1]); var res = new this.constructor(); res[res.length-1]=1; return this.Div(res); };
       get Length (){ return options.over?Math.sqrt(Math.abs(this.Mul(this.Conjugate).s.s)):Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); };
       get VLength (){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]; return Math.sqrt(res); };
       get Normalized (){ var res = new this.constructor(),l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) if (options.over) {res[i]=this[i].Scale(l);} else {res[i]=this[i]*l}; return res; };
@@ -191,6 +240,7 @@
 //    generator.prototype.Vee   = new Function('b,res','res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+drm[ri]+']='+r.map(x=>x.replace(/\[(.*?)\]/g,function(a,b){return '['+(drm[b|0])+']'})).join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+';').join('\n')+'\nreturn res;');
   /// Conforms to the new Chapter 11 now.
     generator.prototype.Vee   = new Function('b,res',('res=res||new this.constructor();\n'+op.map((r,ri)=>'res['+drm[ri]+']='+drms[ri]+'*('+r.map(x=>x.replace(/\[(.*?)\]/g,function(a,b){return '['+(drm[b|0])+']'+(drms[b|0]>0?"":"*-1")})).join('+').replace(/\+\-/g,'-').replace(/\+0/g,'').replace(/(\w*?)\[(.*?)\]/g,(a,b,c)=>options.mix?'('+b+'.'+(c|0?basis[c]:'s')+'||0)':a)+');').join('\n')+'\nreturn res;').replace(/(b\[)|(this\[)/g,a=>a=='b['?'this[':'b['));
+    generator.prototype.eigenValues = eigenValues;
 
   /// Add getter and setters for the basis vectors/bivectors etc ..
     basis.forEach((b,i)=>Object.defineProperty(generator.prototype, i?b:'s', {
@@ -386,8 +436,56 @@
       Div  (b,res) { return this.Mul(b.Inverse,res); }
       LDiv (b,res) { return b.Inverse.Mul(this,res); }
 
-    // Taylor exp - for PGA bivectors in 2D and 3D closed form solution is used.
-      Exp  ()      {
+      
+    // Bivector split - we handle all real cases, still have to add the complex cases for those exception scenarios.
+      Split (iter=50) {
+        var k = Math.floor((p+q+r)/2), OB = this.map(x=>x), B = this.map(x=>x), m = 1;
+        var Wi = [...Array(k)].map((r,i)=>{ m = m*(i+1); var Wi = B.Scale(1/m); B = B.Wedge(OB); return Wi; });
+        if (k<3) { // The quadratic case is easy to solve. (for spaces <6D)
+          var TDT    = this.Dot(this).s, TWT = this.Wedge(this);
+          if (TWT.VLength < 1E-5) return [this]; // bivector was simple.
+          var D      = 0.5*Math.sqrt( TDT**2 - TWT.Mul(TWT).s );
+          var eigen  = [0.5*TDT + D, 0.5*TDT - D].sort((a,b)=>Math.abs(a)<Math.abs(b)?-1:1); 
+        } else { // For >6D, closed form solutions of the characteristic polyn. are impossible, use eigenvalues of companion matrix. 
+          var Wis    = Wi.map((W,i)=>W.Mul(W).s*(-1)**(k-i+(k%2)) );
+          var matrix = [...Array(k)].map((r,i)=>[...Array(k)].map((c,j)=>(j == k-1)?Wis[k-i-1]:(i-1==j)?1:0));
+          var eigen  = eigenValues(matrix,iter).sort((a,b)=>Math.abs(a)<Math.abs(b)?-1:1);
+        }  
+        Wi = [Element.Scalar(1),...Wi,Element.Scalar(0)];
+        var sum = Element.Scalar(0), res = eigen.slice(1).map(v=>{
+          var r = Math.floor(k/2), N = Element.Scalar(0), DN = Element.Scalar(0);
+          for (var i=0; i<=r; ++i) { N.Add( Wi[2*i+1].Scale(v**(r-i)), N); DN.Add( Wi[2*i].Scale(v**(r-i)), DN); }
+          if (DN.VLength == 0) return Element.Scalar(0);
+          var ret = N.Div(DN); sum.Add(ret, sum); return ret;
+        });
+        return [this.Sub(sum),...res]; // Smallest eigvalue becomes B-rest
+      }  
+      
+    // Factorize a motor
+      Factorize (iter=50) {
+        var S = this.Grade(2).Split(iter);
+        var P = this.Scale(1);
+    //    if (P.s) {
+          var R = S.slice(0,S.length-1).map((Si,i)=>{
+            var Mi    = Element.Scalar(P.s).Add(Si);
+            var scale = Math.sqrt(Mi.Reverse.Mul(Mi).s);
+            return Mi.Scale(1/scale); 
+          });
+          R.push( R.reduce((tot,fact)=>tot.Mul(fact.Reverse), Element.Scalar(1)).Mul(P) );
+      //  } 
+        return R;
+      }  
+
+    // exp - closed form exp. 
+      Exp  (taylor = false) {
+        if (!taylor && Math.abs(this[0])<1E-9 && !options.over) {
+          return this.Grade(2).Split().reduce((total,simple)=>{
+            var square = simple.Mul(simple).s, len = Math.sqrt(Math.abs(square));
+            if (len <= 1E-5) return total.Mul(Element.Scalar(1).Add(simple));
+            if (square <  0) return total.Mul(Element.Scalar(Math.cos(len)).Add(simple.Scale(Math.sin(len)/len)) );
+            return total.Mul(Element.Scalar(Math.cosh(len)).Add(simple.Scale(Math.sinh(len)/len)) );
+          },Element.Scalar(1));
+        }  
         if (options.dual) { var f=Math.exp(this.s); return this.map((x,i)=>i?x*f:f); }
         if (r==1 && tot<=4 && Math.abs(this[0])<1E-9 && !options.over) {
            var u = Math.sqrt(Math.abs(this.Dot(this).s)); if (Math.abs(u)<1E-5) return this.Add(Element.Scalar(1));
@@ -395,12 +493,23 @@
            var res2 = Element.Add(Element.Sub(Math.cos(u),v.Scale(Math.sin(u))),Element.Div(Element.Mul((Element.Add(Math.sin(u),v.Scale(Math.cos(u)))),this),(Element.Add(u,v))));
            return res2;       
         }
-        var res = Element.Scalar(1), y=1, M= this.Scale(1), N=this.Scale(1); for (var x=1; x<15; x++) { res=res.Add(M.Scale(1/y)); M=M.Mul(N); y=y*(x+1); }; return res;
+        var res = Element.Scalar(1), y=1, M= this.Scale(1), N=this.Scale(1); for (var x=1; x<15; x++) { res=res.Add(M.Scale(1/y)); M=M.Mul(N); y=y*(x+1); }; 
+        return res;
       }
       
     // Log - only for up to 3D PGA for now
-      Log () {
-        if (tot>5 || options.over) return;
+      Log (compat = false) {
+        if (options.over) return;
+        if (!compat) {
+          return this.Factorize().reduce((sum,bi)=>{
+            var [ci,si] = [bi.s, bi.Grade(2)];
+            var square = si.Mul(si).s;
+            var len = Math.sqrt(Math.abs(square));
+            if (Math.abs(square) < 1E-5) return sum.Add(si);
+            if (square < 0) return sum.Add(si.Scale(Math.acos(ci)/len));
+            return sum.Add(si.Scale(Math.acosh(ci)/len));
+          },Element.Scalar(0));
+        }
         var b = this.Grade(2), bdb = Element.Dot(b,b).s;
         if (Math.abs(bdb)<=1E-5) return this.s<0?b.Scale(-1):b;
         var s = Math.sqrt(-bdb), bwb = Element.Wedge(b,b); 
@@ -827,6 +936,7 @@
           };
         // Create the initial svg and install the mousehandlers.
           res=build(f); res.value=f; res.options=options; res.setAttribute("stroke-width",options.lineWidth*0.005||0.005);
+          res.remake = (animate)=>{ options.animate = animate; if (animate) { var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; }; return res;};
           //onmousedown="if(evt.target==this)this.sel=undefined" 
           var mousex,mousey,cammove=false;
           res.onwheel=(e)=>{ e.preventDefault(); options.scale = Math.min(5,Math.max(0.1,(options.scale||1)-e.deltaY*0.0001)); if (!anim) {var r=build(origf,(!res)||(document.body.contains(res))).innerHTML; if (res) res.innerHTML=r; } }
@@ -834,10 +944,10 @@
           res.onmousemove=(e)=>{ 
             if (cammove && tot==4 && !options.conformal) { 
               if (!e.buttons) { cammove=false; return; };
-              var [dx,dy] = [e.clientX - mousex, e.clientY - mousey];
+              var [dx,dy] = [(options.scale || 1)*(e.clientX - mousex)*3, 3*(options.scale || 1)*(e.clientY - mousey)];
               [mousex,mousey] = [e.clientX,e.clientY];
               if (res.sel && f[res.sel].set) {
-                f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/500,dy/500,0,0,0,0).Exp()),f[res.sel]) );
+                f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/res.clientWidth,dy/res.clientHeight,0,0,0,0).Exp()),f[res.sel]) );
               } else {
                 options.h = (options.h||0) + dx/300;
                 options.p = (options.p||0) - dy/600;
@@ -1092,19 +1202,21 @@
           return mtx;
         }
       // Render the given vertices. (autocreates/destroys vertex array if not supplied).
-        var draw=function(p, tp, vtx, color, color2, ratio, texc, va, cbuf){
+        var draw=function(p, tp, vtx, color, color2, ratio, texc, va, cbuf, allowcull=true){
           gl.useProgram(p); gl.uniformMatrix4fv(gl.getUniformLocation(p, "mv"),false,M);
           gl.uniformMatrix4fv(gl.getUniformLocation(p, "p"),false, [5,0,0,0,0,5*(ratio||2),0,0,0,0,1,2,0,0,-1,0])
           gl.uniform3fv(gl.getUniformLocation(p, "color"),new Float32Array(color));
           gl.uniform3fv(gl.getUniformLocation(p, "color2"),new Float32Array(color2));
           //if (texc) gl.uniform1i(gl.getAttribLocation(p, "texc"),0);
           var v; if (!va) v = createVA(vtx, texc, undefined, cbuf, p); else gl.va.bindVertexArrayOES(va.r);
+          if (options.cull && allowcull) gl.enable(gl.CULL_FACE); 
           if (va && va.b4) {
             gl.drawElements(tp, va.tcount, gl.UNSIGNED_SHORT, 0);
           } else {
             gl.drawArrays(tp, 0, (va&&va.tcount)||vtx.length/3);
           }
           if (v) destroyVA(v);
+          if (options.cull) gl.disable(gl.CULL_FACE); 
         }
       // Program for the geometry. Derivative based normals. Basic lambert shading.
         var program = compile(`attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
@@ -1113,6 +1225,14 @@
                  precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos;
                  void main() { vec3 ldir = normalize(Pos.xyz - vec3(2.0,2.0,-4.0));
                  vec3 normal = normalize(cross(dFdx(Pos.xyz), dFdy(Pos.xyz))); float l=dot(normal,ldir);
+                 vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
+                 gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
+        var programSphere = compile(`attribute vec4 position; varying vec4 Pos; varying vec3 N; uniform mat4 mv; uniform mat4 p;
+                 void main() { gl_PointSize=12.0; Pos=mv*position; N = normalize(position.xzy); gl_Position = p*Pos; }`,
+                `#extension GL_OES_standard_derivatives : enable
+                 precision highp float; uniform vec3 color; uniform vec3 color2; varying vec4 Pos; varying vec3 N;
+                 void main() { vec3 ldir = normalize(Pos.xyz - vec3(2.0,2.0,-4.0));
+                 vec3 normal = N; float l=dot(normal,ldir);
                  vec3 E = normalize(-Pos.xyz); vec3 R = normalize(reflect(ldir,normal));
                  gl_FragColor = vec4(max(0.0,l)*color+vec3(0.5*pow(max(dot(R,E),0.0),20.0))+color2, 1.0);  }`);
         var programPoint = compile(`attribute vec4 position; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
@@ -1151,7 +1271,8 @@
                  uniform vec3 color2; 
                  varying vec2 tc; 
                  void main() { 
-                   gl_FragColor = vec4(color2,(1.0-pow(abs(tc.x),2.0))*tc.y); 
+                   gl_FragColor = vec4(abs(tc.x),abs(tc.x),abs(tc.x),1.0); 
+ //                  gl_FragColor = vec4(color2,(1.0-pow(abs(tc.x),2.0))*tc.y); 
                  }`);
         var programcol = compile(`attribute vec4 position; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; Col=col; }`,
@@ -1266,7 +1387,7 @@
               ttest.push(w,.5,-w,.5,w,.5,w,.5,-w,.5,-w,.5);
             }
             gl.depthMask(false); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.BLEND); 
-            draw(programline, gl.TRIANGLES, ltest, [canvas.width/canvas.height, .003, 0.0],  [0,0,0], canvas.width/canvas.height, ttest, undefined, ltest2);   
+            draw(programline, gl.TRIANGLES, ltest, [canvas.width/canvas.height, .003, 0.0],  [0,0,0], canvas.width/canvas.height, ttest, undefined, ltest2, false);   
             gl.depthMask(true); gl.disable(gl.BLEND);
           }
         // Z-buffer override.
@@ -1313,8 +1434,8 @@
                 }
                 var oldM = M;
                 M=[].concat.apply([],Element.Mul([[d.weight2,0,0,0],[0,d.weight2,0,0],[0,0,d.weight2,0],[d.pos[0],d.pos[1],d.pos[2],1]],[[M[0],M[1],M[2],M[3]],[M[4],M[5],M[6],M[7]],[M[8],M[9],M[10],M[11]],[M[12],M[13],M[14],M[15]]])).map(x=>x.s);
-                gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,0.5); gl.enable(gl.CULL_FACE)
-                draw(program,gl.TRIANGLES,undefined,c,[0,0,0],r,undefined,sphere.va);
+                gl.enable(gl.BLEND); gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA); gl.blendColor(1,1,1,1-(alpha||0.1)); gl.enable(gl.CULL_FACE)
+                draw(programSphere,gl.TRIANGLES,undefined,c,[0,0,0],r,undefined,sphere.va);
                 gl.disable(gl.BLEND); gl.disable(gl.CULL_FACE);
                 M = oldM;
               }
@@ -1330,7 +1451,7 @@
                     ttest.push(w,1-alpha,-w,1-alpha,w,1-alpha,w,1-alpha,-w,1-alpha,-w,1-alpha);
                   }
                   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.BLEND);
-                  draw(programline, gl.TRIANGLES, ltest, [canvas.width/canvas.height,.003,0.0], c, canvas.width/canvas.height, ttest, undefined, ltest2);   
+                  draw(programline, gl.TRIANGLES, ltest, [canvas.width/canvas.height,.003,0.0], c, canvas.width/canvas.height, ttest, undefined, ltest2, false);   
                   var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; 
                   gl.disable(gl.BLEND);
                 }
@@ -1355,7 +1476,7 @@
                        var seed = 1; function random() { var x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
                        e.xRange = e.xRange === undefined ? 1:e.xRange; e.yRange = e.yRange === undefined ? 1:e.yRange; e.zRange = e.zRange === undefined ? 1:e.zRange;
                        var vtx=[], tx=[], vtx2=[];
-                       for (var i=0; i<(e.zRange*e.xRange*e.yRange===0?2500:Math.pow(e.zRange*e.xRange*e.yRange,1/3)*6000); i++) {
+                       for (var i=0; i<(e.zRange*e.xRange*e.yRange===0?2500:Math.pow(e.zRange*e.xRange*e.yRange,1/3)*12000); i++) {
                          var [x,y,z] = [random()*(2*e.xRange)-e.xRange,random()*2*e.yRange-e.yRange,random()*2*e.zRange-e.zRange];
                          var xyz = (x*x+y*y+z*z)*0.5;
                          var p  = Element.Vector(x,y,z,xyz-0.5,xyz+0.5);
@@ -1509,7 +1630,7 @@
                   ttest.push(w,1-alpha,-w,1-alpha,w,1-alpha,w,1-alpha,-w,1-alpha,-w,1-alpha);
                 }
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.BLEND);
-                draw(programline, gl.TRIANGLES, ltest, [canvas.width/canvas.height,.003,0.0], c, canvas.width/canvas.height, ttest, undefined, ltest2);   
+                draw(programline, gl.TRIANGLES, ltest, [canvas.width/canvas.height,.003,0.0], c, canvas.width/canvas.height, ttest, undefined, ltest2, false);   
                 var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; 
                 gl.disable(gl.BLEND);
               }
@@ -1733,6 +1854,8 @@
     }
     Object.defineProperty(res, 'D',  {configurable:true,get(){ if (_D) return _D; _D = makeD(false); return _D }});
     Object.defineProperty(res, 'Dt', {configurable:true,get(){ if (_DT) return _DT; _DT = makeD(true); return _DT }});
+    
+    res.QR = QR;
 
   // If a function was passed in, translate, call and return its result. Else just return the Algebra.
     if (fu instanceof Function) return res.inline(fu)(); else return res;
