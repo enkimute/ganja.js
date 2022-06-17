@@ -744,6 +744,39 @@
       e.returnValue = ''; // chrome
     };
     
+  // Respond to drag/drop and monitor files for updates. (allows you to store your content lcoally)  
+    document.body.ondragover = (e)=>{ e.preventDefault(); return false; };
+    document.body.ondrop = (e)=>{
+      e.preventDefault();
+
+     // get the file as an fileEntry (aka file handle)
+      const fileEntry = e.dataTransfer.items[0].webkitGetAsEntry()
+      let lastModificationTime = 0
+      
+      async function read (file) {
+        // use the new async read method on blobs.
+        editor.setValue(await file.text());
+        editor.clearSelection();
+        els.left.style.with=els.left.style.minWidth=els.left.style.maxWidth=0;
+        els.right.style.with=els.right.style.minWidth=els.right.style.maxWidth=0        
+        closeBar();
+        els.run.click();
+      }
+      
+      function compare (meta) {
+        if (meta.modificationTime > lastModificationTime) {
+          lastModificationTime = meta.modificationTime
+          fileEntry.file(read)
+        }
+      }
+      
+      els.new.click();
+      setTimeout(()=>{
+        els.title.innerHTML=`monitoring "${ fileEntry.name }". Save your file locally to update.`
+        setInterval(fileEntry.getMetadata.bind(fileEntry, compare),1000);
+      },1000);
+    }
+    
   // load custom stash
     function loadStash(closeAll){
       var stashURL = document.location.hash.slice(1).split('&');
