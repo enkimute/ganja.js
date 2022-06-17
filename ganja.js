@@ -224,7 +224,16 @@
       get UnDual (){ if (r) return this.map((x,i,a)=>a[drm[i]]*drms[a.length-i-1]); var res = new this.constructor(); res[res.length-1]=1; return this.Div(res); };
       get Length (){ return options.over?Math.sqrt(Math.abs(this.Mul(this.Conjugate).s.s)):Math.sqrt(Math.abs(this.Mul(this.Conjugate).s)); };
       get VLength (){ var res = 0; for (var i=0; i<this.length; i++) res += this[i]*this[i]; return Math.sqrt(res); };
-      get Normalized (){ var res = new this.constructor(),l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) if (options.over) {res[i]=this[i].Scale(l);} else {res[i]=this[i]*l}; return res; };
+      get Normalized (){ 
+        if (p==3 && r==1) {
+          var sq = this.Mul(this.Reverse), [s,t] = [sq[0], sq[15]];
+          if (s==0) return this;
+          sq[0] = 1/Math.sqrt(s); sq[15] = -t/(2*Math.pow(Math.sqrt(s),3));
+          return this.Mul(sq);
+        } else {
+          var res = new this.constructor(), l=this.Length; if (!l) return this; l=1/l; for (var i=0; i<this.length; i++) if (options.over) {res[i]=this[i].Scale(l);} else {res[i]=this[i]*l}; return res; 
+        }
+      };
     }
 
   /// Convert symbolic matrices to code. (skipping zero's on dot and wedge matrices).
@@ -1271,8 +1280,8 @@
                  uniform vec3 color2; 
                  varying vec2 tc; 
                  void main() { 
-                   gl_FragColor = vec4(abs(tc.x),abs(tc.x),abs(tc.x),1.0); 
- //                  gl_FragColor = vec4(color2,(1.0-pow(abs(tc.x),2.0))*tc.y); 
+//                   gl_FragColor = vec4(abs(tc.x),abs(tc.x),abs(tc.x),1.0-abs(tc.x)); 
+                   gl_FragColor = vec4(color2,(1.0-pow(abs(tc.x),2.0))*tc.y); 
                  }`);
         var programcol = compile(`attribute vec4 position; attribute vec3 col; varying vec3 Col; varying vec4 Pos; uniform mat4 mv; uniform mat4 p;
                  void main() { gl_PointSize=6.0; Pos=mv*position; gl_Position = p*Pos; Col=col; }`,
@@ -1402,7 +1411,7 @@
               else var d = interprete(e);
               if (d.tp) lastpos=d.pos;
               if (d.tp==1) p.push.apply(p,d.pos);
-              if (d.tp==2) { l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]*10)); l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]*10)); }
+              if (d.tp==2) { l.push.apply(l,d.pos.map((x,i)=>x-d.normal[i]*3)); l.push.apply(l,d.pos.map((x,i)=>x+d.normal[i]*3)); }
               if (d.tp==3) { t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]-d.btg[i]));
                              t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]+d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x+d.tg[i]-d.btg[i])); t.push.apply(t,d.pos.map((x,i)=>x-d.tg[i]-d.btg[i])); }
               if (d.tp==4) {
@@ -1451,8 +1460,10 @@
                     ttest.push(w,1-alpha,-w,1-alpha,w,1-alpha,w,1-alpha,-w,1-alpha,-w,1-alpha);
                   }
                   gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.BLEND);
+                  gl.depthMask(false);
                   draw(programline, gl.TRIANGLES, ltest, [canvas.width/canvas.height,.003,0.0], c, canvas.width/canvas.height, ttest, undefined, ltest2, false);   
                   var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; 
+                  gl.depthMask(true);
                   gl.disable(gl.BLEND);
                 }
                 if (p.length) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); draw(programPoint,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[]; gl.disable(gl.BLEND); }
@@ -1545,7 +1556,8 @@
             }
           // Convert lines to line segments.
             if (e instanceof Element && e.Grade(2).Length)
-               e=[e.LDot(e14).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-500))),e.LDot(e14).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,500)))];
+               e=[e.LDot(e14).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,-(options.clip||3)))),e.LDot(e14).Wedge(e).Add(e.Wedge(Element.Coeff(1,1)).Mul(Element.Coeff(0,options.clip||3)))]
+                 .map(x=>x[14]<0?x.Scale(-1):x);
           // If euclidean point, store as point, store line segments and triangles.
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i<=1?1:-1)*y/e[14]).reverse());
             if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i<=1?1:-1)*y/x[14]).reverse()]));
@@ -1630,8 +1642,10 @@
                   ttest.push(w,1-alpha,-w,1-alpha,w,1-alpha,w,1-alpha,-w,1-alpha,-w,1-alpha);
                 }
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.enable(gl.BLEND);
+                gl.depthMask(false);
                 draw(programline, gl.TRIANGLES, ltest, [canvas.width/canvas.height,.003,0.0], c, canvas.width/canvas.height, ttest, undefined, ltest2, false);   
                 var l2=l.length-1; lastpos=[(l[l2-2]+l[l2-5])/2,(l[l2-1]+l[l2-4])/2+0.1,(l[l2]+l[l2-3])/2]; l=[]; 
+                gl.depthMask(true);
                 gl.disable(gl.BLEND);
               }
               if (p.length) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); draw(programPoint,gl.POINTS,p,[0,0,0],c,r); lastpos = p.slice(-3); lastpos[0]-=0.075; lastpos[1]+=0.075; p=[];gl.disable(gl.BLEND); }
