@@ -88,6 +88,7 @@ else (function (){
   }
   
   window.resolve_references = ()=>{
+  // equations
     var eqn = [...document.querySelectorAll('.equation')]
               .map((x,i)=>({ el:x, nr:i+1, name: x.querySelector('.label')?.name}))
     eqn.forEach(e=>{
@@ -97,9 +98,17 @@ else (function (){
        e.el.appendChild(s); e.el.style.position='relative';
        s.innerHTML=`(${e.nr})`
     });
+  
+  // Now try numbering the sections.
+    var sects = [...document.querySelectorAll('h2')]
+               .map((x,i)=>({ el:x, nr:i+1, name: x.querySelector('.label')?.name}))
+  // resolve the references.  
     var ref = [...document.querySelectorAll('.ref')]    
     ref.forEach(r=>{
-      r.innerHTML = '['+eqn.find(x=>x.name == r.name).nr+']';
+      var eq = eqn.find(x=>x.name == r.name);
+      if (eq) r.innerHTML = 'eqn '+eq.nr;
+      var eq = sects.find(x=>x.name == r.name);
+      if (eq) r.innerHTML = 'section '+eq.nr;
     })
   }
   
@@ -182,7 +191,7 @@ else (function (){
   }
   
   window.saveTex = function(){
-    [...document.querySelectorAll(".embed_image")].map(x=>x.firstChild).map((x,i)=>{
+    [...document.querySelectorAll(".embed_image")].map(x=>x.firstChild).filter(x=>x).map((x,i)=>{
       var id = x.parentElement.id;
       var s = `<DIV ID="${id}" CLASS="embed_image" STYLE="width:100%;"></DIV>`;
       allTex = allTex.replace(s,'image_'+i+'.png');
@@ -191,6 +200,8 @@ else (function (){
       var h = parseFloat(s.height);
       var nw = 1920;
       var nh = (nw/w*h)|0;
+      nw*=2;
+      nh*=2;
       var c = document.createElement('canvas');
       c.width  = nw;
       c.height = nh;
@@ -218,6 +229,8 @@ else (function (){
         a.download = `image_${i}.png`;
         a.href = c.toDataURL("image/png",1.0);
         a.click();
+        a.innerHTML=`<BR>image_${i}.png`;
+        document.body.appendChild(a);
       };
     })      
     var DOMURL = window.URL || window.webkitURL || window;
@@ -253,12 +266,13 @@ else (function (){
     allTex += args[0]+'\n';
     args[0] = args[0]
               .replace(/\%\%.*/g,'')
-              .replace(/\\title\{(.*?({.*?}.*?)*)\}/gs,"<CENTER><H1>$1</H1></CENTER>")
-              .replace(/\\ref\{(.*?({.*?}.*?)*)\}/g,"<A CLASS='ref' NAME='$1'>[?]</A>")
-              .replace(/\\section\{(.*?({.*?}.*?)*)\}/g,"## $1")
-              .replace(/\\subsection\{(.*?({.*?}.*?)*)\}/g,"### $1")
-              .replace(/\\subsubsection\{(.*?({.*?}.*?)*)\}/g,"#### $1")
-              .replace(/\\begin\{equation\}(.*?)\\end\{equation\}/gs,"<DIV CLASS='equation'>$$$$$1$$$$</DIV>")
+              .replace(/\\title\s*\{(.*?({.*?}.*?)*)\}/gs,"<CENTER><H1>$1</H1></CENTER>")
+              .replace(/\\ref\s*\{(.*?({.*?}.*?)*)\}/g,"<A CLASS='ref' NAME='$1'>[?]</A>")
+              .replace(/\\cref\s*\{(.*?({.*?}.*?)*)\}/g,"<A CLASS='ref' NAME='$1'>[?]</A>")
+              .replace(/\\section\s*\{(.*?({.*?}.*?)*)\}/g,"## $1")
+              .replace(/\\subsection\s*\{(.*?({.*?}.*?)*)\}/g,"### $1")
+              .replace(/\\subsubsection\s*\{(.*?({.*?}.*?)*)\}/g,"#### $1")
+              .replace(/\\begin\s*\{equation\}(.*?)\\end\{equation\}/gs,"<DIV CLASS='equation'>$$$$$1$$$$</DIV>")
               .replace(/\\\[(.*?)\\\]/gs,"$$$$$1$$$$")
               .replace(/\$\$\s*(\\label{.*?})/g,"$1 $$$$")
               .replace(/\\label{(.*?)}/g,"<A NAME='$1' CLASS='label'></A>")
@@ -276,12 +290,21 @@ else (function (){
                   return "```"+c+"```";
               })
               .replace(/\\includegraphics(\[.*?\]){0,1}\{(.*?)\}/gs,"$2")
+              .replace(/\\caption\w*\{(.*?)\}/gs,"<CENTER CLASS='caption'><SMALL>$1</SMALL></CENTER>")
               .replace(/\\author{(.*?)}/g, "<CENTER><B>$1</B></CENTER>")
               .replace(/\\date{(.*?)}/g, "<CENTER><I>$1</I></CENTER>")
               .replace(/\\begin{itemize}(.*?)\\end{itemize}/s,(t,a)=>a.split('\\item').filter(x=>!x.match(/^\s*$/)).map(x=>'* '+x+'\n').join(''))
               .replace(/\\maketitle/g, "")
-              .replace(/\\begin{document}/g, "")
-              .replace(/\\end{document}.*/gs, "")
+              .replace(/(?:\\fcolorbox{[^{]*?})(?:{.*?}){(.*?{[^{]*}.*)}/g,"$1")
+              .replace(/(?:\\scalebox{[^{]*?}){([^\\\n].*?{[^{]*}.*)}/gs,"$1")
+              .replace(/(?:\\multirow{[^{]*?})(?:{[^}]*}){(.*?{[^{]*}.*)}/gs,"$1")
+              .replace(/(?:<TD>\s*\\multicolumn{[^{]*?})(?:{.*?}){(.*?{[^{]*}.*)(?:})/g,"<TD colspan=2 align=center>$1")
+//              .replace(/(?:<TD>\s*\\multicolumn{[^{]*?})(?:{.*?}){(.*?{[^{]*}.*)(?:})/gs,"<TD colspan=2 align=center>$1")
+              .replace(/\\bf\s*?{([^{]*?)}/gs,"<B>$1</B>")
+              .replace(/\\bf\s/gs,"<B>")
+              .replace(/\\textbf\s*?{([^{]*?)}/gs,"<B>$1</B>")
+              .replace(/\\begin\s*{document}/gs, "")
+              .replace(/\\end\s*{document}.*/gs, "")
     var div = document.createElement('div');
     div.innerHTML = marked.parse(...args);
     document.body.appendChild(div);
