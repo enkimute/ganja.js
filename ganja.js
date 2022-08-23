@@ -1685,9 +1685,9 @@
           var rc = canvas.getBoundingClientRect(), mx=(e.x-rc.left)/(rc.right-rc.left)*2-1, my=((e.y-rc.top)/(rc.bottom-rc.top)*4-2)*canvas.height/canvas.width;
           sel = (e.button==2)?-3:-2; canvas.value.forEach((x,i)=>{
             if (tot != 5) { if (x[14]) {
-              var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [-x[13]/x[14],-x[12]/x[14],x[11]/x[14],1]).map(x=>x.s);
-              pos2 = Element.Mul( [[5,0,0,0],[0,5*(2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
-              if ((mx-pos2[0])**2 + ((my)-pos2[1])**2 < 0.02) sel=i;
+              var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [-x[13]/x[14],x[12]/x[14],x[11]/x[14],1]).map(x=>x.s);
+              pos2 = Element.Mul( [[5,0,0,0],[0,-5*(2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
+              if ((mx-pos2[0])**2 + ((my)-pos2[1])**2 < 0.01) sel=i;
             }} else {
               x = interprete(x); if (x.tp==1) {
                 var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...x.pos,1]).map(x=>x.s);
