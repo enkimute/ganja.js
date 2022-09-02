@@ -487,6 +487,23 @@
 
     // exp - closed form exp. 
       Exp  (taylor = false) {
+        if (r==1 && tot<=4 && Math.abs(this[0])<1E-9 && !options.over && !taylor) {
+           // https://www.researchgate.net/publication/360528787_Normalization_Square_Roots_and_the_Exponential_and_Logarithmic_Maps_in_Geometric_Algebras_of_Less_than_6D
+           // 0 1 2 3 4 5
+           // 5 6 7 8 9 10
+           var l = (this[8]*this[8] + this[9]*this[9] + this[10]*this[10]);
+           if (l==0) return new Element([1, 0,0,0,0, this[5], this[6], this[7], 0, 0, 0, 0,0,0,0, 0]);
+           var m = (this[5]*this[10] + this[6]*this[9] + this[7]*this[8]), a = Math.sqrt(l), c = Math.cos(a), s = Math.sin(a)/a, t = m/l*(c-s);
+           var test = Element.Element(c, 0,0,0,0, s*this[5] + t*this[10], s*this[6] + t*this[9], s*this[7] + t*this[8], s*this[8], s*this[9], s*this[10], 0,0,0,0, m*s);
+           //return test;  // tbc .. investigate pss coeff??
+            
+           var u = Math.sqrt(Math.abs(this.Dot(this).s)); if (Math.abs(u)<1E-5) return this.Add(Element.Scalar(1));
+           var v = this.Wedge(this).Scale(-1/(2*u)); 
+           var res2 = Element.Add(Element.Sub(Math.cos(u),v.Scale(Math.sin(u))),Element.Div(Element.Mul((Element.Add(Math.sin(u),v.Scale(Math.cos(u)))),this),(Element.Add(u,v))));
+           //if ([...test].map(x=>x.toFixed(1))+'' != [...res2].map(x=>x.toFixed(1))+'') { console.log(test, res2); debugger }
+           
+           return res2;       
+        }
         if (!taylor && Math.abs(this[0])<1E-9 && !options.over) {
           return this.Grade(2).Split().reduce((total,simple)=>{
             var square = simple.Mul(simple).s, len = Math.sqrt(Math.abs(square));
@@ -496,12 +513,6 @@
           },Element.Scalar(1));
         }  
         if (options.dual) { var f=Math.exp(this.s); return this.map((x,i)=>i?x*f:f); }
-        if (r==1 && tot<=4 && Math.abs(this[0])<1E-9 && !options.over) {
-           var u = Math.sqrt(Math.abs(this.Dot(this).s)); if (Math.abs(u)<1E-5) return this.Add(Element.Scalar(1));
-           var v = this.Wedge(this).Scale(-1/(2*u)); 
-           var res2 = Element.Add(Element.Sub(Math.cos(u),v.Scale(Math.sin(u))),Element.Div(Element.Mul((Element.Add(Math.sin(u),v.Scale(Math.cos(u)))),this),(Element.Add(u,v))));
-           return res2;       
-        }
         var res = Element.Scalar(1), y=1, M= this.Scale(1), N=this.Scale(1); for (var x=1; x<15; x++) { res=res.Add(M.Scale(1/y)); M=M.Mul(N); y=y*(x+1); }; 
         return res;
       }
@@ -510,6 +521,11 @@
       Log (compat = false) {
         if (options.over) return;
         if (!compat) {
+          if (tot==4 && q==0 && r==1 && !options.over) { // https://www.researchgate.net/publication/360528787_Normalization_Square_Roots_and_the_Exponential_and_Logarithmic_Maps_in_Geometric_Algebras_of_Less_than_6D
+            if (Math.abs(this.s)>=.99999) return Element.Bivector(this[5],this[6],this[7],0,0,0).Scale(Math.sign(this.s));
+            var a = 1/(1 - this[0]*this[0]), b = Math.acos(this[0])*Math.sqrt(a), c = a*this[15]*(1 - this[0]*b);
+            return Element.Bivector( c*this[10] + b*this[5], -c*this[9] + b*this[6], c*this[8] + b*this[7], b*this[8], b*this[9], b*this[10] );
+          }
           return this.Factorize().reduce((sum,bi)=>{
             var [ci,si] = [bi.s, bi.Grade(2)];
             var square = si.Mul(si).s;
@@ -1779,8 +1795,8 @@
           for (var ti=0,t; t=tokens[ti];ti++) if (t[1]=="++" || t[1]=="--") glue(left(),ti);
           // unary - and + are handled separately from syntax ..
           for (var ti=0,t,si; t=tokens[ti];ti++)
-            if (t[1]=="-" && (left()<0 || (tokens[left()]||[5])[0]==5)) glue(ti,right(),6,["Element.Sub(",tokens[right()],")"]);   // unary minus works on all types.
-            else if (t[1]=="+" && (tokens[left()]||[0])[0]==5 && (tokens[left()]||[0])[1][0]!=".") glue(ti,ti+1);                   // unary plus is glued, only on scalars.
+            if (t[1]=="-" && (left()<0 || (tokens[left()]||[])[1]=='return'||(tokens[left()]||[5])[0]==5)) glue(ti,right(),6,["Element.Sub(",tokens[right()],")"]);   // unary minus works on all types.
+            else if (t[1]=="+" && (left()<0 || (tokens[left()]||[])[1]=='return'|| (tokens[left()]||[0])[0]==5 && (tokens[left()]||[0])[1][0]!=".")) glue(ti,ti+1);                   // unary plus is glued, only on scalars.
           // now process all operators in the syntax list ..
           for (var si=0,s; s=syntax[si]; si++) for (var ti=s[0][3]?tokens.length-1:0,t; t=tokens[ti];s[0][3]?ti--:ti++) for (var opi=0,op; op=s[opi]; opi++) if (t[1]==op[0]) {
             // exception case .. ".Normalized" and ".Length" properties are re-routed (so they work on scalars etc ..)
@@ -1788,7 +1804,7 @@
             // unary operators (all are to the left)
               else if (op[2])    { var arg=tokens[right()]; glue(ti, right(), 6, ["Element."+op[1],"(",arg,")"]); }
             // binary operators
-                            else { var l=left(),r=right(),a1=tokens[l],a2=tokens[r]; if (op[0]==op[1]) glue(l,r,6,[a1,op[1],a2]); else glue(l,r,6,["Element."+op[1],"(",a1,",",a2,")"]); ti--; }
+                            else { var l=left(),r=right(),a1=tokens[l],a2=tokens[r]; if (op[0]==op[1]) glue(l,r,6,[a1,op[1],a2]); else glue(l,r,6,["Element."+op[1],"(",a1,",",a2,")"]); ti-=2; }
           }
           return tokens;
       }
