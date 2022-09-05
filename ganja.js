@@ -1820,12 +1820,17 @@
     }
 
     if ((p==2 || p==3) && (r==1)) {
-      res.arrow = res.inline(( from_point, to_point, w=0.03, aspect=0.8 )=>{
-        from_point = from_point/(-from_point|!1e0); to_point = to_point/(-to_point|!1e0);
-        var line = ( to_point & from_point ), l = line.Length;
-        var shape = [[0,w],[l-5*w,w],[l-5*w,aspect*5*w],[l,0],[l-5*w,-aspect*5*w],[l-5*w,-w],[0,-w]].map(([x,y])=>!(1e0+x*1e1+y*1e2));
-        return (1+from_point/!1e0).Normalized*(1+(((to_point) - from_point) & !1e0).Normalized/(!1e1 & !1e0)).Normalized >>> shape;
-      })    
+      res.arrow = res.inline(( from_point, to_point, w=0.03, aspect=0.8, camera=1 )=>{
+         from_point = from_point/(-from_point|!1e0); to_point = to_point/(-to_point|!1e0);
+         var line = ( from_point & to_point ), l = line.Length;
+         var shape = [[0,w],[l-5*w,w],[l-5*w,aspect*5*w],[l,0],[l-5*w,-aspect*5*w],[l-5*w,-w],[0,-w]].map(([x,y])=>!(1e0+x*1e1+y*1e2));
+         var sqrt = R => R==-1?1e12:(1+R).Normalized;
+         var R = ((to_point - from_point).UnDual).Normalized * 1e1;
+         var R2 = sqrt(from_point/!1e0) * sqrt(R);
+         var p2 = R2 >>> 1e3;
+         if (p2 != 0) { var p1 = (((~(camera+0e1) >>> 1e3)|line)/line).Normalized; return sqrt(p1/p2) * R2 >>> shape; }
+         return  R2  >>> shape;
+      })
     }
 
     if (options.dual) {
