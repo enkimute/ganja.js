@@ -1735,7 +1735,12 @@
                x.pos[0] += (e.buttons!=2)?Math.cos((options.h||0))*mx:Math.sin(-(options.h||0))*-my; x.pos[1]+=(e.buttons!=2)?-my:0; x.pos[2]+=(e.buttons!=2)?Math.sin((options.h||0))*mx:Math.cos(-(options.h||0))*-my;
                canvas.value[sel].set(Element.Mul(ni,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1); }
             else if (x) { 
-               canvas.value[sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-mx/2,my/2,0,0,0,0).Exp()),canvas.value[sel]) );
+               var [cw,ch] = [rc.width, rc.height];
+               var ox = (1/(options.scale || 1)) * ((e.clientX / cw) - 0.5);
+               var oy = (1/(options.scale || 1)) * ((e.clientY / ch) - 0.5) * (ch/cw);
+               var tb  = Element.sw(options.camera,canvas.value[sel]);
+               var z = -(tb.e012/tb.e123+5)/5*4; tb.e023 = ox*z*tb.e123; tb.e013 = oy*z*tb.e123;
+               canvas.value[sel].set(Element.sw(options.camera.Reverse, tb));
             }
             if (!options.animate) requestAnimationFrame(canvas.update.bind(canvas,f,options));
           }
