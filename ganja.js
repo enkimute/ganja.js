@@ -975,8 +975,8 @@
                  var [cw,ch] = [res.clientWidth, res.clientHeight];
                  var ox = (1/(options.scale || 1)) * ((e.clientX / cw) - 0.5) * (cw>ch?(cw/ch):1);
                  var oy = (1/(options.scale || 1)) * ((e.clientY / ch) - 0.5) * (ch>cw?(ch/cw):1);
-                 var tb  = Element.sw(options.camera,f[res.sel].Normalized);
-                 var z = -(tb.e012+5)/5*4; tb.e023 = ox*z; tb.e013 = oy*z;
+                 var tb  = Element.sw(options.camera,f[res.sel]);
+                 var z = -(tb.e012/tb.e123+5)/5*4; tb.e023 = ox*z*tb.e123; tb.e013 = oy*z*tb.e123;
                  f[res.sel].set(Element.sw(options.camera.Reverse, tb));
                 //f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/res.clientWidth,dy/res.clientHeight,0,0,0,0).Exp()),f[res.sel]) );
               } else {
