@@ -971,8 +971,14 @@
               if (!e.buttons) { cammove=false; return; };
               var [dx,dy] = [(options.scale || 1)*(e.clientX - mousex)*3, 3*(options.scale || 1)*(e.clientY - mousey)];
               [mousex,mousey] = [e.clientX,e.clientY];
-              if (res.sel && f[res.sel].set) {
-                f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/res.clientWidth,dy/res.clientHeight,0,0,0,0).Exp()),f[res.sel]) );
+              if (res.sel !== undefined && f[res.sel].set) {
+                 var [cw,ch] = [res.clientWidth, res.clientHeight];
+                 var ox = (1/(options.scale || 1)) * ((e.clientX / cw) - 0.5) * (cw>ch?(cw/ch):1);
+                 var oy = (1/(options.scale || 1)) * ((e.clientY / ch) - 0.5) * (ch>cw?(ch/cw):1);
+                 var tb  = Element.sw(options.camera,f[res.sel].Normalized);
+                 var z = -(tb.e012+5)/5*4; tb.e023 = ox*z; tb.e013 = oy*z;
+                 f[res.sel].set(Element.sw(options.camera.Reverse, tb));
+                //f[res.sel].set(   Element.sw(Element.sw(options.camera.Reverse,Element.Bivector(-dx/res.clientWidth,dy/res.clientHeight,0,0,0,0).Exp()),f[res.sel]) );
               } else {
                 options.h = (options.h||0) + dx/300;
                 options.p = (options.p||0) - dy/600;
