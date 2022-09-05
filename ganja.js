@@ -799,7 +799,7 @@
           if (o instanceof Element && o.length == 16 && o[8]**2+o[9]**2+o[10]**2>0.0001) {
             o = [[options.clip||2,1,0,0],[-(options.clip||2),1,0,0],[options.clip||2,0,1,0],[-(options.clip||2),0,1,0],[options.clip||2,0,0,1],[-(options.clip||2),0,0,1]].map(v=>{
               var r = Element.Vector(...v).Wedge(o); return r[14]?r.Scale(1/r[14], r):undefined;
-            }).filter(x=>x && Math.abs(x[13])<= (options.clip||2)+0.001 && Math.abs(x[12]) <= (options.clip||2)+0.001 && Math.abs(x[11]) <= (options.clip||2) + 0.001);
+            }).filter(x=>x && Math.abs(x[13])<= (options.clip||2)+0.001 && Math.abs(x[12]) <= (options.clip||2)+0.001 && Math.abs(x[11]) <= (options.clip||2) + 0.001).slice(0,2);
             return o.map(o=>(tpcam).Vee(options.camera.Mul(o).Mul(options.camera.Conjugate)).Wedge(tpy));
           } 
           // Convert 3D planes to polies.
