@@ -972,9 +972,9 @@
               var [dx,dy] = [(options.scale || 1)*(e.clientX - mousex)*3, 3*(options.scale || 1)*(e.clientY - mousey)];
               [mousex,mousey] = [e.clientX,e.clientY];
               if (res.sel !== undefined && f[res.sel].set) {
-                 var [cw,ch] = [res.clientWidth, res.clientHeight];
-                 var ox = (1/(options.scale || 1)) * ((e.clientX / cw) - 0.5) * (cw>ch?(cw/ch):1);
-                 var oy = (1/(options.scale || 1)) * ((e.clientY / ch) - 0.5) * (ch>cw?(ch/cw):1);
+                 var [cw,ch] = [res.clientWidth, res.clientHeight]; 
+                 var ox = (1/(options.scale || 1)) * ((e.offsetX / cw) - 0.5) * (cw>ch?(cw/ch):1);
+                 var oy = (1/(options.scale || 1)) * ((e.offsetY / ch) - 0.5) * (ch>cw?(ch/cw):1);
                  var tb  = Element.sw(options.camera,f[res.sel]);
                  var z = -(tb.e012/tb.e123+5)/5*4; tb.e023 = ox*z*tb.e123; tb.e013 = oy*z*tb.e123;
                  f[res.sel].set(Element.sw(options.camera.Reverse, tb));
@@ -1736,8 +1736,8 @@
                canvas.value[sel].set(Element.Mul(ni,(x.pos[0]**2+x.pos[1]**2+x.pos[2]**2)*0.5).Sub(no)); canvas.value[sel].set(x.pos,1); }
             else if (x) { 
                var [cw,ch] = [rc.width, rc.height];
-               var ox = (1/(options.scale || 1)) * ((e.clientX / cw) - 0.5);
-               var oy = (1/(options.scale || 1)) * ((e.clientY / ch) - 0.5) * (ch/cw);
+               var ox = (1/(options.scale || 1)) * ((e.offsetX / cw) - 0.5);
+               var oy = (1/(options.scale || 1)) * ((e.offsetY / ch) - 0.5) * (ch/cw);
                var tb  = Element.sw(options.camera,canvas.value[sel]);
                var z = -(tb.e012/tb.e123+5)/5*4; tb.e023 = ox*z*tb.e123; tb.e013 = oy*z*tb.e123;
                canvas.value[sel].set(Element.sw(options.camera.Reverse, tb));
