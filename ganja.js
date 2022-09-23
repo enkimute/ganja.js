@@ -1400,9 +1400,13 @@
           var s = getComputedStyle(canvas); if (s.width) { canvas.width = parseFloat(s.width)*(options.devicePixelRatio||devicePixelRatio||1); canvas.height = parseFloat(s.height)*(options.devicePixelRatio||devicePixelRatio||1); }
           gl.viewport(0,0, canvas.width|0,canvas.height|0); var r=canvas.width/canvas.height;
         // Defaults, resolve function input
-          var a,p=[],l=[],t=[],c=[.5,.5,.5],alpha=0,lastpos=[-2,2,0.2,1]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x();
+          var a,p=[],l=[],t=[],c=[.5,.5,.5],alpha=0,lastpos=[-1.95,1.5,0,1]; gl.clear(gl.COLOR_BUFFER_BIT+gl.DEPTH_BUFFER_BIT); while (x.call) x=x();
         // Create default camera matrix and initial lastposition (contra-compensated for camera)
-          M = mtx(options.camera); lastpos = options.camera.Conjugate.Mul(((a=new this()).set(lastpos,11),a)).Mul(options.camera).slice(11,14);
+          M = mtx(options.camera); 
+          var a = new this(); a.set([1,-2,1.90*canvas.height/canvas.width,0],1); a = options.camera.Conjugate.Mul(a.Dual).Mul(options.camera);
+          lastpos = a.slice(11,14).map((y,i)=>(i<=1?1:-1)*y/a[14]).reverse();
+          var linediff = new this(); linediff.set([0,0,-0.12*2000/canvas.width*(options.fontSize||1),0],1);
+          linediff = options.camera.Conjugate.Mul(linediff.Dual).Mul(options.camera).slice(11,14).map((y,i)=>(i<=1?1:-1)*y/a[14]).reverse();
         // Grid.
           if (options.grid) {
             const gr = options.gridSize||1;
@@ -1563,7 +1567,7 @@
                     var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
                     draw(program2,gl.TRIANGLES,
                          [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return (0.05*(options.z||5))*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
-                         [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                         [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]+=linediff[1]; lastpos[0]+=linediff[0]; lastpos[2]+=linediff[2];
                   }      
                 }
               }
@@ -1687,8 +1691,8 @@
                   gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.DEPTH_TEST);
                   var fw = 113, mapChar = (x)=>{ var c = x.charCodeAt(0)-33; if (c>=94) c = 94+specialChars.indexOf(x); return c/fw; }
                   draw(program2,gl.TRIANGLES,
-                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=-0.2, o=x+(i/18|0)*1.1; return 0.25*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
-                       [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[1]-=0.18;
+                       [...Array(e.length*6*3)].map((x,i)=>{ var x=0,z=0.2, o=x+(i/18|0)*1.1; return 0.2*(options.fontSize||1)*2000/canvas.width*[o,-1,z,o+1.2,-1,z,o,1,z,o+1.2,-1,z,o+1.2,1,z,o,1,z][i%18]}),c,lastpos,r,
+                       [...Array(e.length*6*2)].map((x,i)=>{ var o=mapChar(e[i/12|0]); return [o,1,o+1/fw,1,o,0,o+1/fw,1,o+1/fw,0,o,0][i%12]})); gl.disable(gl.BLEND); lastpos[0] += linediff[0];lastpos[1] += linediff[1];lastpos[2] += linediff[2];
                   if (!options.noZ) gl.enable(gl.DEPTH_TEST);     
                 }
               }
@@ -1709,7 +1713,7 @@
             if (tot != 5) { if (x[14]) {
               var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [-x[13]/x[14],x[12]/x[14],x[11]/x[14],1]).map(x=>x.s);
               pos2 = Element.Mul( [[5,0,0,0],[0,-5*(2),0,0],[0,0,1,-1],[0,0,2,0]], pos2).map(x=>x.s).map((x,i,a)=>x/a[3]);
-              if ((mx-pos2[0])**2 + ((my)-pos2[1])**2 < 0.01) sel=i;
+              if ((mx-pos2[0])**2 + ((my)-pos2[1])**2 < 0.001) sel=i;
             }} else {
               x = interprete(x); if (x.tp==1) {
                 var pos2 = Element.Mul( [[M[0],M[4],M[8],M[12]],[M[1],M[5],M[9],M[13]],[M[2],M[6],M[10],M[14]],[M[3],M[7],M[11],M[15]]], [...x.pos,1]).map(x=>x.s);
