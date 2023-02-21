@@ -202,7 +202,7 @@ specify basis blades and allows using arrays or lambda expressions without
 the need for calling brackets in algebraic expressions.
 
 ```javascript
-Algebra(2,0,1,()={
+Algebra(2,0,1,()=>{
 
   // Direct specification of basis blades using e-notation.
   var xy_bivector = 1e12,
