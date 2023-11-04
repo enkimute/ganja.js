@@ -1586,8 +1586,8 @@
                  .map(x=>x[14]<0?x.Scale(-1):x);
           // If euclidean point, store as point, store line segments and triangles.
             if (e.e123) p.push.apply(p,e.slice(11,14).map((y,i)=>(i<=1?1:-1)*y/e[14]).reverse());
-            if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>[...x.slice(11,14).map((y,i)=>(i<=1?1:-1)*y/x[14]).reverse()]));
-            if (e instanceof Array && e.length%3==0) t=t.concat.apply(t,e.map(x=>[...x.slice(11,14).map((y,i)=>(i<=1?1:-1)*y/x[14]).reverse()]));
+            if (e instanceof Array && e.length==2) l=l.concat.apply(l,e.map(x=>{while(x.call)x=x();return [...x.slice(11,14).map((y,i)=>(i<=1?1:-1)*y/x[14]).reverse()]}));
+            if (e instanceof Array && e.length%3==0) t=t.concat.apply(t,e.map(x=>{while(x.call)x=x();return [...x.slice(11,14).map((y,i)=>(i<=1?1:-1)*y/x[14]).reverse()]}));
           // Render orbits of parametrised motors, as well as lists of points.. 
             function sw_mot_orig(A,R){
               var a0=A[0],a1=A[5],a2=A[6],a3=A[7],a4=A[8],a5=A[9],a6=A[10],a7=A[15];
