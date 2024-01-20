@@ -1763,6 +1763,8 @@
           var args=[].slice.call(arguments,1);
           return res.inline(new Function(args.map((x,i)=>'_template_'+i).join(),'return ('+intxt.map((x,i)=>(x||'')+(args[i]&&('_template_'+i)||'')).join('')+')')).apply(res,args);
         }
+      // Get the current class name (may have been clobbered by a bundler/minimizer)
+        var cls = this.name;
       // Get the source input text.
         var txt = (intxt instanceof Function)?intxt.toString():`function(){return (${intxt})}`;
       // Our tokenizer reads the text token by token and stores it in the tok array (as type/token tuples).
@@ -1779,7 +1781,7 @@
             c = resi[0]; if (t!=0) {possibleRegex = c == '(' || c == '=' || c == '[' || c == ',' || c == ';';} tok.push([t | 0, c]); txt = txt.slice(c.length); break;
           }} // tokenise
       // Translate algebraic literals. (scientific e-notation to "this.Coeff"
-        tok=tok.map(t=>(t[0]==2)?[2,'Element.Coeff('+basis.indexOf((!options.Cayley?simplify:(x)=>x)('e'+t[1].split(/e_|e|i/)[1]||1).replace('-',''))+','+(simplify(t[1].split(/e_|e|i/)[1]||1).match('-')?"-1*":"")+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
+        tok=tok.map(t=>(t[0]==2)?[2,cls+'.Coeff('+basis.indexOf((!options.Cayley?simplify:(x)=>x)('e'+t[1].split(/e_|e|i/)[1]||1).replace('-',''))+','+(simplify(t[1].split(/e_|e|i/)[1]||1).match('-')?"-1*":"")+parseFloat(t[1][0]=='e'?1:t[1].split(/e_|e|i/)[0])+')']:t);
       // String templates (limited support - needs fundamental changes.).
         tok=tok.map(t=>(t[0]==1 && t[1][0]=='`')?[1,t[1].replace(/\$\{(.*?)\}/g,a=>"${"+Element.inline(a.slice(2,-1)).toString().match(/return \((.*)\)/)[1]+"}")]:t);  
       // We support two syntaxes, standard js or if you pass in a text, asciimath.
@@ -1810,16 +1812,16 @@
           for (var ti=0,t; t=tokens[ti];ti++) if (t[1]=="++" || t[1]=="--") glue(left(),ti);
           // unary - and + are handled separately from syntax ..
           for (var ti=0,t,si; t=tokens[ti];ti++)
-            if (t[1]=="-" && (left()<0 || (tokens[left()]||[])[1]=='return'||(tokens[left()]||[5])[0]==5)) glue(ti,right(),6,["Element.Sub(",tokens[right()],")"]);   // unary minus works on all types.
+            if (t[1]=="-" && (left()<0 || (tokens[left()]||[])[1]=='return'||(tokens[left()]||[5])[0]==5)) glue(ti,right(),6,[cls+".Sub(",tokens[right()],")"]);   // unary minus works on all types.
             else if (t[1]=="+" && (left()<0 || (tokens[left()]||[])[1]=='return'|| (tokens[left()]||[0])[0]==5 && (tokens[left()]||[0])[1][0]!=".")) glue(ti,ti+1);                   // unary plus is glued, only on scalars.
           // now process all operators in the syntax list ..
           for (var si=0,s; s=syntax[si]; si++) for (var ti=s[0][3]?tokens.length-1:0,t; t=tokens[ti];s[0][3]?ti--:ti++) for (var opi=0,op; op=s[opi]; opi++) if (t[1]==op[0]) {
             // exception case .. ".Normalized" and ".Length" properties are re-routed (so they work on scalars etc ..)
-                  if (op[2]==2) { var arg=tokens[left()]; glue(ti-1,ti,6,["Element."+op[1],"(",arg,")"]); }
+                  if (op[2]==2) { var arg=tokens[left()]; glue(ti-1,ti,6,[cls+"."+op[1],"(",arg,")"]); }
             // unary operators (all are to the left)
-              else if (op[2])    { var arg=tokens[right()]; glue(ti, right(), 6, ["Element."+op[1],"(",arg,")"]); }
+              else if (op[2])    { var arg=tokens[right()]; glue(ti, right(), 6, [cls+"."+op[1],"(",arg,")"]); }
             // binary operators
-                            else { var l=left(),r=right(),a1=tokens[l],a2=tokens[r]; if (op[0]==op[1]) glue(l,r,6,[a1,op[1],a2]); else glue(l,r,6,["Element."+op[1],"(",a1,",",a2,")"]); ti-=2; }
+                            else { var l=left(),r=right(),a1=tokens[l],a2=tokens[r]; if (op[0]==op[1]) glue(l,r,6,[a1,op[1],a2]); else glue(l,r,6,[cls+"."+op[1],"(",a1,",",a2,")"]); ti-=2; }
           }
           return tokens;
       }
