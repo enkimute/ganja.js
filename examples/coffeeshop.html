@@ -547,6 +547,15 @@
       editor.getSession().clearAnnotations();
 //      var f = els.sample.contentDocument.body.firstChild; while (f && !(f instanceof els.sample.contentWindow.HTMLScriptElement)) f = f.nextElementSibling; f = f&&f.nextElementSibling;
 //      if (f) while (true) { var g=f.nextSibling; els.sample.contentDocument.body.removeChild(f); if (!g) break; f=g; }
+      if (window.localStorage) {
+        var id = document.location.hash.slice(1);
+        var backups = JSON.parse(localStorage.ganjaBackup||'{}');
+        var data = editor.getValue();
+        if(!backups[id] || backups[id][0].data != data){
+          backups[id] = [{id,data}].concat(backups[id]||[]).slice(0,3);
+          localStorage.ganjaBackup = JSON.stringify(backups);
+        }
+      }
       try { 
         //els.sample.contentWindow.eval( editor.getValue() ); 
         var script = document.createElement("script");
